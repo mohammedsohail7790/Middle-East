@@ -5,13 +5,19 @@ export type NavPlan = "essential" | "professional";
 export interface DashboardNavItem {
   href: string;
   label: string;
+  /** next-intl message key resolving to the translated label */
+  labelKey: string;
   plan?: NavPlan;
   /** Shown in topbar under the page title */
   subtitle?: string;
+  /** next-intl message key resolving to the translated subtitle */
+  subtitleKey?: string;
 }
 
 export interface DashboardNavGroup {
   label: string;
+  /** next-intl message key resolving to the translated group label */
+  labelKey: string;
   items: DashboardNavItem[];
 }
 
@@ -23,51 +29,56 @@ const PLAN_LABEL: Record<NavPlan, string> = {
 export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
   {
     label: "Overview",
+    labelKey: "navGroups.overview",
     items: [
-      { href: "/dashboard", label: "Dashboard", subtitle: "Performance, volume, and recent activity" },
+      { href: "/dashboard", label: "Dashboard", labelKey: "nav.dashboard", subtitle: "Performance, volume, and recent activity", subtitleKey: "nav.dashboardSubtitle" },
     ],
   },
   {
     label: "Operations",
+    labelKey: "navGroups.operations",
     items: [
-      { href: "/dashboard/leads", label: "Leads", subtitle: "Pipeline stages and conversion" },
-      { href: "/dashboard/agent", label: "Voice Agents", subtitle: "Voice, tone, and routing rules" },
-      { href: "/dashboard/calendar", label: "Calendar", subtitle: "Appointments and availability" },
-      { href: "/dashboard/analytics", label: "Analytics", plan: "professional", subtitle: "Trends, funnels, and KPIs" },
-      { href: "/dashboard/quality", label: "Quality", subtitle: "Call scoring, sentiment, and lead quality" },
+      { href: "/dashboard/leads", label: "Leads", labelKey: "nav.leads", subtitle: "Pipeline stages and conversion", subtitleKey: "nav.leadsSubtitle" },
+      { href: "/dashboard/agent", label: "Voice Agents", labelKey: "nav.voiceAgents", subtitle: "Voice, tone, and routing rules", subtitleKey: "nav.voiceAgentsSubtitle" },
+      { href: "/dashboard/calendar", label: "Calendar", labelKey: "nav.calendar", subtitle: "Appointments and availability", subtitleKey: "nav.calendarSubtitle" },
+      { href: "/dashboard/analytics", label: "Analytics", labelKey: "nav.analytics", plan: "professional", subtitle: "Trends, funnels, and KPIs", subtitleKey: "nav.analyticsSubtitle" },
+      { href: "/dashboard/quality", label: "Quality", labelKey: "nav.quality", subtitle: "Call scoring, sentiment, and lead quality", subtitleKey: "nav.qualitySubtitle" },
     ],
   },
   {
     label: "Channels",
+    labelKey: "navGroups.channels",
     items: [
-      { href: "/dashboard/calls", label: "Calls", subtitle: "Transcripts, outcomes, and call history" },
-      { href: "/dashboard/channels/sms", label: "SMS", subtitle: "Text conversations and templates" },
-      { href: "/dashboard/channels/whatsapp", label: "WhatsApp", subtitle: "WhatsApp Business conversations" },
-      { href: "/dashboard/channels/web-chat", label: "Web Chat", subtitle: "Website chat widget conversations" },
-      { href: "/dashboard/channels/instagram", label: "Instagram", subtitle: "Instagram Direct conversations" },
-      { href: "/dashboard/channels/facebook", label: "Facebook", subtitle: "Facebook Messenger conversations" },
+      { href: "/dashboard/calls", label: "Calls", labelKey: "nav.calls", subtitle: "Transcripts, outcomes, and call history", subtitleKey: "nav.callsSubtitle" },
+      { href: "/dashboard/channels/sms", label: "SMS", labelKey: "nav.sms", subtitle: "Text conversations and templates", subtitleKey: "nav.smsSubtitle" },
+      { href: "/dashboard/channels/whatsapp", label: "WhatsApp", labelKey: "nav.whatsapp", subtitle: "WhatsApp Business conversations", subtitleKey: "nav.whatsappSubtitle" },
+      { href: "/dashboard/channels/web-chat", label: "Web Chat", labelKey: "nav.webChat", subtitle: "Website chat widget conversations", subtitleKey: "nav.webChatSubtitle" },
+      { href: "/dashboard/channels/instagram", label: "Instagram", labelKey: "nav.instagram", subtitle: "Instagram Direct conversations", subtitleKey: "nav.instagramSubtitle" },
+      { href: "/dashboard/channels/facebook", label: "Facebook", labelKey: "nav.facebook", subtitle: "Facebook Messenger conversations", subtitleKey: "nav.facebookSubtitle" },
     ],
   },
   {
     label: "CRM",
+    labelKey: "navGroups.crm",
     items: [
-      { href: "/dashboard/crm/pipeline", label: "Pipeline", subtitle: "Deal stages and pipeline value" },
-      { href: "/dashboard/crm/contacts", label: "Contacts", subtitle: "People associated with your business" },
-      { href: "/dashboard/crm/companies", label: "Companies", subtitle: "Organizations you do business with" },
-      { href: "/dashboard/crm/deals", label: "Deals", subtitle: "Open and closed opportunities" },
+      { href: "/dashboard/crm/pipeline", label: "Pipeline", labelKey: "nav.crmPipeline", subtitle: "Deal stages and pipeline value", subtitleKey: "nav.crmPipelineSubtitle" },
+      { href: "/dashboard/crm/contacts", label: "Contacts", labelKey: "nav.crmContacts", subtitle: "People associated with your business", subtitleKey: "nav.crmContactsSubtitle" },
+      { href: "/dashboard/crm/companies", label: "Companies", labelKey: "nav.crmCompanies", subtitle: "Organizations you do business with", subtitleKey: "nav.crmCompaniesSubtitle" },
+      { href: "/dashboard/crm/deals", label: "Deals", labelKey: "nav.crmDeals", subtitle: "Open and closed opportunities", subtitleKey: "nav.crmDealsSubtitle" },
     ],
   },
   {
     label: "Platform",
+    labelKey: "navGroups.platform",
     items: [
-      { href: "/dashboard/integrations", label: "Integrations", subtitle: "CRMs, calendars, and automations" },
-      { href: "/dashboard/automation", label: "Automations", subtitle: "Trigger-based rules and workflows" },
-      { href: "/dashboard/knowledge", label: "Knowledge Base", subtitle: "Company details, service area, and AI training content" },
-      { href: "/dashboard/phone-numbers", label: "Phone Numbers", subtitle: "Inbound numbers and routing" },
-      { href: "/dashboard/compliance", label: "Compliance", subtitle: "AI disclosure, call recording, retention, and audit log" },
-      { href: "/dashboard/billing", label: "Billing", subtitle: "Plan, usage, and invoices" },
-      { href: "/dashboard/settings/spam", label: "Spam Protection", subtitle: "Block robocalls and unwanted callers" },
-      { href: "/dashboard/support", label: "Support", subtitle: "Help, docs, and contact" },
+      { href: "/dashboard/integrations", label: "Integrations", labelKey: "nav.integrations", subtitle: "CRMs, calendars, and automations", subtitleKey: "nav.integrationsSubtitle" },
+      { href: "/dashboard/automation", label: "Automations", labelKey: "nav.automations", subtitle: "Trigger-based rules and workflows", subtitleKey: "nav.automationsSubtitle" },
+      { href: "/dashboard/knowledge", label: "Knowledge Base", labelKey: "nav.knowledgeBase", subtitle: "Company details, service area, and AI training content", subtitleKey: "nav.knowledgeBaseSubtitle" },
+      { href: "/dashboard/phone-numbers", label: "Phone Numbers", labelKey: "nav.phoneNumbers", subtitle: "Inbound numbers and routing", subtitleKey: "nav.phoneNumbersSubtitle" },
+      { href: "/dashboard/compliance", label: "Compliance", labelKey: "nav.compliance", subtitle: "AI disclosure, call recording, retention, and audit log", subtitleKey: "nav.complianceSubtitle" },
+      { href: "/dashboard/billing", label: "Billing", labelKey: "nav.billing", subtitle: "Plan, usage, and invoices", subtitleKey: "nav.billingSubtitle" },
+      { href: "/dashboard/settings/spam", label: "Spam Protection", labelKey: "nav.spamProtection", subtitle: "Block robocalls and unwanted callers", subtitleKey: "nav.spamProtectionSubtitle" },
+      { href: "/dashboard/support", label: "Support", labelKey: "nav.support", subtitle: "Help, docs, and contact", subtitleKey: "nav.supportSubtitle" },
     ],
   },
 ];
@@ -104,11 +115,12 @@ export function navPageSubtitle(pathname: string): string {
   return navItemByPath(pathname)?.subtitle ?? "Workspace";
 }
 
-export function navLockedTitle(item: DashboardNavItem, locked: boolean): string | undefined {
+export function navLockedTitle(item: DashboardNavItem, locked: boolean, label?: string): string | undefined {
+  const resolvedLabel = label ?? item.label;
   if (locked && item.plan) {
-    return `${item.label} — requires ${PLAN_LABEL[item.plan]} plan`;
+    return `${resolvedLabel} — requires ${PLAN_LABEL[item.plan]} plan`;
   }
-  return item.label;
+  return resolvedLabel;
 }
 
 export function allNavHrefs(): string[] {

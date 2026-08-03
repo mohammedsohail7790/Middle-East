@@ -1,7 +1,7 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
-import { usePathname } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Phone, Users, Bot, Calendar, MessageSquare, BarChart3,
@@ -65,8 +65,10 @@ function NavLink({
   collapsed: boolean;
   onNavigate: () => void;
 }) {
+  const t = useTranslations();
   const Icon = NAV_ICONS[item.href] ?? LayoutDashboard;
-  const title = navLockedTitle(item, locked);
+  const label = t(item.labelKey);
+  const title = navLockedTitle(item, locked, label);
 
   return (
     <Link
@@ -79,12 +81,12 @@ function NavLink({
         collapsed && "justify-center px-2",
       )}
       title={title}
-      aria-label={locked ? `${item.label} (upgrade required)` : item.label}
+      aria-label={locked ? `${label} (upgrade required)` : label}
     >
       <span className="nav-icon-well">
         <Icon className="size-4" strokeWidth={ICON_STROKE} />
       </span>
-      {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+      {!collapsed && <span className="flex-1 truncate">{label}</span>}
       {!collapsed && locked && (
         <Lock className="size-3 shrink-0 opacity-70" strokeWidth={ICON_STROKE} aria-hidden />
       )}
@@ -93,6 +95,7 @@ function NavLink({
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const t = useTranslations();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -212,7 +215,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {DASHBOARD_NAV_GROUPS.map((group) => (
               <div key={group.label}>
                 {!collapsed && (
-                  <p className="dashboard-nav-group-label">{group.label}</p>
+                  <p className="dashboard-nav-group-label">{t(group.labelKey)}</p>
                 )}
                 <div className="space-y-0.5">
                   {group.items.map((item) => {

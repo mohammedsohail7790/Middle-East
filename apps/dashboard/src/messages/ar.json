@@ -1,4 +1,11 @@
 {
+  "navGroups": {
+    "overview": "نظرة عامة",
+    "operations": "العمليات",
+    "channels": "القنوات",
+    "crm": "إدارة علاقات العملاء",
+    "platform": "المنصة"
+  },
   "nav": {
     "dashboard": "لوحة التحكم",
     "dashboardSubtitle": "الأداء والحجم والنشاط الأخير",

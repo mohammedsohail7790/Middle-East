@@ -1,4 +1,11 @@
 {
+  "navGroups": {
+    "overview": "Overview",
+    "operations": "Operations",
+    "channels": "Channels",
+    "crm": "CRM",
+    "platform": "Platform"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "dashboardSubtitle": "Performance, volume, and recent activity",
