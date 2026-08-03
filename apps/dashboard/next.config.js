@@ -1,3 +1,6 @@
+const createNextIntlPlugin = require('next-intl/plugin');
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+
 /** @type {import('next').NextConfig} */
 const gatewayTarget =
     process.env.GATEWAY_PROXY_URL?.replace(/\/$/, '') ||
@@ -187,4 +190,4 @@ const nextConfig = {
     },
 };
 
-module.exports = nextConfig;
+module.exports = withNextIntl(nextConfig);
