@@ -30,18 +30,39 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
   {
     label: "Operations",
     items: [
-      { href: "/dashboard/calls", label: "Calls", subtitle: "Transcripts, outcomes, and call history" },
       { href: "/dashboard/leads", label: "Leads", subtitle: "Pipeline stages and conversion" },
-      { href: "/dashboard/agent", label: "AI Agent", subtitle: "Voice, tone, and routing rules" },
+      { href: "/dashboard/agent", label: "Voice Agents", subtitle: "Voice, tone, and routing rules" },
       { href: "/dashboard/calendar", label: "Calendar", subtitle: "Appointments and availability" },
       { href: "/dashboard/analytics", label: "Analytics", plan: "professional", subtitle: "Trends, funnels, and KPIs" },
+      { href: "/dashboard/quality", label: "Quality", subtitle: "Call scoring, sentiment, and lead quality" },
+    ],
+  },
+  {
+    label: "Channels",
+    items: [
+      { href: "/dashboard/calls", label: "Calls", subtitle: "Transcripts, outcomes, and call history" },
+      { href: "/dashboard/channels/sms", label: "SMS", subtitle: "Text conversations and templates" },
+      { href: "/dashboard/channels/whatsapp", label: "WhatsApp", subtitle: "WhatsApp Business conversations" },
+      { href: "/dashboard/channels/web-chat", label: "Web Chat", subtitle: "Website chat widget conversations" },
+      { href: "/dashboard/channels/instagram", label: "Instagram", subtitle: "Instagram Direct conversations" },
+      { href: "/dashboard/channels/facebook", label: "Facebook", subtitle: "Facebook Messenger conversations" },
+    ],
+  },
+  {
+    label: "CRM",
+    items: [
+      { href: "/dashboard/crm/pipeline", label: "Pipeline", subtitle: "Deal stages and pipeline value" },
+      { href: "/dashboard/crm/contacts", label: "Contacts", subtitle: "People associated with your business" },
+      { href: "/dashboard/crm/companies", label: "Companies", subtitle: "Organizations you do business with" },
+      { href: "/dashboard/crm/deals", label: "Deals", subtitle: "Open and closed opportunities" },
     ],
   },
   {
     label: "Platform",
     items: [
       { href: "/dashboard/integrations", label: "Integrations", subtitle: "CRMs, calendars, and automations" },
-      { href: "/dashboard/knowledge", label: "Business Profile", subtitle: "Company details, service area, and AI training content" },
+      { href: "/dashboard/automation", label: "Automations", subtitle: "Trigger-based rules and workflows" },
+      { href: "/dashboard/knowledge", label: "Knowledge Base", subtitle: "Company details, service area, and AI training content" },
       { href: "/dashboard/phone-numbers", label: "Phone Numbers", subtitle: "Inbound numbers and routing" },
       { href: "/dashboard/compliance", label: "Compliance", subtitle: "AI disclosure, call recording, retention, and audit log" },
       { href: "/dashboard/billing", label: "Billing", subtitle: "Plan, usage, and invoices" },

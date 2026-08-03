@@ -96,6 +96,16 @@ const SEEDS: IndustrySeed[] = [
   { id: 'nonprofit', name: 'Nonprofit Organization', description: 'Donations and program intake', icon: '🤝', services: ['Donations', 'Volunteer intake', 'Program info', 'Event registration'], trade: 'nonprofit' },
   { id: 'construction', name: 'General Contractor', description: 'Residential and commercial construction', icon: '🏗️', services: ['Renovation', 'New build consult', 'Estimate', 'Project scheduling'], trade: 'construction' },
   { id: 'solar', name: 'Solar Installer', description: 'Solar panel install and service', icon: '☀️', services: ['Site survey', 'Install quote', 'Battery storage', 'Maintenance'], trade: 'solar installation' },
+  { id: 'hospital', name: 'Hospital', description: 'Multi-department hospital patient services', icon: '🏥', services: ['Appointment booking', 'Department transfer', 'Billing inquiry', 'Emergency triage info', 'Visiting hours'], trade: 'hospital' },
+  { id: 'beauty_clinic', name: 'Beauty Clinic', description: 'Aesthetic and cosmetic treatments', icon: '💅', services: ['Consultation booking', 'Treatment inquiry', 'Package pricing', 'Follow-up scheduling'], trade: 'beauty clinic' },
+  { id: 'plastic_surgery', name: 'Plastic Surgery Practice', description: 'Cosmetic and reconstructive surgery', icon: '🩺', services: ['Consultation booking', 'Procedure inquiry', 'Pre-op instructions', 'Post-op follow-up'], trade: 'plastic surgery practice' },
+  { id: 'hotel', name: 'Hotel', description: 'Hospitality reservations and guest services', icon: '🏨', services: ['Reservation', 'Room inquiry', 'Concierge request', 'Amenities info', 'Group booking'], trade: 'hotel' },
+  { id: 'car_dealer', name: 'Car Dealership', description: 'New and used vehicle sales', icon: '🚙', services: ['Test drive booking', 'Inventory inquiry', 'Financing info', 'Trade-in estimate'], trade: 'car dealership' },
+  { id: 'finance', name: 'Financial Services', description: 'Personal and business financial advisory', icon: '💵', services: ['Consultation booking', 'Account inquiry', 'Product info', 'Advisor callback'], trade: 'financial services' },
+  { id: 'consulting', name: 'Consulting Firm', description: 'Business and management consulting', icon: '💼', services: ['Discovery call', 'Proposal request', 'Engagement scheduling'], trade: 'consulting firm' },
+  { id: 'ecommerce', name: 'Ecommerce Business', description: 'Online store customer service', icon: '🛒', services: ['Order status', 'Returns', 'Product questions', 'Shipping inquiry'], trade: 'ecommerce business' },
+  { id: 'travel_agency', name: 'Travel Agency', description: 'Trip planning and booking services', icon: '✈️', services: ['Booking inquiry', 'Itinerary change', 'Visa/documents info', 'Group travel'], trade: 'travel agency' },
+  { id: 'government_services', name: 'Government Services', description: 'Public sector citizen services', icon: '🏛️', services: ['Service inquiry', 'Appointment booking', 'Document status', 'Department transfer'], trade: 'government services office' },
 ];
 
 export function buildExtendedIndustryTemplates(): Record<string, IndustryTemplate> {

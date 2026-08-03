@@ -318,7 +318,7 @@ import {
   LayoutDashboard, Phone, Users, Bot, Calendar, MessageSquare, BarChart3,
   Puzzle, BookOpen, Lock, CreditCard, Hash, LogOut, Shield,
   PanelLeftClose, PanelLeft, X, LifeBuoy, type LucideIcon,
-  Star, Workflow, MessagesSquare, Instagram, Facebook, Building2, Contact, Handshake, KanbanSquare,
+  Star, Workflow, MessagesSquare, Instagram, Facebook, Building2, Contact, Briefcase, KanbanSquare,
 } from "lucide-react";
 ```
 
@@ -341,7 +341,7 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   "/dashboard/crm/pipeline": KanbanSquare,
   "/dashboard/crm/contacts": Contact,
   "/dashboard/crm/companies": Building2,
-  "/dashboard/crm/deals": Handshake,
+  "/dashboard/crm/deals": Briefcase,
   "/dashboard/integrations": Puzzle,
   "/dashboard/automation": Workflow,
   "/dashboard/knowledge": BookOpen,
@@ -703,11 +703,11 @@ export default function CrmCompaniesPage() {
 ```tsx
 "use client";
 
-import { Handshake } from "lucide-react";
+import { Briefcase } from "lucide-react";
 import { CrmNotBuilt } from "@/components/dashboard/CrmNotBuilt";
 
 export default function CrmDealsPage() {
-  return <CrmNotBuilt icon={Handshake} entityName="Deal" entityNamePlural="Deals" />;
+  return <CrmNotBuilt icon={Briefcase} entityName="Deal" entityNamePlural="Deals" />;
 }
 ```
 

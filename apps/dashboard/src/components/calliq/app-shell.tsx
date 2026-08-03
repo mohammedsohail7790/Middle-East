@@ -7,6 +7,7 @@ import {
   LayoutDashboard, Phone, Users, Bot, Calendar, MessageSquare, BarChart3,
   Puzzle, BookOpen, Lock, CreditCard, Hash, LogOut, Shield,
   PanelLeftClose, PanelLeft, X, LifeBuoy, type LucideIcon,
+  Star, Workflow, MessagesSquare, Instagram, Facebook, Building2, Contact, Briefcase, KanbanSquare,
 } from "lucide-react";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,18 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   "/dashboard/agent": Bot,
   "/dashboard/calendar": Calendar,
   "/dashboard/analytics": BarChart3,
+  "/dashboard/quality": Star,
+  "/dashboard/channels/sms": MessageSquare,
+  "/dashboard/channels/whatsapp": MessagesSquare,
+  "/dashboard/channels/web-chat": MessageSquare,
+  "/dashboard/channels/instagram": Instagram,
+  "/dashboard/channels/facebook": Facebook,
+  "/dashboard/crm/pipeline": KanbanSquare,
+  "/dashboard/crm/contacts": Contact,
+  "/dashboard/crm/companies": Building2,
+  "/dashboard/crm/deals": Briefcase,
   "/dashboard/integrations": Puzzle,
+  "/dashboard/automation": Workflow,
   "/dashboard/knowledge": BookOpen,
   "/dashboard/phone-numbers": Hash,
   "/dashboard/compliance": Lock,
