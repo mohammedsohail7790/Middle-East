@@ -55,3 +55,25 @@ test.describe('authenticated dashboard journeys', () => {
     await assertNoSeriousAxeViolations(page);
   });
 });
+
+const ARABIC_DASHBOARD_ROUTES = [
+  '/ar',
+  '/ar/dashboard',
+  '/ar/dashboard/calls',
+  '/ar/dashboard/leads',
+  '/ar/dashboard/agent',
+] as const;
+
+test.describe('arabic dashboard journeys', () => {
+  for (const route of ARABIC_DASHBOARD_ROUTES) {
+    test(`loads ${route} in RTL without console errors`, async ({ page, consoleErrors, failedRequests }) => {
+      const response = await page.goto(route, { waitUntil: 'domcontentloaded' });
+      expect(response?.status() ?? 200).toBeLessThan(400);
+      await expect(page.locator('main').first()).toBeVisible({ timeout: 30_000 });
+      await expect(page.locator('h1').first()).toBeVisible({ timeout: 15_000 });
+      await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+      expect(consoleErrors, `console errors on ${route}`).toEqual([]);
+      expect(filterHardApiFailures(failedRequests), `failed requests on ${route}`).toEqual([]);
+    });
+  }
+});
