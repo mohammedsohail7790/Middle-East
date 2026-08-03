@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { LayoutDashboard, Phone, Users, Puzzle, Menu } from "lucide-react";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { cn } from "@/lib/utils";

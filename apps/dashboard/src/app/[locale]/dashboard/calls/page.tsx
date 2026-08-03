@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Phone, Search, ArrowUpRight, Clock, ChevronLeft, ChevronRight, ShieldBan } from "lucide-react";
 import { IconBox, outcomeIconVariant } from "@/components/ui-kit/IconBox";
 import { EmptyState } from "@/components/ui-kit/EmptyState";

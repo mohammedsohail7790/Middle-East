@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Bot, Plus, Save, Trash2, Lock, Pencil, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { hasAccess, subscribePlanUpdates } from "@/lib/store";

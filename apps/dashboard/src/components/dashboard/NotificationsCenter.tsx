@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Bell } from "lucide-react";
 import { cn, timeAgo } from "@/lib/utils";
 import type { DashboardNotification } from "@/lib/dashboard-notifications";

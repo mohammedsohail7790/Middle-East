@@ -9,7 +9,7 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid
 } from "recharts";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { api, asArray } from "@/lib/api";
 import { normalizeAnalyticsMetrics, funnelFromApi } from "@/lib/gateway-adapters";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";

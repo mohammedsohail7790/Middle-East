@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Lock, Sparkles, Mail } from "lucide-react";
 import { api } from "@/lib/api";
 import { supabase } from "@/lib/supabase";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { HelpCircle, MessageSquare, Mail, ExternalLink, ChevronDown, ChevronUp, Send } from "lucide-react";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { DashboardPageSection } from "@/components/ui-kit/DashboardPageSection";

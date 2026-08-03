@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { AlertTriangle, Clock, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 

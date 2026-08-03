@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Users, Plus, X, Star, TrendingUp, Search, User,

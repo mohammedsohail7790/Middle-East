@@ -13,6 +13,8 @@ type CallIqLogoProps = {
   /** sm | md | lg | sidebar (dashboard nav) */
   size?: "sm" | "md" | "lg" | "sidebar";
   className?: string;
+  /** Override the Link component (e.g. the locale-aware Link for dashboard usage). Defaults to plain next/link. */
+  linkAs?: React.ElementType;
 };
 
 const SIZES = {
@@ -29,6 +31,7 @@ export function CallIqLogo({
   centered = false,
   size = "md",
   className,
+  linkAs,
 }: CallIqLogoProps) {
   const s = SIZES[size];
 
@@ -81,10 +84,11 @@ export function CallIqLogo({
   );
 
   if (href) {
+    const LinkComponent = linkAs ?? Link;
     return (
-      <Link href={href} className={cn(wrapperClass, className)}>
+      <LinkComponent href={href} className={cn(wrapperClass, className)}>
         {content}
-      </Link>
+      </LinkComponent>
     );
   }
 
@@ -92,7 +96,15 @@ export function CallIqLogo({
 }
 
 /** Compact mark: icon + Call<span className="text-cyan">IQ</span> text */
-export function CallIqMark({ className, href = "/" }: { className?: string; href?: string }) {
+export function CallIqMark({
+  className,
+  href = "/",
+  linkAs,
+}: {
+  className?: string;
+  href?: string;
+  linkAs?: React.ElementType;
+}) {
   const inner = (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <Image src="/logo.png" alt="" width={44} height={44} className="h-11 w-11 rounded-lg object-contain" />
@@ -101,6 +113,9 @@ export function CallIqMark({ className, href = "/" }: { className?: string; href
       </span>
     </span>
   );
-  if (href) return <Link href={href}>{inner}</Link>;
+  if (href) {
+    const LinkComponent = linkAs ?? Link;
+    return <LinkComponent href={href}>{inner}</LinkComponent>;
+  }
   return inner;
 }

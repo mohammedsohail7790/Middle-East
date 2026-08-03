@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 import { Search, Phone, Users, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { gatewayFetch } from "@/lib/enterprise-api";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";

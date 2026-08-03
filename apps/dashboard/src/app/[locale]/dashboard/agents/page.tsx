@@ -1,5 +1,10 @@
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
 
-export default function AgentsRedirectPage() {
-  redirect("/dashboard/agent#per-number-agents");
+export default async function AgentsRedirectPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect({ href: "/dashboard/agent#per-number-agents", locale });
 }

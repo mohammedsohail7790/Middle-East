@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { Phone, RefreshCw } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 export default function CallsError({
   error,

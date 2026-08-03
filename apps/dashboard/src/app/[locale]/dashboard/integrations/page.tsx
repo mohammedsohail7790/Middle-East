@@ -15,7 +15,7 @@ import {
   Sparkles,
   Plug,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/api";
 import { readApiGetCache } from "@/lib/api-get-cache";
 import { showDashboardToast } from "@/lib/dashboard-toast";

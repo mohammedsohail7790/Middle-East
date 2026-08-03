@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 /** Legacy URL → main integrations wizard with CRM pre-selected */
 export default function CrmSetupRedirectPage() {

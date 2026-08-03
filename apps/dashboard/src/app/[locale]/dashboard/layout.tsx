@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { supabase } from "@/lib/supabase";
 import { AppShell } from "@/components/calliq/app-shell";
 import { setTenantId, getTenantId, syncPlanFromAccount } from "@/lib/store";

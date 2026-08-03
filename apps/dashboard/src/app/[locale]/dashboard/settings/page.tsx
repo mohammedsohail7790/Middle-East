@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Shield, ChevronRight } from "lucide-react";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";

@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   LayoutDashboard, Phone, Users, Bot, Calendar, MessageSquare, BarChart3,
@@ -173,7 +173,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ) : (
             <div className="dashboard-sidebar-logo flex justify-center pr-8">
-              <CallIqLogo href="/dashboard" size="lg" centered className="w-full max-w-[220px]" />
+              <CallIqLogo href="/dashboard" size="lg" centered className="w-full max-w-[220px]" linkAs={Link} />
             </div>
           )}
           {collapsed ? (
