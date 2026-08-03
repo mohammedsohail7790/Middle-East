@@ -2,8 +2,13 @@ import pkg from 'pg';
 const { Pool } = pkg;
 import fs from 'fs';
 
+if (!process.env.DATABASE_URL) {
+  console.error('Missing DATABASE_URL env var');
+  process.exit(1);
+}
+
 const pool = new Pool({
-  connectionString: 'postgresql://postgres:8618957790sohail@db.btgwgfphgdgnoaqtopwy.supabase.co:5432/postgres',
+  connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 

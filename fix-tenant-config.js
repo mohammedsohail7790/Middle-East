@@ -2,8 +2,13 @@
 import pg from 'pg';
 const { Client } = pg;
 
+if (!process.env.DATABASE_URL) {
+    console.error('Missing DATABASE_URL env var');
+    process.exit(1);
+}
+
 const client = new Client({
-    connectionString: 'postgresql://postgres:8618957790sohail@db.btgwgfphgdgnoaqtopwy.supabase.co:5432/postgres',
+    connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
 
