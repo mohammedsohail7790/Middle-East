@@ -1,0 +1,42 @@
+{
+  "name": "call-iq-videos",
+  "version": "1.0.0",
+  "description": "Call IQ Remotion video compositions",
+  "repository": {},
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@react-three/fiber": "^8.17.10",
+    "@remotion/cli": "^4.0.476",
+    "@remotion/google-fonts": "4.0.475",
+    "@remotion/media": "4.0.475",
+    "@remotion/three": "^4.0.476",
+    "@remotion/transitions": "4.0.475",
+    "@types/three": "^0.184.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.475",
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "@remotion/eslint-config-flat": "4.0.475",
+    "@types/react": "19.2.7",
+    "@types/web": "0.0.166",
+    "eslint": "9.39.4",
+    "prettier": "3.8.1",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "studio": "remotion studio",
+    "audio:generate": "node scripts/generate-cinematic-audio.mjs && powershell -ExecutionPolicy Bypass -File scripts/generate-voiceover.ps1",
+    "voiceover:training": "py scripts/generate_training_voiceover.py",
+    "render:cinematic": "remotion render CallIQLabsCinematic out/call-iq-launch.mp4",
+    "render": "remotion render",
+    "build": "remotion bundle",
+    "upgrade": "remotion upgrade",
+    "lint": "eslint src && tsc"
+  },
+  "sideEffects": [
+    "*.css"
+  ]
+}

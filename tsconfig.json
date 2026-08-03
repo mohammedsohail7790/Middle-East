@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "declaration": true,
+        "lib": ["ESNext"],
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "paths": {
+            "@call-iq/types": ["./packages/types/src"],
+            "@call-iq/db": ["./packages/db/src"],
+            "@call-iq/memory": ["./packages/memory/src"],
+            "@call-iq/mcp-client": ["./packages/mcp-client/src"]
+        }
+    }
+}

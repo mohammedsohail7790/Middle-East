@@ -1,0 +1,16 @@
+# Deprecated — production dashboard deploys on Vercel (www.calliqlabs.com).
+# See DEPLOY_VERCEL.md. Kept for reference only.
+
+[build]
+  command = "npm run build:dashboard"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
+  NEXT_TELEMETRY_DISABLED = "1"
+  NEXT_PUBLIC_GATEWAY_API_URL = "https://call-iq-gateway.onrender.com"
+  NEXT_PUBLIC_GATEWAY_WS_URL = "wss://call-iq-gateway.onrender.com"
+  NEXT_PUBLIC_SITE_URL = "https://www.calliqlabs.com"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

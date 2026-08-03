@@ -1,0 +1,157 @@
+{
+  "version": "2.0.0",
+  "generated": "2026-06-14",
+  "primaryTenant": {
+    "id": "tenant_northline_001",
+    "name": "Northline Home Services",
+    "slug": "northline-home-services",
+    "industry": "Home Services",
+    "services": ["Plumbing", "HVAC", "Electrical"],
+    "timezone": "America/Denver",
+    "website": "https://northlinehome.com",
+    "owner": {
+      "name": "Rachel Torres",
+      "email": "rachel@northlinehome.com",
+      "role": "Owner"
+    },
+    "plan": "Professional",
+    "planPrice": 149,
+    "includedMinutes": 2000,
+    "trialDays": 14
+  },
+  "flagshipTenant": {
+    "id": "tenant_summit_hvac_001",
+    "name": "Summit Comfort HVAC",
+    "slug": "summit-comfort-hvac",
+    "industry": "HVAC",
+    "services": ["AC Repair", "Furnace Installation", "Duct Cleaning", "Maintenance Plans"],
+    "timezone": "America/Denver",
+    "website": "https://summitcomforthvac.com",
+    "owner": {
+      "name": "Marcus Chen",
+      "email": "marcus@summitcomforthvac.com",
+      "role": "Operations Manager"
+    },
+    "plan": "Professional",
+    "planPrice": 149
+  },
+  "multiTenantExamples": [
+    "Northline Home Services",
+    "Cascade Dental Studio",
+    "Pacific Ridge Realty Group"
+  ],
+  "agents": {
+    "northline": {
+      "id": "agent_main_001",
+      "name": "Main Receptionist",
+      "displayName": "Sarah",
+      "voice": "shimmer",
+      "voiceLabel": "Sarah — Warm & Professional",
+      "type": "Inbound Receptionist",
+      "language": "English (US)",
+      "tone": "Warm & Professional",
+      "greeting": "Thank you for calling Northline Home Services! I'm Sarah, your AI assistant. How can I help you today?",
+      "phoneNumber": "+1 (720) 555-0188"
+    },
+    "summit": {
+      "id": "agent_summit_001",
+      "name": "HVAC Receptionist",
+      "displayName": "Morgan",
+      "voice": "cedar",
+      "voiceLabel": "Morgan — Calm & Knowledgeable",
+      "type": "Inbound Receptionist",
+      "language": "English (US)",
+      "tone": "Calm & Knowledgeable",
+      "greeting": "Thank you for calling Summit Comfort HVAC! I'm Morgan. Are you calling about heating, cooling, or a maintenance plan?",
+      "phoneNumber": "+1 (303) 555-0147"
+    },
+    "sales": {
+      "id": "agent_sales_001",
+      "name": "Sales Agent",
+      "displayName": "Alex",
+      "voice": "coral",
+      "voiceLabel": "Alex — Confident & Friendly",
+      "type": "Sales Qualifier",
+      "phoneNumber": "+1 (720) 555-0199"
+    }
+  },
+  "phoneNumbers": [
+    {
+      "number": "+1 (720) 555-0188",
+      "areaCode": "720",
+      "region": "Denver, CO",
+      "type": "local",
+      "assignedAgent": "Main Receptionist",
+      "status": "active"
+    },
+    {
+      "number": "+1 (720) 555-0199",
+      "areaCode": "720",
+      "region": "Denver, CO",
+      "type": "local",
+      "assignedAgent": "Sales Agent",
+      "status": "active"
+    },
+    {
+      "number": "+1 (303) 555-0147",
+      "areaCode": "303",
+      "region": "Boulder, CO",
+      "type": "local",
+      "assignedAgent": "HVAC Receptionist",
+      "status": "active"
+    },
+    {
+      "number": "+1 (800) 555-0142",
+      "areaCode": "800",
+      "region": "Toll-Free",
+      "type": "toll-free",
+      "assignedAgent": "Main Receptionist",
+      "status": "available"
+    }
+  ],
+  "routingRules": [
+    {
+      "condition": "Business hours (Mon–Fri 7am–7pm)",
+      "action": "Route to AI Agent — Sarah"
+    },
+    {
+      "condition": "After hours",
+      "action": "AI Agent + Emergency HVAC/plumbing line"
+    },
+    {
+      "condition": "Caller requests manager",
+      "action": "Transfer to +1 (720) 555-0100"
+    },
+    {
+      "condition": "No answer after 30s",
+      "action": "Voicemail + SMS alert to on-call"
+    }
+  ],
+  "assetFiles": {
+    "businesses": "demo-assets/sample-businesses.json",
+    "leads": "demo-assets/sample-leads.json",
+    "calls": "demo-assets/sample-calls.json",
+    "transcripts": "demo-assets/sample-transcripts.json",
+    "appointments": "demo-assets/sample-appointments.json",
+    "analytics": "demo-assets/sample-analytics.json",
+    "crmRecords": "demo-assets/sample-crm-records.json"
+  },
+  "dashboardRoutes": {
+    "home": "/dashboard",
+    "calls": "/dashboard/calls",
+    "callDetail": "/dashboard/calls/[id]",
+    "leads": "/dashboard/leads",
+    "agent": "/dashboard/agent",
+    "knowledge": "/dashboard/knowledge",
+    "simulator": "/dashboard/simulator",
+    "calendar": "/dashboard/calendar",
+    "analytics": "/dashboard/analytics",
+    "integrations": "/dashboard/integrations",
+    "phoneNumbers": "/dashboard/phone-numbers",
+    "automation": "/dashboard/automation",
+    "onboarding": "/onboarding",
+    "signup": "/signup",
+    "billing": "/dashboard/billing",
+    "settings": "/dashboard/settings"
+  }
+}

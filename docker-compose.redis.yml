@@ -1,0 +1,13 @@
+# Local Redis 7 for dev and Playwright E2E (BullMQ requires Redis >= 5).
+# Port 6380 avoids conflict with legacy Windows Redis/Memurai on 6379.
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

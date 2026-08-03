@@ -1,0 +1,28 @@
+name: Verify Production Realtime
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: Dashboard realtime (Render)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Run production realtime verify
+        env:
+          SMOKE_GATEWAY_URL: https://call-iq-gateway.onrender.com
+          SMOKE_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SMOKE_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SMOKE_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SMOKE_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+          SMOKE_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+        run: npm run verify:realtime:prod

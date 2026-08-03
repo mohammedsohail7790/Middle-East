@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Create API key. Settings → Developer Tools → Create API Key">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)" rx="12"/>
+  
+  
+  <rect x="32" y="32" width="88" height="28" rx="14" fill="#0ea5e9"/>
+  <text x="76" y="51" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="#ffffff">STEP 3/5</text>
+  
+  <rect x="24" y="72" width="592" height="40" fill="#ffffff" stroke="#e2e8f0" rx="8"/>
+  <text x="320" y="98" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="600" fill="#64748b">Buildium setup</text>
+  <rect x="48" y="128" width="160" height="152" fill="#f8fafc" stroke="#e2e8f0" rx="10"/>
+  <rect x="64" y="148" width="128" height="14" fill="#e2e8f0" rx="3"/>
+  <rect x="64" y="170" width="100" height="14" fill="#e2e8f0" rx="3"/>
+  <rect x="64" y="192" width="128" height="22" fill="#dbeafe" stroke="#2563eb" stroke-width="2" rx="4"/>
+  <text x="128" y="207" text-anchor="middle" font-size="10" font-weight="700" fill="#1d4ed8">CLICK HERE</text>
+  <rect x="64" y="222" width="90" height="14" fill="#e2e8f0" rx="3"/>
+  <rect x="64" y="244" width="110" height="14" fill="#e2e8f0" rx="3"/>
+  <path d="M 220 204 L 260 204 L 260 220 L 285 188 L 260 156 L 260 172 L 220 172 Z" fill="#0ea5e9"/>
+  <rect x="300" y="128" width="292" height="152" fill="#ffffff" stroke="#e2e8f0" rx="10"/>
+  <text x="446" y="158" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="16" font-weight="700" fill="#0f172a">Create API key</text>
+  <rect x="320" y="178" width="252" height="72" rx="8" fill="#f0fdf4" stroke="#22c55e" stroke-width="2"/>
+  <text x="446" y="202" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="13" font-weight="700" fill="#15803d">Settings → Developer</text>
+<text x="446" y="221" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="13" font-weight="700" fill="#15803d">Tools → Create API Key</text>
+  
+  <rect x="24" y="300" width="592" height="48" fill="#0f172a" rx="8"/>
+  <text x="320" y="326" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="13" font-weight="500" fill="#f8fafc">Settings → Developer Tools → Create API Key</text>
+</svg>

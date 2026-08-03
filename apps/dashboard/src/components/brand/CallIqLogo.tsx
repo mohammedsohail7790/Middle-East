@@ -1,0 +1,106 @@
+import Image from "next/image";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+
+type CallIqLogoProps = {
+  href?: string;
+  /** Icon only (square) */
+  iconOnly?: boolean;
+  /** Show tagline under wordmark */
+  showTagline?: boolean;
+  /** Center logo + tagline (e.g. onboarding, auth pages) */
+  centered?: boolean;
+  /** sm | md | lg | sidebar (dashboard nav) */
+  size?: "sm" | "md" | "lg" | "sidebar";
+  className?: string;
+};
+
+const SIZES = {
+  sm: { icon: 40, wordmark: 132, height: 44 },
+  md: { icon: 48, wordmark: 168, height: 52 },
+  lg: { icon: 64, wordmark: 220, height: 72 },
+  sidebar: { icon: 90, wordmark: 236, height: 90 },
+};
+
+export function CallIqLogo({
+  href = "/",
+  iconOnly = false,
+  showTagline = false,
+  centered = false,
+  size = "md",
+  className,
+}: CallIqLogoProps) {
+  const s = SIZES[size];
+
+  const content = iconOnly ? (
+    <Image
+      src="/logo.png"
+      alt="Call IQ"
+      width={s.icon}
+      height={s.icon}
+      className="object-contain mx-auto"
+      priority
+    />
+  ) : (
+    <div
+      className={cn(
+        "flex flex-col gap-0.5",
+        centered ? "items-center text-center" : "items-start",
+        className
+      )}
+    >
+      <Image
+        src="/logo.png"
+        alt="Call IQ — Smart, Seamless, Always"
+        width={s.wordmark}
+        height={s.height}
+        className={cn(
+          "object-contain h-auto w-auto max-h-[var(--logo-h)]",
+          centered ? "object-center mx-auto" : "object-left"
+        )}
+        style={{ "--logo-h": `${s.height}px` } as React.CSSProperties}
+        priority
+      />
+      {showTagline && (
+        <p
+          className={cn(
+            "text-[10px] sm:text-xs text-muted-foreground tracking-wide",
+            !centered && "pl-0.5"
+          )}
+        >
+          Smart <span className="text-[var(--cyan)]">•</span> Seamless{" "}
+          <span className="text-[var(--cyan)]">•</span> Always
+        </p>
+      )}
+    </div>
+  );
+
+  const wrapperClass = cn(
+    "inline-flex shrink-0",
+    centered ? "flex-col items-center justify-center w-full" : "items-center"
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={cn(wrapperClass, className)}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={cn(wrapperClass, className)}>{content}</div>;
+}
+
+/** Compact mark: icon + Call<span className="text-cyan">IQ</span> text */
+export function CallIqMark({ className, href = "/" }: { className?: string; href?: string }) {
+  const inner = (
+    <span className={cn("inline-flex items-center gap-2.5", className)}>
+      <Image src="/logo.png" alt="" width={44} height={44} className="h-11 w-11 rounded-lg object-contain" />
+      <span className="font-bold text-lg tracking-tight text-foreground leading-none">
+        Call<span className="text-[var(--cyan)]">IQ</span>
+      </span>
+    </span>
+  );
+  if (href) return <Link href={href}>{inner}</Link>;
+  return inner;
+}

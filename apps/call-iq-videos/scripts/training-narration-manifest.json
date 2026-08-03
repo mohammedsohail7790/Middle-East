@@ -1,0 +1,105 @@
+{
+  "voice": {
+    "id": "en-US-AriaNeural",
+    "label": "Professional female narrator (confident US / NYC business tone)",
+    "rate": "+10%",
+    "pitch": "+2Hz"
+  },
+  "videos": [
+    {
+      "id": "WelcomeToCallIQ",
+      "slug": "welcome-to-call-iq",
+      "chapters": [
+        { "text": "Welcome to Call IQ — the AI voice receptionist built for home service businesses that never want to miss a lead." },
+        { "text": "Every missed call is lost revenue. When your crew is on a job site, Call IQ answers instantly, qualifies callers, and books appointments — around the clock." },
+        { "text": "Configure intelligent voice agents that sound human, pull answers from your knowledge base, and hand off to your team when it matters." },
+        { "text": "Every caller is scored, tagged, and synced to your dashboard — Maria's kitchen leak, David's AC issue, Jennifer's panel upgrade — ready for follow-up." },
+        { "text": "Track 1,284 calls this month with 96% answer rate. See conversion trends, agent performance, and cost savings in one executive dashboard." },
+        { "text": "Call IQ checks Google Calendar or Outlook availability and books on the spot — like Maria's 2:30 PM plumbing visit or David's AC diagnostic at 3:30." },
+        { "text": "Every call outcome triggers CRM updates — contacts created in HubSpot, deals moved in Salesforce, call notes logged automatically." },
+        { "text": "Agencies and multi-location operators manage isolated orgs — separate numbers, agents, and billing — from one admin console." },
+        { "text": "Northline Home Services saves over $3,000 monthly versus a full-time receptionist while capturing 49% more qualified leads. Start your free trial at calliqlabs.com." }
+      ]
+    },
+    {
+      "id": "ClientOnboarding",
+      "slug": "client-onboarding",
+      "chapters": [
+        { "text": "Start your free trial at calliqlabs.com — fourteen days, no credit card. Enter your name, work email, password, and company name." },
+        { "text": "Call IQ sends a confirmation link to your inbox — not a code. Click the link to verify your account, then continue to setup." },
+        { "text": "The onboarding wizard starts with your business. Enter Northline Home Services, your services, and set your timezone to Mountain." },
+        { "text": "Select every industry you serve — HVAC, plumbing, and electrical — so your AI uses the right vocabulary on every call." },
+        { "text": "Set working days and hours. Your AI still answers twenty-four seven, but tells callers when your team is available." },
+        { "text": "Name your AI receptionist Sarah, choose a professional personality, and preview the voice callers will hear." },
+        { "text": "Search area code 720, claim +1 (720) 555-0188, and your AI line is live — included on your free trial." },
+        { "text": "You're all set. Sarah is ready for Northline Home Services on a fourteen-day trial with sixty included minutes. Run a test call, then open your dashboard." },
+        { "text": "Your dashboard shows forty-seven calls today, twenty-three leads, eight appointments, and a forty-nine percent conversion rate." }
+      ]
+    },
+    {
+      "id": "AIAgentConfiguration",
+      "slug": "ai-agent-configuration",
+      "chapters": [
+        { "text": "Marcus Chen at Summit Comfort HVAC creates an HVAC receptionist named Morgan — inbound type, cedar voice, calm and knowledgeable tone." },
+        { "text": "Upload service guides, maintenance plan pricing, warranty policies, and financing sheets. Call IQ indexes every page for RAG during live calls." },
+        { "text": "Point Call IQ at https://summitcomforthvac.com. It crawled 52 pages — services, service areas, and seasonal promotions — synced every Monday." },
+        { "text": "Add approved FAQ answers for hours, brands serviced, tune-up pricing, service areas, and financing — Morgan uses these as source of truth." },
+        { "text": "Set Morgan's calm, knowledgeable tone and craft the opening greeting callers hear on every inbound call." },
+        { "text": "Core instructions tell Morgan to collect address and callback number, prioritize no-cool emergencies, and never quote exact replacement prices." },
+        { "text": "Configure Boulder business hours and after-hours emergency dispatch — $89 trip fee for no-heat and no-cool emergencies." },
+        { "text": "Escalate on keywords like manager, warranty dispute, or legal inquiry. Notify dispatch via SMS and email when sentiment turns negative." },
+        { "text": "Route dispatch, sales, and emergency lines. When a caller asks for a manager, Morgan transfers to dispatch within 3 seconds." },
+        { "text": "90-minute diagnostic slots, 4-hour minimum notice for standard visits, immediate dispatch for emergencies, and SMS reminders with tech en-route alerts." },
+        { "text": "Run a no-cool emergency scenario: 92 degrees, newborn at home. Morgan flags same-day dispatch and collects address — score 97%." },
+        { "text": "Review simulation transcripts. Call number 2 flagged for quoting exact replacement price — update instructions before going live." },
+        { "text": "After 3 instruction updates and 2 new FAQs, re-test scores hit 96%. Morgan goes live on +1 (303) 555-0147 — monitor the first 50 calls." }
+      ]
+    },
+    {
+      "id": "PhoneNumberSetup",
+      "slug": "phone-number-setup",
+      "chapters": [
+        { "text": "Search Denver area code 720 or Boulder 303. Purchase a local number in minutes — no carrier contracts or porting delays." },
+        { "text": "Assign +1 (720) 555-0188 to Main Receptionist and +1 (720) 555-0199 to Sales Agent. Each number loads its agent's knowledge base and personality." },
+        { "text": "Configure business-hours routing to AI, after-hours emergency dispatch, manager transfers, and voicemail fallback with SMS alerts." },
+        { "text": "Place three test calls: AI answered in 1.2 seconds, sales transfer connected, after-hours SMS alert delivered. All passed — go live." }
+      ]
+    },
+    {
+      "id": "CallFlowBuilder",
+      "slug": "call-flow-builder",
+      "chapters": [
+        { "text": "Maria calls about a kitchen leak. Sarah qualifies urgency, captures her address on Tennyson Street, and tags the lead as emergency plumbing." },
+        { "text": "Sarah checks Carlos's availability and books Maria for 2:30 PM today — no hold music, no callback queue." },
+        { "text": "HubSpot creates Maria Gonzalez as a contact, logs the full transcript, and sets deal stage to Appointment Scheduled." },
+        { "text": "Maria receives an SMS: Northline Home Services — plumbing visit confirmed today 2:30 PM. Tech: Carlos V. Reply RESCHEDULE to change." },
+        { "text": "A Google Calendar event appears on dispatch's calendar with address, service type, and linked HubSpot contact." },
+        { "text": "Five automated steps — qualify, book, sync CRM, confirm via SMS, create calendar event — zero manual data entry from call to dispatch." }
+      ]
+    },
+    {
+      "id": "AnalyticsReporting",
+      "slug": "analytics-reporting",
+      "chapters": [
+        { "text": "Northline Home Services handled 1,284 inbound calls this month — 96% answered with an average duration of 3 minutes 48 seconds." },
+        { "text": "Only 51 missed calls — down 32% from last month. 63% were after hours; 78% recovered via callback or SMS follow-up." },
+        { "text": "49% conversion rate generated 634 qualified leads and 296 booked appointments — up 22% and 15% respectively." },
+        { "text": "296 appointments booked with an 88.2% show rate. Only 7% rescheduled — most common services: HVAC diagnostic and emergency plumbing." },
+        { "text": "Sarah scores 96% satisfaction on 892 calls. Alex handles sales qualification at 91%. Escalation rate dropped to 3.8%." },
+        { "text": "At $149 per month versus $3,200 for a full-time receptionist, Northline saves $3,051 monthly — a 95% cost reduction with higher lead capture." }
+      ]
+    },
+    {
+      "id": "CRMIntegrations",
+      "slug": "crm-integrations",
+      "chapters": [
+        { "text": "Connect HubSpot — 412 contacts synced this month. Maria Gonzalez created automatically; David Chen's call logged with transcript." },
+        { "text": "Salesforce maps Call IQ leads to Contacts and Opportunities with custom fields for transcript, lead score, and service type." },
+        { "text": "Zoho CRM syncs SMB leads like James Okonkwo's maintenance plan inquiry — ideal for teams already on Zoho One." },
+        { "text": "Google Calendar sync creates events in real time — David's 3:30 PM diagnostic and Maria's 2:30 PM plumbing visit booked during calls." },
+        { "text": "Microsoft Outlook integration checks dispatch calendar availability for commercial jobs and team scheduling." },
+        { "text": "Two active webhook endpoints — ServiceTitan job creation and Slack dispatch alerts — delivered 1,847 events this month with 3 failures." }
+      ]
+    }
+  ]
+}

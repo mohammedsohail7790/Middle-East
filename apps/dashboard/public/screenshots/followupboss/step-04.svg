@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Copy the key immediately. You only see the full key once">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)" rx="12"/>
+  
+  
+  <rect x="32" y="32" width="88" height="28" rx="14" fill="#0ea5e9"/>
+  <text x="76" y="51" text-anchor="middle" font-family="system-ui,sans-serif" font-size="12" font-weight="700" fill="#ffffff">STEP 4/5</text>
+  
+  <rect x="24" y="72" width="592" height="40" fill="#ffffff" stroke="#e2e8f0" rx="8"/>
+  <text x="320" y="98" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" font-weight="600" fill="#64748b">Follow Up Boss setup</text>
+  <rect x="48" y="128" width="544" height="152" fill="#ffffff" stroke="#e2e8f0" rx="12"/>
+  <text x="320" y="158" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="17" font-weight="700" fill="#0f172a">Copy the key immediately</text>
+  <rect x="80" y="178" width="480" height="44" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+  <text x="100" y="206" font-family="ui-monospace,monospace" font-size="14" fill="#92400e">sk_live_••••••••••••••••</text>
+  <rect x="460" y="186" width="88" height="28" rx="6" fill="#f59e0b"/>
+  <text x="504" y="205" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff">COPY</text>
+  <path d="M 320 230 L 320 248" stroke="#0ea5e9" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="320" y="268" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="12" font-weight="500" fill="#64748b">You only see the full key once</text>
+  
+  <rect x="24" y="300" width="592" height="48" fill="#0f172a" rx="8"/>
+  <text x="320" y="326" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="13" font-weight="500" fill="#f8fafc">Copy the key immediately</text>
+</svg>

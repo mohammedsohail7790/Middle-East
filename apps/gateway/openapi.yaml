@@ -1,0 +1,58 @@
+openapi: 3.0.3
+info:
+  title: Call IQ Enterprise API
+  version: 1.0.0
+  description: Inbound-only enterprise API (JWT required)
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+paths:
+  /enterprise/overview:
+    get:
+      summary: Unified ops overview
+      tags: [Enterprise]
+  /enterprise/topology:
+    get:
+      summary: Runtime topology graph
+      tags: [Observability]
+  /enterprise/diagnostics:
+    get:
+      summary: Runtime diagnostics and reconnect heatmap
+      tags: [Observability]
+  /enterprise/audit-events:
+    get:
+      summary: Immutable enterprise audit stream
+      tags: [Compliance]
+  /enterprise-auth/policy:
+    get:
+      summary: Org auth policy
+      tags: [Auth]
+    put:
+      summary: Update org auth policy
+      tags: [Auth]
+  /search:
+    get:
+      summary: Global tenant search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [all, calls, leads, appointments, audit, governance]
+      tags: [Search]
+  /intelligence/tenant-score:
+    get:
+      summary: Composite tenant operational score
+      tags: [Intelligence]
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

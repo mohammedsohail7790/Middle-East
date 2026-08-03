@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Call IQ — 3D Architecture Diagram</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a1a;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    color: #fff;
+  }
+  #canvas { display: block; }
+  #ui {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+  }
+  #title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #a78bfa;
+    text-shadow: 0 0 20px #7c3aed88;
+  }
+  #subtitle {
+    font-size: 12px;
+    color: #94a3b8;
+    letter-spacing: 1px;
+  }
+  #controls {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 10;
+  }
+  .btn {
+    background: rgba(124,58,237,0.2);
+    border: 1px solid #7c3aed55;
+    color: #a78bfa;
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: rgba(124,58,237,0.4); border-color: #a78bfa; }
+  #tooltip {
+    position: fixed;
+    background: rgba(10,10,30,0.95);
+    border: 1px solid #7c3aed88;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #e2e8f0;
+    pointer-events: none;
+    display: none;
+    max-width: 260px;
+    z-index: 20;
+    line-height: 1.6;
+    box-shadow: 0 0 20px #7c3aed44;
+  }
+  #tooltip h3 { color: #a78bfa; margin-bottom: 6px; font-size: 14px; }
+  #tooltip .tag {
+    display: inline-block;
+    background: #7c3aed33;
+    border: 1px solid #7c3aed55;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 11px;
+    margin: 2px 2px 0 0;
+    color: #c4b5fd;
+  }
+  #legend {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: rgba(10,10,30,0.85);
+    border: 1px solid #ffffff11;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #94a3b8;
+    z-index: 10;
+  }
+  #legend h4 { color: #a78bfa; margin-bottom: 8px; font-size: 13px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div id="ui">
+  <div id="title">⚡ CALL IQ — SYSTEM ARCHITECTURE</div>
+  <div id="subtitle">Drag to rotate · Scroll to zoom · Hover nodes for details</div>
+</div>
+<div id="legend">
+  <h4>Layer Legend</h4>
+  <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div> Client / Internet</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div> Frontend (Vercel)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Backend (Render)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Telephony (Twilio)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div> AI Services</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#64748b"></div> Data / Cache</div>
+</div>
+<div id="controls">
+  <button class="btn" id="btnReset">⟳ Reset View</button>
+  <button class="btn" id="btnAuto">▶ Auto Rotate</button>
+  <button class="btn" id="btnTop">⬆ Top View</button>
+</div>
+<div id="tooltip"></div>
+<canvas id="canvas"></canvas>
+
+<script>
+// ─── Minimal 3D engine (no external deps) ─────────────────────────────────
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+// Camera state
+let rotX = -0.35, rotY = 0.55, zoom = 1, autoRotate = false;
+let isDragging = false, lastMX = 0, lastMY = 0;
+
+canvas.addEventListener('mousedown', e => { isDragging = true; lastMX = e.clientX; lastMY = e.clientY; });
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+  if (!isDragging) { checkHover(e.clientX, e.clientY); return; }
+  rotY += (e.clientX - lastMX) * 0.007;
+  rotX += (e.clientY - lastMY) * 0.005;
+  rotX = Math.max(-1.2, Math.min(0.3, rotX));
+  lastMX = e.clientX; lastMY = e.clientY;
+});
+canvas.addEventListener('wheel', e => { zoom = Math.max(0.4, Math.min(2.2, zoom - e.deltaY * 0.001)); });
+document.getElementById('btnReset').onclick = () => { rotX = -0.35; rotY = 0.55; zoom = 1; };
+document.getElementById('btnTop').onclick = () => { rotX = -1.18; rotY = 0; zoom = 1.1; };
+document.getElementById('btnAuto').onclick = () => { autoRotate = !autoRotate; document.getElementById('btnAuto').textContent = autoRotate ? '⏸ Auto Rotate' : '▶ Auto Rotate'; };
+
+// Touch
+canvas.addEventListener('touchstart', e => { isDragging = true; lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY; });
+canvas.addEventListener('touchend', () => isDragging = false);
+canvas.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  rotY += (e.touches[0].clientX - lastMX) * 0.007;
+  rotX += (e.touches[0].clientY - lastMY) * 0.005;
+  lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY;
+  e.preventDefault();
+}, { passive: false });
+
+// ─── 3D math ────────────────────────────────────────────────────────────────
+function project(x, y, z) {
+  const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+  const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+  let ny = y * cosX - z * sinX;
+  let nz = y * sinX + z * cosX;
+  let nx = x * cosY + nz * sinY;
+  nz = -x * sinY + nz * cosY;
+  const fov = 900 * zoom;
+  const zOff = 5;
+  const scale = fov / (nz + zOff);
+  return { sx: W / 2 + nx * scale, sy: H / 2 + ny * scale, scale, depth: nz };
+}
+
+// ─── Node definitions ────────────────────────────────────────────────────────
+const NODES = [
+  // [id, label, x, y, z, color, icon, shortDesc, details, tags]
+  { id:'caller',    label:'Caller',           x:-3.5, y:-2.8, z:-3.0, color:'#7c3aed', icon:'📞',
+    desc:'Inbound phone call from a home service customer.',
+    tags:['PSTN','Twilio Number'] },
+
+  { id:'twilio',    label:'Twilio',           x:-1.2, y:-1.8, z:-2.0, color:'#f59e0b', icon:'📡',
+    desc:'Receives inbound PSTN call. Returns TwiML <Connect><Stream> response. Streams g711-ulaw audio over WebSocket.',
+    tags:['Media Streams','TwiML','SMS','WebSocket','g711-ulaw 8kHz'] },
+
+  { id:'vercel',    label:'Vercel Dashboard', x: 3.0, y:-2.5, z:-2.0, color:'#0ea5e9', icon:'🖥',
+    desc:'Next.js 15 App Router on Vercel Edge Network. Hosts dashboard + all marketing pages. www.calliqlabs.com',
+    tags:['Next.js 15','React 18','Tailwind','Radix UI','SSR/SSG'] },
+
+  { id:'gateway',   label:'Gateway (Render)', x: 0.0, y:-0.5, z: 0.0, color:'#10b981', icon:'⚙️',
+    desc:'Node.js 22 + Express. 46 service modules. Handles Twilio webhooks, WebSocket voice pipeline, REST API, billing, integrations. call-iq-gateway.onrender.com',
+    tags:['Node.js 22','Express','TypeScript 5','WebSocket','BullMQ','Port 3003'] },
+
+  { id:'openai',    label:'OpenAI Realtime',  x: 2.2, y: 0.8, z: 1.5, color:'#ec4899', icon:'🧠',
+    desc:'wss://api.openai.com/v1/realtime. Real-time voice conversation with tool calling. GPT-4o-mini for completions and embeddings (text-embedding-3-small).',
+    tags:['Realtime API','WebSocket','Function Calling','GPT-4o-mini','text-embedding-3-small'] },
+
+  { id:'deepgram',  label:'Deepgram STT',     x:-2.5, y: 0.8, z: 1.5, color:'#ec4899', icon:'🎙',
+    desc:'Streaming speech-to-text with interim results. <100ms latency. Multi-language support.',
+    tags:['STT','Streaming','<100ms latency','Multi-language'] },
+
+  { id:'elevenlabs',label:'ElevenLabs TTS',   x: 0.0, y: 2.0, z: 2.2, color:'#ec4899', icon:'🔊',
+    desc:'Text-to-speech synthesis. mulaw 8kHz output compatible with Twilio. <500ms latency. 13 OpenAI native voices also supported.',
+    tags:['TTS','mulaw 8kHz','<500ms latency','Voice Cloning (Enterprise)'] },
+
+  { id:'supabase',  label:'Supabase',         x:-2.0, y: 1.5, z:-0.5, color:'#64748b', icon:'🗄',
+    desc:'PostgreSQL + pgvector + Auth + RLS + Realtime. 13 core tables. Row Level Security enforces tenant isolation. Realtime subscriptions for dashboard live updates.',
+    tags:['PostgreSQL 15','pgvector','Auth','RLS','Realtime WebSocket','13 tables'] },
+
+  { id:'redis',     label:'Redis (Upstash)',  x: 2.2, y: 1.5, z:-0.5, color:'#64748b', icon:'⚡',
+    desc:'Two-tier cache: tenant config, knowledge queries, usage counters. BullMQ job queue for async CRM/webhook delivery. Rate limiting state. Concurrency tracking.',
+    tags:['Upstash','BullMQ','Rate Limiting','Usage Counters','Tenant Cache'] },
+
+  { id:'stripe',    label:'Stripe',           x: 0.0, y: 2.8, z:-1.5, color:'#64748b', icon:'💳',
+    desc:'Subscription billing for Essential ($39), Professional ($149), Enterprise ($499) plans. Metered usage overage. Webhook event processing.',
+    tags:['Subscriptions','Metered Usage','Webhook Events','SCA-ready'] },
+
+  { id:'crm',       label:'CRMs / Webhooks',  x:-2.5, y: 2.8, z: 1.0, color:'#64748b', icon:'🔗',
+    desc:'ServiceTitan, Jobber, HouseCallPro, HubSpot, Salesforce, Zapier, Slack, SMTP, Custom Webhooks. All delivered async via BullMQ with exponential backoff retry.',
+    tags:['ServiceTitan','Jobber','HubSpot','Salesforce','Zapier','Slack','SMTP'] },
+
+  { id:'calendar',  label:'Calendar',         x: 2.5, y: 2.8, z: 1.0, color:'#64748b', icon:'📅',
+    desc:'Google Calendar (OAuth, free/busy, event creation), Outlook/Microsoft Graph (MSAL), Calendly, Acuity Scheduling.',
+    tags:['Google Calendar','Outlook','Calendly','Acuity','OAuth 2.0'] },
+];
+
+// ─── Edge definitions [from, to, label] ─────────────────────────────────────
+const EDGES = [
+  ['caller','twilio','PSTN call'],
+  ['twilio','gateway','TwiML webhook\nPOST /incoming-call'],
+  ['gateway','twilio','TwiML response\n<Connect><Stream>'],
+  ['twilio','gateway','WSS audio stream\ng711-ulaw'],
+  ['gateway','deepgram','audio chunks'],
+  ['deepgram','gateway','transcript'],
+  ['gateway','openai','text + tools'],
+  ['openai','gateway','response + calls'],
+  ['gateway','elevenlabs','text'],
+  ['elevenlabs','gateway','audio mulaw'],
+  ['vercel','gateway','REST API /api/v1/*'],
+  ['gateway','supabase','reads/writes'],
+  ['gateway','redis','cache + queue'],
+  ['gateway','stripe','billing events'],
+  ['gateway','crm','BullMQ jobs'],
+  ['gateway','calendar','book appt'],
+];
+
+// ─── Hit testing ─────────────────────────────────────────────────────────────
+let hoveredNode = null;
+const projected = [];
+
+function checkHover(mx, my) {
+  let best = null, bestDist = 40;
+  for (const n of projected) {
+    const d = Math.hypot(mx - n.sx, my - n.sy);
+    if (d < bestDist) { bestDist = d; best = n; }
+  }
+  const tip = document.getElementById('tooltip');
+  if (best) {
+    hoveredNode = best.id;
+    const nd = NODES.find(n => n.id === best.id);
+    tip.style.display = 'block';
+    tip.style.left = (mx + 16) + 'px';
+    tip.style.top = (my - 10) + 'px';
+    tip.innerHTML = `<h3>${nd.icon} ${nd.label}</h3>${nd.desc}<br><br>${nd.tags.map(t => `<span class="tag">${t}</span>`).join('')}`;
+  } else {
+    hoveredNode = null;
+    tip.style.display = 'none';
+  }
+}
+
+// ─── Draw ─────────────────────────────────────────────────────────────────────
+function drawBox(px, py, label, icon, color, scale, isHovered, depth) {
+  const w = Math.max(80, label.length * 7.5) * scale * 0.85;
+  const h = 38 * scale;
+  const bevel = 8 * scale;
+  const glowAlpha = isHovered ? '88' : '33';
+
+  // Shadow / glow
+  ctx.shadowBlur = isHovered ? 30 : 10;
+  ctx.shadowColor = color;
+
+  // Box top face
+  ctx.beginPath();
+  ctx.moveTo(px - w/2 + bevel, py - h/2);
+  ctx.lineTo(px + w/2 - bevel, py - h/2);
+  ctx.lineTo(px + w/2, py - h/2 + bevel);
+  ctx.lineTo(px + w/2, py + h/2 - bevel);
+  ctx.lineTo(px + w/2 - bevel, py + h/2);
+  ctx.lineTo(px - w/2 + bevel, py + h/2);
+  ctx.lineTo(px - w/2, py + h/2 - bevel);
+  ctx.lineTo(px - w/2, py - h/2 + bevel);
+  ctx.closePath();
+
+  const grad = ctx.createLinearGradient(px - w/2, py - h/2, px + w/2, py + h/2);
+  grad.addColorStop(0, color + '55');
+  grad.addColorStop(1, color + '22');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = isHovered ? color : color + '99';
+  ctx.lineWidth = isHovered ? 2.5 : 1.5;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // 3D side depth lines
+  const sideH = 10 * scale;
+  ctx.strokeStyle = color + '44';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(px - w/2, py + h/2 - bevel); ctx.lineTo(px - w/2 - 5, py + h/2 - bevel + sideH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px + w/2, py + h/2 - bevel); ctx.lineTo(px + w/2 + 5, py + h/2 - bevel + sideH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px - w/2 + bevel, py + h/2); ctx.lineTo(px - w/2 + bevel - 5, py + h/2 + sideH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px + w/2 - bevel, py + h/2); ctx.lineTo(px + w/2 - bevel + 5, py + h/2 + sideH); ctx.stroke();
+
+  // Icon + label
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `${12 * scale}px 'Segoe UI', system-ui`;
+  ctx.fillStyle = '#fff';
+  ctx.fillText(icon + ' ' + label, px, py);
+}
+
+function drawEdge(p1, p2, label) {
+  const dx = p2.sx - p1.sx, dy = p2.sy - p1.sy;
+  const dist = Math.hypot(dx, dy);
+  if (dist < 1) return;
+  const nx = dx / dist, ny = dy / dist;
+  const startX = p1.sx + nx * 45, startY = p1.sy + ny * 20;
+  const endX = p2.sx - nx * 45, endY = p2.sy - ny * 20;
+
+  // Depth-based alpha
+  const avgDepth = (p1.depth + p2.depth) / 2;
+  const alpha = Math.max(0.15, Math.min(0.65, 0.5 - avgDepth * 0.05));
+
+  ctx.beginPath();
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = `rgba(167,139,250,${alpha})`;
+  ctx.lineWidth = 1;
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(endX, endY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Arrow
+  const angle = Math.atan2(endY - startY, endX - startX);
+  ctx.fillStyle = `rgba(167,139,250,${alpha})`;
+  ctx.beginPath();
+  ctx.moveTo(endX, endY);
+  ctx.lineTo(endX - 8 * Math.cos(angle - 0.4), endY - 8 * Math.sin(angle - 0.4));
+  ctx.lineTo(endX - 8 * Math.cos(angle + 0.4), endY - 8 * Math.sin(angle + 0.4));
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawGrid() {
+  const count = 18, spacing = 80;
+  ctx.strokeStyle = 'rgba(124,58,237,0.06)';
+  ctx.lineWidth = 1;
+  for (let i = -count; i <= count; i++) {
+    const x = W/2 + i * spacing;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    const y = H/2 + i * spacing;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+}
+
+function drawLayerLabel(text, y, color) {
+  ctx.save();
+  ctx.font = '11px Segoe UI';
+  ctx.fillStyle = color + '88';
+  ctx.textAlign = 'left';
+  ctx.fillText(text, 20, y);
+  ctx.restore();
+}
+
+// ─── Animation loop ───────────────────────────────────────────────────────────
+function frame() {
+  if (autoRotate) rotY += 0.004;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background gradient
+  const bg = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W, H) * 0.8);
+  bg.addColorStop(0, '#0f0a2e');
+  bg.addColorStop(1, '#060610');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  drawGrid();
+
+  // Project all nodes
+  projected.length = 0;
+  for (const n of NODES) {
+    const p = project(n.x, n.y, n.z);
+    projected.push({ id: n.id, sx: p.sx, sy: p.sy, depth: p.depth, scale: p.scale });
+  }
+
+  // Sort by depth (back to front)
+  const sorted = [...projected].sort((a, b) => b.depth - a.depth);
+
+  // Draw edges first
+  for (const [fromId, toId] of EDGES) {
+    const p1 = projected.find(p => p.id === fromId);
+    const p2 = projected.find(p => p.id === toId);
+    if (p1 && p2) drawEdge(p1, p2);
+  }
+
+  // Draw nodes
+  for (const p of sorted) {
+    const nd = NODES.find(n => n.id === p.id);
+    drawBox(p.sx, p.sy, nd.label, nd.icon, nd.color, p.scale, hoveredNode === p.id, p.depth);
+  }
+
+  // Floating particles
+  const t = Date.now() * 0.001;
+  for (let i = 0; i < 40; i++) {
+    const px2 = (Math.sin(t * 0.3 + i * 2.4) * 0.5 + 0.5) * W;
+    const py2 = (Math.cos(t * 0.2 + i * 1.7) * 0.5 + 0.5) * H;
+    const alpha = (Math.sin(t + i) * 0.5 + 0.5) * 0.3;
+    ctx.beginPath();
+    ctx.arc(px2, py2, 1, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(167,139,250,${alpha})`;
+    ctx.fill();
+  }
+
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>

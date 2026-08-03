@@ -1,0 +1,122 @@
+{
+  "name": "call-iq",
+  "version": "1.0.0",
+  "description": "AI voice receptionist SaaS for service businesses",
+  "private": true,
+  "type": "module",
+  "author": "Call IQ Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mangeshraut712/Call-IQ.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mangeshraut712/Call-IQ/issues"
+  },
+  "homepage": "https://github.com/mangeshraut712/Call-IQ#readme",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "sync:marketing": "node scripts/sync-marketing.mjs",
+    "sync:marketing:watch": "node scripts/sync-marketing.mjs --watch",
+    "import:landing": "node scripts/import-landing.mjs",
+    "dev": "npm run sync:marketing && concurrently -n \"gateway,dashboard\" -c \"cyan,magenta\" \"npx --yes cross-env PORT=3003 npm run dev -w @call-iq/gateway\" \"npx --yes wait-on http-get://127.0.0.1:3003/health -t 180000 -i 2500 && npx --yes cross-env PORT=3000 npm run dev -w @call-iq/dashboard\"",
+    "dev:dashboard": "npx --yes cross-env PORT=3000 npm run dev -w @call-iq/dashboard",
+    "dev:gateway": "npx --yes cross-env PORT=3003 npm run dev -w @call-iq/gateway",
+    "build": "npm run build:packages && npm run build:apps",
+    "build:packages": "npm run build -w @call-iq/types && npm run build -w @call-iq/db && npm run build -w @call-iq/memory && npm run build -w @call-iq/mcp-client",
+    "build:apps": "npm run build -w @call-iq/gateway && npm run build -w @call-iq/dashboard && npm run build -w @call-iq/worker",
+    "build:worker": "npm run build -w @call-iq/worker",
+    "build:dashboard": "npm run sync:marketing && npm run build -w @call-iq/dashboard",
+    "build:gateway": "npm run build -w @call-iq/gateway",
+    "start": "concurrently \"npm run start -w @call-iq/gateway\" \"npm run start -w @call-iq/dashboard\"",
+    "start:dashboard": "npm run start -w @call-iq/dashboard",
+    "start:gateway": "npm run start -w @call-iq/gateway",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint --workspaces --if-present -- --fix",
+    "test": "vitest run",
+    "test:gateway:integration": "vitest run apps/gateway/tests/integration --passWithNoTests",
+    "test:e2e": "playwright test",
+    "test:e2e:flows": "node scripts/ensure-local-redis.mjs && playwright test e2e/journeys/dashboard-dataflow.spec.ts e2e/journeys/callflow.spec.ts e2e/journeys/workflow.spec.ts e2e/journeys/dashboard-realtime.spec.ts e2e/api/gateway-dataflow.spec.ts e2e/api/dashboard-realtime-api.spec.ts",
+    "test:e2e:local": "node scripts/ensure-local-redis.mjs && playwright test",
+    "test:e2e:prod": "npx --yes cross-env PLAYWRIGHT_SKIP_WEBSERVER=1 PLAYWRIGHT_BASE_URL=https://www.calliqlabs.com PLAYWRIGHT_GATEWAY_URL=https://call-iq-gateway.onrender.com playwright test e2e/journeys/dashboard-dataflow.spec.ts e2e/journeys/callflow.spec.ts e2e/journeys/workflow.spec.ts e2e/journeys/dashboard-realtime.spec.ts e2e/api/dashboard-realtime-api.spec.ts",
+    "verify:prod": "node scripts/production-audit.mjs && node scripts/verify-dashboard-realtime.mjs && node scripts/smoke-production.mjs",
+    "validate:prod": "npm run typecheck && npm run test && npm run build && npm run verify:prod",
+    "videos:studio": "npm run studio -w call-iq-videos",
+    "videos:render": "npm run render -w call-iq-videos --",
+    "smoke:prod": "node scripts/smoke-production.mjs",
+    "verify:realtime:prod": "node scripts/verify-dashboard-realtime.mjs",
+    "verify:realtime": "vitest run tests/integration/dashboard-sync-scopes.test.ts && playwright test e2e/api/dashboard-realtime-api.spec.ts e2e/journeys/dashboard-realtime.spec.ts",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:install": "playwright install chromium webkit firefox winldd",
+    "test:workspaces": "npm run test --workspaces --if-present",
+    "test:watch": "npm run test:watch --workspaces --if-present",
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "test:ci": "npm run test:coverage --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "clean": "rm -rf node_modules */node_modules */*/node_modules */dist */*/dist */.next",
+    "clean:cache": "rm -rf .next */. next */*/. next node_modules/.cache",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "redis:up": "docker compose -f docker-compose.redis.yml up -d",
+    "redis:down": "docker compose -f docker-compose.redis.yml down",
+    "redis:ensure": "node scripts/ensure-local-redis.mjs",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart",
+    "prepare": "node -e \"if(process.env.CI||process.env.RENDER)process.exit(0);try{require.resolve('husky')}catch{process.exit(0)};require('child_process').execSync('husky',{stdio:'inherit'})\"",
+    "postinstall": "echo '✅ Dependencies installed successfully!'",
+    "validate": "node scripts/validate-migrations.mjs && npm run typecheck && npm run lint && npm run test",
+    "validate:enterprise": "node scripts/validate-migrations.mjs && npm run typecheck && npm run lint && npm run test && npm run build",
+    "validate:migrations": "node scripts/validate-migrations.mjs",
+    "sync:migrations:history": "node scripts/sync-migration-history.mjs",
+    "precommit": "npm run lint && npm run typecheck",
+    "prepush": "npm run validate",
+    "clean:all": "npm run clean && npm run clean:cache && npm cache clean --force",
+    "size": "du -sh node_modules apps/dashboard/.next 2>/dev/null || echo 'Build folders not found'",
+    "analyze": "ANALYZE=true npm run build:dashboard",
+    "health": "npm outdated && npm audit",
+    "optimize": "npm run clean:all && npm install && npm run build"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
+    "@playwright/test": "^1.60.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "concurrently": "^10.0.3",
+    "eslint": "^8.57.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.8"
+  },
+  "overrides": {
+    "postcss": "^8.5.15",
+    "next": {
+      "postcss": "^8.5.15"
+    }
+  },
+  "engines": {
+    "node": "22.x",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "saas",
+    "chatbot",
+    "whatsapp",
+    "telegram",
+    "anthropic",
+    "nextjs",
+    "express",
+    "supabase"
+  ],
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.0"
+  }
+}

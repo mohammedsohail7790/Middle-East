@@ -1,0 +1,55 @@
+# Call IQ Gateway — production Kubernetes scaffold (Phase 5)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: call-iq-gateway
+  labels:
+    app: call-iq-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: call-iq-gateway
+  template:
+    metadata:
+      labels:
+        app: call-iq-gateway
+    spec:
+      containers:
+        - name: gateway
+          image: call-iq-gateway:latest
+          ports:
+            - containerPort: 3003
+          envFrom:
+            - secretRef:
+                name: call-iq-gateway-secrets
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3003
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: call-iq-gateway
+spec:
+  selector:
+    app: call-iq-gateway
+  ports:
+    - port: 80
+      targetPort: 3003
+  type: ClusterIP

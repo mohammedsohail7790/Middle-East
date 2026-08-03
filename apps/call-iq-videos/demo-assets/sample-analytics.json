@@ -1,0 +1,93 @@
+{
+  "tenantId": "tenant_northline_001",
+  "reportingPeriod": {
+    "start": "2026-05-15",
+    "end": "2026-06-14",
+    "label": "May 15 – Jun 14, 2026"
+  },
+  "summary": {
+    "totalCalls": 1284,
+    "answered": 1233,
+    "answerRate": 96.0,
+    "missedCalls": 51,
+    "avgDuration": "3:48",
+    "avgDurationSeconds": 228,
+    "leadsGenerated": 634,
+    "conversionRate": 49.4,
+    "appointmentsBooked": 296,
+    "appointmentShowRate": 88.2,
+    "escalationRate": 3.8
+  },
+  "trends": {
+    "callsVsLastMonth": "+18%",
+    "missedVsLastMonth": "-32%",
+    "conversionVsLastMonth": "+6%",
+    "leadsVsLastMonth": "+22%",
+    "appointmentsVsLastMonth": "+15%",
+    "escalationVsLastMonth": "-1.1%"
+  },
+  "dailyCallVolume": [
+    { "day": "Mon", "calls": 42, "leads": 21 },
+    { "day": "Tue", "calls": 48, "leads": 24 },
+    { "day": "Wed", "calls": 45, "leads": 22 },
+    { "day": "Thu", "calls": 52, "leads": 27 },
+    { "day": "Fri", "calls": 58, "leads": 31 },
+    { "day": "Sat", "calls": 38, "leads": 18 },
+    { "day": "Sun", "calls": 31, "leads": 14 }
+  ],
+  "missedCallBreakdown": {
+    "total": 51,
+    "afterHours": 32,
+    "afterHoursPercent": 63,
+    "recoveryRate": 78
+  },
+  "agentPerformance": [
+    { "name": "Sarah — Main Receptionist", "satisfaction": 96, "calls": 892, "escalationRate": 3.2 },
+    { "name": "Alex — Sales Agent", "satisfaction": 91, "calls": 341, "escalationRate": 5.1 },
+    { "name": "Morgan — Summit HVAC", "satisfaction": 94, "calls": 51, "escalationRate": 2.8 }
+  ],
+  "costSavings": {
+    "callIqMonthly": 149,
+    "receptionistEquivalent": 3200,
+    "monthlySavings": 3051,
+    "savingsPercent": 95,
+    "annualSavings": 36612
+  },
+  "revenueImpact": {
+    "estimatedRecoveredRevenue": 42800,
+    "avgJobValue": 385,
+    "jobsAttributedToAi": 111
+  },
+  "chapterMetrics": {
+    "totalCalls": [
+      { "label": "Total Calls", "value": "1,284", "change": "+18% vs last month" },
+      { "label": "Answered", "value": "1,233", "change": "96.0% answer rate" },
+      { "label": "Avg Duration", "value": "3:48", "change": "-14s vs last month" }
+    ],
+    "missedCalls": [
+      { "label": "Missed Calls", "value": "51", "change": "-32% vs last month" },
+      { "label": "After Hours", "value": "32", "change": "63% of missed" },
+      { "label": "Recovery Rate", "value": "78%", "change": "Callback completed" }
+    ],
+    "conversion": [
+      { "label": "Conversion Rate", "value": "49%", "change": "+6% vs last month" },
+      { "label": "Leads Generated", "value": "634", "change": "+22% vs last month" },
+      { "label": "Appointments Booked", "value": "296", "change": "+15% vs last month" }
+    ],
+    "appointments": [
+      { "label": "Booked", "value": "296", "change": "This month" },
+      { "label": "Completed", "value": "261", "change": "88.2% show rate" },
+      { "label": "Rescheduled", "value": "21", "change": "7.1% of bookings" }
+    ],
+    "agentPerformance": [
+      { "label": "Sarah — Main", "value": "96%", "change": "Satisfaction score" },
+      { "label": "Alex — Sales", "value": "91%", "change": "Satisfaction score" },
+      { "label": "Escalation Rate", "value": "3.8%", "change": "-1.1% vs last month" }
+    ],
+    "costSavings": [
+      { "label": "Call IQ Cost", "value": "$149/mo", "change": "Professional plan" },
+      { "label": "Receptionist Equiv.", "value": "$3,200/mo", "change": "Full-time staffing" },
+      { "label": "Monthly Savings", "value": "$3,051", "change": "95% cost reduction" }
+    ]
+  }
+}

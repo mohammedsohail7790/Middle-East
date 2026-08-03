@@ -1,0 +1,114 @@
+# Build outputs
+.next
+*.next
+dist
+out
+build
+*.tsbuildinfo
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing
+coverage
+*.lcov
+.nyc_output
+.vitest
+qa/artifacts/
+playwright-report/
+test-results/
+e2e/.auth/
+
+# Environment
+.env
+.env.*
+!.env.example
+apps/gateway/.env
+apps/dashboard/.env.local
+apps/dashboard/.env
+**/credentials.json
+**/secrets.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDEs
+.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.cursor
+.cursor/rules/codacy.mdc
+
+# Cache
+.cache
+.temp
+.tmp
+.eslintcache
+.turbo
+.parcel-cache
+
+# Misc
+*.pem
+.vercel
+.gravity
+.husky/_
+
+# Debug
+debug.log
+.debug
+
+# Agent skills / local scratch (not deployed)
+.agents/
+.harness/
+skills-lock.json
+apps/dashboard/.hallmark/
+.mobai/
+ui-ux-pro-max-skill-main/
+
+# Legacy duplicates & temp files
+pixel-perfect-clone-47614/
+tmp-*
+/calliq_main.js
+/calliq_styles.css
+/index.html
+
+# Tool state (ruflo/claude-flow swarm memory)
+.swarm/
+ruvector.db
+
+# Accidental shell/clipboard fragments
+controller.abort()
+e.type
+void
+this.maxHistory)
+0)
+3)
+!a.executed
+!h.filter
+.env*

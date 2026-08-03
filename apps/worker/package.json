@@ -1,0 +1,30 @@
+{
+  "name": "@call-iq/worker",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+    "scripts": {
+        "dev": "npm run build -w @call-iq/gateway && tsx watch src/index.ts",
+        "build": "tsc --project tsconfig.json",
+        "typecheck": "tsc --noEmit --project tsconfig.json",
+        "lint": "eslint src --max-warnings=0",
+        "start": "npm run build -w @call-iq/gateway && node dist/apps/worker/src/index.js"
+    },
+  "dependencies": {
+    "@call-iq/gateway": "*",
+    "@call-iq/types": "*",
+    "@supabase/supabase-js": "^2.105.3",
+    "bullmq": "^5.76.1",
+    "dotenv": "^16.3.1",
+    "ioredis": "^5.3.2",
+    "pg": "^8.20.0",
+    "winston": "^3.11.0"
+  },
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^8.0.0",
+        "@typescript-eslint/parser": "^8.0.0",
+        "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

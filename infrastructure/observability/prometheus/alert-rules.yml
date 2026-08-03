@@ -1,0 +1,59 @@
+groups:
+  - name: calliq_platform
+    rules:
+      - alert: CallIQDLQGrowth
+        expr: calliq_dlq_depth > 40
+        for: 8m
+        labels:
+          severity: warning
+        annotations:
+          summary: DLQ depth elevated (tuned threshold)
+          description: "DLQ {{ $value }} — inspect consumers before replay"
+
+      - alert: CallIQDLQCritical
+        expr: calliq_dlq_depth > 120
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: DLQ depth critical
+
+      - alert: CallIQReconnectSpike
+        expr: calliq_reconnecting_sessions > 8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Elevated reconnecting sessions
+
+      - alert: CallIQReconnectStorm
+        expr: calliq_reconnecting_sessions > 12
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: Reconnect storm — check transport churn
+
+      - alert: CallIQGovernanceDenials
+        expr: calliq_ai_denials / (calliq_ai_executions + calliq_ai_denials + 1) > 0.3
+        for: 12m
+        labels:
+          severity: warning
+        annotations:
+          summary: Sustained AI denial rate
+
+      - alert: CallIQMemoryPressure
+        expr: calliq_process_heap_bytes > 603979776
+        for: 8m
+        labels:
+          severity: warning
+        annotations:
+          summary: Gateway heap elevated (~576MB+)
+
+      - alert: CallIQBackpressureElevated
+        expr: calliq_backpressure_level >= 1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: Platform backpressure elevated

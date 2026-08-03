@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: call-iq-rollback-advisory
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: rollback
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Rollback advisory — run infrastructure/deployment/rollback-automation.sh"
+              curl -sf "${GATEWAY_URL}/health" || exit 1
+          env:
+            - name: GATEWAY_URL
+              value: "http://call-iq-gateway:3003"

@@ -1,0 +1,128 @@
+services:
+  - type: web
+    name: call-iq-gateway
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: node dist/index.js
+    healthCheckPath: /ready
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: LOG_LEVEL
+        value: info
+      - key: LOG_FORMAT
+        value: json
+      
+      # Supabase Session Pooler (port 6543) — NOT direct connection (port 5432)
+      # Format: postgresql://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require
+      - key: DATABASE_URL
+        sync: false
+      - key: GATEWAY_DATABASE_URL
+        sync: false
+      - key: PGSSLMODE
+        value: require
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      
+      # AI Providers
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: OPENAI_TIMEOUT_MS
+        value: 12000
+      - key: OPENAI_EMBEDDING_MODEL
+        value: text-embedding-3-small
+      - key: OPENAI_EMBEDDING_TIMEOUT_MS
+        value: 15000
+      
+      # Voice Providers
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID_EN
+        value: 21m00Tcm4TlvDq8ikWAM
+      - key: DEEPGRAM_API_KEY
+        sync: false
+      
+      # Twilio (CRITICAL: TWILIO_STREAM_WSS_URL will be set after deployment)
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        value: +19193715609
+      
+      # Redis
+      - key: REDIS_URL
+        sync: false
+      
+      # Security
+      - key: JWT_SECRET
+        sync: false
+      - key: VOICE_INTERNAL_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://www.calliqlabs.com,https://calliqlabs.com,http://localhost:3000
+      - key: DASHBOARD_URL
+        value: https://www.calliqlabs.com
+      - key: VOICE_WS_ALLOWED_ORIGINS
+        value: https://www.calliqlabs.com,https://calliqlabs.com
+      
+      # Voice Pipeline Configuration
+      - key: ENABLE_VOICE_AGENT
+        value: true
+      - key: ENABLE_KNOWLEDGE_INGESTION
+        value: false
+      - key: VOICE_SILENCE_TIMEOUT_MS
+        value: 6000
+      - key: VOICE_MAX_SILENCE_PROMPTS
+        value: 3
+      - key: VOICE_PARTIAL_DEBOUNCE_MS
+        value: 600
+      - key: VOICE_MAX_CALL_DURATION_MS
+        value: 900000
+      - key: VOICE_MAX_TOKENS_PER_CALL
+        value: 5000
+      - key: VOICE_WS_INACTIVITY_TIMEOUT_MS
+        value: 45000
+      - key: VOICE_MAX_GLOBAL_CONCURRENT_CALLS
+        value: 300
+      - key: VOICE_MAX_TENANT_CONCURRENT_CALLS
+        value: 25
+      - key: VOICE_CONCURRENCY_KEY_TTL_SECONDS
+        value: 120
+      - key: VOICE_USAGE_KEY_TTL_SECONDS
+        value: 604800
+      
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 60000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      - key: VOICE_RATE_LIMIT_WINDOW_MS
+        value: 60000
+      - key: VOICE_RATE_LIMIT_MAX
+        value: 60
+      
+      # Integrations
+      - key: ZAPIER_WEBHOOK_URL
+        value: https://hooks.zapier.com/hooks/catch/27063740/uj0ecm6/
+      - key: INTEGRATION_JOB_TIMEOUT_MS
+        value: 15000
+      
+      # Alerts
+      - key: VOICE_ALERT_ERROR_RATE_THRESHOLD
+        value: 0.2
+      - key: VOICE_ALERT_LATENCY_MS_THRESHOLD
+        value: 3000
+      - key: VOICE_ALERT_INTEGRATION_FAILURE_THRESHOLD
+        value: 5
+      # DEV_TENANT_ID — never set in production (blocked by production-safety at boot)

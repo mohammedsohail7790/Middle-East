@@ -1,0 +1,9 @@
+{
+  "title": "Call IQ — Platform Overview",
+  "description": "Import into Grafana; scrape gateway /metrics/prometheus",
+  "panels": [
+    { "title": "Active runtime sessions", "targets": [{ "expr": "calliq_active_sessions" }] },
+    { "title": "AI tool executions", "targets": [{ "expr": "calliq_ai_executions_total" }] },
+    { "title": "Event DLQ depth", "targets": [{ "expr": "calliq_dlq_depth" }] }
+  ]
+}

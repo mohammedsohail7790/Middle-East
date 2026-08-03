@@ -1,0 +1,49 @@
+{
+  "transcripts": [
+    {
+      "id": "transcript_001",
+      "callId": "call_001",
+      "exchanges": [
+        { "speaker": "agent", "text": "Thank you for calling Northline Home Services! I'm Sarah. How can I help you today?" },
+        { "speaker": "caller", "text": "Hi, I have water pooling under my kitchen sink. I think the pipe is leaking." },
+        { "speaker": "agent", "text": "I'm sorry to hear that — let's get someone out to you. Can I have your name and the address where the leak is?" },
+        { "speaker": "caller", "text": "Maria Gonzalez. 4821 Tennyson Street, Denver." },
+        { "speaker": "agent", "text": "Thank you, Maria. Is the water still actively leaking, or have you shut off the valve under the sink?" },
+        { "speaker": "caller", "text": "I shut it off, but there's still a slow drip." },
+        { "speaker": "agent", "text": "Good call shutting it off. I have a technician available today after 2 PM or tomorrow morning at 8 AM. Which works better?" },
+        { "speaker": "caller", "text": "Today after 2 would be great." },
+        { "speaker": "agent", "text": "Perfect — I've booked you for today at 2:30 PM. You'll receive a confirmation text shortly. Is there anything else I can help with?" }
+      ]
+    },
+    {
+      "id": "transcript_009",
+      "callId": "call_009",
+      "tenantId": "tenant_summit_hvac_001",
+      "exchanges": [
+        { "speaker": "agent", "text": "Thank you for calling Summit Comfort HVAC! I'm Morgan. Are you calling about heating, cooling, or a maintenance plan?" },
+        { "speaker": "caller", "text": "Cooling — our upstairs AC isn't keeping up and the unit is 14 years old." },
+        { "speaker": "agent", "text": "Understood. When did you first notice it wasn't cooling properly?" },
+        { "speaker": "caller", "text": "About a week ago. It got worse over the weekend." },
+        { "speaker": "agent", "text": "I'd recommend a diagnostic visit first — our tech can check refrigerant, airflow, and whether repair or replacement makes more sense. May I have your name and address?" },
+        { "speaker": "caller", "text": "Tyler Reed, 1145 Alpine Avenue, Boulder." },
+        { "speaker": "agent", "text": "Thanks, Tyler. I have tomorrow at 10 AM or Thursday at 1 PM for a diagnostic. The visit is $89, credited toward any repair or replacement." },
+        { "speaker": "caller", "text": "Tomorrow at 10 works." },
+        { "speaker": "agent", "text": "You're booked for tomorrow at 10 AM. I'll text you a confirmation and our technician will call 30 minutes before arrival." }
+      ]
+    },
+    {
+      "id": "transcript_sim_hvac_emergency",
+      "callId": "sim_001",
+      "tenantId": "tenant_summit_hvac_001",
+      "scenario": "Simulator — No Cool Emergency",
+      "exchanges": [
+        { "speaker": "caller", "text": "Hi, our AC stopped blowing cold air last night. It's 92 degrees and we have a newborn at home." },
+        { "speaker": "agent", "text": "I'm sorry you're dealing with that — especially with a newborn. I can get a technician out today. May I have your name, address, and the best number to reach you?" },
+        { "speaker": "caller", "text": "Sarah Kim, 2200 Pearl Parkway, Boulder. This number is fine." },
+        { "speaker": "agent", "text": "Thank you, Sarah. I'm flagging this as a same-day cooling emergency. Our nearest tech can be there between 1 and 3 PM. Does that window work?" }
+      ],
+      "score": 97,
+      "passed": true
+    }
+  ]
+}

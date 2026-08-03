@@ -1,0 +1,67 @@
+# ============================================================================
+# Call IQ Gateway — Production Multi-Stage Dockerfile
+# ============================================================================
+
+# Stage 1: Build
+FROM node:20-alpine AS builder
+
+RUN apk add --no-cache python3 make g++ ffmpeg
+
+WORKDIR /app
+
+# Layer 1: Install dependencies (cached until package.json changes)
+COPY package.json package-lock.json ./
+COPY apps/gateway/package.json ./apps/gateway/
+COPY packages/types/package.json ./packages/types/
+COPY packages/db/package.json ./packages/db/
+COPY packages/memory/package.json ./packages/memory/
+COPY packages/mcp-client/package.json ./packages/mcp-client/
+
+RUN npm ci
+
+# Layer 2: Copy source after deps (cached separately)
+COPY tsconfig.json ./
+COPY apps/gateway/tsconfig.json ./apps/gateway/
+COPY packages/types/ ./packages/types/
+COPY packages/db/ ./packages/db/
+COPY packages/memory/ ./packages/memory/
+COPY packages/mcp-client/ ./packages/mcp-client/
+COPY apps/gateway/ ./apps/gateway/
+
+WORKDIR /app/apps/gateway
+RUN npm run build
+
+# Stage 2: Production runtime
+FROM node:20-alpine AS production
+
+RUN apk add --no-cache curl ffmpeg
+
+WORKDIR /app
+
+# Layer 1: Production dependencies
+COPY package.json package-lock.json ./
+COPY apps/gateway/package.json ./apps/gateway/
+COPY packages/types/package.json ./packages/types/
+COPY packages/db/package.json ./packages/db/
+COPY packages/memory/package.json ./packages/memory/
+COPY packages/mcp-client/package.json ./packages/mcp-client/
+
+RUN npm ci --omit=dev --ignore-scripts
+
+# Layer 2: Compiled output and shared packages
+COPY --from=builder /app/apps/gateway/dist ./apps/gateway/dist
+COPY --from=builder /app/packages/types/dist ./packages/types/dist
+COPY --from=builder /app/packages/db/dist ./packages/db/dist
+COPY --from=builder /app/packages/memory/dist ./packages/memory/dist
+COPY --from=builder /app/packages/mcp-client/dist ./packages/mcp-client/dist
+
+ENV NODE_ENV=production
+ENV PORT=3003
+
+EXPOSE 3003
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:3003/health || exit 1
+
+WORKDIR /app/apps/gateway
+CMD ["node", "dist/apps/gateway/src/index.js"]

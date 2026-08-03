@@ -1,0 +1,137 @@
+{
+  "northlineHomeServices": {
+    "id": "biz_northline_001",
+    "legalName": "Northline Home Services LLC",
+    "dba": "Northline Home Services",
+    "ein": "84-7291043",
+    "address": {
+      "street": "1842 Wazee Street, Suite 300",
+      "city": "Denver",
+      "state": "CO",
+      "zip": "80202"
+    },
+    "phone": "+1 (720) 555-0188",
+    "email": "hello@northlinehome.com",
+    "website": "https://northlinehome.com",
+    "services": ["Emergency Plumbing", "HVAC Repair", "Electrical Diagnostics", "Water Heater Install"],
+    "serviceArea": "Denver Metro — 35 mile radius",
+    "teamSize": "12–25 employees",
+    "businessHours": {
+      "weekdays": "Mon–Fri 7:00 AM – 7:00 PM",
+      "saturday": "Sat 8:00 AM – 4:00 PM",
+      "sunday": "Closed — Emergency line available",
+      "afterHours": "AI agent + emergency dispatch for HVAC/plumbing"
+    },
+    "onboarding": {
+      "signupEmail": "rachel@northlinehome.com",
+      "organizationName": "Northline Home Services",
+      "industry": "Home Services",
+      "plan": "Professional — $149/mo",
+      "calendarProvider": "Google Calendar",
+      "crmProvider": "HubSpot",
+      "verificationCode": "7 3 8 2 9 4"
+    }
+  },
+  "summitComfortHvac": {
+    "id": "biz_summit_001",
+    "legalName": "Summit Comfort HVAC Inc.",
+    "dba": "Summit Comfort HVAC",
+    "address": {
+      "street": "2901 Pearl Street",
+      "city": "Boulder",
+      "state": "CO",
+      "zip": "80301"
+    },
+    "phone": "+1 (303) 555-0147",
+    "email": "dispatch@summitcomforthvac.com",
+    "website": "https://summitcomforthvac.com",
+    "services": ["AC Repair", "Furnace Installation", "Duct Cleaning", "Seasonal Tune-Ups", "Maintenance Plans"],
+    "serviceArea": "Boulder County & Northern Denver suburbs",
+    "teamSize": "8–15 technicians",
+    "businessHours": {
+      "weekdays": "Mon–Fri 7:00 AM – 6:00 PM",
+      "saturday": "Sat 8:00 AM – 2:00 PM",
+      "sunday": "Closed",
+      "afterHours": "Emergency cooling/heating dispatch — $89 trip fee"
+    },
+    "knowledgeBase": {
+      "documents": [
+        { "filename": "summit-services-guide.pdf", "pages": 28, "category": "Services" },
+        { "filename": "maintenance-plans-2026.pdf", "pages": 6, "category": "Pricing" },
+        { "filename": "warranty-policy.pdf", "pages": 4, "category": "Policy" },
+        { "filename": "financing-options.pdf", "pages": 3, "category": "Sales" }
+      ],
+      "websiteCrawl": {
+        "url": "https://summitcomforthvac.com",
+        "pagesIndexed": 52,
+        "lastSynced": "2026-06-14T09:22:00-06:00",
+        "schedule": "Weekly — every Monday 6:00 AM"
+      },
+      "faqs": [
+        {
+          "question": "What are your business hours?",
+          "answer": "We're open Monday through Friday 7am to 6pm, and Saturday 8am to 2pm. After-hours emergency service is available for heating and cooling emergencies."
+        },
+        {
+          "question": "Do you service all HVAC brands?",
+          "answer": "Yes — we service Carrier, Trane, Lennox, Rheem, Goodman, and most major residential brands. Commercial rooftop units require a site visit quote."
+        },
+        {
+          "question": "How much does a tune-up cost?",
+          "answer": "Our seasonal tune-up is $129 for one system or $199 for dual-system homes. Maintenance plan members receive two tune-ups per year included."
+        },
+        {
+          "question": "What areas do you serve?",
+          "answer": "We serve Boulder, Louisville, Lafayette, Superior, Broomfield, and northern Denver suburbs within 25 miles of our Boulder office."
+        },
+        {
+          "question": "Do you offer financing?",
+          "answer": "Yes — 0% APR for 12 months on qualifying furnace and AC replacements over $4,500. Ask Morgan or your technician for details."
+        }
+      ]
+    },
+    "agentConfig": {
+      "agentName": "HVAC Receptionist",
+      "voice": "cedar",
+      "voiceLabel": "Morgan — Calm & Knowledgeable",
+      "tone": "Calm & Knowledgeable",
+      "greeting": "Thank you for calling Summit Comfort HVAC! I'm Morgan. Are you calling about heating, cooling, or a maintenance plan?",
+      "coreInstructions": "Always collect caller name, address, and best callback number. For no-cool or no-heat emergencies, prioritize same-day dispatch. Never quote exact replacement prices — provide ranges and schedule a free in-home estimate. Offer maintenance plan when caller mentions tune-up or filter change.",
+      "escalationKeywords": "manager, supervisor, complaint, warranty dispute, legal",
+      "transferNumbers": {
+        "dispatch": "+1 (303) 555-0148",
+        "sales": "+1 (303) 555-0149",
+        "emergency": "+1 (303) 555-0199"
+      },
+      "appointmentRules": {
+        "defaultDuration": "90 minutes",
+        "minimumNotice": "4 hours for standard, immediate for emergency",
+        "serviceTypes": ["Diagnostic", "Tune-Up", "Repair", "Installation Estimate", "Duct Cleaning"],
+        "confirmationSms": "Enabled — 24hr reminder + tech en-route alert"
+      }
+    },
+    "simulatorScenarios": [
+      {
+        "id": "sim_001",
+        "caller": "Hi, our AC stopped blowing cold air last night. It's 92 degrees and we have a newborn at home.",
+        "agentResponse": "I'm sorry you're dealing with that — especially with a newborn. I can get a technician out today. May I have your name, address, and the best number to reach you?",
+        "intent": "Emergency — No Cool",
+        "score": 97
+      },
+      {
+        "id": "sim_002",
+        "caller": "How much to replace a 3-ton AC unit?",
+        "agentResponse": "Replacement pricing depends on your home's ductwork, electrical, and equipment tier. Most 3-ton replacements in Boulder County range from $6,500 to $9,800 installed. I'd love to schedule a free estimate — what's your address?",
+        "intent": "Sales — Replacement Quote",
+        "score": 94
+      },
+      {
+        "id": "sim_003",
+        "caller": "I want to speak to a manager about my last bill.",
+        "agentResponse": "I understand — let me connect you with our dispatch manager right away. May I have your name while I transfer you?",
+        "intent": "Escalation — Billing",
+        "score": 88
+      }
+    ]
+  }
+}

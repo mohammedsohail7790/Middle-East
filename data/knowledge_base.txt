@@ -1,0 +1,384 @@
+HVAC Terminology for Your AI Database
+Here is a breakdown of essential HVAC terms, organized by category to help the AI understand context.
+
+1. System Types & Components
+These are the core physical parts and types of systems the AI will hear about most often.
+
+Air Conditioner: A system that cools and dehumidifies indoor air .
+
+Furnace: An indoor unit that heats air by burning fuel (gas, oil) or using electricity and distributes it through the house .
+
+Heat Pump: A versatile system that can both heat and cool a home by transferring heat instead of generating it .
+
+Boiler: A closed vessel that heats water or steam for radiant heat, often through radiators or baseboards .
+
+Air Handler: The indoor unit that contains the blower, evaporator coil, and filter to circulate conditioned air .
+
+Compressor: Often called the "heart" of the AC system, it's located in the outdoor unit and circulates refrigerant .
+
+Evaporator Coil: The indoor coil that absorbs heat from the air .
+
+Condenser Coil: The outdoor coil that releases absorbed heat to the outside air .
+
+Ductwork / Ducts: The network of pipes or passages that distribute air throughout a building .
+
+Mini-Split / Ductless System: A system where an outdoor unit connects to one or more indoor air handlers without using ducts .
+
+Package Unit: A single unit that contains both heating and cooling components, usually installed on a rooftop or a concrete slab .
+
+Thermostat: The control system that monitors temperature and signals the HVAC equipment to turn on or off .
+
+2. Efficiency Ratings & Measurements
+These terms are critical for understanding conversations about energy costs, equipment performance, and upgrades.
+
+SEER (Seasonal Energy Efficiency Ratio): A rating of an air conditioner's or heat pump's cooling efficiency. Higher SEER means higher efficiency .
+
+AFUE (Annual Fuel Utilization Efficiency): A measure of how efficiently a furnace converts fuel into heat over a typical year, expressed as a percentage .
+
+HSPF (Heating Seasonal Performance Factor): A measure of a heat pump's heating efficiency. Higher numbers mean better efficiency .
+
+EER (Energy Efficiency Ratio): A rating of an air conditioner's efficiency at a specific, fixed outdoor temperature .
+
+BTU (British Thermal Unit): The standard unit of measurement for heating and cooling capacity. It's the energy needed to raise one pound of water by one degree Fahrenheit .
+
+Tonnage: A unit of measurement for cooling capacity. One ton of cooling equals 12,000 BTUs per hour .
+
+CFM (Cubic Feet per Minute): A measurement of the volume of air flowing through the system .
+
+3. Common Service, Repair, & Diagnostic Terms
+This vocabulary is essential for identifying problems, scheduling the right service, and understanding technician feedback.
+
+Refrigerant: The chemical fluid in an AC or heat pump that absorbs and releases heat to cool the air .
+
+R-22 / Freon: An older type of refrigerant being phased out .
+
+R-410A / Puron: A newer, more environmentally friendly refrigerant that has replaced R-22 .
+
+Heat Exchanger: A critical furnace component that transfers heat to the air. A crack in it is a serious safety issue .
+
+Load Calculation: A mathematical assessment to determine the correct heating and cooling capacity needed for a home .
+
+Short Cycling: When an HVAC system turns on and off frequently without completing a full cycle, indicating a problem .
+
+Capacitor: An electrical component that stores energy and provides a starting boost to motors like the compressor and blower fan. A common point of failure .
+
+Zoning System / Dampers: A system that divides a home into separate areas, each controlled by its own thermostat and dampers in the ductwork .
+
+Ignitor / Pilot Light: The component that ignites the gas burner in a furnace. Older systems use a standing pilot light, while newer ones use an electronic ignitor .
+
+Flame Sensor: A safety device that detects if a burner has properly ignited .
+
+Inducer Motor / Draft Inducer: A fan that pulls combustion gases through the heat exchanger and out the flue .
+
+Carbon Monoxide (CO): A dangerous, odorless gas produced by incomplete combustion that furnace issues can cause .
+
+4. Adjectives & Problem Descriptors
+These words help the AI gauge the urgency and nature of the call.
+
+No Heat / No Cool / Not Working: Indicates a complete system failure .
+
+Strange Noises (e.g., grinding, banging, clicking): Descriptors that can help identify specific mechanical failures .
+
+Leaking / Refrigerant Leak: Loss of cooling capacity due to refrigerant escaping .
+
+Freezing Up / Ice on Unit: Ice formation on the unit or lines, often due to airflow or refrigerant issues .
+
+Tune-Up / Maintenance: A routine service visit for inspection and cleaning .
+
+Not Keeping Up / Not Reaching Temperature: Indicates the system is running but unable to meet the thermostat setting.
+
+💡 How to Use This List
+To get the most out of this vocabulary, you can guide your engineer on how to implement it:
+
+Categorization: Group terms as shown above. This helps the AI understand the context (e.g., a "compressor" is a part, "short cycling" is a problem).
+
+Synonym Mapping: Connect common phrases to technical terms. For example, if a caller says "my Freon is low," the AI should connect that to the terms refrigerant or leak.
+
+Emergency Keywords: Flag terms like "carbon monoxide," "gas smell," "no heat" (in winter), and "electrical issue" to trigger priority routing or emergency protocols.
+
+Clarifying Questions: Use this vocabulary to generate intelligent follow-up questions. If a caller says "my AC isn't working," the AI could ask, "Is the fan running, or is the unit completely silent?" or "Is there any ice forming on the lines?"
+
+
+
+Plumbing Terminology for Your AI Database
+This list is compiled from industry glossaries and technical resources. Organizing terms by category will help the AI discern context—for example, distinguishing between a "T&P valve" (a safety device) and a "mixing valve" (a temperature control).
+
+1. System Types & Key Components
+These are the core physical parts and systems the AI will hear about most often.
+
+Term	Definition / Context for AI
+DWV (Drain-Waste-Vent)	The system of pipes that removes wastewater and vents sewer gases. A foundational system concept.
+Main Line / Water Main	The primary pipeline supplying water from the utility company or the main drain line receiving waste from all branches.
+Septic Tank	An underground tank where solid waste is decomposed by bacteria, used where no sewer connection exists.
+Sump Pump	A pump installed in a pit (sump) to remove accumulated water from basements or crawl spaces to prevent flooding.
+Water Heater	An appliance for heating water. Can be tank-type (storage) or tankless/instantaneous.
+Boiler	A sealed tank where water is heated to generate hot water or steam for heating systems.
+Hydronic Heating	A heating system that circulates hot water through pipes to radiators, baseboards, or radiant floor systems.
+2. Pipes, Materials & Fittings
+These terms are critical for understanding conversations about installations, repairs, and material types.
+
+Term	Definition / Context for AI
+ABS (Acrylonitrile Butadiene Styrene)	Rigid black plastic pipe used for DWV systems.
+PVC (Polyvinyl Chloride)	White or gray rigid plastic pipe used for DWV and cold water systems.
+CPVC (Chlorinated Polyvinyl Chloride)	Off-white or cream-colored plastic pipe rated for hot and cold water supply lines.
+PEX (Cross-Linked Polyethylene)	Flexible, color-coded plastic tubing (red for hot, blue for cold) increasingly used for water supply lines.
+Copper	A metal pipe and fitting material used for water supply systems.
+Brass	An alloy (copper and zinc) used for faucets, valves, and fittings; also a slang term for faucets/fixtures.
+Polybutylene (PB)	A gray or white flexible plastic tubing used for water supply in the late 20th century, now known to be prone to failure.
+Fitting	A generic term for a piece (e.g., elbow, tee, coupling) that connects sections of pipe.
+Nipple	A short, straight length of pipe with threads on both ends, used to connect fittings.
+Elbow / Ell	A curved fitting, typically 90° or 45°, used to change pipe direction.
+Tee	A T-shaped fitting used to create a branch connection where three pipes meet.
+Wye Fitting	A Y-shaped fitting that connects two sections of pipe at a 45-degree angle for smoother flow.
+Bushing	A fitting with internal and external threads, used to connect pipes of different sizes.
+Dielectric Union	A special fitting that joins dissimilar metals (like copper and steel) to prevent galvanic corrosion.
+No-Hub Coupling	A rubber sleeve with a stainless steel band used to join hubless cast-iron pipe.
+3. Fixtures & Appliances
+These are the endpoint devices where water is used or waste is collected. Distinguishing between a "fitting" and a "fixture" is important for accuracy.
+
+Term	Definition / Context for AI
+Faucet	A fitting for controlling water flow into a basin; also called a "tap".
+Fixture	A device that receives water and/or waste (e.g., toilet, sink, bathtub). Note: Often confused with "fitting" in casual speech.
+Toilet / Water Closet	A fixture for receiving and flushing human waste. Key parts include the bowl (round or elongated), tank, and trapway.
+Lavatory	Industry term for a bathroom sink or washbowl.
+Sink	A fixture for washing, typically in a kitchen or utility room.
+Bathtub	A large fixture for bathing. Features include an apron (front skirting) and end drain (left or right-hand orientation).
+Shower	An enclosure for bathing. Components include the curb (raised edge), body sprays, and showerhead.
+Bidet	A floor-mounted plumbing fixture for personal hygiene, similar in appearance to a toilet.
+Urinal	A wall-hung or floor-mounted fixture for use by males, primarily in commercial settings.
+4. Valves & Controls
+These terms describe devices that start, stop, or regulate flow. This is a critical category for troubleshooting.
+
+Term	Definition / Context for AI
+Shutoff Valve / Angle Stop	A valve used to stop water flow to a specific fixture (like a sink or toilet) for repairs. An angle stop has a 90-degree inlet/outlet configuration.
+Ball Valve	A quarter-turn valve using a rotating ball with a hole to control flow; known for reliability and full shut-off.
+Gate Valve	A valve that uses a sliding gate to control flow; often used as a main shut-off but less reliable than a ball valve. An OS&Y valve has a visible rising stem.
+Check Valve	A one-way valve that allows flow in only one direction to prevent backflow.
+Pressure Reducing Valve (PRV)	A valve that reduces high incoming water pressure to a safe, consistent level for a building.
+Mixing Valve	A valve that blends hot and cold water to achieve a desired outlet temperature, enhancing safety and comfort.
+Anti-Scald Device / Scald Guard	A valve or mechanism that prevents rapid temperature fluctuations to protect against scalding.
+Temperature and Pressure (T&P) Relief Valve	A critical safety valve on water heaters that opens if temperature or pressure exceeds safe limits.
+Diverter Valve	A valve that redirects water flow, e.g., from a tub spout to a showerhead, or to a kitchen sink sprayer.
+Ballcock / Fill Valve	The valve assembly in a toilet tank, controlled by a float, that refills the tank after a flush.
+5. Common Service, Repair, & Problem Descriptors
+This vocabulary is essential for the AI to understand caller issues and prioritize emergencies.
+
+Term	Definition / Context for AI
+Leak	An unintended escape of water from a pipe, fitting, or fixture.
+Clog / Blockage	An obstruction in a drain, waste pipe, or toilet that prevents proper flow.
+Drain Cleaning Tools	Tools used to clear clogs, such as an auger or snake (flexible cable), plunger, and blowbag.
+Trap / P-Trap	The curved pipe (often U or J-shaped) under a sink or fixture that holds water to create a trap seal, preventing sewer gases from entering the building.
+Cleanout	A fitting with a removable plug that provides access to the drain line for cleaning and inspection.
+Backflow	The unwanted reverse flow of water, which can contaminate the potable water supply. Prevented by backflow preventers.
+Water Hammer	A loud banging noise in pipes caused by a sudden stop in water flow (e.g., when a valve closes quickly). Can be fixed with a water hammer arrestor.
+Rough-In	The phase of installation where pipes, drains, and vent lines are installed inside walls, floors, and ceilings before finishes are applied.
+Sewer Gas	Toxic and potentially explosive gas (containing methane, hydrogen sulfide) resulting from decomposing waste. An indication of a dry trap or venting issue.
+Gallons per Minute (GPM)	A standard measure of water flow rate from a faucet or showerhead.
+Gallons per Flush (GPF)	A measure of the water volume a toilet uses per flush. Modern toilets are typically 1.6 GPF or less. Dual-flush toilets offer a choice of full or partial flush.
+Potable Water	Water that is safe for drinking and domestic use.
+Greywater / Gray Water	Wastewater from sinks, showers, and laundry (excluding toilets), which may be reused for irrigation in some systems.
+Lead-Free	A regulatory standard (≤0.25% lead content) for materials in contact with potable water.
+Effluent	Liquid waste, partially treated, that flows from a septic tank into the drain/leach field.
+Leach Field / Absorption Field	A network of perforated pipes in a gravel bed that disperses effluent from a septic tank into the soil.
+6. Sealing & Joining Materials
+Term	Definition / Context for AI
+Flux	A chemical paste applied to clean metal surfaces and promote the flow of solder during soldering.
+Teflon Tape / Thread Seal Tape	A white tape wrapped around pipe threads to create a watertight seal on threaded joints.
+Plumber's Putty	A pliable, dough-like putty used to create a watertight seal on the underside of faucets and drains where they meet a sink or tub.
+O-Ring	A round rubber gasket that compresses to create a seal, often in valve stems and slip-joint connections.
+Wax Ring	A ring of wax used to create a watertight and airtight seal between the base of a toilet and the closet flange on the floor.
+Gasket	A flat ring, often made of rubber or fiber, used to create a seal between two metal surfaces.
+Dope / Pipe Joint Compound	A lubricant and sealant paste applied to pipe threads.
+💡 Implementation Tips for Your Engineer
+Categorization is Key: Grouping terms as shown above helps the AI understand context. A "T&P valve" is clearly a valve associated with a water heater, likely indicating a safety issue.
+
+Synonym Mapping: Connect common, non-technical phrases to the correct plumbing terms.
+
+"My toilet is running" → Ballcock or Fill Valve or Flapper
+
+"The drain is slow" → Clog or Blockage
+
+"Water is backing up" → Backflow or Main line clog
+
+"There's a smell from the drain" → Sewer gas or Dry trap
+
+Emergency Keyword Flagging: Program the AI to recognize high-urgency phrases and prioritize them.
+
+"Burst pipe," "major leak," "flooding," "no water," "sewer gas smell," "carbon monoxide" (if discussing a boiler), "T&P valve leaking."
+
+Clarifying Questions: Use the vocabulary to ask intelligent follow-up questions. If a caller says "my sink is clogged," the AI could ask:
+
+"Is the water draining slowly, or is it completely blocked?"
+
+"Is it the kitchen sink or the bathroom sink?"
+
+"Have you used a plunger or drain cleaner?"
+
+
+
+Electrical Terminology for Your AI Database
+This list draws from authoritative sources including the National Electrical Code (NEC) definitions  and comprehensive electronics dictionaries , organized to help the AI understand context and route calls appropriately.
+
+1. System Types & Core Electrical Concepts
+These fundamental terms describe the basic principles and infrastructure of electrical systems.
+
+Term	Definition / Context for AI
+AC (Alternating Current)	Electric current that periodically reverses direction; standard for grid power distribution and mains power in homes .
+DC (Direct Current)	Electric current flowing consistently in one direction; used in batteries, electronics, and solar power systems .
+Voltage	Electrical pressure or force that pushes current through a conductor; measured in volts.
+Current	The flow of electrons through a conductor; measured in amperes (amps).
+Resistance	Opposition to the flow of current; measured in ohms.
+Power	Rate of doing electrical work; calculated as voltage × current; measured in watts .
+Service	The conductors and equipment delivering electricity from the utility to the building .
+Feeder	Circuit conductors between the service equipment and the final branch-circuit overcurrent device .
+Branch Circuit	Circuit conductors between the final overcurrent device and the outlets .
+Grounding	Connecting electrical systems to earth for safety and equipment protection.
+Bonding	Permanent joining of metal parts to ensure electrical conductivity and safe current-carrying capacity .
+Single-Phase	Standard residential power delivery using two voltage phases 180 degrees apart.
+Three-Phase	Commercial/industrial power using three alternating currents, providing smoother and more efficient power delivery.
+2. Equipment & Components
+These are the physical devices and hardware the AI will hear about most often.
+
+Term	Definition / Context for AI
+Panelboard / Breaker Panel / Load Center	Central distribution point dividing electrical power into branch circuits, protected by circuit breakers .
+Switchboard	Large, free-standing power distribution assembly with switches, overcurrent devices, and instruments .
+Disconnect Switch	Device that opens and closes a circuit, manually operated, that can safely interrupt current .
+Circuit Breaker	Automatic device that opens a circuit during overcurrent conditions without damaging itself .
+Fuse	Overcurrent protection device that opens by melting a fusible element when current exceeds rated value .
+AFCI (Arc-Fault Circuit Interrupter)	Breaker that detects dangerous electrical arcing and shuts down the circuit to prevent fires .
+GFCI (Ground-Fault Circuit Interrupter)	Device that quickly shuts off power when detecting current leakage to ground, preventing shock.
+Transformer	Device that transfers electrical energy between circuits through electromagnetic induction, changing voltage levels.
+Conductor	Material (typically copper or aluminum wire) that carries electrical current .
+Raceway	Enclosed channel designed expressly for holding wires, cables, or busbars (conduit, tubing, wireways) .
+Conduit	Tube or trough for protecting electrical wiring (rigid metal, EMT, PVC, flexible) .
+Busbar	Metallic strip or bar that conducts electricity within switchboards, panelboards, or busway systems.
+Outlet	Point on wiring system where current is taken to supply equipment (receptacle, lighting outlet) .
+Receptacle	Contact device installed at outlet for connection of an attachment plug .
+Meter / Watt-Hour Meter	Device measuring and recording electrical energy consumption.
+3. Wire Types, Sizing & Materials
+These terms are essential for understanding specifications, materials, and installations.
+
+Term	Definition / Context for AI
+AWG (American Wire Gauge)	North American standard system for wire diameters; smaller gauge numbers = larger wire .
+Ampacity	Maximum current a conductor can carry continuously without exceeding temperature rating .
+Insulated Conductor	Conductor encased within material recognized as electrical insulation .
+Bare Conductor	Conductor without covering or insulation (e.g., service grounding wire) .
+THHN / THWN	Common insulation types: Thermoplastic High Heat-resistant Nylon-coated / Thermoplastic Heat and Water-resistant Nylon-coated.
+NM Cable (Romex)	Nonmetallic sheathed cable; common residential wiring with conductors inside plastic sheath.
+MC Cable (Metal-Clad)	Flexible cable with metal armor for physical protection.
+UF Cable (Underground Feeder)	Moisture-resistant cable rated for direct burial.
+Conductor Size	Physical cross-sectional dimension determining current-carrying capacity.
+Stranded vs. Solid	Multiple small strands twisted vs. single solid wire; stranded is more flexible.
+4. Common Service, Repair, & Diagnostic Terms
+This vocabulary helps identify problems, schedule appropriate service, and understand technician feedback.
+
+Term	Definition / Context for AI
+Overcurrent	Excessive current relative to normal operating current; includes overloads, short circuits, and ground faults .
+Short Circuit	Unintentional connection between ungrounded conductors of low impedance, causing excessive current.
+Ground Fault	Unintentional connection between an ungrounded conductor and ground/equipment ground .
+Arc Fault	Dangerous electrical discharge characterized by high heat, potentially causing fires .
+Open Circuit	Broken or interrupted path preventing current flow.
+Trip / Tripped Breaker	Automatic opening of circuit breaker due to overcurrent condition.
+Flickering Lights	Common symptom indicating loose connections, voltage fluctuations, or failing components.
+Dead Outlet	Outlet with no power.
+Plenum	Compartment or chamber connected to air distribution system; requires special plenum-rated cable .
+Concealed Wiring	Wiring installed within walls or partitions, inaccessible without damaging finish .
+Working Space	Clear area around electrical equipment for safe operation and maintenance (minimum 3 feet in front) .
+Load Calculation	Determining total electrical demand to size service and equipment properly.
+Voltage Drop	Reduction in voltage along a conductor due to resistance; excessive drop causes equipment issues.
+5. Safety & Code Terminology
+These terms are critical for understanding regulatory compliance, inspections, and safety protocols.
+
+Term	Definition / Context for AI
+NEC (National Electrical Code)	The standard for safe electrical installation in the US; often called "the book" .
+AHJ (Authority Having Jurisdiction)	Organization or individual (typically electrical inspector) enforcing code requirements .
+Approved	Acceptable to the authority having jurisdiction .
+Listed / Labeled	Equipment included in a list published by an approved testing laboratory (UL, ETL, CSA) meeting appropriate standards.
+Qualified Person	One familiar with construction/operation of equipment and hazards involved (licensed electrician, professional engineer) .
+Service Entrance	Point where power enters building, including service drop/mast, meter, and main disconnect.
+Main Bonding Jumper	Connection between grounded circuit conductor and equipment grounding conductor at service.
+Grounding Electrode	Device establishing direct connection to earth (ground rod, water pipe, concrete-encased electrode).
+Permit	Official authorization required before beginning electrical work.
+Inspection	Official examination of work by AHJ for code compliance.
+6. Residential vs. Commercial Contexts
+These terms help distinguish between typical residential issues and more complex commercial/industrial work.
+
+Term	Definition / Context for AI
+Residential Service	Typically 100-400 amp, single-phase, 120/240V.
+Commercial Service	Typically 120/208V or 277/480V, three-phase, higher amperage.
+Subpanel	Secondary panel fed from main service, serving a specific area or addition.
+Main Lug Only (MLO)	Panel without main breaker; used as subpanel.
+Main Breaker	Primary overcurrent device for entire panel.
+Knob and Tube	Early wiring method (pre-1950s) with ceramic knobs and tubes; obsolete and often requiring replacement.
+Aluminum Wiring	Wiring used in 1960s-70s requiring special connections due to different expansion properties and oxidation concerns.
+Service Upgrade	Replacing older electrical service to increase capacity or meet modern safety standards.
+7. Modern & Emerging Technologies
+As electrical work increasingly intersects with smart home technology, these terms are becoming more common in service calls.
+
+Term	Definition / Context for AI
+Smart Panel / Load Center	Modern panel with integrated monitoring, remote control, and smart breaker capabilities.
+EV Charger / EVSE (Electric Vehicle Supply Equipment)	Equipment for charging electric vehicles; installation is a growing electrical service call category.
+Solar / PV (Photovoltaic) System	Solar electric generation system requiring interconnection with electrical service.
+Battery Backup / Energy Storage System	Battery banks storing energy for backup or load shifting.
+Generator / Transfer Switch	Backup power source and automatic/manual switch isolating from utility during outages .
+Smart Thermostat	WiFi-enabled thermostat requiring C-wire (common wire) for continuous power.
+Whole Home Surge Protector	Device installed at panel protecting entire home from external surges.
+AFCI/GFCI Combination Breaker	Modern breaker providing both arc-fault and ground-fault protection.
+8. Electrical Problems & Emergency Descriptors
+These words help the AI gauge urgency and prioritize emergency calls.
+
+Term / Phrase	Likely Meaning / Priority Level
+"No power" / "Dead outlet"	Complete loss of power; could be tripped breaker or larger issue.
+"Breaker keeps tripping"	Persistent overcurrent or ground fault; indicates underlying problem needing diagnosis.
+"Spark / Sparks"	Visible arcing; potentially serious safety issue.
+"Smell burning / burning smell"	Potential overheating or fire hazard; high priority emergency.
+"Buzzing / humming noise"	Loose connection, failing breaker, or faulty device.
+"Shock / tingling"	Ground fault or improper grounding; safety emergency.
+"Lights dim when..."	Voltage drop under load; possible undersized circuit or loose connection.
+"Partial power"	Only some circuits working; could indicate lost phase (emergency for commercial).
+"Main breaker tripped"	Whole service interruption; could be serious overload or fault.
+"Arcing / crackling"	Visible or audible electrical discharge; fire hazard emergency.
+"Power outage"	No utility power; may be weather-related or neighborhood-wide.
+"Outlet hot / warm"	Overheating at connection point; potential fire hazard.
+💡 Implementation Tips for Your Engineer
+Categorization Strategy: Group terms as shown above to help the AI understand context. A "GFCI" is a device, "tripping" is a problem, and "no power in kitchen" indicates a location-specific issue.
+
+Synonym Mapping: Connect common, non-technical phrases to technical terms:
+
+"The breaker flipped" → Tripped breaker
+
+"The electricity went out" → Power outage or Service interruption
+
+"Plug doesn't work" → Dead outlet
+
+"Lights are flickering" → Voltage fluctuation or Loose connection
+
+"Small shock from appliance" → Ground fault
+
+Emergency Keyword Flagging: Program the AI to recognize high-urgency phrases and prioritize them:
+
+"Smoke", "burning smell", "sparks", "fire" → Immediate emergency protocols
+
+"Shock", "tingling" → Safety hazard, urgent dispatch
+
+"No heat" (winter) combined with electrical issues → Priority (may involve furnace/heat pump)
+
+Clarifying Questions: Use the vocabulary to ask intelligent follow-up questions. If a caller says "my breaker keeps tripping," the AI could ask:
+
+"Does it trip immediately when you reset it, or after using certain appliances?"
+
+"Which breaker is tripping? Is it labeled for a specific area (kitchen, bathroom, etc.)?"
+
+"Have you noticed any burning smells or visible damage at the panel?"
+
+
+change basic inspection to Service Call / Diagnostic Fee of $125 per visit.  Covers the trip and inspection; sometimes waived if you proceed with a repair
+
+ If the caller specifically asks to speak to a human, or if the AI detects a situation it cannot handle, can it transfer the call to a real phone number. Can the AI say: "I'm going to transfer you now. One moment please." Then we forward the call directly to you.
+
+how would clients get details showing:
+•	Active calls
+•	Call history (duration, outcome, transcript)
+•	Minutes used this billing cycle
+•	Lead conversion metrics
+•	Missed call reasons

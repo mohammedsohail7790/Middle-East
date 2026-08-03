@@ -1,0 +1,73 @@
+{
+  "tenantId": "tenant_northline_001",
+  "appointments": [
+    {
+      "id": "appt_001",
+      "leadId": "lead_002",
+      "callId": "call_002",
+      "customerName": "David Chen",
+      "phone": "+1 (720) 555-3917",
+      "service": "HVAC Diagnostic — AC Not Cooling",
+      "scheduledAt": "2026-06-14T15:30:00-06:00",
+      "durationMinutes": 60,
+      "technician": "Mike R.",
+      "status": "confirmed",
+      "calendarProvider": "Google Calendar",
+      "calendarEventId": "gcal_evt_8f2a91",
+      "smsConfirmationSent": true,
+      "address": "3100 Blake Street, Denver, CO 80205"
+    },
+    {
+      "id": "appt_002",
+      "leadId": "lead_005",
+      "callId": "call_005",
+      "customerName": "Amanda Torres",
+      "phone": "+1 (303) 555-6612",
+      "service": "Commercial Drain Cleaning",
+      "scheduledAt": "2026-06-15T09:00:00-06:00",
+      "durationMinutes": 90,
+      "technician": "Team B",
+      "status": "confirmed",
+      "calendarProvider": "Google Calendar",
+      "smsConfirmationSent": true,
+      "address": "1700 Lincoln Street, Denver, CO 80203"
+    },
+    {
+      "id": "appt_003",
+      "leadId": "lead_001",
+      "callId": "call_001",
+      "customerName": "Maria Gonzalez",
+      "phone": "+1 (303) 555-2841",
+      "service": "Emergency Plumbing — Kitchen Leak",
+      "scheduledAt": "2026-06-14T14:30:00-06:00",
+      "durationMinutes": 60,
+      "technician": "Carlos V.",
+      "status": "in_progress",
+      "calendarProvider": "Google Calendar",
+      "smsConfirmationSent": true,
+      "address": "4821 Tennyson Street, Denver, CO 80212"
+    },
+    {
+      "id": "appt_004",
+      "leadId": "lead_009",
+      "callId": "call_009",
+      "customerName": "Tyler Reed",
+      "phone": "+1 (303) 555-8821",
+      "service": "AC Diagnostic & Replacement Estimate",
+      "scheduledAt": "2026-06-15T10:00:00-06:00",
+      "durationMinutes": 90,
+      "technician": "Jordan T.",
+      "status": "confirmed",
+      "tenantId": "tenant_summit_hvac_001",
+      "calendarProvider": "Google Calendar",
+      "smsConfirmationSent": true,
+      "address": "1145 Alpine Avenue, Boulder, CO 80304"
+    }
+  ],
+  "todayStats": {
+    "callsToday": 47,
+    "leadsCaptured": 23,
+    "appointmentsBooked": 8,
+    "conversionRate": 49
+  }
+}

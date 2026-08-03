@@ -1,0 +1,61 @@
+/** Call IQ V4 — canonical platform events (P2). */
+
+export const PlatformEventTypes = {
+  CALL_STARTED: 'CALL_STARTED',
+  CALL_CONNECTED: 'CALL_CONNECTED',
+  CALL_TRANSCRIPT_UPDATED: 'CALL_TRANSCRIPT_UPDATED',
+  CALL_SUMMARY_GENERATED: 'CALL_SUMMARY_GENERATED',
+  CALL_ENDED: 'CALL_ENDED',
+
+  SESSION_CREATED: 'SESSION_CREATED',
+  SESSION_REATTACHED: 'SESSION_REATTACHED',
+  SESSION_TERMINATED: 'SESSION_TERMINATED',
+  SESSION_WATCHDOG_CLEANUP: 'SESSION_WATCHDOG_CLEANUP',
+
+  LEAD_CREATED: 'LEAD_CREATED',
+  LEAD_UPDATED: 'LEAD_UPDATED',
+
+  APPOINTMENT_CREATED: 'APPOINTMENT_CREATED',
+  APPOINTMENT_RESCHEDULED: 'APPOINTMENT_RESCHEDULED',
+  APPOINTMENT_CANCELLED: 'APPOINTMENT_CANCELLED',
+
+  SMS_SENT: 'SMS_SENT',
+  AUTOMATION_TRIGGERED: 'AUTOMATION_TRIGGERED',
+
+  CRM_SYNC_REQUESTED: 'CRM_SYNC_REQUESTED',
+  CRM_SYNC_COMPLETED: 'CRM_SYNC_COMPLETED',
+  CRM_SYNC_FAILED: 'CRM_SYNC_FAILED',
+
+  TOOL_EXECUTED: 'TOOL_EXECUTED',
+  TOOL_SKIPPED_IDEMPOTENT: 'TOOL_SKIPPED_IDEMPOTENT',
+  AI_RUNTIME_WARNING: 'AI_RUNTIME_WARNING',
+
+  AI_TOOL_AUTHORIZED: 'AI_TOOL_AUTHORIZED',
+  AI_TOOL_DENIED: 'AI_TOOL_DENIED',
+  AI_TOOL_EXECUTED: 'AI_TOOL_EXECUTED',
+  AI_TOOL_FAILED: 'AI_TOOL_FAILED',
+  AI_RUNTIME_POLICY_VIOLATION: 'AI_RUNTIME_POLICY_VIOLATION',
+  AI_RUNTIME_GUARDRAIL_TRIGGERED: 'AI_RUNTIME_GUARDRAIL_TRIGGERED',
+} as const;
+
+export type PlatformEventType = (typeof PlatformEventTypes)[keyof typeof PlatformEventTypes];
+
+/** @deprecated Use PlatformEventTypes */
+export const PlatformEvents = PlatformEventTypes;
+
+export type EventStreamName =
+  | 'call-events'
+  | 'appointment-events'
+  | 'lead-events'
+  | 'automation-events'
+  | 'integration-events'
+  | 'analytics-events';
+
+export const STREAM_PREFIX = 'calliq:stream:';
+
+export function streamKey(name: EventStreamName): string {
+  return `${STREAM_PREFIX}${name}`;
+}
+
+export const DLQ_STREAM_KEY = 'calliq:stream:dlq';
+export const CONSUMER_GROUP = 'calliq-platform';

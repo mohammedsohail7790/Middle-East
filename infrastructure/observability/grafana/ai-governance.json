@@ -1,0 +1,36 @@
+{
+  "title": "Call IQ — AI Governance",
+  "uid": "calliq-governance",
+  "tags": ["call-iq", "governance", "p3"],
+  "panels": [
+    {
+      "id": 1,
+      "title": "AI executions",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [{ "expr": "calliq_ai_executions" }]
+    },
+    {
+      "id": 2,
+      "title": "AI denials",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [{ "expr": "calliq_ai_denials" }]
+    },
+    {
+      "id": 3,
+      "title": "Guardrail triggers",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [{ "expr": "calliq_ai_guardrail_triggers" }]
+    },
+    {
+      "id": 4,
+      "title": "Span duration (AI tools)",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "targets": [{ "expr": "calliq_span_duration_ms_sum{name=\"ai.tool.execute\"}" }]
+    }
+  ],
+  "schemaVersion": 38
+}

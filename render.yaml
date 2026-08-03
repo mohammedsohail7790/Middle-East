@@ -1,0 +1,225 @@
+# Call IQ — Render Blueprint (production)
+# deploy-refresh: 2026-06-16 (unified API integration verify+test on connect)
+# Deploy: Render Dashboard → New → Blueprint → connect this repo
+#
+# Services created:
+#   calliq-gateway  — API + Twilio webhooks + WebSocket voice (Render)
+#   calliq-redis    — Redis for cache, sessions, queues
+#
+# Dashboard (marketing + app): deploy on Vercel → www.calliqlabs.com (see DEPLOY_VERCEL.md)
+# Do NOT deploy calliq-frontend-main/ (legacy Vite) unless you need a separate marketing site.
+
+services:
+  - type: web
+    name: calliq-gateway
+    runtime: node
+    region: oregon
+    plan: starter
+    buildCommand: npm install && npm run build:gateway
+    startCommand: npm run start:gateway
+    healthCheckPath: /ready
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3003
+      - key: PGSSLMODE
+        value: require
+      - key: ENABLE_VOICE_AGENT
+        value: "true"
+      - key: ENABLE_KNOWLEDGE_INGESTION
+        value: "true"
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: OPENAI_TIMEOUT_MS
+        value: 5000
+      - key: VOICE_SILENCE_TIMEOUT_MS
+        value: 800
+      - key: VOICE_MAX_CALL_DURATION_MS
+        value: 900000
+      - key: VOICE_MAX_TOKENS_PER_CALL
+        value: 5000
+      - key: VOICE_MAX_SILENCE_PROMPTS
+        value: 3
+      - key: VOICE_RATE_LIMIT_WINDOW_MS
+        value: 60000
+      - key: VOICE_RATE_LIMIT_MAX
+        value: 60
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      - key: VOICE_WS_ALLOWED_IPS
+        value: ""
+      - key: TWILIO_ALLOWED_IPS
+        value: ""
+      # Custom domains + Render dashboard URL (DASHBOARD_URL added automatically to CORS in code)
+      - key: ALLOWED_ORIGINS
+        value: https://www.calliqlabs.com,https://calliqlabs.com,https://call-iq-gateway.onrender.com
+      - key: VOICE_WS_ALLOWED_ORIGINS
+        value: https://www.calliqlabs.com,https://calliqlabs.com
+      - key: DASHBOARD_URL
+        value: https://www.calliqlabs.com
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: calliq-redis
+          property: connectionString
+      # RENDER_EXTERNAL_URL is auto-injected by Render on gateway (Twilio webhooks / WSS)
+      # TWILIO_STREAM_WSS_URL auto-derived from RENDER_EXTERNAL_URL if not set (see env.ts)
+      - key: DATABASE_URL
+        sync: false
+      - key: GATEWAY_DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DEEPGRAM_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_STREAM_WSS_URL
+        value: wss://call-iq-gateway.onrender.com
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_ESSENTIAL_PRODUCT_ID_MONTHLY
+        sync: false
+      - key: STRIPE_ESSENTIAL_PRODUCT_ID_ANNUAL
+        sync: false
+      - key: STRIPE_PROFESSIONAL_PRODUCT_ID_MONTHLY
+        sync: false
+      - key: STRIPE_PROFESSIONAL_PRODUCT_ID_ANNUAL
+        sync: false
+      - key: STRIPE_ENTERPRISE_PRODUCT_ID_MONTHLY
+        sync: false
+      - key: STRIPE_ENTERPRISE_PRODUCT_ID_ANNUAL
+        sync: false
+      - key: STRIPE_ESSENTIAL_PRICE_ID
+        sync: false
+      - key: STRIPE_ESSENTIAL_ANNUAL_PRICE_ID
+        sync: false
+      - key: STRIPE_ESSENTIAL_OVERAGE_ID
+        sync: false
+      - key: STRIPE_PROFESSIONAL_PRICE_ID
+        sync: false
+      - key: STRIPE_PROFESSIONAL_ANNUAL_PRICE_ID
+        sync: false
+      - key: STRIPE_PROFESSIONAL_OVERAGE_ID
+        sync: false
+      - key: STRIPE_ENTERPRISE_PRICE_ID
+        sync: false
+      - key: STRIPE_ENTERPRISE_ANNUAL_PRICE_ID
+        sync: false
+      - key: STRIPE_ENTERPRISE_OVERAGE_ID
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        value: https://call-iq-gateway.onrender.com/api/v1/calendar/google/callback
+      - key: HUBSPOT_CLIENT_ID
+        sync: false
+      - key: HUBSPOT_CLIENT_SECRET
+        sync: false
+      - key: HUBSPOT_OAUTH_SCOPES
+        value: crm.objects.contacts.read crm.objects.contacts.write crm.objects.deals.read crm.objects.deals.write crm.objects.contracts.read
+      - key: SALESFORCE_CLIENT_ID
+        sync: false
+      - key: SALESFORCE_CLIENT_SECRET
+        sync: false
+      - key: SLACK_CLIENT_ID
+        sync: false
+      - key: SLACK_CLIENT_SECRET
+        sync: false
+      - key: ZOHO_CLIENT_ID
+        sync: false
+      - key: ZOHO_CLIENT_SECRET
+        sync: false
+      - key: PIPEDRIVE_CLIENT_ID
+        sync: false
+      - key: PIPEDRIVE_CLIENT_SECRET
+        sync: false
+      - key: FRESHSALES_CLIENT_ID
+        sync: false
+      - key: FRESHSALES_CLIENT_SECRET
+        sync: false
+      - key: FRESHSALES_OAUTH_SCOPES
+        value: freshsales.contacts.create freshsales.contacts.upsert freshsales.contacts.filters.view freshsales.selectors.view
+      - key: JOBBER_CLIENT_ID
+        sync: false
+      - key: JOBBER_CLIENT_SECRET
+        sync: false
+      - key: JOBBER_REDIRECT_URI
+        value: https://call-iq-gateway.onrender.com/api/v1/integrations/jobber/callback
+      - key: JOBBER_API_VERSION
+        value: "2025-04-16"
+      - key: CLIO_CLIENT_ID
+        sync: false
+      - key: CLIO_CLIENT_SECRET
+        sync: false
+      - key: MS_CLIENT_ID
+        sync: false
+      - key: MS_CLIENT_SECRET
+        sync: false
+      - key: MS_TENANT_ID
+        value: common
+      - key: MS_REDIRECT_URI
+        value: https://call-iq-gateway.onrender.com/api/v1/calendar/outlook/callback
+      - key: CALENDLY_CLIENT_ID
+        sync: false
+      - key: CALENDLY_CLIENT_SECRET
+        sync: false
+      - key: CALENDLY_REDIRECT_URI
+        value: https://call-iq-gateway.onrender.com/api/v1/calendar/calendly/callback
+      - key: ACUITY_CLIENT_ID
+        sync: false
+      - key: ACUITY_CLIENT_SECRET
+        sync: false
+      - key: ACUITY_REDIRECT_URI
+        value: https://call-iq-gateway.onrender.com/api/v1/calendar/acuity/callback
+      - key: GATEWAY_PUBLIC_URL
+        value: https://call-iq-gateway.onrender.com
+      # Supabase session pooler limit is ~15 — stay below it (use port 6543 transaction pooler if needed)
+      - key: PG_POOL_MAX
+        value: "8"
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: VOICE_INTERNAL_API_KEY
+        generateValue: true
+      - key: ADMIN_API_KEY
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SENTRY_DSN
+        sync: false
+      - key: PROMETHEUS_PORT
+        value: "9090"
+      - key: ENABLE_PUBLIC_METRICS
+        value: "false"
+
+redis:
+  - name: calliq-redis
+    plan: starter
+    region: oregon
+    maxmemoryPolicy: noeviction

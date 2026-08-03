@@ -1,0 +1,66 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+dist
+.next
+out
+build
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Version control
+.git
+.gitattributes
+.gitignore
+.github
+
+# IDE
+.idea
+.vscode
+.cursor
+.kiro
+.gravity
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+.cache
+.temp
+.tmp
+.eslintcache
+.turbo
+
+# Logs
+logs
+*.log
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+*.md
+
+# Tests
+tests
+coverage
+*.lcov
+.nyc_output
+
+# Data
+data
+node_modules
+
+# Config
+.prettierignore
+.prettierrc.json
+tsconfig.json
+vitest.config.ts
+package-lock.json

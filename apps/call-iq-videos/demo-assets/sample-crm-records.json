@@ -1,0 +1,100 @@
+{
+  "tenantId": "tenant_northline_001",
+  "integrations": [
+    {
+      "id": "int_hubspot",
+      "name": "HubSpot",
+      "category": "CRM — Contacts & Deals",
+      "connected": true,
+      "connectedAt": "2026-05-20T10:15:00-06:00",
+      "syncSettings": {
+        "autoCreateContacts": true,
+        "logCallActivities": true,
+        "syncDeals": true,
+        "fieldMapping": "Call IQ Lead → HubSpot Contact"
+      },
+      "recentActivity": [
+        { "action": "Contact created", "record": "Maria Gonzalez", "timestamp": "2026-06-14T08:43:00-06:00" },
+        { "action": "Call logged", "record": "David Chen — AC Diagnostic", "timestamp": "2026-06-14T09:16:00-06:00" },
+        { "action": "Deal stage updated", "record": "Jennifer Walsh — Panel Upgrade", "timestamp": "2026-06-13T14:25:00-06:00" }
+      ]
+    },
+    {
+      "id": "int_salesforce",
+      "name": "Salesforce",
+      "category": "CRM — Enterprise",
+      "connected": true,
+      "connectedAt": "2026-06-01T14:00:00-06:00",
+      "syncSettings": {
+        "objectMapping": "Lead → Contact + Opportunity",
+        "customFields": ["Call_Transcript__c", "Lead_Score__c", "Service_Type__c"]
+      },
+      "recentActivity": [
+        { "action": "Lead converted", "record": "Lisa Bradley — Repipe", "timestamp": "2026-06-11T13:22:00-06:00" },
+        { "action": "Task created", "record": "Follow-up: Robert Park WH quote", "timestamp": "2026-06-13T11:12:00-06:00" }
+      ]
+    },
+    {
+      "id": "int_zoho",
+      "name": "Zoho CRM",
+      "category": "CRM — SMB",
+      "connected": true,
+      "connectedAt": "2026-06-08T09:30:00-06:00",
+      "recentActivity": [
+        { "action": "Lead synced", "record": "James Okonkwo — Maintenance", "timestamp": "2026-06-12T10:32:00-06:00" }
+      ]
+    },
+    {
+      "id": "int_gcal",
+      "name": "Google Calendar",
+      "category": "Calendar — Real-time sync",
+      "connected": true,
+      "calendarId": "rachel@northlinehome.com",
+      "recentActivity": [
+        { "action": "Event created", "record": "David Chen — HVAC Diagnostic 3:30 PM", "timestamp": "2026-06-14T09:16:00-06:00" },
+        { "action": "Event created", "record": "Maria Gonzalez — Plumbing 2:30 PM", "timestamp": "2026-06-14T08:44:00-06:00" }
+      ]
+    },
+    {
+      "id": "int_outlook",
+      "name": "Outlook",
+      "category": "Calendar — Microsoft 365",
+      "connected": true,
+      "calendarId": "dispatch@northlinehome.com",
+      "recentActivity": [
+        { "action": "Availability checked", "record": "Team B — Commercial slot", "timestamp": "2026-06-12T16:46:00-06:00" }
+      ]
+    },
+    {
+      "id": "int_webhooks",
+      "name": "Webhooks",
+      "category": "Custom — HTTP endpoints",
+      "connected": true,
+      "endpoints": [
+        {
+          "name": "ServiceTitan Job Create",
+          "url": "https://api.servicetitan.io/webhooks/call-iq",
+          "events": ["appointment_set", "call_completed"],
+          "status": "active"
+        },
+        {
+          "name": "Slack #dispatch-alerts",
+          "url": "https://hooks.slack.com/services/T0/B0/xxx",
+          "events": ["emergency_call", "escalation"],
+          "status": "active"
+        }
+      ],
+      "recentActivity": [
+        { "action": "Webhook delivered", "record": "appointment_set → ServiceTitan", "timestamp": "2026-06-14T09:16:00-06:00" },
+        { "action": "Webhook delivered", "record": "call_completed → Slack", "timestamp": "2026-06-14T08:45:00-06:00" }
+      ]
+    }
+  ],
+  "syncSummary": {
+    "contactsSynced30d": 412,
+    "callsLogged30d": 1284,
+    "calendarEventsCreated30d": 296,
+    "webhookDeliveries30d": 1847,
+    "failedSyncs30d": 3
+  }
+}

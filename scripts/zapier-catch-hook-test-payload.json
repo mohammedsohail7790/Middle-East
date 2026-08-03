@@ -1,0 +1,12 @@
+{
+  "test": true,
+  "source": "call_iq",
+  "type": "lead",
+  "lead": {
+    "name": "Test Lead (Call IQ)",
+    "phone": "+15551234567",
+    "email": "test@example.com",
+    "service": "HVAC service call",
+    "notes": "Sample from Call IQ — map lead.name, lead.phone, lead.email in Zapier."
+  }
+}

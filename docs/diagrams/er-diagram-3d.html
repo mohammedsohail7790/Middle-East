@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Call IQ — 3D ER Diagram</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#060616; font-family:'Segoe UI',system-ui,sans-serif; overflow:hidden; color:#fff; }
+#canvas { display:block; }
+#ui {
+  position:fixed; top:16px; left:50%; transform:translateX(-50%);
+  z-index:10; display:flex; flex-direction:column; align-items:center; gap:6px;
+  pointer-events:none;
+}
+#title { font-size:22px; font-weight:700; letter-spacing:2px; color:#38bdf8; text-shadow:0 0 24px #0ea5e988; }
+#subtitle { font-size:12px; color:#94a3b8; letter-spacing:1px; }
+#controls {
+  position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+  display:flex; gap:12px; z-index:10;
+}
+.btn {
+  background:rgba(14,165,233,0.15); border:1px solid #0ea5e955;
+  color:#38bdf8; padding:6px 16px; border-radius:20px; cursor:pointer;
+  font-size:12px; transition:all 0.2s;
+}
+.btn:hover { background:rgba(14,165,233,0.35); border-color:#38bdf8; }
+#tooltip {
+  position:fixed; background:rgba(6,6,22,0.96); border:1px solid #0ea5e966;
+  border-radius:10px; padding:12px 16px; font-size:12px; color:#e2e8f0;
+  pointer-events:none; display:none; max-width:300px; z-index:20;
+  line-height:1.7; box-shadow:0 0 24px #0ea5e933;
+}
+#tooltip h3 { color:#38bdf8; margin-bottom:6px; font-size:14px; }
+#tooltip .field { color:#94a3b8; font-size:11px; }
+#tooltip .field span { color:#e2e8f0; }
+#tooltip .pk { color:#fbbf24; }
+#tooltip .fk { color:#34d399; }
+#tooltip .tag {
+  display:inline-block; background:#0ea5e922; border:1px solid #0ea5e944;
+  border-radius:4px; padding:1px 6px; font-size:10px; margin:2px 2px 0 0; color:#7dd3fc;
+}
+#legend {
+  position:fixed; top:100px; right:20px; background:rgba(6,6,22,0.88);
+  border:1px solid #ffffff11; border-radius:10px; padding:12px 16px;
+  font-size:12px; color:#94a3b8; z-index:10;
+}
+#legend h4 { color:#38bdf8; margin-bottom:8px; font-size:13px; }
+.legend-item { display:flex; align-items:center; gap:8px; margin:5px 0; }
+.legend-dot { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+</style>
+</head>
+<body>
+<div id="ui">
+  <div id="title">🗄 CALL IQ — DATABASE ER DIAGRAM</div>
+  <div id="subtitle">Drag to rotate · Scroll to zoom · Hover tables for schema · Click to pin</div>
+</div>
+<div id="legend">
+  <h4>Table Groups</h4>
+  <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Auth (Supabase)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>User / Agent</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Voice / Calls</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Billing</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>Knowledge</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#64748b"></div>Migration tables</div>
+</div>
+<div id="controls">
+  <button class="btn" id="btnReset">⟳ Reset View</button>
+  <button class="btn" id="btnAuto">▶ Auto Rotate</button>
+  <button class="btn" id="btnTop">⬆ Top View</button>
+  <button class="btn" id="btnSide">◀ Side View</button>
+</div>
+<div id="tooltip"></div>
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+
+let rotX = -0.42, rotY = 0.5, zoom = 1.0, autoRotate = false;
+let isDragging = false, lastMX = 0, lastMY = 0;
+let pinnedNode = null, hoveredNode = null;
+
+canvas.addEventListener('mousedown', e => { isDragging = true; lastMX = e.clientX; lastMY = e.clientY; });
+window.addEventListener('mouseup', e => { if (!isDragging) return; isDragging = false; });
+canvas.addEventListener('click', e => {
+  const hit = getHit(e.clientX, e.clientY);
+  pinnedNode = (hit && hit !== pinnedNode) ? hit : null;
+});
+window.addEventListener('mousemove', e => {
+  if (isDragging) {
+    rotY += (e.clientX - lastMX) * 0.007;
+    rotX += (e.clientY - lastMY) * 0.005;
+    rotX = Math.max(-1.3, Math.min(0.3, rotX));
+    lastMX = e.clientX; lastMY = e.clientY;
+  } else { checkHover(e.clientX, e.clientY); }
+});
+canvas.addEventListener('wheel', e => { zoom = Math.max(0.3, Math.min(2.5, zoom - e.deltaY * 0.001)); });
+canvas.addEventListener('touchstart', e => { isDragging = true; lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY; });
+canvas.addEventListener('touchend', () => isDragging = false);
+canvas.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  rotY += (e.touches[0].clientX - lastMX) * 0.007;
+  rotX += (e.touches[0].clientY - lastMY) * 0.005;
+  lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY;
+  e.preventDefault();
+}, { passive: false });
+
+document.getElementById('btnReset').onclick = () => { rotX=-0.42; rotY=0.5; zoom=1.0; };
+document.getElementById('btnTop').onclick   = () => { rotX=-1.2;  rotY=0;   zoom=1.1; };
+document.getElementById('btnSide').onclick  = () => { rotX=-0.2;  rotY=1.5; zoom=1.0; };
+document.getElementById('btnAuto').onclick  = () => { autoRotate = !autoRotate; document.getElementById('btnAuto').textContent = autoRotate ? '⏸ Auto Rotate' : '▶ Auto Rotate'; };
+
+// ── 3D math ──────────────────────────────────────────────────────────────────
+function project(x, y, z) {
+  const cX=Math.cos(rotX), sX=Math.sin(rotX), cY=Math.cos(rotY), sY=Math.sin(rotY);
+  let ny = y*cX - z*sX, nz = y*sX + z*cX;
+  let nx = x*cY + nz*sY; nz = -x*sY + nz*cY;
+  const fov = 900*zoom, zOff = 6;
+  const sc = fov/(nz+zOff);
+  return { sx: W/2+nx*sc, sy: H/2+ny*sc, scale: sc/150, depth: nz };
+}
+
+// ── Table node definitions ────────────────────────────────────────────────────
+const TABLES = [
+  { id:'auth_users', label:'auth.users', x:0, y:-3.5, z:0, color:'#7c3aed',
+    cols:['🔑 id: uuid PK','email: text','raw_user_meta_data: jsonb'],
+    note:'Supabase managed. Auto-creates profile + user_role on insert via trigger.',
+    tags:['Supabase Auth','Trigger: on_auth_user_created'] },
+
+  { id:'profiles', label:'profiles', x:-3.2, y:-2.0, z:-1.0, color:'#0ea5e9',
+    cols:['🔑 id: uuid PK','👤 user_id: uuid FK→auth.users','email: text','full_name: text',
+          'company_name: text','subscription_tier: enum','stripe_customer_id: text','polar_customer_id: text',
+          'billing_metadata: jsonb','created_at / updated_at: timestamptz'],
+    note:'One profile per Supabase user. Stores subscription tier and billing IDs.',
+    tags:['RLS','1:1 with auth.users'] },
+
+  { id:'user_roles', label:'user_roles', x: 3.2, y:-2.0, z:-1.0, color:'#0ea5e9',
+    cols:['🔑 id: uuid PK','👤 user_id: uuid FK→auth.users','role: app_role (admin|user)','created_at: timestamptz'],
+    note:'Supports multiple roles per user. Unique constraint on (user_id, role).',
+    tags:['RLS','RBAC'] },
+
+  { id:'agents', label:'agents', x: 0, y:-1.0, z:-2.0, color:'#0ea5e9',
+    cols:['🔑 id: uuid PK','👤 user_id: uuid FK→auth.users','name, avatar_url: text',
+          'template_type: text','personality: personality_type enum','custom_instructions: text',
+          'knowledge_base: jsonb','status: agent_status enum','channels: jsonb',
+          'api_key: text UNIQUE','monetization_enabled: boolean','price_per_month: decimal',
+          'metadata: jsonb','created_at / updated_at: timestamptz'],
+    note:'Each user can own multiple agents. Indexed on user_id and status.',
+    tags:['RLS','idx_agents_user_id','idx_agents_status'] },
+
+  { id:'conversations', label:'conversations', x:-3.0, y: 0.5, z:-1.5, color:'#0ea5e9',
+    cols:['🔑 id: uuid PK','🔗 agent_id: uuid FK→agents','user_identifier: text',
+          'status: conversation_status enum','started_at: timestamptz','last_message_at: timestamptz'],
+    note:'Tracks each chat session through an agent. Status: active | resolved | escalated.',
+    tags:['RLS','Supabase Realtime','idx_conversations_agent_id'] },
+
+  { id:'messages', label:'messages', x:-4.5, y: 2.0, z:-0.5, color:'#0ea5e9',
+    cols:['🔑 id: uuid PK','🔗 conversation_id: uuid FK→conversations',
+          'role: text (user|assistant)','content: text','created_at: timestamptz'],
+    note:'All chat messages. Realtime-enabled for live dashboard updates.',
+    tags:['RLS','Supabase Realtime','idx_messages_conversation_id'] },
+
+  { id:'analytics_events', label:'analytics_events', x: 3.0, y: 0.5, z:-1.5, color:'#0ea5e9',
+    cols:['🔑 id: uuid PK','🔗 agent_id: uuid FK→agents','event_type: text','metadata: jsonb','created_at: timestamptz'],
+    note:'Event types: message_sent, conversation_started, escalation, etc.',
+    tags:['RLS','idx_analytics_events_agent_id'] },
+
+  { id:'voice_tenants', label:'voice_tenants', x: 0, y: 1.5, z: 1.0, color:'#10b981',
+    cols:['🔑 id: uuid PK','👤 owner_user_id: uuid FK→auth.users','company_name: text',
+          'phone_number: text UNIQUE','default_language: text','timezone: text',
+          'diagnostic_fee: numeric','call_handling_mode: text (message|transfer|both)',
+          'voice_services: jsonb','voice_tone: text','voice_questions: jsonb',
+          'google_access_token / refresh_token / calendar_id: text',
+          'zapier_webhook_url: text','servicetitan_* fields','jobber_* fields',
+          'housecallpro_* fields','salesforce_* fields','hubspot_* fields',
+          'custom_webhook_url, headers: jsonb','metadata: jsonb','created_at / updated_at'],
+    note:'One per business. Central config: voice, integrations, calendar OAuth tokens, all CRM credentials.',
+    tags:['RLS','idx_voice_tenants_owner_user_id','Multi-tenant core'] },
+
+  { id:'calls', label:'calls', x:-2.8, y: 3.0, z: 2.0, color:'#10b981',
+    cols:['🔑 id: uuid PK','🔗 tenant_id: uuid FK→voice_tenants','call_sid: text UNIQUE (Twilio)',
+          'transcript: text','recording_url: text','language: text',
+          'latency: integer','duration_ms: integer','outcome: text',
+          'missed_reason: text','transfer_target: text','created_at: timestamptz'],
+    note:'Every inbound call. call_sid is the Twilio identifier. Indexed on tenant+created_at DESC.',
+    tags:['RLS','idx_calls_tenant_created_at','Twilio SID unique'] },
+
+  { id:'leads', label:'leads', x: 0, y: 3.5, z: 3.0, color:'#10b981',
+    cols:['🔑 id: uuid PK','🔗 tenant_id: uuid FK→voice_tenants','🔗 call_id: uuid FK→calls (optional)',
+          'name, phone, service: text','notes: text','preferred_time: text',
+          'fingerprint: text (dedup)','created_at: timestamptz'],
+    note:'Captured during calls. Deduplicated via fingerprint. Unique index on (tenant_id, fingerprint).',
+    tags:['RLS','Dedup fingerprint','idx_leads_tenant_id'] },
+
+  { id:'appointments', label:'appointments', x: 2.8, y: 3.0, z: 2.0, color:'#10b981',
+    cols:['🔑 id: uuid PK','🔗 tenant_id: uuid FK→voice_tenants','name, phone, service: text',
+          'scheduled_time: timestamptz','status: text (booked|cancelled|completed)',
+          'calendar_event_id: text (Google/Outlook)','created_at: timestamptz'],
+    note:'Booked appointments. Unique index on (tenant_id, scheduled_time) when status=booked.',
+    tags:['RLS','Unique per slot','Calendar sync'] },
+
+  { id:'knowledge_base', label:'knowledge_base', x:-3.0, y: 0.0, z: 3.0, color:'#ec4899',
+    cols:['🔑 id: uuid PK','🔗 tenant_id: uuid FK→voice_tenants (nullable = global)',
+          'category: text','content: text','embedding: vector(1536)','created_at: timestamptz'],
+    note:'RAG knowledge store. 1536-dim embeddings from text-embedding-3-small. IVFFlat cosine similarity index.',
+    tags:['pgvector','IVFFlat cosine index','RAG','1536-dim'] },
+
+  { id:'knowledge_ingestion_runs', label:'knowledge_ingestion_runs', x:-4.8, y: 1.2, z: 3.5, color:'#ec4899',
+    cols:['🔑 id: uuid PK','source: text','content_hash: text UNIQUE','created_at: timestamptz'],
+    note:'Tracks already-ingested content by hash to avoid re-embedding.',
+    tags:['Dedup by hash','Service role only'] },
+
+  { id:'subscriptions', label:'subscriptions', x: 3.0, y:-0.5, z: 1.5, color:'#f59e0b',
+    cols:['🔑 id: uuid PK','🔗 tenant_id: uuid FK→voice_tenants','stripe_customer_id: text',
+          'stripe_subscription_id: text','plan: text (essential|professional|enterprise)',
+          'status: text (active|trialing|canceled|past_due|incomplete)',
+          'current_period_start / end: timestamptz','cancel_at_period_end: boolean',
+          'trial_started_at / expires_at / minutes_used','included_minutes / overage_minutes / overage_charged'],
+    note:'One per tenant. Source of truth for plan enforcement. Trial: 14 days OR 60 minutes, whichever first.',
+    tags:['Stripe','Plan enforcement','Trial logic'] },
+
+  { id:'minutes_accounting', label:'minutes_accounting', x: 4.5, y: 1.2, z: 2.5, color:'#f59e0b',
+    cols:['🔑 id: uuid PK','🔗 tenant_id: uuid FK→voice_tenants','🔗 subscription_id: uuid FK→subscriptions',
+          'call_sid: text','duration_seconds: integer','billed_minutes: integer (ceil/60)',
+          'source: text (voice)','is_trial: boolean',
+          'billing_period_start / end: date','created_at: timestamptz'],
+    note:'Durable billing ledger. One row per call. Dual-write with Redis for real-time enforcement.',
+    tags:['Billing ledger','Dual-write Redis','Per-call'] },
+
+  { id:'billing_warnings', label:'billing_warnings', x: 3.0, y: 2.5, z: 0.5, color:'#f59e0b',
+    cols:['🔑 id: uuid PK','🔗 tenant_id: uuid FK→voice_tenants','warning_type: text',
+          'message: text','details: jsonb','acknowledged: boolean',
+          'acknowledged_at: timestamptz','created_at: timestamptz'],
+    note:'Usage warnings at 75% (45 min), 92% (55 min), 100% (60 min / 14 days).',
+    tags:['Trial warnings','Usage alerts'] },
+
+  { id:'billing_events', label:'billing_events', x: 0, y:-2.5, z: 1.5, color:'#f59e0b',
+    cols:['🔑 id: uuid PK','👤 user_id: uuid FK→auth.users','provider: text (stripe)',
+          'event_type: text','raw_payload: jsonb','created_at: timestamptz'],
+    note:'Raw Stripe webhook event log for idempotency and audit trail.',
+    tags:['Stripe webhooks','Audit log','RLS'] },
+];
+
+// ── Relationship edges [from, to, cardinality, label] ─────────────────────────
+const EDGES = [
+  ['auth_users','profiles','1:1','owns'],
+  ['auth_users','user_roles','1:N','has roles'],
+  ['auth_users','agents','1:N','owns'],
+  ['auth_users','voice_tenants','1:1','owns'],
+  ['auth_users','billing_events','1:N','triggers'],
+  ['agents','conversations','1:N','has'],
+  ['agents','analytics_events','1:N','logs'],
+  ['conversations','messages','1:N','contains'],
+  ['voice_tenants','calls','1:N','records'],
+  ['voice_tenants','leads','1:N','captures'],
+  ['voice_tenants','appointments','1:N','books'],
+  ['voice_tenants','knowledge_base','1:N','stores'],
+  ['voice_tenants','subscriptions','1:1','billed via'],
+  ['voice_tenants','billing_warnings','1:N','receives'],
+  ['calls','leads','1:1','generates'],
+  ['knowledge_base','knowledge_ingestion_runs','N:1','tracked by'],
+  ['subscriptions','minutes_accounting','1:N','accrues'],
+];
+
+// ── Hit testing ───────────────────────────────────────────────────────────────
+const projected = [];
+function getHit(mx, my) {
+  let best = null, bestD = 50;
+  for (const p of projected) {
+    const d = Math.hypot(mx - p.sx, my - p.sy);
+    if (d < bestD) { bestD = d; best = p.id; }
+  }
+  return best;
+}
+
+function checkHover(mx, my) {
+  const hit = getHit(mx, my);
+  const tip = document.getElementById('tooltip');
+  const active = pinnedNode || hit;
+  hoveredNode = hit;
+  if (active) {
+    const td = TABLES.find(t => t.id === active);
+    tip.style.display = 'block';
+    tip.style.left = (mx + 18) + 'px';
+    tip.style.top = Math.min(my - 10, H - 300) + 'px';
+    const colHTML = td.cols.map(c => {
+      let cls = 'field';
+      if (c.includes('PK')) cls += ' pk';
+      else if (c.includes('FK')) cls += ' fk';
+      return `<div class="${cls}">${c}</div>`;
+    }).join('');
+    tip.innerHTML = `<h3>📋 ${td.label}</h3>${colHTML}<br><div style="color:#94a3b8;font-size:11px">${td.note}</div><br>${td.tags.map(t=>`<span class="tag">${t}</span>`).join('')}`;
+  } else {
+    if (!pinnedNode) tip.style.display = 'none';
+  }
+}
+
+// ── Drawing helpers ───────────────────────────────────────────────────────────
+function drawTable(px, py, label, color, sc, isActive) {
+  const w = Math.max(90, label.length * 8) * sc;
+  const h = 44 * sc;
+  const r = 6 * sc;
+  // Glow
+  ctx.shadowBlur = isActive ? 28 : 8;
+  ctx.shadowColor = color;
+  // Header block
+  const grad = ctx.createLinearGradient(px-w/2, py-h/2, px+w/2, py+h/2);
+  grad.addColorStop(0, color + (isActive ? 'aa' : '66'));
+  grad.addColorStop(1, color + (isActive ? '55' : '22'));
+  roundRect(px-w/2, py-h/2, w, h, r, grad, isActive ? color : color+'99', isActive ? 2.5 : 1.5);
+
+  // 3D depth sides
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = color + '33';
+  ctx.lineWidth = 1;
+  const sideD = 7 * sc;
+  // bottom-left
+  ctx.beginPath(); ctx.moveTo(px-w/2, py+h/2); ctx.lineTo(px-w/2-sideD*0.7, py+h/2+sideD); ctx.stroke();
+  // bottom-right
+  ctx.beginPath(); ctx.moveTo(px+w/2, py+h/2); ctx.lineTo(px+w/2+sideD*0.3, py+h/2+sideD); ctx.stroke();
+  // bottom edge
+  ctx.beginPath();
+  ctx.moveTo(px-w/2-sideD*0.7, py+h/2+sideD);
+  ctx.lineTo(px+w/2+sideD*0.3, py+h/2+sideD);
+  ctx.fillStyle = color + '18';
+  ctx.fill(); ctx.stroke();
+
+  // Label
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font = `bold ${Math.max(9, 11*sc)}px 'Segoe UI',system-ui`;
+  ctx.fillStyle = '#fff';
+  ctx.fillText(label, px, py - h*0.1);
+  // Row count hint
+  const td = TABLES.find(t => t.label === label || t.id === label);
+  if (td && sc > 0.55) {
+    ctx.font = `${Math.max(7, 9*sc)}px 'Segoe UI'`;
+    ctx.fillStyle = color + 'bb';
+    ctx.fillText(td.cols.length + ' columns', px, py + h*0.28);
+  }
+  ctx.shadowBlur = 0;
+}
+
+function roundRect(x, y, w, h, r, fill, stroke, lw) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke();
+}
+
+function drawEdge(p1, p2, card, lbl) {
+  const dx=p2.sx-p1.sx, dy=p2.sy-p1.sy, dist=Math.hypot(dx,dy);
+  if (dist < 2) return;
+  const nx=dx/dist, ny=dy/dist;
+  const ox=p1.sx+nx*52, oy=p1.sy+ny*24;
+  const ex=p2.sx-nx*52, ey=p2.sy-ny*24;
+  const avgD=(p1.depth+p2.depth)/2;
+  const alpha=Math.max(0.12, Math.min(0.55, 0.45-avgD*0.04));
+
+  // Bezier curve for depth feel
+  const mx2=(ox+ex)/2 - ny*20, my2=(oy+ey)/2 + nx*20;
+  ctx.beginPath();
+  ctx.setLineDash([5,5]);
+  ctx.strokeStyle=`rgba(56,189,248,${alpha})`;
+  ctx.lineWidth=1.2;
+  ctx.moveTo(ox,oy); ctx.quadraticCurveTo(mx2,my2,ex,ey);
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // Arrow head
+  const angle=Math.atan2(ey-my2, ex-mx2);
+  ctx.fillStyle=`rgba(56,189,248,${alpha+0.1})`;
+  ctx.beginPath();
+  ctx.moveTo(ex,ey);
+  ctx.lineTo(ex-9*Math.cos(angle-0.4), ey-9*Math.sin(angle-0.4));
+  ctx.lineTo(ex-9*Math.cos(angle+0.4), ey-9*Math.sin(angle+0.4));
+  ctx.closePath(); ctx.fill();
+
+  // Cardinality label
+  if (dist > 80) {
+    const midX=(ox+ex)/2, midY=(oy+ey)/2;
+    ctx.font=`9px 'Segoe UI'`;
+    ctx.fillStyle=`rgba(148,163,184,${alpha+0.1})`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(card, midX, midY-8);
+  }
+}
+
+function drawGrid() {
+  ctx.strokeStyle='rgba(14,165,233,0.05)'; ctx.lineWidth=1;
+  for (let i=-20; i<=20; i++) {
+    const x=W/2+i*70; ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    const y=H/2+i*70; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+}
+
+// ── Render loop ───────────────────────────────────────────────────────────────
+function frame() {
+  if (autoRotate) rotY += 0.004;
+  ctx.clearRect(0,0,W,H);
+
+  const bg = ctx.createRadialGradient(W/2,H/2,0, W/2,H/2, Math.max(W,H)*0.8);
+  bg.addColorStop(0,'#0c1428'); bg.addColorStop(1,'#060610');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  drawGrid();
+
+  projected.length = 0;
+  for (const t of TABLES) {
+    const p = project(t.x, t.y, t.z);
+    projected.push({ id:t.id, sx:p.sx, sy:p.sy, depth:p.depth, scale:p.scale });
+  }
+
+  const sorted = [...projected].sort((a,b) => b.depth - a.depth);
+
+  // Edges first
+  for (const [fId, tId, card, lbl] of EDGES) {
+    const p1=projected.find(p=>p.id===fId), p2=projected.find(p=>p.id===tId);
+    if (p1 && p2) drawEdge(p1, p2, card, lbl);
+  }
+
+  // Tables
+  for (const p of sorted) {
+    const td = TABLES.find(t => t.id === p.id);
+    const isActive = p.id === hoveredNode || p.id === pinnedNode;
+    drawTable(p.sx, p.sy, td.label, td.color, Math.max(0.35, Math.min(1.5, p.scale)), isActive);
+  }
+
+  // Ambient particles
+  const t2=Date.now()*0.0008;
+  for (let i=0;i<30;i++) {
+    const px2=(Math.sin(t2*0.4+i*2.7)*0.5+0.5)*W;
+    const py2=(Math.cos(t2*0.3+i*1.9)*0.5+0.5)*H;
+    const a=(Math.sin(t2+i)*0.5+0.5)*0.25;
+    ctx.beginPath(); ctx.arc(px2,py2,1,0,Math.PI*2);
+    ctx.fillStyle=`rgba(56,189,248,${a})`; ctx.fill();
+  }
+
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>

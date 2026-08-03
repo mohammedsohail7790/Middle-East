@@ -1,0 +1,5 @@
+*
+!.next/
+!public/
+!package.json
+!node_modules/

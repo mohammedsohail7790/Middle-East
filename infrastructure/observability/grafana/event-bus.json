@@ -1,0 +1,33 @@
+{
+  "title": "Call IQ — Event Bus",
+  "uid": "calliq-events",
+  "tags": ["call-iq", "events", "p2"],
+  "panels": [
+    {
+      "id": 1,
+      "title": "DLQ depth",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "calliq_dlq_depth" }],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 25 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Stream depth by stream",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "targets": [{ "expr": "calliq_stream_depth" }]
+    }
+  ],
+  "schemaVersion": 38
+}

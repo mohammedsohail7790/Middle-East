@@ -1,0 +1,37 @@
+{
+  "title": "Call IQ — Runtime Continuity",
+  "uid": "calliq-runtime",
+  "tags": ["call-iq", "runtime", "p1"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Active sessions",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "calliq_active_sessions", "legendFormat": "sessions" }]
+    },
+    {
+      "id": 2,
+      "title": "Reconnecting sessions",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "calliq_reconnecting_sessions" }]
+    },
+    {
+      "id": 3,
+      "title": "Reconnect total",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "calliq_reconnect_total" }]
+    },
+    {
+      "id": 4,
+      "title": "Watchdog orphan cleanups",
+      "type": "graph",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [{ "expr": "calliq_watchdog_orphan_cleanups" }]
+    }
+  ],
+  "schemaVersion": 38
+}

@@ -1,0 +1,248 @@
+# Grafana Alerting Rules for Call IQ Gateway
+# 
+# These rules define critical alerts for production monitoring
+
+groups:
+  - name: session_health
+    interval: 30s
+    rules:
+      - alert: HighSessionFailureRate
+        expr: rate(calliq_session_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: session
+        annotations:
+          summary: "High session failure rate detected"
+          description: "Session failure rate is {{ $value | humanize }} failures/sec (threshold: 0.1/sec)"
+
+      - alert: ZombieSessionsDetected
+        expr: rate(calliq_zombie_sessions_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: session
+        annotations:
+          summary: "Zombie sessions detected"
+          description: "Zombie session rate is {{ $value | humanize }} zombies/sec"
+
+      - alert: HighOrphanSessionRate
+        expr: rate(calliq_orphan_sessions_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: session
+        annotations:
+          summary: "High orphan session rate"
+          description: "Orphan session rate is {{ $value | humanize }} orphans/sec"
+
+      - alert: SessionCapacityNearLimit
+        expr: sum(calliq_sessions_active) > 250
+        for: 5m
+        labels:
+          severity: warning
+          component: capacity
+        annotations:
+          summary: "Session capacity near limit"
+          description: "Active sessions: {{ $value }} (limit: 300)"
+
+  - name: audio_pipeline
+    interval: 30s
+    rules:
+      - alert: HighAudioLatency
+        expr: histogram_quantile(0.95, rate(calliq_audio_latency_milliseconds_bucket[5m])) > 800
+        for: 3m
+        labels:
+          severity: critical
+          component: audio
+        annotations:
+          summary: "High audio latency detected"
+          description: "P95 audio latency is {{ $value | humanize }}ms (threshold: 800ms)"
+
+      - alert: HighAudioDropoutRate
+        expr: rate(calliq_audio_frames_dropped_total[5m]) / rate(calliq_audio_frames_received_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          component: audio
+        annotations:
+          summary: "High audio dropout rate"
+          description: "Audio dropout rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+      - alert: AudioPipelineStalled
+        expr: rate(calliq_audio_frames_received_total[1m]) == 0 and sum(calliq_sessions_active) > 0
+        for: 1m
+        labels:
+          severity: critical
+          component: audio
+        annotations:
+          summary: "Audio pipeline stalled"
+          description: "No audio frames received despite active sessions"
+
+  - name: websocket_health
+    interval: 30s
+    rules:
+      - alert: HighWebSocketErrorRate
+        expr: rate(calliq_websocket_errors_total[5m]) > 1
+        for: 2m
+        labels:
+          severity: warning
+          component: websocket
+        annotations:
+          summary: "High WebSocket error rate"
+          description: "WebSocket error rate is {{ $value | humanize }} errors/sec"
+
+      - alert: WebSocketConnectionFailures
+        expr: rate(calliq_websocket_connections_total{status="error"}[5m]) > 0.2
+        for: 3m
+        labels:
+          severity: critical
+          component: websocket
+        annotations:
+          summary: "High WebSocket connection failure rate"
+          description: "Connection failure rate is {{ $value | humanize }} failures/sec"
+
+  - name: tool_execution
+    interval: 30s
+    rules:
+      - alert: HighToolExecutionLatency
+        expr: histogram_quantile(0.95, rate(calliq_tool_execution_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+          component: tools
+        annotations:
+          summary: "High tool execution latency"
+          description: "P95 tool execution time is {{ $value | humanize }}s (threshold: 30s)"
+
+      - alert: HighToolTimeoutRate
+        expr: rate(calliq_tool_timeouts_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+          component: tools
+        annotations:
+          summary: "High tool timeout rate"
+          description: "Tool timeout rate is {{ $value | humanize }} timeouts/sec"
+
+      - alert: CircuitBreakerOpen
+        expr: calliq_tool_circuit_breaker_open == 1
+        for: 1m
+        labels:
+          severity: critical
+          component: tools
+        annotations:
+          summary: "Circuit breaker open for {{ $labels.tool_name }}"
+          description: "Tool {{ $labels.tool_name }} circuit breaker is open"
+
+  - name: redis_health
+    interval: 30s
+    rules:
+      - alert: HighRedisLatency
+        expr: histogram_quantile(0.95, rate(calliq_redis_operation_duration_milliseconds_bucket[5m])) > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: redis
+        annotations:
+          summary: "High Redis operation latency"
+          description: "P95 Redis latency is {{ $value | humanize }}ms (threshold: 100ms)"
+
+      - alert: RedisConnectionErrors
+        expr: rate(calliq_redis_connection_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: redis
+        annotations:
+          summary: "Redis connection errors detected"
+          description: "Redis error rate is {{ $value | humanize }} errors/sec"
+
+  - name: openai_health
+    interval: 30s
+    rules:
+      - alert: HighOpenAILatency
+        expr: histogram_quantile(0.95, rate(calliq_openai_latency_milliseconds_bucket[5m])) > 2000
+        for: 5m
+        labels:
+          severity: warning
+          component: openai
+        annotations:
+          summary: "High OpenAI API latency"
+          description: "P95 OpenAI latency is {{ $value | humanize }}ms (threshold: 2000ms)"
+
+      - alert: HighOpenAIErrorRate
+        expr: rate(calliq_openai_errors_total[5m]) > 0.5
+        for: 3m
+        labels:
+          severity: critical
+          component: openai
+        annotations:
+          summary: "High OpenAI error rate"
+          description: "OpenAI error rate is {{ $value | humanize }} errors/sec"
+
+      - alert: FrequentOpenAIReconnects
+        expr: rate(calliq_openai_reconnects_total[5m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: openai
+        annotations:
+          summary: "Frequent OpenAI reconnects"
+          description: "OpenAI reconnect rate is {{ $value | humanize }} reconnects/sec"
+
+  - name: system_health
+    interval: 30s
+    rules:
+      - alert: HighMemoryUsage
+        expr: (calliq_memory_usage_bytes{type="heap_used"} / calliq_memory_usage_bytes{type="heap_total"}) > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "High memory usage"
+          description: "Heap usage is {{ $value | humanizePercentage }} (threshold: 90%)"
+
+      - alert: HighEventLoopLag
+        expr: histogram_quantile(0.95, rate(calliq_event_loop_lag_milliseconds_bucket[5m])) > 100
+        for: 3m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High event loop lag"
+          description: "P95 event loop lag is {{ $value | humanize }}ms (threshold: 100ms)"
+
+      - alert: MemoryLeak
+        expr: rate(calliq_memory_usage_bytes{type="heap_used"}[30m]) > 10485760
+        for: 30m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "Potential memory leak detected"
+          description: "Memory growing at {{ $value | humanize }} bytes/sec for 30 minutes"
+
+  - name: business_metrics
+    interval: 60s
+    rules:
+      - alert: LowBookingConversionRate
+        expr: rate(calliq_bookings_created_total[1h]) / rate(calliq_sessions_total[1h]) < 0.1
+        for: 1h
+        labels:
+          severity: info
+          component: business
+        annotations:
+          summary: "Low booking conversion rate"
+          description: "Booking conversion rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+
+      - alert: NoBookingsCreated
+        expr: increase(calliq_bookings_created_total[1h]) == 0 and increase(calliq_sessions_total[1h]) > 10
+        for: 1h
+        labels:
+          severity: warning
+          component: business
+        annotations:
+          summary: "No bookings created in last hour"
+          description: "0 bookings despite {{ $value }} sessions"

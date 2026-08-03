@@ -1,0 +1,156 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, feature/consolidate-changes]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '22'
+  NEXT_TELEMETRY_DISABLED: '1'
+
+jobs:
+  validate-migrations:
+    name: Validate Migration Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Check for duplicate migration numbers
+        run: node scripts/validate-migrations.mjs
+
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    needs: validate-migrations
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint --if-present
+      - run: npm run typecheck --if-present
+
+  build:
+    name: Build Packages
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build --if-present
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test
+
+  gateway-integration:
+    name: Gateway Integration (Redis)
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - name: Run Redis integration smoke tests
+        env:
+          REDIS_URL: redis://localhost:6379
+        run: npm run test -- tests/integration/redis-smoke.test.ts
+      - name: Run gateway integration tests
+        env:
+          REDIS_URL: redis://localhost:6379
+          RUN_INTEGRATION_TESTS: 'true'
+        run: npm run test:gateway:integration
+
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      - run: npm ci
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm run test:e2e:install
+      - name: Write dashboard env for build
+        working-directory: apps/dashboard
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          GATEWAY_URL: ${{ secrets.NEXT_PUBLIC_GATEWAY_API_URL }}
+        run: |
+          URL="${SUPABASE_URL:-https://e2e-placeholder.supabase.co}"
+          ANON="${SUPABASE_ANON:-e2e-placeholder-anon-key}"
+          GW="${GATEWAY_URL:-http://127.0.0.1:3003}"
+          printf '%s\n' \
+            "NEXT_PUBLIC_SUPABASE_URL=$URL" \
+            "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON" \
+            "NEXT_PUBLIC_GATEWAY_API_URL=$GW" \
+            > .env.local
+      - run: npm run build -w @call-iq/dashboard
+      - name: Start production dashboard
+        run: |
+          npm run start -w @call-iq/dashboard &
+          npx --yes wait-on@7.2.0 -t 120000 http://127.0.0.1:3000
+      - name: Run Playwright
+        env:
+          CI: 'true'
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+          PLAYWRIGHT_SKIP_WEBSERVER: '1'
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+        run: npm run test:e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: qa/artifacts/playwright-report
+          retention-days: 7
+
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/consolidate-changes')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build Gateway
+        run: docker build -f apps/gateway/Dockerfile -t call-iq-gateway:latest .
+      - name: Build Dashboard
+        run: docker build -f apps/dashboard/Dockerfile -t call-iq-dashboard:latest .
