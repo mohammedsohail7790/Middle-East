@@ -28,6 +28,7 @@ import { navPageTitle, navPageSubtitle } from "@/lib/dashboard-nav";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { ThemeToggle } from "@/components/ui-kit/ThemeToggle";
 import { NotificationsCenter } from "@/components/dashboard/NotificationsCenter";
+import { LanguageSwitcher } from "@/components/dashboard/LanguageSwitcher";
 import { useDashboardLive } from "@/components/dashboard/DashboardRealtimeProvider";
 import type { WorkspaceProfile } from "@/lib/ensure-tenant";
 
@@ -167,6 +168,7 @@ export function DashboardTopbar({ workspace, onOpenMenu, planTick }: Props) {
       <div className="dashboard-header-actions">
         <LiveStatusPill />
         <div className="dashboard-header-utilities hidden sm:flex items-center gap-1.5">
+          <LanguageSwitcher />
           <ThemeToggle />
           <NotificationsCenter />
         </div>
