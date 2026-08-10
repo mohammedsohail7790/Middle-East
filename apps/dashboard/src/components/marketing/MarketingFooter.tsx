@@ -36,9 +36,6 @@ export function MarketingFooter() {
             <Link href="/ai-vs-human" className="flink">
               AI vs. Live Agents
             </Link>
-            <Link href="/integrations" className="flink">
-              Integrations
-            </Link>
             <Link href="/faq" className="flink">
               FAQ
             </Link>
@@ -124,7 +121,7 @@ export function MarketingFooter() {
         </div>
 
         <div className="footer-bottom">
-          <div className="footer-legal">© {new Date().getFullYear()} Call IQ Labs. All rights reserved.</div>
+          <div className="footer-legal">© {new Date().getFullYear()} Halla AI Labs. All rights reserved.</div>
         </div>
       </div>
     </footer>

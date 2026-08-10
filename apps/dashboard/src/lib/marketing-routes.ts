@@ -4,7 +4,6 @@ export const MARKETING_ROUTES: Record<string, string> = {
   features: "/features",
   pricing: "/pricing",
   "how-it-works": "/how-it-works",
-  integrations: "/integrations",
   roi: "/roi",
   blog: "/blog",
   forwarding: "/forwarding",

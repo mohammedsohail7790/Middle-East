@@ -1,8 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useId, useState } from "react";
+import {
+  Phone, Bot, Zap, Languages, Shield, Calendar, MapPin, Mic,
+  Target, Mail, Shuffle, Moon, AlertTriangle, CheckCircle2,
+  type LucideIcon,
+} from "lucide-react";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { Hero } from "@/components/marketing/Hero";
 import {
   TICKER_ITEMS,
   VALUE_PROPS,
@@ -12,15 +18,44 @@ import {
   FAQ_ITEMS,
 } from "@/lib/marketing-content";
 
+const ICONS: Record<string, LucideIcon> = {
+  phone: Phone,
+  bot: Bot,
+  zap: Zap,
+  languages: Languages,
+  shield: Shield,
+  calendar: Calendar,
+  "map-pin": MapPin,
+  mic: Mic,
+  target: Target,
+  mail: Mail,
+  shuffle: Shuffle,
+  moon: Moon,
+};
+
+function MarketingIcon({ name, className }: { name: string; className?: string }) {
+  const Icon = ICONS[name] ?? Phone;
+  return <Icon className={className} strokeWidth={2} aria-hidden />;
+}
+
 function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
+  const answerId = useId();
   return (
     <div className={`faq-item${open ? " open" : ""}`}>
-      <button type="button" className="faq-q" onClick={() => setOpen((o) => !o)}>
+      <button
+        type="button"
+        className="faq-q"
+        aria-expanded={open}
+        aria-controls={answerId}
+        onClick={() => setOpen((o) => !o)}
+      >
         {q}
         <span className="faq-icon">+</span>
       </button>
-      <div className="faq-a">{a}</div>
+      <div id={answerId} className="faq-a" aria-hidden={!open}>
+        {a}
+      </div>
     </div>
   );
 }
@@ -31,60 +66,14 @@ export default function HomeMarketingPage() {
   return (
     <MarketingShell>
 
-      <section className="hero text-center">
-        <div className="container">
-          <div className="hero-eyebrow">
-            <span className="dot" />
-            14-Day Free Trial — No Credit Card Required
-          </div>
-          <h1>
-            Your Business Deserves
-            <br />
-            an AI That <em>Never</em> Sleeps
-          </h1>
-          <p className="hero-sub">
-            Call IQ answers every call 24/7, books appointments, captures leads, and routes emergencies — automatically.
-            Starting at $39/month. One call can pay for 6 months.
-          </p>
-          <div className="hero-actions">
-            <Link href="/signup" className="btn btn-primary btn-lg">
-              Get My AI Receptionist →
-            </Link>
-            <Link href="/how-it-works" className="btn btn-outline btn-lg">
-              See How It Works
-            </Link>
-          </div>
-          <p className="hero-note">
-            ✓ Free 14-day trial &nbsp;&nbsp; ✓ No credit card &nbsp;&nbsp; ✓ Live in 15 minutes &nbsp;&nbsp; ✓ Cancel
-            anytime
-          </p>
-
-          <div className="stats-bar">
-            <div className="stat-item">
-              <div className="stat-num">24/7</div>
-              <div className="stat-label">Always Answering</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-num">$39</div>
-              <div className="stat-label">Starting / Month</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-num">50+</div>
-              <div className="stat-label">Industries Served</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-num">15min</div>
-              <div className="stat-label">Setup Time</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <Hero />
 
       <div className="ticker-wrap">
         <div className="ticker-track">
           {ticker.map((item, i) => (
-            <span key={i} className="ticker-item">
-              {item.emoji} <strong>{item.strong}</strong> {item.text}{" "}
+            <span key={i} className="ticker-item" aria-hidden={i >= TICKER_ITEMS.length}>
+              <MarketingIcon name={item.icon} className="inline-block size-3.5 -mt-0.5 me-1 text-[var(--gold)]" />
+              <strong>{item.strong}</strong> {item.text}{" "}
               <span className="ticker-sep">·</span>
             </span>
           ))}
@@ -102,7 +91,7 @@ export default function HomeMarketingPage() {
                 <span style={{ color: "var(--accent)" }}>6+ Months</span> of Service
               </h2>
               <p style={{ margin: "18px 0 36px", fontSize: "1.05rem" }}>
-                Every missed call is money walking to your competitor. Call IQ ensures every call is answered, every lead
+                Every missed call is money walking to your competitor. Halla AI ensures every call is answered, every lead
                 captured, every appointment booked — while you&apos;re doing the actual work.
               </p>
               {VALUE_PROPS.map((v) => (
@@ -121,25 +110,30 @@ export default function HomeMarketingPage() {
 
             <div className="mockup-wrap">
               <div className="mock-badge mock-badge-1">
-                🚨 <span>Emergency flagged</span> <span className="mock-badge-green">→ Dispatching</span>
+                <AlertTriangle className="inline-block size-3.5 -mt-0.5 me-1" strokeWidth={2.25} aria-hidden />
+                <span>Emergency flagged</span> <span className="mock-badge-green">→ Dispatching</span>
               </div>
               <div className="mock-badge mock-badge-2">
-                ✅ <span className="mock-badge-green">$1,200 job</span> captured
+                <CheckCircle2 className="inline-block size-3.5 -mt-0.5 me-1" strokeWidth={2.25} aria-hidden />
+                <span className="mock-badge-green">AED 2,000 job</span> captured
               </div>
               <div className="mockup">
-                <div className="mockup-header">📞 Incoming Call — (555) 847-2931</div>
+                <div className="mockup-header">
+                  <Phone className="inline-block size-3.5 -mt-0.5 me-1.5" strokeWidth={2.25} aria-hidden />
+                  Incoming Call — +971 4 XXX XXXX
+                </div>
                 <div className="wave">
                   {[0, 1, 2, 3, 4, 5, 6].map((i) => (
                     <div key={i} className="wave-bar" />
                   ))}
                 </div>
-                <div className="bubble">My pipe just burst — water&apos;s flooding everywhere!</div>
+                <div className="bubble">The AC unit just stopped completely — it&apos;s 45 degrees outside!</div>
                 <div className="bubble ai">
-                  I&apos;m Call IQ, your AI receptionist. Is water actively flooding right now?
+                  I&apos;m Halla AI, your AI receptionist. Is this a full outage, or is it still running but not cooling?
                 </div>
-                <div className="bubble">Yes! The basement!</div>
+                <div className="bubble">Full outage. No power to the unit at all.</div>
                 <div className="bubble ai">
-                  Marking as emergency — alerting your on-call tech now. Confirming 1402 Oak Street?
+                  Marking as emergency — alerting your on-call technician now. Confirming your address in Al Barsha?
                 </div>
                 <div className="mockup-status">
                   <div className="status-dot" />
@@ -169,7 +163,9 @@ export default function HomeMarketingPage() {
           <div className="grid-3" style={{ gap: 20 }}>
             {FEATURES.map((f) => (
               <div key={f.title} className={`card${f.iconClass === "feat-icon-blue" ? " card-blue" : ""}`}>
-                <div className={`feat-icon ${f.iconClass}`.trim()}>{f.icon}</div>
+                <div className={`feat-icon ${f.iconClass}`.trim()}>
+                  <MarketingIcon name={f.icon} className="size-5" />
+                </div>
                 <h4>{f.title}</h4>
                 <p style={{ marginTop: 8, fontSize: "0.875rem" }}>{f.desc}</p>
               </div>
@@ -218,7 +214,7 @@ export default function HomeMarketingPage() {
                 {p.popular && <div className="pop-badge">Most Popular</div>}
                 <div className="pricing-plan">{p.name}</div>
                 <div className="pricing-price">
-                  <sup>$</sup>
+                  <span className="text-[0.4em] font-semibold align-top me-1">{p.currency}</span>
                   {p.price}
                   <sub>/mo</sub>
                 </div>
@@ -257,7 +253,7 @@ export default function HomeMarketingPage() {
       <section className="section-sm">
         <div className="container">
           <div className="cta-block">
-            <div className="label" style={{ background: "rgba(14,165,233,0.15)", color: "var(--accent-mid)" }}>
+            <div className="label" style={{ background: "rgba(201,162,75,0.15)", color: "var(--accent-mid)" }}>
               Start Today
             </div>
             <h2>
@@ -281,7 +277,7 @@ export default function HomeMarketingPage() {
               </Link>
             </div>
             <p style={{ marginTop: 20, fontSize: "0.8rem", color: "rgba(255,255,255,0.3)" }}>
-              14-day free trial · No credit card · Cancel anytime · Live chat 7am–3pm ET
+              14-day free trial · No credit card · Cancel anytime · Live chat 9am–6pm GST
             </p>
           </div>
         </div>

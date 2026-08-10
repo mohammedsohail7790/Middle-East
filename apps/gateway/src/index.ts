@@ -37,10 +37,7 @@ import { RealtimeGateway } from './services/realtime/realtime.gateway.js';
 import { validateEnvironment, getAllowedOrigins, isAllowedCorsOrigin } from './services/env.js';
 import { knowledgeService } from './services/knowledge/knowledge.service.js';
 import { productionTelemetry } from './services/voice/production-telemetry.js';
-import { handleStripeBillingWebhook } from './services/billing/stripe-webhook.js';
 import { startRetentionWorker } from './workers/retention-worker.js';
-import { startIntegrationSyncWorker } from './workers/integration-sync.worker.js';
-import { startScimSyncWorker } from './workers/scim-sync.worker.js';
 import { startSelfHealingLoop } from './operations/self-healing/self-healing.service.js';
 import { bootstrapOtel } from './observability/otel/otel-bootstrap.js';
 import { requestTracingMiddleware } from './middleware/request-tracing.js';
@@ -48,10 +45,8 @@ import { httpsRedirectMiddleware, securityHeadersMiddleware } from './middleware
 import {
     tieredRateLimitMiddleware,
     publicRootRateLimitMiddleware,
-    inboundWebhookRateLimitMiddleware,
 } from './security/tiered-rate-limit.js';
 import { requestHardeningMiddleware } from './security/request-hardening.js';
-import { integrationService } from './services/integrations/integration.service.js';
 import { registerService, shutdown } from './services/graceful-shutdown.js';
 import { wsRateLimiter } from './services/ws-rate-limiter.js';
 import { healthCheckService } from './services/health-check.js';
@@ -68,8 +63,6 @@ bootstrapOtel();
 // In production, deploy apps/worker as a separate service instead.
 if (process.env.GATEWAY_RUN_WORKERS === 'true') {
   startRetentionWorker();
-  startIntegrationSyncWorker();
-  startScimSyncWorker();
   logger.info('WORKERS_STARTED_IN_GATEWAY', { note: 'Consider deploying apps/worker separately' });
 } else {
   logger.info('WORKERS_NOT_STARTED', { note: 'Set GATEWAY_RUN_WORKERS=true to co-locate, or deploy apps/worker' });
@@ -90,10 +83,6 @@ startSelfHealingLoop();
         logger.warn('Database connection failed on boot', { error: String(error) });
     }
 })();
-
-// PART 6 — start the integration worker immediately on boot so queued jobs
-// from previous runs are processed without waiting for the first new call.
-integrationService.startWorkerOnBoot();
 
 import('./events/platform-event-bus.js')
   .then(({ startPlatformEventBus }) => startPlatformEventBus())
@@ -127,56 +116,6 @@ registerDefaultHealthChecks();
 app.use(MiddlewareFactory.security() as any);
 app.use(MiddlewareFactory.compressionMiddleware());
 app.use(MiddlewareFactory.requestId());
-(app as any).post(
-  '/api/v1/billing/webhook',
-  (req: any, res: any, next: any) => {
-    void inboundWebhookRateLimitMiddleware(req, res, next);
-  },
-  (express as any).raw({ type: 'application/json' }),
-  handleStripeBillingWebhook
-);
-
-(app as any).post(
-  '/api/v1/calendar/calendly/webhook',
-  (req: any, res: any, next: any) => {
-    void inboundWebhookRateLimitMiddleware(req, res, next);
-  },
-  (express as any).raw({ type: 'application/json' }),
-  async (req: any, res: any) => {
-    try {
-      const { verifyCalendlyWebhookSignature } = await import(
-        './services/calendar/calendly.webhook.js'
-      );
-      const { calendlyService } = await import('./services/calendar/calendly.service.js');
-      const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || '');
-      const sig = req.headers['calendly-webhook-signature'] as string | undefined;
-      if (!verifyCalendlyWebhookSignature(raw, sig)) {
-        res.status(401).json({ error: 'Invalid Calendly webhook signature' });
-        return;
-      }
-      const tenantId = typeof req.query.tenant_id === 'string' ? req.query.tenant_id.trim() : '';
-      if (!tenantId) {
-        res.status(400).json({ error: 'Missing tenant_id' });
-        return;
-      }
-      // Validate tenant_id exists in our database to prevent cross-tenant event routing
-      const { voiceDb } = await import('./services/voice/tenant-scope.js');
-      const tenantCheck = await voiceDb.query('SELECT id FROM public.voice_tenants WHERE id = $1 LIMIT 1', [tenantId]);
-      if (tenantCheck.rows.length === 0) {
-        res.status(400).json({ error: 'Invalid tenant_id' });
-        return;
-      }
-      const payload = JSON.parse(raw.toString('utf8')) as Record<string, unknown>;
-      await calendlyService.handleWebhookPayload(tenantId, payload);
-      res.status(200).json({ received: true });
-    } catch (err) {
-      const { logger } = await import('./services/logger.js');
-      logger.error('[Calendly] Webhook error', { error: String(err) });
-      res.status(500).json({ error: 'Webhook processing failed' });
-    }
-  }
-);
-
 app.use(express.json({ limit: '10mb' }));
 app.use(requestHardeningMiddleware);
 
@@ -249,20 +188,12 @@ app.use(errorHandler);
 
 // Start server
 server.listen(port, '0.0.0.0', () => {
-    logger.info(`🚀 Call IQ gateway running on port ${port}`, {
+    logger.info(`🚀 Halla AI gateway running on port ${port}`, {
         port,
         env: process.env.NODE_ENV || 'development',
         version: process.env.npm_package_version || '1.0.0',
     });
 
-    void import('./services/billing/billing.service.js').then(({ warmStripePriceCache, validateStripeBillingConfig }) => {
-        warmStripePriceCache()
-            .then(() => validateStripeBillingConfig())
-            .catch((err) => {
-                logger.warn('STRIPE_CATALOG_INIT_FAILED', { error: String(err) });
-            });
-    });
-    
     if (process.env.NODE_ENV !== 'production') {
         setInterval(() => {
             console.log('⏳ WAITING FOR TWILIO WEBHOOK...');
@@ -295,15 +226,6 @@ registerService({
     shutdown: async () => {
         if (typeof (wsRateLimiter as any).destroy === 'function') {
             (wsRateLimiter as any).destroy();
-        }
-    },
-});
-
-registerService({
-    name: 'integration-worker',
-    shutdown: async () => {
-        if (typeof (integrationService as any).closeWorker === 'function') {
-            await (integrationService as any).closeWorker();
         }
     },
 });

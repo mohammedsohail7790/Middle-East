@@ -8,7 +8,6 @@ const PRODUCT_LINKS = [
   { href: "/features", label: "Features", icon: "✨" },
   { href: "/pricing", label: "Pricing", icon: "💰" },
   { href: "/how-it-works", label: "How It Works", icon: "⚙️" },
-  { href: "/integrations", label: "Integrations", icon: "🔗" },
 ];
 
 const SOLUTION_LINKS = [
@@ -53,7 +52,7 @@ export function MarketingNav() {
         <div className="container">
           <div className="nav-inner">
             <Link href="/" className="logo">
-              <Image src="/logo.png" alt="Call IQ" width={220} height={56} className="h-[56px] w-auto max-w-[min(220px,46vw)]" priority />
+              <Image src="/logo.png" alt="Halla AI" width={220} height={56} className="h-[56px] w-auto max-w-[min(220px,46vw)]" priority />
             </Link>
 
             <div className="nav-links">
