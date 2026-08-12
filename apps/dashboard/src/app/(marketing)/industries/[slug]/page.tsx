@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   return params.then(({ slug }) => {
     const ind = INDUSTRY_PAGES[slug] ?? { title: slug };
-    return { title: `${ind.title} | Call IQ` };
+    return { title: `${ind.title} | Halla AI` };
   });
 }
 
@@ -28,7 +28,7 @@ function industryContent(slug: string) {
   return {
     title,
     subtitle: "AI receptionist built for your trade",
-    intro: `Call IQ answers every call for ${title} businesses — 24/7. Book jobs, capture leads, and route emergencies while your team stays in the field.`,
+    intro: `Halla AI answers every call for ${title} businesses — 24/7. Book jobs, capture leads, and route emergencies while your team stays in the field.`,
     useCases: [
       "24/7 call answering with your business name",
       "Lead capture and instant SMS/email summaries",
@@ -58,7 +58,7 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
 
           {ind.differentiators ? (
             <>
-              <h3 style={{ marginBottom: 16 }}>What sets Call IQ apart</h3>
+              <h3 style={{ marginBottom: 16 }}>What sets Halla AI apart</h3>
               <div style={{ display: "grid", gap: 10, marginBottom: 40 }}>
                 {ind.differentiators.map((d) => (
                   <div key={d} className="pricing-feature" style={{ color: "var(--gray-700)" }}>{d}</div>
@@ -67,7 +67,7 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
             </>
           ) : (
             <>
-              <h3 style={{ marginBottom: 16 }}>How Call IQ helps {ind.title} businesses</h3>
+              <h3 style={{ marginBottom: 16 }}>How Halla AI helps {ind.title} businesses</h3>
               <ul style={{ marginBottom: 40, paddingLeft: 20, color: "var(--gray-600)", lineHeight: 2 }}>
                 {ind.useCases.map((u) => (
                   <li key={u}>{u}</li>

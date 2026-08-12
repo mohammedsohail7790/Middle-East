@@ -6,8 +6,8 @@ import { EnterpriseBackground } from "../three/EnterpriseBackground";
 import { VolumetricRays } from "./effects";
 
 export const CINEMATIC = {
-  company: "CALL IQ LABS",
-  website: "CALLIQLABS.COM",
+  company: "HALLA AI",
+  website: "HALLAAI.COM",
   accent: brand.colors.cyan,
   dark: "#050508",
   red: "#EF4444",

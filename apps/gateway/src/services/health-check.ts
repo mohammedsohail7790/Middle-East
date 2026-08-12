@@ -4,7 +4,7 @@
  */
 
 import os from 'os';
-// @call-iq/types - type declarations handled separately
+// @halla-ai/types - type declarations handled separately
 import { logger } from './logger.js';
 import { pool } from './db/pool.js';
 

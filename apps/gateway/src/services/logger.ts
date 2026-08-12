@@ -1,5 +1,5 @@
 /**
- * Enhanced Call IQ Logger Service
+ * Enhanced Halla AI Logger Service
  * Structured logging with correlation IDs, log levels, and multiple transports
  */
 

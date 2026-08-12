@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { Phone, Bot, Calendar, BarChart3, ArrowUpRight } from "lucide-react";
+import { Phone, Bot, Users, BarChart3, ArrowUpRight } from "lucide-react";
 
 const ACTIONS = [
   { href: "/dashboard/calls", label: "Review calls", desc: "Transcripts & outcomes", icon: Phone },
   { href: "/dashboard/agent", label: "Configure agent", desc: "Voice & scripts", icon: Bot },
-  { href: "/dashboard/calendar", label: "Calendar", desc: "Bookings & availability", icon: Calendar },
+  { href: "/dashboard/leads", label: "Leads", desc: "Pipeline & conversions", icon: Users },
   { href: "/dashboard/analytics", label: "Analytics", desc: "Performance trends", icon: BarChart3 },
 ];
 

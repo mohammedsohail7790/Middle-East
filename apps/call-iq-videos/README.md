@@ -1,6 +1,6 @@
-# Call IQ Training Videos
+# Halla AI Training Videos
 
-Professional 1920×1080 training videos for [Call IQ](https://www.calliqlabs.com) — AI voice receptionist SaaS.
+Professional 1920×1080 training videos for [Halla AI](https://www.hallaai.com) — AI voice receptionist SaaS.
 
 **Tagline:** Smart • Seamless • Always  
 **Brand colors:** Cyan `#0EA5E9`, Dark `#0A0A0A`, White `#FFFFFF`

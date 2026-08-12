@@ -18,7 +18,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
   process.exit(1);
 }
 
-const testEmail = process.env.TEST_USER_EMAIL || 'test@calliq.com';
+const testEmail = process.env.TEST_USER_EMAIL || 'test@hallaai.com';
 const testPassword = process.env.TEST_USER_PASSWORD || process.env.ADMIN_PASSWORD;
 
 if (!testPassword) {

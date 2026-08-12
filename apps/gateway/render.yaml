@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: call-iq-gateway
+    name: halla-ai-gateway
     env: node
     region: oregon
     plan: starter
@@ -70,11 +70,11 @@ services:
       - key: VOICE_INTERNAL_API_KEY
         sync: false
       - key: ALLOWED_ORIGINS
-        value: https://www.calliqlabs.com,https://calliqlabs.com,http://localhost:3000
+        value: https://www.hallaai.com,https://hallaai.com,https://app.hallaai.com,http://localhost:3000
       - key: DASHBOARD_URL
-        value: https://www.calliqlabs.com
+        value: https://app.hallaai.com
       - key: VOICE_WS_ALLOWED_ORIGINS
-        value: https://www.calliqlabs.com,https://calliqlabs.com
+        value: https://www.hallaai.com,https://app.hallaai.com
       
       # Voice Pipeline Configuration
       - key: ENABLE_VOICE_AGENT

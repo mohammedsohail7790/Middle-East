@@ -3,15 +3,15 @@
  *
  * Edit at repo root (gitignored, local only):
  *   index.html
- *   calliq_styles.css
- *   calliq_main.js
+ *   hallaai_styles.css
+ *   hallaai_main.js
  *
  * On Vercel/CI, root files are absent; build uses committed outputs below.
  *
- * Outputs (committed, served at /calliq-spa.html, /calliq-marketing.css, /calliq_main.js):
- *   apps/dashboard/public/calliq-spa.html
- *   apps/dashboard/public/calliq_main.js
- *   apps/dashboard/public/calliq-marketing.css (+ src/styles copy via scope script)
+ * Outputs (committed, served at /hallaai-spa.html, /hallaai-marketing.css, /hallaai_main.js):
+ *   apps/dashboard/public/hallaai-spa.html
+ *   apps/dashboard/public/hallaai_main.js
+ *   apps/dashboard/public/hallaai-marketing.css (+ src/styles copy via scope script)
  */
 import fs from "fs";
 import path from "path";
@@ -26,16 +26,16 @@ const DASHBOARD = path.join(REPO_ROOT, "apps", "dashboard");
 
 const ROOT_FILES = {
   html: path.join(REPO_ROOT, "index.html"),
-  css: path.join(REPO_ROOT, "calliq_styles.css"),
-  js: path.join(REPO_ROOT, "calliq_main.js"),
+  css: path.join(REPO_ROOT, "hallaai_styles.css"),
+  js: path.join(REPO_ROOT, "hallaai_main.js"),
 };
 
 const OUT = {
   indexHtml: path.join(DASHBOARD, "public", "index.html"),
-  spa: path.join(DASHBOARD, "public", "calliq-spa.html"),
-  js: path.join(DASHBOARD, "public", "calliq_main.js"),
-  publicCss: path.join(DASHBOARD, "public", "calliq_styles.css"),
-  unscopedCss: path.join(DASHBOARD, "public", "calliq-marketing.unscoped.css"),
+  spa: path.join(DASHBOARD, "public", "hallaai-spa.html"),
+  js: path.join(DASHBOARD, "public", "hallaai_main.js"),
+  publicCss: path.join(DASHBOARD, "public", "hallaai_styles.css"),
+  unscopedCss: path.join(DASHBOARD, "public", "hallaai-marketing.unscoped.css"),
 };
 
 function missing(paths) {
@@ -75,14 +75,14 @@ function logoVersion() {
 }
 
 const LOGO_SRC = `/logo.png?v=${logoVersion()}`;
-const NAV_LOGO_HTML = `<img src="${LOGO_SRC}" alt="Call IQ" />`;
+const NAV_LOGO_HTML = `<img src="${LOGO_SRC}" alt="Halla AI" />`;
 const FOOTER_LOGO_HTML =
-  `<div class="footer-logo"><a href="javascript:void(0)" onclick="go('home')" aria-label="Call IQ home"><img src="${LOGO_SRC}" alt="Call IQ" /></a></div>`;
+  `<div class="footer-logo"><a href="javascript:void(0)" onclick="go('home')" aria-label="Halla AI home"><img src="${LOGO_SRC}" alt="Halla AI" /></a></div>`;
 
 function fixMarketingLogos(html) {
   let out = html
-    .replace(/<img src="data:image\/[^"]+" alt="Call IQ"[^>]*>/gi, NAV_LOGO_HTML)
-    .replace(/<img src="\/logo\.png(?:\?v=[^"]*)?" alt="Call IQ"[^>]*>/gi, NAV_LOGO_HTML)
+    .replace(/<img src="data:image\/[^"]+" alt="(?:Call IQ|Halla AI)"[^>]*>/gi, NAV_LOGO_HTML)
+    .replace(/<img src="\/logo\.png(?:\?v=[^"]*)?" alt="(?:Call IQ|Halla AI)"[^>]*>/gi, NAV_LOGO_HTML)
     .replace(/<div class="footer-logo"><img src="data:image[^>]*><\/div>/, FOOTER_LOGO_HTML)
     .replace(/<div class="footer-logo"><img src="\/logo\.png(?:\?v=[^"]*)?"[^>]*><\/div>/, FOOTER_LOGO_HTML)
     .replace(
@@ -94,32 +94,34 @@ function fixMarketingLogos(html) {
 
 function prepareHtmlExact(html) {
   let out = prepareLandingHtml(html);
-  out = out.replace(/href=["']\.?\/?calliq_styles\.css["']/gi, 'href="/calliq_styles.css"');
-  out = out.replace(/src=["']\.?\/?calliq_main\.js["']/gi, 'src="/calliq_main.js"');
+  // Support both old calliq_* names and new hallaai_* names in source HTML
+  out = out.replace(/href=["']\.?\/?(?:calliq|hallaai)_styles\.css["']/gi, 'href="/hallaai_styles.css"');
+  out = out.replace(/src=["']\.?\/?(?:calliq|hallaai)_main\.js["']/gi, 'src="/hallaai_main.js"');
   return fixMarketingLogos(out);
 }
 
 function prepareHtml(html) {
   let out = html;
 
-  out = out.replace(/href=["']\.?\/?calliq_styles\.css["']/gi, 'href="/calliq-marketing.css"');
-  out = out.replace(/href=["']calliq-marketing\.unscoped\.css["']/gi, 'href="/calliq-marketing.css"');
+  out = out.replace(/href=["']\.?\/?(?:calliq|hallaai)_styles\.css["']/gi, 'href="/hallaai-marketing.css"');
+  out = out.replace(/href=["'](?:calliq|hallaai)-marketing\.unscoped\.css["']/gi, 'href="/hallaai-marketing.css"');
+  out = out.replace(/src=["']\.?\/?(?:calliq|hallaai)_main\.js["']/gi, 'src="/hallaai_main.js"');
 
-  out = out.replace(/src=["']\.?\/?calliq_main\.js["']/gi, 'src="/calliq_main.js"');
-
-  /** Do not match href="/calliq-marketing.css" — only the body element. */
-  if (!/<body[^>]*\bcalliq-marketing\b/i.test(out)) {
+  /** Do not match href="/hallaai-marketing.css" — only the body element. */
+  if (!/<body[^>]*\bhallaai-marketing\b/i.test(out)) {
     out = out.replace(/<body([^>]*)>/i, (match, attrs) => {
       const a = attrs || "";
       if (/class\s*=/.test(a)) {
         return `<body${a.replace(/class\s*=\s*["']([^"']*)["']/i, (_, classes) => {
-          const next = classes.includes("calliq-marketing")
-            ? classes
-            : `${classes} calliq-marketing`.trim();
+          // Remove old calliq-marketing class if present, add hallaai-marketing
+          const cleaned = classes.replace(/\bcalliq-marketing\b/g, "").trim();
+          const next = cleaned.includes("hallaai-marketing")
+            ? cleaned
+            : `${cleaned} hallaai-marketing`.trim();
           return `class="${next}"`;
         })}>`;
       }
-      return '<body class="calliq-marketing">';
+      return '<body class="hallaai-marketing">';
     });
   }
 
@@ -131,7 +133,7 @@ const COMMITTED_OUTPUTS = [
   OUT.spa,
   OUT.js,
   OUT.publicCss,
-  path.join(DASHBOARD, "public", "calliq-marketing.css"),
+  path.join(DASHBOARD, "public", "hallaai-marketing.css"),
 ];
 
 function syncOnce() {
@@ -148,7 +150,7 @@ function syncOnce() {
     console.error(
       "[sync-marketing] Missing root landing files:\n" +
         absent.map((p) => `  - ${path.relative(REPO_ROOT, p)}`).join("\n") +
-        "\n\nPlace index.html, calliq_styles.css, and calliq_main.js in the repo root, then re-run.\n" +
+        "\n\nPlace index.html, hallaai_styles.css, and hallaai_main.js in the repo root, then re-run.\n" +
         "Or commit generated files under apps/dashboard/public/."
     );
     process.exit(1);

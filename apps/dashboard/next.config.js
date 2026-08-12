@@ -5,7 +5,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const gatewayTarget =
     process.env.GATEWAY_PROXY_URL?.replace(/\/$/, '') ||
     process.env.NEXT_PUBLIC_GATEWAY_API_URL?.replace(/\/$/, '') ||
-    'https://call-iq-gateway.onrender.com';
+    'https://gateway.hallaai.com';
 
 /** WebSockets cannot use Vercel rewrites — default to Render gateway WS in production builds. */
 const gatewayWsTarget =
@@ -108,7 +108,7 @@ const nextConfig = {
         // to load and it renders as an empty, unstyled shell.
         const tawkStyleSrc = ' https://embed.tawk.to https://fonts.googleapis.com';
         const tawkFontSrc = ' https://fonts.gstatic.com';
-        const connectSrc = `'self' https://call-iq-gateway.onrender.com https://*.supabase.co wss://call-iq-gateway.onrender.com wss://*.supabase.co${tawkConnectSrc}${localGatewayConnect}`;
+        const connectSrc = `'self' https://gateway.hallaai.com https://*.supabase.co wss://gateway.hallaai.com wss://*.supabase.co${tawkConnectSrc}${localGatewayConnect}`;
 
         /** Marketing SPA is embedded in an iframe on `/` — must allow same-origin framing. */
         const marketingSpaCsp = [

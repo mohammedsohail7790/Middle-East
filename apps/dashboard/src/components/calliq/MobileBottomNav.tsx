@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { usePathname } from "@/i18n/navigation";
-import { LayoutDashboard, Phone, Users, Puzzle, Menu } from "lucide-react";
+import { LayoutDashboard, Phone, Users, Bot, Menu } from "lucide-react";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +10,7 @@ const ITEMS = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard, exact: true },
   { href: "/dashboard/calls", label: "Calls", icon: Phone },
   { href: "/dashboard/leads", label: "Leads", icon: Users },
-  { href: "/dashboard/integrations", label: "Connect", icon: Puzzle },
+  { href: "/dashboard/agent", label: "Agent", icon: Bot },
 ] as const;
 
 type Props = {

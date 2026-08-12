@@ -66,7 +66,7 @@ export async function inviteTeamMember(
       const msg = error.message || String(error);
       if (/already|registered|exists/i.test(msg)) {
         message =
-          'This email already has a Call IQ account — they can sign in and will be linked to your workspace.';
+          'This email already has a Halla AI account — they can sign in and will be linked to your workspace.';
         logger.info('[Team] Invite skipped — user already exists', {
           tenantId,
           email: normalizedEmail,
@@ -76,12 +76,12 @@ export async function inviteTeamMember(
       }
     } else {
       inviteSent = true;
-      message = 'Invitation email sent from Call IQ.';
+      message = 'Invitation email sent from Halla AI.';
     }
   } catch (err) {
     logger.error('[Team] Supabase invite failed', { tenantId, email: normalizedEmail, error: String(err) });
     throw new Error(
-      'Could not send invitation email. In Supabase, enable Invite user template + custom SMTP (sender: Call IQ).'
+      'Could not send invitation email. In Supabase, enable Invite user template + custom SMTP (sender: Halla AI).'
     );
   }
 

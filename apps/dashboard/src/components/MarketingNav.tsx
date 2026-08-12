@@ -41,7 +41,7 @@ export function MarketingNav() {
           CQ
         </div>
         <span className="font-bold text-base tracking-tight truncate" style={{ color: "var(--color-ink)" }}>
-          Call IQ
+          Halla AI
         </span>
       </Link>
 

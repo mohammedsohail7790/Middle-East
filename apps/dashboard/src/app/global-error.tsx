@@ -33,7 +33,7 @@ export default function GlobalError({
             Something went wrong
           </h1>
           <p style={{ fontSize: "0.875rem", color: "#64748b", marginBottom: "1.25rem" }}>
-            Call IQ hit an unexpected error. Refresh the page — if you just deployed, wait a
+            Halla AI hit an unexpected error. Refresh the page — if you just deployed, wait a
             moment for the new build to finish.
           </p>
           <button
@@ -43,7 +43,7 @@ export default function GlobalError({
               padding: "0.625rem 1rem",
               borderRadius: "0.5rem",
               border: "none",
-              background: "#0ea5e9",
+              background: "#C9A24B",
               color: "white",
               fontWeight: 600,
               cursor: "pointer",

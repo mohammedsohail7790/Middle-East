@@ -151,7 +151,7 @@ The gateway tests DB connection on boot but doesn't warm up pool connections. Fo
 ## Benchmark: Production Health (Live)
 
 ```
-GET /health              → 200 OK (service: call-iq-gateway)
+GET /health              → 200 OK (service: halla-ai-gateway)
 GET /ready               → 200 {"database":{"ok":true},"redis":{"ok":true}}
 GET /debug/env           → 401 Unauthorized (security working)
 GET /metrics/system      → 404 (production mode, correctly hidden)

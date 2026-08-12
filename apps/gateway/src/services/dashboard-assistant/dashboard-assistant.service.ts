@@ -1,7 +1,7 @@
 import { voiceDb } from '../voice/tenant-scope.js';
 import { knowledgeService } from '../knowledge/knowledge.service.js';
 import { logger } from '../logger.js';
-import { CALL_IQ_ASSISTANT_GUIDE } from './dashboard-assistant-knowledge.js';
+import { HALLA_AI_ASSISTANT_GUIDE } from './dashboard-assistant-knowledge.js';
 import { resolvePageContext } from './dashboard-page-catalog.js';
 import { scanPromptInjection, sanitizeUntrustedText } from '../../security/prompt-safety.js';
 
@@ -189,7 +189,7 @@ export async function buildAssistantSystemPrompt(
     : '';
 
   return [
-    CALL_IQ_ASSISTANT_GUIDE,
+    HALLA_AI_ASSISTANT_GUIDE,
     resolvePageContext(page),
     titleLine,
     tenantSnippet ? `\nLIVE WORKSPACE DATA:\n${tenantSnippet}` : '',

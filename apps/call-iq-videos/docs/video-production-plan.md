@@ -33,7 +33,7 @@ This plan covers seven training/demo videos for Call IQ Labs — an enterprise A
 |---------|-------|
 | Product name | Call IQ |
 | Tagline | Smart • Seamless • Always |
-| Website | https://www.calliqlabs.com |
+| Website | https://www.hallaai.com |
 | Primary accent | Cyan `#0EA5E9` |
 | Background | Near-black `#0A0A0A` |
 | Surface | Charcoal `#1A1A1A` / `#2A2A2A` |
@@ -319,7 +319,7 @@ Motion (`user-motion` MCP) is for **marketing cut-downs, launch teasers, and soc
 Create a 30-second enterprise SaaS promo for Call IQ, an AI voice receptionist
 for home service businesses. Dark mode, blue (#0EA5E9) accents. Audience:
 HVAC/plumbing owners missing after-hours calls. Key stats: 1,284 calls handled,
-49% conversion, $3,051/month saved vs hiring receptionist. CTA: calliqlabs.com.
+49% conversion, $3,051/month saved vs hiring receptionist. CTA: hallaai.com.
 Tone: professional, confident. Attach Northline Home Services as example customer.
 design_system_id: linear, aspect_ratio: 16:9, duration: 30s-1min
 ```

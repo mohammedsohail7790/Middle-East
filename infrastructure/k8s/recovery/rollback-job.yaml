@@ -17,4 +17,4 @@ spec:
               curl -sf "${GATEWAY_URL}/health" || exit 1
           env:
             - name: GATEWAY_URL
-              value: "http://call-iq-gateway:3003"
+              value: "http://halla-ai-gateway:3003"

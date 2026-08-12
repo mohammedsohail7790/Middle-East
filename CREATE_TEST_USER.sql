@@ -23,7 +23,7 @@ INSERT INTO auth.users (
   gen_random_uuid(),
   'authenticated',
   'authenticated',
-  'test@calliq.com',
+  'test@hallaai.com',
   crypt('Test123!', gen_salt('bf')), -- Password: Test123!
   NOW(),
   NOW(),
@@ -51,9 +51,9 @@ INSERT INTO public.tenants (
 ) VALUES (
   gen_random_uuid(),
   'Test User',
-  'test@calliq.com',
-  '+1234567890',
-  'Test Business',
+  'test@hallaai.com',
+  '+97150000001',         -- UAE mobile placeholder
+  'Halla AI Test Tenant',
   'Technology',
   'professional',
   'active',
@@ -62,5 +62,5 @@ INSERT INTO public.tenants (
 ) ON CONFLICT (email) DO NOTHING;
 
 -- Test Credentials:
--- Email: test@calliq.com
+-- Email: test@hallaai.com
 -- Password: Test123!

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type CallIqLogoProps = {
+type HallaAiLogoProps = {
   href?: string;
   /** Icon only (square) */
   iconOnly?: boolean;
@@ -24,7 +24,7 @@ const SIZES = {
   sidebar: { icon: 90, wordmark: 236, height: 90 },
 };
 
-export function CallIqLogo({
+export function HallaAiLogo({
   href = "/",
   iconOnly = false,
   showTagline = false,
@@ -32,13 +32,13 @@ export function CallIqLogo({
   size = "md",
   className,
   linkAs,
-}: CallIqLogoProps) {
+}: HallaAiLogoProps) {
   const s = SIZES[size];
 
   const content = iconOnly ? (
     <Image
       src="/logo.png"
-      alt="Call IQ"
+      alt="Halla AI"
       width={s.icon}
       height={s.icon}
       className="object-contain mx-auto"
@@ -54,7 +54,7 @@ export function CallIqLogo({
     >
       <Image
         src="/logo.png"
-        alt="Call IQ — Smart, Seamless, Always"
+        alt="Halla AI — Smart, Seamless, Always"
         width={s.wordmark}
         height={s.height}
         className={cn(
@@ -95,8 +95,8 @@ export function CallIqLogo({
   return <div className={cn(wrapperClass, className)}>{content}</div>;
 }
 
-/** Compact mark: icon + Call<span className="text-cyan">IQ</span> text */
-export function CallIqMark({
+/** Compact mark: icon + Halla<span className="text-accent">AI</span> text */
+export function HallaAiMark({
   className,
   href = "/",
   linkAs,
@@ -109,7 +109,7 @@ export function CallIqMark({
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <Image src="/logo.png" alt="" width={44} height={44} className="h-11 w-11 rounded-lg object-contain" />
       <span className="font-bold text-lg tracking-tight text-foreground leading-none">
-        Call<span className="text-[var(--cyan)]">IQ</span>
+        Halla<span className="text-[var(--gold)]">AI</span>
       </span>
     </span>
   );
@@ -119,3 +119,9 @@ export function CallIqMark({
   }
   return inner;
 }
+
+// ─── Backward-compat aliases (remove once all consumers are updated) ─────────
+/** @deprecated Use HallaAiLogo */
+export const CallIqLogo = HallaAiLogo;
+/** @deprecated Use HallaAiMark */
+export const CallIqMark = HallaAiMark;

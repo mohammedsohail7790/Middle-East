@@ -13,7 +13,7 @@ import { navPageTitle } from "@/lib/dashboard-nav";
 import { FloatingRobot, type RobotMood } from "./FloatingRobot";
 
 const WELCOME =
-  "Hi — I'm Call IQ Assistant. I can see your current dashboard page and workspace data. Ask me anything about setup, calls, leads, billing, or troubleshooting.";
+  "Hi — I'm Halla AI Assistant. I can see your current dashboard page and workspace data. Ask me anything about setup, calls, leads, or troubleshooting.";
 
 
 function resolvePageTitle(pathname: string): string {
@@ -131,7 +131,7 @@ export function DashboardAssistant() {
         />
       )}
       {open && (
-        <div className="dashboard-assistant-panel" role="dialog" aria-label="Call IQ Assistant">
+        <div className="dashboard-assistant-panel" role="dialog" aria-label="Halla AI Assistant">
           <header className="dashboard-assistant-header">
             <div className="flex items-center gap-3 min-w-0">
               <div className="assistant-logo-wrap shrink-0">
@@ -145,7 +145,7 @@ export function DashboardAssistant() {
                 />
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-sm text-foreground">Call IQ Assistant</p>
+                <p className="font-semibold text-sm text-foreground">Halla AI Assistant</p>
                 <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
               </div>
             </div>
@@ -153,7 +153,7 @@ export function DashboardAssistant() {
               type="button"
               className="dashboard-icon-btn"
               onClick={() => setOpen(false)}
-              aria-label="Close Call IQ Assistant"
+              aria-label="Close Halla AI Assistant"
             >
               <X className="w-4 h-4" />
             </button>
@@ -207,7 +207,7 @@ export function DashboardAssistant() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Call IQ Assistant…"
+              placeholder="Ask Halla AI Assistant…"
               className="input flex-1 text-sm"
               disabled={streaming}
               maxLength={2000}
@@ -229,7 +229,7 @@ export function DashboardAssistant() {
         className={cn("dashboard-assistant-fab", open && "is-open")}
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        aria-label={open ? "Close Call IQ Assistant" : "Open Call IQ Assistant"}
+        aria-label={open ? "Close Halla AI Assistant" : "Open Halla AI Assistant"}
       >
         {open ? (
           <X className="w-5 h-5" />

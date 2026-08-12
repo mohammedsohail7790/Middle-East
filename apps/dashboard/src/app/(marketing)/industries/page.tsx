@@ -3,7 +3,7 @@ import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { PageHero } from "@/components/marketing/PageHero";
 import { INDUSTRIES_LIST } from "@/lib/marketing-pages";
 
-export const metadata = { title: "Industries | Call IQ" };
+export const metadata = { title: "Industries | Halla AI" };
 
 export default function IndustriesPage() {
   return (

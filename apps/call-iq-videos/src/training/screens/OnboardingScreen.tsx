@@ -27,7 +27,7 @@ type OnboardingScreenProps = {
 };
 
 export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
-  url = "https://www.calliqlabs.com/onboarding",
+  url = "https://www.hallaai.com/onboarding",
   stepLabel,
   wizardStep,
   wizardTotal = 5,

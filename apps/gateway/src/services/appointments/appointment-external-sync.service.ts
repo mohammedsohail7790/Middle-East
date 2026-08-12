@@ -39,7 +39,7 @@ export async function syncAppointmentToExternalCalendars(
 ): Promise<ExternalCalendarSyncResult[]> {
   const results: ExternalCalendarSyncResult[] = [];
   const title = `${input.service} — ${input.name}`;
-  const description = `Phone: ${input.phone}\nService: ${input.service}\nCall IQ appointment ${input.appointmentId}`;
+  const description = `Phone: ${input.phone}\nService: ${input.service}\nHalla AI appointment ${input.appointmentId}`;
 
   if (await googleCalendarService.hasConnection(input.tenantId)) {
     try {

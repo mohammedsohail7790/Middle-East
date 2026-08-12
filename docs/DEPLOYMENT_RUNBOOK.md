@@ -1,4 +1,4 @@
-# Call IQ — Deployment Runbook
+# Halla AI — Deployment Runbook
 
 ## Production Deployment
 
@@ -6,9 +6,9 @@
 - Render CLI or dashboard access
 - Supabase project credentials
 - OpenAI API key
-- Twilio account SID + auth token
+- Twilio account SID + auth token (GCC numbers: +971, +966, +974…)
 - Stripe secret + webhook keys
-- DNS access for `api.calliqlabs.com` and `www.calliqlabs.com`
+- DNS access for `gateway.hallaai.com` and `www.hallaai.com`
 
 ### Step 1: Verify Build
 
@@ -28,8 +28,8 @@ npx tsc --noEmit
 **Via Render Dashboard:**
 1. Push to `main` branch (auto-deploy enabled)
 2. Monitor build logs at `https://dashboard.render.com/web/srv-xxx`
-3. Verify health: `curl https://api.calliqlabs.com/health`
-4. Verify readiness: `curl https://api.calliqlabs.com/ready`
+3. Verify health: `curl https://gateway.hallaai.com/health`
+4. Verify readiness: `curl https://gateway.hallaai.com/ready`
 
 **Via Render API:**
 ```bash
@@ -38,10 +38,10 @@ curl -X POST "https://api.render.com/deploy/srv-{GATEWAY_SRV_ID}?key={DEPLOY_HOO
 
 ### Step 3: Deploy Dashboard
 
-**Via Render Dashboard:**
+**Via Vercel:**
 1. Push to `main` branch (auto-deploy enabled)
-2. Monitor build logs at `https://dashboard.render.com/web/srv-yyy`
-3. Verify: open `https://www.calliqlabs.com` in browser
+2. Monitor build logs in Vercel dashboard
+3. Verify: open `https://app.hallaai.com` in browser
 
 ### Step 4: Run Migrations
 
@@ -55,27 +55,27 @@ node run-migration.js supabase/migrations/019_onboarding_progress.sql
 
 | Webhook | URL | Secret |
 |---------|-----|--------|
-| Twilio Voice | `https://api.calliqlabs.com/ws/realtime/` | None |
-| Twilio Status | `https://api.calliqlabs.com/api/twilio/status` | None |
-| Stripe | `https://api.calliqlabs.com/api/v1/billing/webhook` | `STRIPE_WEBHOOK_SECRET` |
-| Google OAuth | `https://api.calliqlabs.com/api/v1/calendar/oauth/callback` | `GOOGLE_CLIENT_SECRET` |
+| Twilio Voice | `https://gateway.hallaai.com/ws/realtime/` | None |
+| Twilio Status | `https://gateway.hallaai.com/api/twilio/status` | None |
+| Stripe | `https://gateway.hallaai.com/api/v1/billing/webhook` | `STRIPE_WEBHOOK_SECRET` |
+| Google OAuth | `https://gateway.hallaai.com/api/v1/calendar/oauth/callback` | `GOOGLE_CLIENT_SECRET` |
 
 ### Step 6: Post-Deploy Verification
 
 ```bash
 # Health checks
-curl -f https://api.calliqlabs.com/health
-curl -f https://api.calliqlabs.com/ready
-curl -f https://api.calliqlabs.com/health/realtime
+curl -f https://gateway.hallaai.com/health
+curl -f https://gateway.hallaai.com/ready
+curl -f https://gateway.hallaai.com/health/realtime
 
 # Full system check
-curl -f https://api.calliqlabs.com/voice-health
+curl -f https://gateway.hallaai.com/voice-health
 
 # Metrics endpoint
-curl https://api.calliqlabs.com/metrics | head -20
+curl https://gateway.hallaai.com/metrics | head -20
 
 # Dashboard
-curl -f https://www.calliqlabs.com/api/health
+curl -f https://app.hallaai.com/api/health
 ```
 
 ---
@@ -84,7 +84,7 @@ curl -f https://www.calliqlabs.com/api/health
 
 Same as production but:
 - Use staging env vars: `deploy.sh staging all`
-- Verify at `https://staging.calliqlabs.com`
+- Verify at `https://staging.hallaai.com`
 - Use test Stripe keys (sk_test_xxx)
 - Use Twilio test credentials
 
@@ -96,7 +96,7 @@ Same as production but:
 1. In Render dashboard → gateway → "Manual Deploy" → "Deploy previous version"
 2. Select last known good deploy
 3. Wait for health check pass
-4. Verify: `curl -f https://api.calliqlabs.com/health`
+4. Verify: `curl -f https://gateway.hallaai.com/health`
 
 ### Database Rollback
 1. Identify the migration to roll back

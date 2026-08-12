@@ -1,4 +1,4 @@
-const DEFAULT_GATEWAY_URL = "https://call-iq-gateway.onrender.com";
+const DEFAULT_GATEWAY_URL = "https://gateway.hallaai.com";
 
 export function resolveGatewayBase(): string {
   return (

@@ -7,14 +7,14 @@ export function registerHealthRoutes(app: Application, cacheManager: CacheManage
     app.get('/', (_req, res) => {
         res.status(200).json({
             success: true,
-            service: 'Call IQ Gateway',
+            service: 'Halla AI Gateway',
             status: 'running',
             timestamp: new Date().toISOString(),
         });
     });
 
     app.get('/health', (_req, res) => {
-        res.status(200).json({ status: 'ok', service: 'call-iq-gateway' });
+        res.status(200).json({ status: 'ok', service: 'halla-ai-gateway' });
     });
 
     app.get('/ready', asyncHandler(async (_req, res) => {

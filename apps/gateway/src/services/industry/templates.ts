@@ -1,6 +1,6 @@
 /**
  * Industry Templates
- * Production-ready industry-specific configurations for Call IQ.
+ * Production-ready industry-specific configurations for Halla AI.
  * Each industry defines: default prompt, services, working hours, KPIs, lead fields, and business rules.
  */
 import { buildExtendedIndustryTemplates } from './extended-templates.js';

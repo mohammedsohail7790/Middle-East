@@ -244,14 +244,14 @@ export default function AnalyticsPage() {
             <Lock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-foreground">Advanced analytics requires Professional</h3>
+            <h3 className="text-lg font-semibold text-foreground">Analytics unavailable</h3>
             <p className="text-sm text-muted-foreground mt-1 max-w-md">
-              Upgrade to access conversion funnels, date-range analytics, and PDF exports.
-              Basic metrics are available on all plans.
+              We couldn&apos;t load analytics for your account right now. Contact support if this
+              persists.
             </p>
           </div>
-          <Link href="/dashboard/billing" className="btn-primary text-sm">
-            Upgrade to Professional
+          <Link href="/dashboard/support" className="btn-primary text-sm">
+            Contact Support
           </Link>
         </div>
       </DashboardPage>
@@ -290,12 +290,12 @@ export default function AnalyticsPage() {
               <AreaChart data={callVolume} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                 <defs>
                   <linearGradient id="callsGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#C9A24B" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#C9A24B" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="leadsGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#38BDF8" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#E4C878" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="#E4C878" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10B981" stopOpacity={0.25} />
@@ -323,8 +323,8 @@ export default function AnalyticsPage() {
                     color: "var(--foreground)",
                   }}
                 />
-                <Area type="monotone" dataKey="calls" stroke="#0EA5E9" strokeWidth={2} fill="url(#callsGrad)" />
-                <Area type="monotone" dataKey="leads" stroke="#38BDF8" strokeWidth={2} fill="url(#leadsGrad)" />
+                <Area type="monotone" dataKey="calls" stroke="#C9A24B" strokeWidth={2} fill="url(#callsGrad)" />
+                <Area type="monotone" dataKey="leads" stroke="#E4C878" strokeWidth={2} fill="url(#leadsGrad)" />
                 <Area type="monotone" dataKey="conversions" stroke="#10B981" strokeWidth={2} fill="url(#convGrad)" />
               </AreaChart>
             </ResponsiveContainer>
@@ -369,7 +369,7 @@ export default function AnalyticsPage() {
                     animate={{ width: `${step.percentage}%` }}
                     transition={{ duration: 1, delay: 0.6 + i * 0.1 }}
                     className="h-full rounded-xl"
-                    style={{ background: "linear-gradient(90deg, #0EA5E9, #38BDF8)" }}
+                    style={{ background: "linear-gradient(90deg, #C9A24B, #E4C878)" }}
                   />
                   <div className="absolute inset-0 flex items-center px-4">
                     <span className="text-sm font-medium text-foreground">{step.value}</span>

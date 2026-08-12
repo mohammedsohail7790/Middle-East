@@ -1,12 +1,12 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: call-iq-gateway-autoscale
+  name: halla-ai-gateway-autoscale
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: call-iq-gateway
+    name: halla-ai-gateway
   minReplicas: 2
   maxReplicas: 20
   behavior:

@@ -1,5 +1,5 @@
 {
-    "name": "@call-iq/dashboard",
+    "name": "@halla-ai/dashboard",
     "version": "1.0.0",
     "private": true,
     "scripts": {

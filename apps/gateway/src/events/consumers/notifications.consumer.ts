@@ -17,7 +17,6 @@ export async function handleNotificationsEvent(event: PlatformEvent): Promise<vo
   };
 
   const notificationPayload = {
-    from: payload.callerPhone || 'Unknown',
     duration: payload.durationMs || 0,
   };
 
@@ -27,13 +26,8 @@ export async function handleNotificationsEvent(event: PlatformEvent): Promise<vo
   }
   if (!shouldConsumerExecute('notifications')) return;
 
-  try {
-    const { slackService } = await import('../../services/slack/slack.service.js');
-    await slackService.sendNewCallNotification(event.tenantId, notificationPayload);
-  } catch (err) {
-    logger.debug('NOTIFICATIONS_CONSUMER_SKIP', {
-      tenantId: event.tenantId,
-      reason: String(err),
-    });
-  }
+  logger.debug('NOTIFICATIONS_CONSUMER_CALL_ENDED', {
+    tenantId: event.tenantId,
+    ...notificationPayload,
+  });
 }

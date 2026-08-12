@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { Bot, Plus, Save, Trash2, Lock, Pencil, X } from "lucide-react";
+import { Bot, Plus, Save, Trash2, Pencil, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { hasAccess, subscribePlanUpdates } from "@/lib/store";
 import { useDashboardSync } from "@/lib/dashboard-sync";
@@ -128,13 +128,9 @@ export function AdditionalAgentsPanel() {
   if (locked) {
     return (
       <div className="card p-8 text-center">
-        <Lock className="w-8 h-8 text-amber-700 mx-auto mb-3" />
         <p className="text-sm text-foreground-secondary mb-4">
-          Multiple agents per phone number requires the Professional plan.
+          Multiple agents per phone number are not available yet.
         </p>
-        <Link href="/dashboard/billing" className="btn-primary text-sm">
-          Upgrade plan
-        </Link>
       </div>
     );
   }

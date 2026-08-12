@@ -21,7 +21,7 @@ function fallbackRequestHost(): string {
             /* ignore */
         }
     }
-    return 'call-iq-gateway.onrender.com';
+    return 'gateway.hallaai.com';
 }
 
 /** Start recording a call via the Twilio REST API. Fire-and-forget after a short
@@ -633,27 +633,6 @@ export function createVoiceRouter(): express.Router {
                 callSid,
             });
 
-            const { enforceCallAllowed } = await import('../../middleware/usage-enforcement.js');
-            const allowance = await enforceCallAllowed(tenant.id);
-            if (!allowance.allowed) {
-                logger.warn('Incoming call blocked by billing', {
-                    tenantId: tenant.id,
-                    callSid,
-                    reason: allowance.reason,
-                    blockType: allowance.blockType,
-                });
-                const msg =
-                    allowance.blockType === 'trial_expired' || allowance.blockType === 'trial_minutes'
-                        ? 'Your free trial has ended. Please visit your dashboard to upgrade and restore service.'
-                        : 'This line is temporarily unavailable. Please try again later or contact the business directly.';
-                const safeMsg = msg.replace(/[<>&"']/g, '');
-                return res.type('text/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say voice="Polly.Joanna">${safeMsg}</Say>
-  <Hangup/>
-</Response>`);
-            }
-
             const { evaluateSpam, markCallAsSpam, spamRejectTwiml } = await import('../spam/spam.service.js');
             const spamResult = await evaluateSpam({
                 tenantId: tenant.id,
@@ -699,7 +678,7 @@ export function createVoiceRouter(): express.Router {
             if (streamUrl.includes('calliq-gateway.onrender.com')) {
                 logger.error('STREAM_URL_DEAD_HOST', {
                     streamUrl,
-                    hint: 'Use https://call-iq-gateway.onrender.com (hyphen). Unset wrong TWILIO_STREAM_WSS_URL on Render.',
+                    hint: 'Use https://gateway.hallaai.com. Unset wrong TWILIO_STREAM_WSS_URL on Render.',
                     renderExternalUrl: process.env.RENDER_EXTERNAL_URL,
                 });
             }

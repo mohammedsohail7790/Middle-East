@@ -14,8 +14,8 @@ function AvatarOrb({ mood }: { mood: AssistantMood }) {
     <Float speed={1.8} rotationIntensity={0.25} floatIntensity={0.55}>
       <Sphere args={[0.82, 40, 40]} scale={scale}>
         <MeshDistortMaterial
-          color="#0ea5e9"
-          emissive="#0369a1"
+          color="#c9a24b"
+          emissive="#7a5f1f"
           emissiveIntensity={0.35}
           roughness={0.15}
           metalness={0.25}
@@ -43,7 +43,7 @@ export function AssistantAvatar3D({
       >
         <ambientLight intensity={0.55} />
         <directionalLight position={[3, 4, 2]} intensity={1.1} />
-        <pointLight position={[-2, -1, 2]} intensity={0.4} color="#38bdf8" />
+        <pointLight position={[-2, -1, 2]} intensity={0.4} color="#e4c878" />
         <AvatarOrb mood={mood} />
       </Canvas>
     </div>

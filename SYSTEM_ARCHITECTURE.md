@@ -1,10 +1,14 @@
-# Call IQ System Architecture
+# Halla AI System Architecture
+
+> Formerly Call IQ — rebranded for the GCC / Middle East market.
+> Domain: hallaai.com | Primary languages: Arabic (ar), English (en)
+> Default timezone: Asia/Dubai (UTC+4) | Default currency: AED
 
 ## 🏗️ High-Level Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         CALL IQ SYSTEM                          │
+│                        HALLA AI SYSTEM                          │
 └─────────────────────────────────────────────────────────────────┘
 
 ┌──────────────┐         ┌──────────────┐         ┌──────────────┐

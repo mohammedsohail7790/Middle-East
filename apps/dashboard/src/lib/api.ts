@@ -8,8 +8,8 @@ import {
 import { SUPPORT_EMAIL } from "./integration-support";
 import { warmGatewayWhenReady } from "./gateway-warm";
 
-/** Live Render gateway — use localhost only when explicitly set in .env.local */
-const DEFAULT_GATEWAY_URL = "https://call-iq-gateway.onrender.com";
+/** Live gateway — use localhost only when explicitly set in .env.local */
+const DEFAULT_GATEWAY_URL = "https://gateway.hallaai.com";
 
 const BASE = (
   process.env.NEXT_PUBLIC_GATEWAY_API_URL ||
@@ -174,7 +174,7 @@ function healthCheckBases(primary: string): string[] {
   if (typeof window === "undefined") return bases;
   const host = window.location.hostname;
   const isProdHost =
-    host.includes("calliqlabs.com") || host.endsWith(".vercel.app");
+    host.includes("hallaai.com") || host.endsWith(".vercel.app");
   if (!isProdHost) return bases;
   const direct = resolveDirectGatewayBase().replace(/\/$/, "");
   if (!bases.includes(direct)) bases.push(direct);
@@ -204,12 +204,12 @@ function isNetworkFetchError(err: unknown): boolean {
 function unreachableApiMessage(_apiBase?: string): string {
   const gateway = resolveDirectGatewayBase();
   if (isLocalDashboardHost()) {
-    return "Cannot reach the Call IQ API. From the project folder run npm run dev and keep that terminal open, then use http://localhost:3000.";
+    return "Cannot reach the Halla AI API. From the project folder run npm run dev and keep that terminal open, then use http://localhost:3000.";
   }
   if (isVercelPreviewDashboardHost()) {
-    return `Cannot reach the Call IQ backend (${gateway}). Use https://www.calliqlabs.com for production, or wait for the gateway to wake up and refresh.`;
+    return `Cannot reach the Halla AI backend (${gateway}). Use https://app.hallaai.com for production, or wait for the gateway to wake up and refresh.`;
   }
-  return `Cannot reach the Call IQ backend (${gateway}). The server may be waking up — wait 30 seconds and refresh. If this keeps happening, contact ${SUPPORT_EMAIL}.`;
+  return `Cannot reach the Halla AI backend (${gateway}). The server may be waking up — wait 30 seconds and refresh. If this keeps happening, contact ${SUPPORT_EMAIL}.`;
 }
 
 async function parseHttpErrorBody(res: Response): Promise<string> {
@@ -316,7 +316,7 @@ function fetchBasesFor(path: string, primary: string): string[] {
   const normalized = path.split("?")[0];
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
-    const isProdHost = host.includes("calliqlabs.com") || host.endsWith(".vercel.app");
+    const isProdHost = host.includes("hallaai.com") || host.endsWith(".vercel.app");
     const directOnly =
       isProdHost &&
       (normalized === "/dashboard/bootstrap" ||

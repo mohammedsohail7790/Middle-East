@@ -1,4 +1,4 @@
-export const PRODUCTION_SITE_ORIGIN = "https://www.calliqlabs.com";
+export const PRODUCTION_SITE_ORIGIN = "https://www.hallaai.com";
 const PRODUCTION_SITE = PRODUCTION_SITE_ORIGIN;
 
 /** Canonical public site URL (Vercel production or local dev). */

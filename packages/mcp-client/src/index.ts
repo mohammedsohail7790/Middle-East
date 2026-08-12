@@ -12,7 +12,7 @@ interface MCPTool {
  * Gravity MCP Client
  * Standardizes skill execution across any MCP-compliant server.
  */
-// @call-iq/types - type declarations handled separately
+// @halla-ai/types - type declarations handled separately
 
 export class GravityMCPClient {
     private tools: Map<string, MCPTool> = new Map();

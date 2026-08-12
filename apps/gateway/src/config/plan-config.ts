@@ -16,17 +16,35 @@
  */
 
 // ─── Supported Languages ────────────────────────────────────────────────────
+// GCC / Middle East market languages.
+// Saudi Arabic first (primary market), then English, Hindi, Russian.
 
 export const SUPPORTED_LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'es', name: 'Spanish' },
-  { code: 'fr', name: 'French' },
-  { code: 'ru', name: 'Russian' },
-  { code: 'zh', name: 'Mandarin' },
-  { code: 'hi', name: 'Hindi' },
+  { code: 'ar-SA', name: 'Arabic (Saudi)' },
+  { code: 'en',    name: 'English' },
+  { code: 'hi',    name: 'Hindi' },
+  { code: 'ru',    name: 'Russian' },
 ] as const;
 
 export type LanguageCode = typeof SUPPORTED_LANGUAGES[number]['code'];
+
+// ─── Regional Currency Defaults ─────────────────────────────────────────────
+
+/** Default currency for new tenants — AED for the GCC/Middle East market. */
+export const DEFAULT_CURRENCY = 'AED';
+
+/** AED → USD approximate rate for internal overage calculations (update periodically). */
+export const AED_USD_RATE = 0.27;
+
+/**
+ * Overage rate in AED per minute.
+ * Essential: ~0.74 AED (~$0.20 USD), Professional: ~0.55 AED (~$0.15 USD).
+ */
+export const OVERAGE_RATE_AED = {
+  essential: 0.74,
+  professional: 0.55,
+  enterprise: 0.37,
+} as const;
 
 // ─── Voice Configuration Types ──────────────────────────────────────────────
 
@@ -61,7 +79,7 @@ export interface TenantVoiceSettings {
 export const DEFAULT_VOICE_CONFIG: TenantVoiceSettings = {
   voiceProvider: 'openai',
   voiceId: 'marin',
-  language: 'en',
+  language: 'ar-SA',        // Saudi Arabic-first for GCC/ME market
   speakingSpeed: 1.0,
   interruptionSensitivity: 'high',
   responseStyle: 'professional',
@@ -94,9 +112,9 @@ export interface PlanConfig {
 export const PLAN_FEATURES: Record<string, PlanConfig> = {
   essential: {
     includedMinutes: 250,
-    overageRate: 0.20,
+    overageRate: 0.74,          // AED per minute (~$0.20 USD)
     maxPhoneNumbers: 1,
-    languages: ['en', 'es'],
+    languages: ['ar-SA', 'en'],  // Saudi Arabic + English on entry plan
     customVoice: false,
     crmIntegrations: false,
     advancedAnalytics: false,
@@ -114,9 +132,9 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
   },
   professional: {
     includedMinutes: 750,
-    overageRate: 0.15,
+    overageRate: 0.55,          // AED per minute (~$0.15 USD)
     maxPhoneNumbers: 3,
-    languages: ['en', 'es', 'fr', 'ru', 'zh', 'hi'],
+    languages: ['ar-SA', 'en', 'hi', 'ru'],  // all 4 supported languages
     customVoice: true,
     crmIntegrations: true,
     advancedAnalytics: true,
@@ -124,7 +142,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     hipaa: false,
     calendarSync: 'native',
     voiceCloning: false,
-    multiLanguageSwitching: false,
+    multiLanguageSwitching: true,
     dynamicVoiceRouting: false,
     departmentVoices: false,
     sla: false,
@@ -137,7 +155,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     includedMinutes: 60,
     overageRate: 0,
     maxPhoneNumbers: 3,
-    languages: ['en', 'es', 'fr', 'ru', 'zh', 'hi'],
+    languages: ['ar-SA', 'en', 'hi', 'ru'],  // all 4 supported languages
     customVoice: true,
     crmIntegrations: true,
     advancedAnalytics: true,
@@ -145,7 +163,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     hipaa: false,
     calendarSync: 'native',
     voiceCloning: false,
-    multiLanguageSwitching: false,
+    multiLanguageSwitching: true,
     dynamicVoiceRouting: false,
     departmentVoices: false,
     sla: false,

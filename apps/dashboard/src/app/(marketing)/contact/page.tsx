@@ -3,7 +3,7 @@ import { PageHero } from "@/components/marketing/PageHero";
 import { CtaBlock } from "@/components/marketing/CtaBlock";
 import { ContactForm } from "@/components/marketing/ContactForm";
 
-export const metadata = { title: "Contact Us | Call IQ" };
+export const metadata = { title: "Contact Us | Halla AI" };
 // Force per-request rendering — static generation intermittently froze this
 // page's Suspense boundary mid-stream (content correct but hidden forever).
 export const dynamic = "force-dynamic";
@@ -14,7 +14,7 @@ export default function ContactPage() {
       <PageHero
         label="Get in Touch"
         title="Let's Talk"
-        subtitle="Have questions about Call IQ? We're here to help. Reach out via email or our live chat."
+        subtitle="Have questions about Halla AI? We're here to help. Reach out via email or our live chat."
       />
       <section className="section">
         <div className="container" style={{ maxWidth: 640 }}>

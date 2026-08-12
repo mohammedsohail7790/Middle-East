@@ -23,8 +23,10 @@ loadEnvFile(resolve('.env.e2e'));
 
 const isProdE2e =
   process.env.PLAYWRIGHT_PROD === '1' ||
-  process.env.SMOKE_GATEWAY_URL?.includes('calliqlabs.com') ||
-  process.env.PLAYWRIGHT_BASE_URL?.includes('calliqlabs.com');
+  process.env.SMOKE_GATEWAY_URL?.includes('hallaai.com') ||
+  process.env.SMOKE_GATEWAY_URL?.includes('calliqlabs.com') ||   // legacy fallback
+  process.env.PLAYWRIGHT_BASE_URL?.includes('hallaai.com') ||
+  process.env.PLAYWRIGHT_BASE_URL?.includes('calliqlabs.com');   // legacy fallback
 
 // Local E2E: prefer explicit gateway URL from env; default to :3003 only when unset.
 if (!isProdE2e) {
@@ -39,7 +41,7 @@ if (!isProdE2e) {
   const prodOrigin = (
     process.env.PLAYWRIGHT_BASE_URL ||
     process.env.SMOKE_GATEWAY_URL ||
-    'https://www.calliqlabs.com'
+    'https://www.hallaai.com'
   ).replace(/\/$/, '');
   process.env.PLAYWRIGHT_SKIP_WEBSERVER = process.env.PLAYWRIGHT_SKIP_WEBSERVER ?? '1';
   process.env.PLAYWRIGHT_BASE_URL = prodOrigin;
@@ -68,7 +70,7 @@ const webServers: NonNullable<import('@playwright/test').PlaywrightTestConfig['w
 if (!process.env.PLAYWRIGHT_SKIP_WEBSERVER) {
   if (!skipLocalGateway) {
     webServers.push({
-      command: 'npm run dev -w @call-iq/gateway',
+      command: 'npm run dev -w @halla-ai/gateway',
       url: `${gatewayUrl}/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 240_000,
@@ -81,7 +83,7 @@ if (!process.env.PLAYWRIGHT_SKIP_WEBSERVER) {
     });
   }
   webServers.push({
-    command: process.env.PLAYWRIGHT_WEB_SERVER_CMD ?? 'npm run dev -w @call-iq/dashboard',
+    command: process.env.PLAYWRIGHT_WEB_SERVER_CMD ?? 'npm run dev -w @halla-ai/dashboard',
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,

@@ -2,14 +2,14 @@ import Link from "next/link";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { PageHero } from "@/components/marketing/PageHero";
 
-export const metadata = { title: "Alternatives | Call IQ" };
+export const metadata = { title: "Alternatives | Halla AI" };
 
 export default function AlternativesPage() {
   return (
     <MarketingShell>
       <PageHero
         label="Compare"
-        title="Call IQ vs. The Competition"
+        title="Halla AI vs. The Competition"
         subtitle="Honest comparison against Smith.ai, Ruby, and SkipCalls."
       />
       <section className="section">
@@ -19,7 +19,7 @@ export default function AlternativesPage() {
               <thead>
                 <tr>
                   <th>Feature</th>
-                  <th>Call IQ</th>
+                  <th>Halla AI</th>
                   <th>Smith.ai</th>
                   <th>Ruby</th>
                   <th>SkipCalls</th>
@@ -52,7 +52,7 @@ export default function AlternativesPage() {
           </div>
           <div className="text-center">
             <Link href="/signup" className="btn btn-primary btn-lg">
-              Try Call IQ Free — No Credit Card →
+              Try Halla AI Free — No Credit Card →
             </Link>
           </div>
         </div>

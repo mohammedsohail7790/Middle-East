@@ -4,7 +4,7 @@ import { FeatureGrid } from "@/components/marketing/FeatureGrid";
 import { CtaBlock } from "@/components/marketing/CtaBlock";
 import { FEATURES_CORE, FEATURES_PRO } from "@/lib/marketing-pages";
 
-export const metadata = { title: "Features | Call IQ" };
+export const metadata = { title: "Features | Halla AI" };
 // Force per-request rendering — static generation intermittently froze this
 // page's Suspense boundary mid-stream (content correct but hidden forever).
 export const dynamic = "force-dynamic";

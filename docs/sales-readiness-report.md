@@ -12,7 +12,7 @@
 **Pain:** Misses 30-40 calls/day when technicians are in the field. Each missed call = $200-600 lost job.
 
 **Trial Journey:**
-1. Visited calliqlabs.com → Clear value prop ("Never Miss a Call Again")  
+1. Visited hallaai.com → Clear value prop  
 2. Pricing: $39/mo Essential for 250 min → **Problem:** 12 techs generate ~600 calls/month. 250 min is too little for a real HVAC shop. Objection raised before clicking.
 3. Signed up → 4-field form, no Google sign-in (now fixed) → Friction removed
 4. Onboarding: "Configure AI" → Sets industry to HVAC → **Positive:** pre-built HVAC questions appear

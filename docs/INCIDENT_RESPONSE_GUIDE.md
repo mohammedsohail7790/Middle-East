@@ -23,7 +23,7 @@
 
 **Immediate Actions:**
 1. Check Render dashboard → gateway service logs
-2. `curl -f https://api.calliqlabs.com/health`
+2. `curl -f https://gateway.hallaai.com/health`
 3. Check if gateway process crashed: look for OOM kill in logs
 4. Check upstream services: `curl -f https://api.openai.com/v1/models` (OpenAI)
 
@@ -48,7 +48,7 @@
 1. Check WebSocket connections: `/metrics/realtime` → `activeRealtimeSessions`
 2. Check Twilio stream status in Twilio console
 3. Check OpenAI Realtime API logs for audio events
-4. Test with a direct WS connection: `wscat -c wss://api.calliqlabs.com/ws/realtime/test-tenant`
+4. Test with a direct WS connection: `wscat -c wss://gateway.hallaai.com/ws/realtime/test-tenant`
 
 **Resolution:**
 - If OpenAI Realtime connection failing: Check `OPENAI_API_KEY` and OpenAI rate limits

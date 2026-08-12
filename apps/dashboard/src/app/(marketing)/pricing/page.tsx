@@ -4,7 +4,7 @@ import { PricingGrid } from "@/components/marketing/PricingGrid";
 import { CtaBlock } from "@/components/marketing/CtaBlock";
 import { fetchPublicPlansServer } from "@/lib/public-api";
 
-export const metadata = { title: "Pricing | Call IQ" };
+export const metadata = { title: "Pricing | Halla AI" };
 // Force per-request rendering — static generation intermittently froze this
 // page's Suspense boundary mid-stream (content correct but hidden forever).
 // Also ensures live plan data isn't stuck on a stale ISR snapshot.
@@ -88,7 +88,7 @@ export default async function PricingPage() {
             </table>
           </div>
           <CtaBlock
-            title="Try Call IQ Risk-Free"
+            title="Try Halla AI Risk-Free"
             description="14-day free trial. No credit card. Cancel anytime."
             secondaryHref="/roi"
             secondaryLabel="Calculate My ROI"

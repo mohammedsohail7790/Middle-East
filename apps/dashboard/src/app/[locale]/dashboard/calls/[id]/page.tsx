@@ -355,8 +355,8 @@ export default function CallDetailPage() {
             size="sm"
             actions={
               call.appointment ? (
-                <Link href="/dashboard/calendar" className="text-xs text-accent hover:underline">
-                  Open calendar
+                <Link href="/dashboard/leads" className="text-xs text-accent hover:underline">
+                  View appointment
                 </Link>
               ) : undefined
             }

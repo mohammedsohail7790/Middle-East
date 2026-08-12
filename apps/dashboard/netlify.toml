@@ -1,4 +1,5 @@
-# Deprecated — production dashboard deploys on Vercel (www.calliqlabs.com).
+# Halla AI dashboard deploys on Vercel (app.hallaai.com).
+# This Netlify config is kept for reference only — do not deploy from here.
 # See DEPLOY_VERCEL.md. Kept for reference only.
 
 [build]
@@ -8,9 +9,9 @@
   NODE_VERSION = "20"
   NPM_FLAGS = "--legacy-peer-deps"
   NEXT_TELEMETRY_DISABLED = "1"
-  NEXT_PUBLIC_GATEWAY_API_URL = "https://call-iq-gateway.onrender.com"
-  NEXT_PUBLIC_GATEWAY_WS_URL = "wss://call-iq-gateway.onrender.com"
-  NEXT_PUBLIC_SITE_URL = "https://www.calliqlabs.com"
+  NEXT_PUBLIC_GATEWAY_API_URL = "https://gateway.hallaai.com"
+  NEXT_PUBLIC_GATEWAY_WS_URL = "wss://gateway.hallaai.com"
+  NEXT_PUBLIC_SITE_URL = "https://www.hallaai.com"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

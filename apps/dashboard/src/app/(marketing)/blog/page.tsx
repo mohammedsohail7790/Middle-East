@@ -3,7 +3,7 @@ import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { PageHero } from "@/components/marketing/PageHero";
 import { BLOG_POSTS } from "@/lib/marketing-pages";
 
-export const metadata = { title: "Blog | Call IQ" };
+export const metadata = { title: "Blog | Halla AI" };
 // Force per-request rendering — static generation intermittently froze this
 // page's Suspense boundary mid-stream (content correct but hidden forever).
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default function BlogPage() {
   return (
     <MarketingShell>
-      <PageHero label="Blog" title="Call IQ Blog" subtitle="Insights on AI receptionists, call handling, and growth." />
+      <PageHero label="Blog" title="Halla AI Blog" subtitle="Insights on AI receptionists, call handling, and growth." />
       <section className="section">
         <div className="container">
           <div className="grid-3">

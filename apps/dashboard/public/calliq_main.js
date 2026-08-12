@@ -180,7 +180,7 @@ function go(page) {
       window.Intercom("show");
       return;
     }
-    window.location.href = "mailto:info@calliqlabs.com";
+    window.location.href = "mailto:info@hallaai.com";
   }
 
   function handleContactForm(event) {
@@ -192,7 +192,7 @@ function go(page) {
     var message = (form.querySelector("textarea") || {}).value || "";
     var body = "From: " + name + " <" + email + ">\n\n" + message;
     var mailto =
-      "mailto:info@calliqlabs.com?subject=" +
+      "mailto:info@hallaai.com?subject=" +
       encodeURIComponent("Contact form: " + name) +
       "&body=" +
       encodeURIComponent(body);

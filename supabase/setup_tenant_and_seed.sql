@@ -1,6 +1,8 @@
 -- =====================================================
+-- Halla AI — Full tenant bootstrap + seed
 -- Run this entire script in Supabase Dashboard > SQL Editor
--- Creates: tenant_phone_numbers table, lookup function, and demo tenant
+-- Creates: tenant_phone_numbers table, lookup function, and GCC demo tenant
+-- Market: GCC / Middle East | Domain: hallaai.com
 -- =====================================================
 
 -- 1. TENANT PHONE NUMBERS TABLE
@@ -73,13 +75,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 4. DEMO TENANT (skip if already exists)
+-- 4. DEMO TENANT — GCC / UAE (skip if already exists)
+-- Phone: +971 4 555 1234 (Dubai dummy number)
+-- Language: Arabic | Timezone: Asia/Dubai | Currency: AED
 INSERT INTO public.voice_tenants (
   owner_user_id,
   company_name,
   phone_number,
   default_language,
   timezone,
+  currency,
   diagnostic_fee,
   call_handling_mode,
   voice_tone,
@@ -92,23 +97,24 @@ SELECT
     (SELECT id FROM auth.users LIMIT 1),
     '00000000-0000-0000-0000-000000000000'::uuid
   ),
-  'Call IQ Demo Business',
-  '+19193715609',
-  'en',
-  'America/New_York',
-  125,
+  'Halla AI Demo Business',
+  '+97145551234',
+  'ar',
+  'Asia/Dubai',
+  'AED',
+  0,
   'message',
-  'friendly, concise, and professional',
+  'warm, professional, and helpful',
   '["greeting", "appointment_scheduling", "faq"]'::jsonb,
   '[
-    "What service are you calling about?",
-    "What is your name?",
-    "What is your phone number?",
-    "When would you like to schedule?"
+    "ما الخدمة التي تحتاجها؟",
+    "ما اسمك الكريم؟",
+    "ما رقم هاتفك؟",
+    "متى تفضل الموعد؟"
   ]'::jsonb,
-  '{"industry": "hvac", "services_offered": ["AC Repair", "Heating", "Maintenance"]}'::jsonb
+  '{"industry": "services", "services_offered": ["استشارات", "صيانة", "دعم فني"], "region": "gcc"}'::jsonb
 WHERE NOT EXISTS (
-  SELECT 1 FROM public.voice_tenants WHERE phone_number = '+19193715609'
+  SELECT 1 FROM public.voice_tenants WHERE phone_number = '+97145551234'
 );
 
 -- 5. LINK THE PHONE NUMBER
@@ -122,29 +128,29 @@ INSERT INTO public.tenant_phone_numbers (
 )
 SELECT
   vt.id,
-  '+19193715609',
+  '+97145551234',
   'PN_demo_' || gen_random_uuid()::text,
   'active',
   '{"voice": true, "sms": true}'::jsonb,
-  'Call IQ Main Line'
+  'Halla AI Main Line — Dubai'
 FROM public.voice_tenants vt
-WHERE vt.phone_number = '+19193715609'
+WHERE vt.phone_number = '+97145551234'
   AND NOT EXISTS (
     SELECT 1 FROM public.tenant_phone_numbers tpn
-    WHERE tpn.phone_number = '+19193715609'
+    WHERE tpn.phone_number = '+97145551234'
   );
 
 -- 6. VERIFY
 SELECT '=== TENANTS ===' AS info;
-SELECT id, company_name, phone_number, call_handling_mode, voice_tone
+SELECT id, company_name, phone_number, call_handling_mode, voice_tone, currency, timezone
 FROM public.voice_tenants
-WHERE phone_number = '+19193715609';
+WHERE phone_number = '+97145551234';
 
 SELECT '=== PHONE NUMBERS ===' AS info;
 SELECT tpn.id, tpn.phone_number, tpn.status, vt.company_name
 FROM public.tenant_phone_numbers tpn
 JOIN public.voice_tenants vt ON vt.id = tpn.tenant_id
-WHERE tpn.phone_number = '+19193715609';
+WHERE tpn.phone_number = '+97145551234';
 
 SELECT '=== TEST LOOKUP ===' AS info;
-SELECT * FROM public.get_tenant_by_phone_number('+19193715609');
+SELECT * FROM public.get_tenant_by_phone_number('+97145551234');

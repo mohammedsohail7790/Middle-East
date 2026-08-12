@@ -19,7 +19,7 @@ export function bootstrapOtel(): void {
   if (!isOtelEnabled()) return;
   logger.info('OTEL_BOOTSTRAP', {
     exporter: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'in-process',
-    service: process.env.OTEL_SERVICE_NAME || 'call-iq-gateway',
+    service: process.env.OTEL_SERVICE_NAME || 'halla-ai-gateway',
   });
 }
 
@@ -46,12 +46,12 @@ export function toOtlpSpanBatch(spans: {
       {
         resource: {
           attributes: [
-            { key: 'service.name', value: { stringValue: process.env.OTEL_SERVICE_NAME || 'call-iq-gateway' } },
+            { key: 'service.name', value: { stringValue: process.env.OTEL_SERVICE_NAME || 'halla-ai-gateway' } },
           ],
         },
         scopeSpans: [
           {
-            scope: { name: 'call-iq-gateway' },
+            scope: { name: 'halla-ai-gateway' },
             spans: spans.map((s) => ({
               traceId: s.traceId,
               spanId: s.spanId,

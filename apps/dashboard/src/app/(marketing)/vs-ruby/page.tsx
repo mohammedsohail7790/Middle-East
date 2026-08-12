@@ -2,12 +2,12 @@ import Link from "next/link";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { PageHero } from "@/components/marketing/PageHero";
 
-export const metadata = { title: "Call IQ vs Ruby" };
+export const metadata = { title: "Halla AI vs Ruby" };
 
 export default function VsRubyPage() {
   return (
     <MarketingShell>
-      <PageHero label="Comparison" title="Call IQ vs. Ruby" subtitle="An honest, side-by-side comparison." />
+      <PageHero label="Comparison" title="Halla AI vs. Ruby" subtitle="An honest, side-by-side comparison." />
       <section className="section">
         <div className="container">
           <div className="table-wrap" style={{ marginBottom: 36 }}>
@@ -15,7 +15,7 @@ export default function VsRubyPage() {
               <thead>
                 <tr>
                   <th>Feature</th>
-                  <th>Call IQ Professional</th>
+                  <th>Halla AI Professional</th>
                   <th>Ruby</th>
                 </tr>
               </thead>
@@ -46,13 +46,13 @@ export default function VsRubyPage() {
           <div className="comp-highlight" style={{ maxWidth: 680, margin: "0 auto 48px" }}>
             <h4 style={{ marginBottom: 10 }}>Our Verdict</h4>
             <p style={{ fontSize: "0.9rem" }}>
-              Call IQ is significantly more affordable than Ruby at any call volume. Choose Ruby only if you require a
+              Halla AI is significantly more affordable than Ruby at any call volume. Choose Ruby only if you require a
               live human voice on every single call.
             </p>
           </div>
           <div className="text-center">
             <Link href="/signup" className="btn btn-primary btn-lg">
-              Try Call IQ Free →
+              Try Halla AI Free →
             </Link>
           </div>
         </div>

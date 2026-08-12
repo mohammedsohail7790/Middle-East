@@ -126,7 +126,7 @@ export class CustomWebhooksService {
         // Sign payload if secret exists
         if (webhook.secret) {
           const signature = createHmac('sha256', webhook.secret).update(body).digest('hex');
-          headers['X-CallIQ-Signature'] = `sha256=${signature}`;
+          headers['X-HallaAI-Signature'] = `sha256=${signature}`;
         }
 
         const response = await fetch(webhook.url, {

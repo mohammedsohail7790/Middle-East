@@ -40,7 +40,7 @@ DEEPGRAM_API_KEY=...                            # If using Deepgram transcriptio
 ELEVENLABS_API_KEY=...                          # If using ElevenLabs voice cloning
 PG_POOL_MAX=8                                   # Default: 8. Raise to 15 at >500 tenants
 NODE_ENV=production                             # Critical — affects security behavior
-ALLOWED_ORIGINS=https://www.calliqlabs.com      # CORS — add dashboard domain
+ALLOWED_ORIGINS=https://www.hallaai.com,https://app.hallaai.com  # CORS — add dashboard domain
 
 # === EMERGENCY OVERRIDES (leave unset in normal operation) ===
 # ALLOWLIST_FAIL_OPEN=true                      # Only set during DB maintenance
@@ -64,8 +64,8 @@ NODE_ENV=production
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-NEXT_PUBLIC_GATEWAY_API_URL=https://call-iq-gateway.onrender.com
-NEXT_PUBLIC_SITE_URL=https://www.calliqlabs.com
+NEXT_PUBLIC_GATEWAY_API_URL=https://gateway.hallaai.com
+NEXT_PUBLIC_SITE_URL=https://www.hallaai.com
 ```
 
 ---
@@ -87,13 +87,13 @@ NEXT_PUBLIC_SITE_URL=https://www.calliqlabs.com
 ### Twilio
 - [ ] Account SID and Auth Token configured
 - [ ] Phone number purchased and configured in dashboard
-- [ ] Twilio webhook URL set to: `https://call-iq-gateway.onrender.com/api/v1/voice/incoming-call`
+- [ ] Twilio webhook URL set to: `https://gateway.hallaai.com/api/v1/voice/incoming-call`
 - [ ] Status callback URL set
-- [ ] Media Streams WSS URL: `wss://call-iq-gateway.onrender.com`
+- [ ] Media Streams WSS URL: `wss://gateway.hallaai.com`
 
 ### Stripe
 - [ ] Secret key configured
-- [ ] Webhook endpoint created: `https://call-iq-gateway.onrender.com/api/v1/billing/webhook`
+- [ ] Webhook endpoint created: `https://gateway.hallaai.com/api/v1/billing/webhook`
 - [ ] Webhook events subscribed: `customer.subscription.*`, `invoice.*`, `payment_intent.*`
 - [ ] Webhook signing secret configured as `STRIPE_WEBHOOK_SECRET`
 - [ ] Products and prices created for Essential/Professional/Enterprise plans
@@ -136,14 +136,14 @@ NEXT_PUBLIC_SITE_URL=https://www.calliqlabs.com
 ### 2. Verify Health Endpoints
 
 ```bash
-curl https://call-iq-gateway.onrender.com/health
-# Expected: {"status":"ok","service":"call-iq-gateway"}
+curl https://gateway.hallaai.com/health
+# Expected: {"status":"ok","service":"halla-ai-gateway"}
 
-curl https://call-iq-gateway.onrender.com/ready
+curl https://gateway.hallaai.com/ready
 # Expected: {"status":"ready","checks":{"database":{"ok":true},"redis":{"ok":true},...}}
 
 # Verify security:
-curl https://call-iq-gateway.onrender.com/debug/env
+curl https://gateway.hallaai.com/debug/env
 # Expected: 401 Unauthorized
 ```
 
@@ -159,7 +159,7 @@ curl https://call-iq-gateway.onrender.com/debug/env
 
 ```bash
 # Vercel: auto-deploys on push to main
-# Verify: dashboard loads at https://www.calliqlabs.com
+# Verify: dashboard loads at https://app.hallaai.com
 # Test: signup flow, login, dashboard access
 ```
 

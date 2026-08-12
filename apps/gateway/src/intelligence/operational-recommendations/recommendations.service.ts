@@ -1,13 +1,12 @@
 import { buildTenantHealthReport } from '../tenant-health/tenant-health.service.js';
 import { predictRuntimeDegradation } from '../runtime-prediction/runtime-prediction.service.js';
 import { getGovernanceEffectiveness } from '../governance-intelligence/governance-intelligence.service.js';
-import { getTenantBillingIntelligence } from '../../services/billing/billing-intelligence.service.js';
 import { detectReconnectStorm } from '../../services/runtime-reliability/reconnect-storm.js';
 
 export interface OperationalRecommendation {
   id: string;
   priority: 'high' | 'medium' | 'low';
-  domain: 'runtime' | 'governance' | 'billing' | 'events';
+  domain: 'runtime' | 'governance' | 'events';
   title: string;
   detail: string;
   confidence: number;
@@ -17,11 +16,10 @@ export interface OperationalRecommendation {
 export async function generateOperationalRecommendations(
   tenantId: string
 ): Promise<OperationalRecommendation[]> {
-  const [health, prediction, governance, billing] = await Promise.all([
+  const [health, prediction, governance] = await Promise.all([
     buildTenantHealthReport(tenantId),
     predictRuntimeDegradation(tenantId),
     Promise.resolve(getGovernanceEffectiveness(tenantId)),
-    getTenantBillingIntelligence(tenantId),
   ]);
 
   const storm = detectReconnectStorm(tenantId);
@@ -57,17 +55,6 @@ export async function generateOperationalRecommendations(
       detail: 'Elevated denials or guardrail triggers — tune allowed tools and quotas',
       confidence: 0.7,
       remediationHint: 'Open Governance console and review recent decisions',
-    });
-  }
-  if (billing.quotaHeadroomPct < 20) {
-    recs.push({
-      id: 'cost_headroom',
-      priority: 'medium',
-      domain: 'billing',
-      title: 'Cost headroom low',
-      detail: `Forecast ${billing.forecastNext30d} vs subscription margin — review usage`,
-      confidence: 0.65,
-      remediationHint: 'Billing Intelligence → expensive calls and token efficiency',
     });
   }
   if (prediction.forecast24h.dlqDepthProjected > 30) {

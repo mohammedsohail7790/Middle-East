@@ -234,6 +234,111 @@ export const dashboardAssistantChatSchema: ValidationSchema = {
   },
 };
 
+const CRM_CHANNELS = ['whatsapp', 'web_chat', 'instagram', 'facebook'] as const;
+const CRM_CHANNEL_STATUSES = ['not_connected', 'connected', 'error'] as const;
+
+export const crmIdParamSchema: ValidationSchema = {
+  params: { id: UUID_PARAM },
+};
+
+export const crmStageCreateBodySchema: ValidationSchema = {
+  allowOnlyBody: ['name', 'position'],
+  body: {
+    name: { type: 'string', required: true, minLength: 1, maxLength: 200 },
+    position: { type: 'number', minimum: 0, maximum: 100_000 },
+  },
+};
+
+export const crmStageUpdateBodySchema: ValidationSchema = {
+  allowOnlyBody: ['name', 'position'],
+  body: {
+    name: { type: 'string', minLength: 1, maxLength: 200 },
+    position: { type: 'number', minimum: 0, maximum: 100_000 },
+  },
+};
+
+export const crmCompanyCreateBodySchema: ValidationSchema = {
+  allowOnlyBody: ['name', 'website', 'industry', 'notes'],
+  body: {
+    name: { type: 'string', required: true, minLength: 1, maxLength: 300 },
+    website: { type: 'string', maxLength: 2048 },
+    industry: { type: 'string', maxLength: 128 },
+    notes: { type: 'string', maxLength: 5000 },
+  },
+};
+
+export const crmCompanyUpdateBodySchema: ValidationSchema = {
+  allowOnlyBody: ['name', 'website', 'industry', 'notes'],
+  body: {
+    name: { type: 'string', minLength: 1, maxLength: 300 },
+    website: { type: 'string', maxLength: 2048 },
+    industry: { type: 'string', maxLength: 128 },
+    notes: { type: 'string', maxLength: 5000 },
+  },
+};
+
+export const crmContactCreateBodySchema: ValidationSchema = {
+  allowOnlyBody: ['name', 'companyId', 'phone', 'email', 'notes'],
+  body: {
+    name: { type: 'string', required: true, minLength: 1, maxLength: 300 },
+    companyId: { type: 'uuid' },
+    phone: { type: 'string', minLength: 3, maxLength: 32 },
+    email: { type: 'email', maxLength: 254 },
+    notes: { type: 'string', maxLength: 5000 },
+  },
+};
+
+export const crmContactUpdateBodySchema: ValidationSchema = {
+  allowOnlyBody: ['name', 'companyId', 'phone', 'email', 'notes'],
+  body: {
+    name: { type: 'string', minLength: 1, maxLength: 300 },
+    companyId: { type: 'uuid' },
+    phone: { type: 'string', minLength: 3, maxLength: 32 },
+    email: { type: 'email', maxLength: 254 },
+    notes: { type: 'string', maxLength: 5000 },
+  },
+};
+
+export const crmDealCreateBodySchema: ValidationSchema = {
+  allowOnlyBody: ['title', 'stageId', 'contactId', 'companyId', 'value', 'currency', 'notes'],
+  body: {
+    title: { type: 'string', required: true, minLength: 1, maxLength: 300 },
+    stageId: { type: 'uuid' },
+    contactId: { type: 'uuid' },
+    companyId: { type: 'uuid' },
+    value: { type: 'number', minimum: 0, maximum: 999_999_999_999.99 },
+    currency: { type: 'string', minLength: 3, maxLength: 3 },
+    notes: { type: 'string', maxLength: 5000 },
+  },
+};
+
+export const crmDealUpdateBodySchema: ValidationSchema = {
+  allowOnlyBody: ['title', 'stageId', 'contactId', 'companyId', 'value', 'currency', 'notes'],
+  body: {
+    title: { type: 'string', minLength: 1, maxLength: 300 },
+    stageId: { type: 'uuid' },
+    contactId: { type: 'uuid' },
+    companyId: { type: 'uuid' },
+    value: { type: 'number', minimum: 0, maximum: 999_999_999_999.99 },
+    currency: { type: 'string', minLength: 3, maxLength: 3 },
+    notes: { type: 'string', maxLength: 5000 },
+  },
+};
+
+export const channelParamSchema: ValidationSchema = {
+  params: {
+    channel: { type: 'string', required: true, enum: [...CRM_CHANNELS], maxLength: 32 },
+  },
+};
+
+export const channelUpsertBodySchema: ValidationSchema = {
+  allowOnlyBody: ['status', 'config'],
+  body: {
+    status: { type: 'string', enum: [...CRM_CHANNEL_STATUSES], maxLength: 32 },
+    config: { type: 'object' },
+  },
+};
+
 export const tenantCreateBodySchema: ValidationSchema = {
   allowOnlyBody: [
     'business_name',

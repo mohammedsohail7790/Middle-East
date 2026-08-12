@@ -128,7 +128,7 @@ function Sparkline({
     })
     .join(" ");
 
-  const stroke = direction === "negative" ? "#EF4444" : "#0EA5E9";
+  const stroke = direction === "negative" ? "#EF4444" : "#C9A24B";
 
   return (
     <svg

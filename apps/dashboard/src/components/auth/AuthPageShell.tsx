@@ -29,7 +29,7 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
           <Link href="/" className="flex shrink-0 items-center">
             <Image
               src="/logo.png"
-              alt="Call IQ"
+              alt="Halla AI"
               width={160}
               height={48}
               className="block h-[48px] w-auto object-contain object-left"
@@ -59,7 +59,7 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
             </Link>
             <Link
               href="/signup"
-              className="inline-flex items-center rounded-full bg-cyan-500 px-[18px] py-[9px] text-sm font-semibold text-white no-underline shadow-[0_2px_10px_rgba(14,165,233,0.3)] whitespace-nowrap transition-all hover:bg-cyan-600 hover:shadow-[0_4px_16px_rgba(14,165,233,0.4)] hover:-translate-y-px"
+              className="inline-flex items-center rounded-full bg-[var(--gold)] px-[18px] py-[9px] text-sm font-semibold text-white no-underline shadow-[0_2px_10px_var(--gold-glow)] whitespace-nowrap transition-all hover:bg-[var(--gold-dark)] hover:shadow-[0_4px_16px_var(--gold-glow)] hover:-translate-y-px"
             >
               Start free trial
             </Link>
@@ -74,7 +74,7 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
       <footer className="border-t border-gray-200 bg-white">
         <div className="mx-auto flex w-full max-w-[1120px] flex-col items-center justify-between gap-3 px-4 py-4 sm:flex-row sm:px-6">
           <p className="text-center text-[0.78rem] text-gray-400 sm:text-left">
-            &copy; {new Date().getFullYear()} Call IQ Labs &middot;{" "}
+            &copy; {new Date().getFullYear()} Halla AI Labs &middot;{" "}
             <Link href="/privacy" className="text-gray-400 no-underline transition-colors hover:text-[#0A0A0A]">Privacy</Link> &middot;{" "}
             <Link href="/terms" className="text-gray-400 no-underline transition-colors hover:text-[#0A0A0A]">Terms</Link> &middot;{" "}
             <Link href="/security" className="text-gray-400 no-underline transition-colors hover:text-[#0A0A0A]">Security</Link>
@@ -161,7 +161,7 @@ export function AuthFooterLink({
   return (
     <p className="mt-6 text-center text-sm text-gray-500">
       {prompt}{" "}
-      <Link href={href} className="font-semibold text-[#0A0A0A] no-underline transition-colors hover:text-cyan-600">
+      <Link href={href} className="font-semibold text-[#0A0A0A] no-underline transition-colors hover:text-[var(--gold-dark)]">
         {linkLabel}
       </Link>
     </p>

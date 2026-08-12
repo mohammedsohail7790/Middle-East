@@ -19,9 +19,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 async function testLogin() {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@calliqlabs.com';
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@hallaai.com';
   const adminPassword = process.env.ADMIN_PASSWORD;
-  const testEmail = process.env.TEST_USER_EMAIL || 'test@calliq.com';
+  const testEmail = process.env.TEST_USER_EMAIL || 'test@hallaai.com';
   const testPassword = process.env.TEST_USER_PASSWORD;
 
   if (!adminPassword) {

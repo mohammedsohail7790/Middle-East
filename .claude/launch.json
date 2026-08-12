@@ -4,7 +4,7 @@
     {
       "name": "dashboard",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--workspace=@call-iq/dashboard"],
+      "runtimeArgs": ["run", "dev", "--workspace=@halla-ai/dashboard"],
       "port": 3000
     }
   ]

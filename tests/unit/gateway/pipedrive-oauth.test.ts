@@ -3,6 +3,8 @@ import { getPipedriveOAuthConfig } from '../../../apps/gateway/src/services/inte
 
 const ENV_KEYS = ['PIPEDRIVE_CLIENT_ID', 'PIPEDRIVE_CLIENT_SECRET', 'GATEWAY_PUBLIC_URL'] as const;
 
+const GW = 'https://gateway.hallaai.com';
+
 describe('getPipedriveOAuthConfig', () => {
   const saved: Record<string, string | undefined> = {};
 
@@ -21,27 +23,28 @@ describe('getPipedriveOAuthConfig', () => {
   });
 
   it('derives redirect URI from GATEWAY_PUBLIC_URL', () => {
-    process.env.GATEWAY_PUBLIC_URL = 'https://call-iq-gateway.onrender.com';
+    process.env.GATEWAY_PUBLIC_URL = GW;
     process.env.PIPEDRIVE_CLIENT_ID = 'abc123';
     process.env.PIPEDRIVE_CLIENT_SECRET = 'secret';
 
     expect(getPipedriveOAuthConfig()).toEqual({
       clientId: 'abc123',
       clientSecret: 'secret',
-      redirectUri: 'https://call-iq-gateway.onrender.com/api/v1/integrations/pipedrive/callback',
+      redirectUri: `${GW}/api/v1/integrations/pipedrive/callback`,
     });
   });
 
   it('returns empty credentials when env vars are unset', () => {
+    process.env.GATEWAY_PUBLIC_URL = GW;
     expect(getPipedriveOAuthConfig()).toEqual({
       clientId: '',
       clientSecret: '',
-      redirectUri: 'https://call-iq-gateway.onrender.com/api/v1/integrations/pipedrive/callback',
+      redirectUri: `${GW}/api/v1/integrations/pipedrive/callback`,
     });
   });
 
   it('builds the documented Pipedrive authorize URL shape', () => {
-    process.env.GATEWAY_PUBLIC_URL = 'https://call-iq-gateway.onrender.com';
+    process.env.GATEWAY_PUBLIC_URL = GW;
     const config = getPipedriveOAuthConfig();
     const clientId = 'b4d083d9216986345b32';
     const state = 'deadbeef';
@@ -54,7 +57,7 @@ describe('getPipedriveOAuthConfig', () => {
     expect(url).toBe(
       'https://oauth.pipedrive.com/oauth/authorize' +
         '?client_id=b4d083d9216986345b32' +
-        '&redirect_uri=https%3A%2F%2Fcall-iq-gateway.onrender.com%2Fapi%2Fv1%2Fintegrations%2Fpipedrive%2Fcallback' +
+        `&redirect_uri=${encodeURIComponent(GW + '/api/v1/integrations/pipedrive/callback')}` +
         '&state=deadbeef'
     );
   });

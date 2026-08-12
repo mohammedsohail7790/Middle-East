@@ -191,7 +191,7 @@ rollback_deployment() {
     
     # This would use your deployment platform API
     # For Render: Use API to rollback to previous deployment
-    # For K8s: kubectl rollout undo deployment/call-iq-gateway
+    # For K8s: kubectl rollout undo deployment/halla-ai-gateway
     
     # Simulate rollback
     sleep 5

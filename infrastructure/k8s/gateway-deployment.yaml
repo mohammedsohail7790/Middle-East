@@ -1,28 +1,28 @@
-# Call IQ Gateway — production Kubernetes scaffold (Phase 5)
+# Halla AI Gateway — production Kubernetes scaffold
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: call-iq-gateway
+  name: halla-ai-gateway
   labels:
-    app: call-iq-gateway
+    app: halla-ai-gateway
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: call-iq-gateway
+      app: halla-ai-gateway
   template:
     metadata:
       labels:
-        app: call-iq-gateway
+        app: halla-ai-gateway
     spec:
       containers:
         - name: gateway
-          image: call-iq-gateway:latest
+          image: halla-ai-gateway:latest
           ports:
             - containerPort: 3003
           envFrom:
             - secretRef:
-                name: call-iq-gateway-secrets
+                name: halla-ai-gateway-secrets
           livenessProbe:
             httpGet:
               path: /health
@@ -45,10 +45,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: call-iq-gateway
+  name: halla-ai-gateway
 spec:
   selector:
-    app: call-iq-gateway
+    app: halla-ai-gateway
   ports:
     - port: 80
       targetPort: 3003

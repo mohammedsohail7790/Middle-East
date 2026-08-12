@@ -8,8 +8,8 @@
   "redirects": [
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "calliqlabs.com" }],
-      "destination": "https://www.calliqlabs.com/:path*",
+      "has": [{ "type": "host", "value": "hallaai.com" }],
+      "destination": "https://www.hallaai.com/:path*",
       "permanent": true
     }
   ],

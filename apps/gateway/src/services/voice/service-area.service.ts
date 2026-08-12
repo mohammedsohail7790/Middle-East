@@ -33,7 +33,7 @@ export interface ServiceAreaResult {
 
 const GEOCODE_TIMEOUT_MS = 5000;
 const ROUTE_TIMEOUT_MS = 5000;
-const USER_AGENT = 'CallIQ/1.0 (https://www.calliqlabs.com; service-area-check)';
+const USER_AGENT = 'HallaAI/1.0 (https://www.hallaai.com; service-area-check)';
 
 type Coords = { lat: number; lng: number };
 

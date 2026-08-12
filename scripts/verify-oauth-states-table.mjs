@@ -19,7 +19,7 @@ if (!tenantId) {
 const state = randomBytes(16).toString('hex');
 await pool.query(
   `INSERT INTO public.integration_oauth_states (state, tenant_id, provider, redirect_uri, code_verifier, expires_at)
-   VALUES ($1, $2, 'hubspot', 'https://example.com/cb', 'https://www.calliqlabs.com', NOW() + INTERVAL '10 minutes')`,
+   VALUES ($1, $2, 'hubspot', 'https://example.com/cb', 'https://www.hallaai.com', NOW() + INTERVAL '10 minutes')`,
   [state, tenantId]
 );
 await pool.query(`DELETE FROM public.integration_oauth_states WHERE state = $1`, [state]);

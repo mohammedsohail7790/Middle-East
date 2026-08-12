@@ -1,7 +1,7 @@
 /**
  * ORG-001 — Organizations as tenancy boundary (ADR-001).
  * Persistence: public.organizations + organization_members.
- * Call IQ bridge: voice_tenants.id = organizations.id (1:1).
+ * Halla AI bridge: voice_tenants.id = organizations.id (1:1).
  */
 
 import { voiceDb } from '../voice/tenant-scope.js';
@@ -301,7 +301,7 @@ export async function createOrganization(input: CreateOrganizationInput): Promis
         client.release();
     }
 
-    // Call IQ bridge is best-effort after tenancy rows are durable
+    // Halla AI bridge is best-effort after tenancy rows are durable
     try {
         await provisionVoiceTenantBridge(organization);
     } catch (bridgeErr) {

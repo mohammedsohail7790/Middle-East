@@ -28,7 +28,7 @@ export function ProductPreview() {
       <div className="premium-preview-glow" aria-hidden />
       <div className="premium-preview-frame">
         <div className="premium-preview-chrome">
-          <span className="premium-preview-title">Call IQ · Operations</span>
+          <span className="premium-preview-title">Halla AI · Operations</span>
           <span className="ml-auto flex items-center gap-1.5 text-[10px] font-medium text-emerald-600">
             <Activity className="w-3 h-3" />
             Live

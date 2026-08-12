@@ -4,12 +4,12 @@ import { PageHero } from "@/components/marketing/PageHero";
 
 import { SUPPORT_EMAIL } from "@/lib/integration-support";
 
-export const metadata = { title: "Terms of Service | Call IQ" };
+export const metadata = { title: "Terms of Service | Halla AI" };
 
 export default function TermsPage() {
   return (
     <MarketingShell>
-      <PageHero label="Legal" title="Terms of Service" subtitle="Subscription terms for Call IQ." />
+      <PageHero label="Legal" title="Terms of Service" subtitle="Subscription terms for Halla AI." />
       <section className="section">
         <div className="container container-sm">
           <p style={{ marginBottom: 20 }}>
@@ -17,7 +17,7 @@ export default function TermsPage() {
             otherwise stated at signup. You may cancel with notice per your plan.
           </p>
           <p style={{ marginBottom: 20 }}>
-            Call IQ is a software service provided on an as-available basis.
+            Halla AI is a software service provided on an as-available basis.
             Abuse, unlawful robocalling, or circumventing usage limits may result in suspension.
           </p>
           <p style={{ marginBottom: 32 }}>
