@@ -198,7 +198,7 @@ export class RealtimeToolsManager {
     if (!PLAN_FEATURES[plan]?.multiLanguageSwitching) {
       return { success: false, error: 'Mid-call language switching is not currently available on any plan' };
     }
-    if (!isLanguageAllowed(plan, lang as 'en' | 'es' | 'fr' | 'ru' | 'zh' | 'hi')) {
+    if (!isLanguageAllowed(plan, lang as 'ar-SA' | 'en' | 'hi' | 'ru')) {
       return { success: false, error: `Language "${lang}" is not included on your plan` };
     }
 
