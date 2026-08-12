@@ -21,7 +21,7 @@ function resolveGatewayUrl() {
   if (pub && !/localhost|127\.0\.0\.1/i.test(pub)) {
     return pub.replace(/\/$/, '');
   }
-  return 'https://call-iq-gateway.onrender.com';
+  return 'https://gateway.hallaai.com';
 }
 
 const GATEWAY = resolveGatewayUrl();
@@ -169,7 +169,7 @@ async function auditDatabase() {
     const state = randomBytes(16).toString('hex');
     await pool.query(
       `INSERT INTO public.integration_oauth_states (state, tenant_id, provider, redirect_uri, code_verifier, expires_at)
-       VALUES ($1, $2, 'hubspot', 'https://example.com/cb', 'https://www.calliqlabs.com', NOW() + INTERVAL '10 minutes')`,
+       VALUES ($1, $2, 'hubspot', 'https://example.com/cb', 'https://www.hallaai.com', NOW() + INTERVAL '10 minutes')`,
       [state, TENANT_ID]
     );
     await pool.query(`DELETE FROM public.integration_oauth_states WHERE state = $1`, [state]);
@@ -396,7 +396,7 @@ async function auditGateway(token, tenantRow) {
     const streamMatch = twiml.match(/url="([^"]+)"/);
     const streamUrl = streamMatch?.[1]?.replace(/&amp;/g, '&') || '';
     if (streamUrl.includes('calliq-gateway.onrender.com') && !streamUrl.includes('call-iq-gateway')) {
-      fail('Stream URL hostname', 'dead host calliq-gateway (missing hyphen)');
+      fail('Stream URL hostname', 'dead host calliq-gateway (missing hyphen — still using old Render URL)');
     } else if (streamUrl) {
       pass('Stream URL host', new URL(streamUrl.replace(/^wss:/i, 'https:')).hostname);
     }

@@ -2,7 +2,7 @@ import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { PageHero } from "@/components/marketing/PageHero";
 import { CtaBlock } from "@/components/marketing/CtaBlock";
 
-export const metadata = { title: "AI vs Human | Call IQ" };
+export const metadata = { title: "AI vs Human | Halla AI" };
 
 export default function AiVsHumanPage() {
   return (
@@ -22,7 +22,7 @@ export default function AiVsHumanPage() {
                   <th>Expense</th>
                   <th>Human FTE</th>
                   <th>Human Agency</th>
-                  <th>Call IQ AI</th>
+                  <th>Halla AI</th>
                 </tr>
               </thead>
               <tbody>
@@ -66,7 +66,7 @@ export default function AiVsHumanPage() {
               </p>
             </div>
             <div className="card card-blue">
-              <h4 style={{ marginBottom: 16, color: "var(--accent)" }}>When to Choose Call IQ</h4>
+              <h4 style={{ marginBottom: 16, color: "var(--accent)" }}>When to Choose Halla AI</h4>
               <p style={{ fontSize: "0.875rem", lineHeight: 2.2 }}>
                 • Transactional calls (booking, pricing, hours)
                 <br />• Save $20,000–$50,000/year
@@ -75,7 +75,7 @@ export default function AiVsHumanPage() {
               </p>
             </div>
           </div>
-          <CtaBlock title="Try Call IQ Free for 14 Days" description="Call your own AI receptionist. If you don't love it, keep your money." />
+          <CtaBlock title="Try Halla AI Free for 14 Days" description="Call your own AI receptionist. If you don't love it, keep your money." />
         </div>
       </section>
     </MarketingShell>

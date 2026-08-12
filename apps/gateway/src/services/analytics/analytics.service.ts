@@ -338,7 +338,7 @@ export class AnalyticsService {
     const avgSec = Math.round(metrics.avgCallDuration || 0);
 
     return buildAnalyticsPdfBuffer({
-      title: 'Call IQ Analytics Report',
+      title: 'Halla AI Analytics Report',
       period,
       kpis: [
         { label: 'Total Calls', value: String(metrics.totalCalls) },

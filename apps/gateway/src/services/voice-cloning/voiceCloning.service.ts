@@ -80,8 +80,8 @@ export class VoiceCloningService {
       } else {
         // Create new professional voice clone
         const formData = new FormData();
-        formData.append('name', `Call IQ - ${tenantId.slice(0, 8)}`);
-        formData.append('description', `Custom voice clone for Call IQ tenant`);
+        formData.append('name', `Halla AI - ${tenantId.slice(0, 8)}`);
+        formData.append('description', `Custom voice clone for Halla AI tenant`);
 
         for (const sample of samples) {
           const audioBuffer = Buffer.from(sample.audioBase64, 'base64');

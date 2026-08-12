@@ -155,12 +155,12 @@ WHAT NOT TO DO:
   const { data: tenant, error } = await supabase
     .from('voice_tenants')
     .update({
-      company_name: 'Call IQ',
-      phone_number: '+19193715609',
-      transfer_phone_number: '+19193715609',
-      default_language: 'en',
-      timezone: 'America/New_York',
-      diagnostic_fee: 125,
+      company_name: 'Halla AI',
+      phone_number: '+97145551234',        -- Replace with your real UAE/GCC Twilio number
+      transfer_phone_number: '+97145551234',
+      default_language: 'ar',
+      timezone: 'Asia/Dubai',
+      diagnostic_fee: 0,
       call_handling_mode: 'both',
       voice_services: voiceServices,
       voice_tone: voiceTone,

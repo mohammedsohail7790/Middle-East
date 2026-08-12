@@ -4,10 +4,10 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  LayoutDashboard, Phone, Users, Bot, Calendar, MessageSquare, BarChart3,
-  Puzzle, BookOpen, Lock, CreditCard, Hash, LogOut, Shield,
+  LayoutDashboard, Phone, Users, Bot, BarChart3,
+  BookOpen, Lock, Hash, LogOut, Shield,
   PanelLeftClose, PanelLeft, X, LifeBuoy, type LucideIcon,
-  Star, Workflow, MessagesSquare, Instagram, Facebook, Building2, Contact, Briefcase, KanbanSquare,
+  Star,
 } from "lucide-react";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { cn } from "@/lib/utils";
@@ -17,9 +17,9 @@ import {
   navLockedTitle,
   type DashboardNavItem,
 } from "@/lib/dashboard-nav";
-import { CallIqLogo } from "@/components/brand/CallIqLogo";
+import { HallaAiLogo } from "@/components/brand/CallIqLogo";
 import Image from "next/image";
-import { MobileBottomNav } from "@/components/calliq/MobileBottomNav";
+import { MobileBottomNav } from "@/components/halla/MobileBottomNav";
 import { DashboardTopbar } from "@/components/dashboard/DashboardTopbar";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { fetchWorkspaceProfile, type WorkspaceProfile } from "@/lib/ensure-tenant";
@@ -30,24 +30,11 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   "/dashboard/calls": Phone,
   "/dashboard/leads": Users,
   "/dashboard/agent": Bot,
-  "/dashboard/calendar": Calendar,
   "/dashboard/analytics": BarChart3,
   "/dashboard/quality": Star,
-  "/dashboard/channels/sms": MessageSquare,
-  "/dashboard/channels/whatsapp": MessagesSquare,
-  "/dashboard/channels/web-chat": MessageSquare,
-  "/dashboard/channels/instagram": Instagram,
-  "/dashboard/channels/facebook": Facebook,
-  "/dashboard/crm/pipeline": KanbanSquare,
-  "/dashboard/crm/contacts": Contact,
-  "/dashboard/crm/companies": Building2,
-  "/dashboard/crm/deals": Briefcase,
-  "/dashboard/integrations": Puzzle,
-  "/dashboard/automation": Workflow,
   "/dashboard/knowledge": BookOpen,
   "/dashboard/phone-numbers": Hash,
   "/dashboard/compliance": Lock,
-  "/dashboard/billing": CreditCard,
   "/dashboard/settings/spam": Shield,
   "/dashboard/support": LifeBuoy,
 };
@@ -72,7 +59,7 @@ function NavLink({
 
   return (
     <Link
-      href={locked ? "/dashboard/billing" : item.href}
+      href={item.href}
       onClick={onNavigate}
       className={cn(
         "dashboard-nav-link",
@@ -121,8 +108,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const onPlan = () => setPlanTick((n) => n + 1);
+    window.addEventListener("halla-plan-updated", onPlan);
+    // backward compat: also listen for legacy event name
     window.addEventListener("calliq-plan-updated", onPlan);
-    return () => window.removeEventListener("calliq-plan-updated", onPlan);
+    return () => {
+      window.removeEventListener("halla-plan-updated", onPlan);
+      window.removeEventListener("calliq-plan-updated", onPlan);
+    };
   }, []);
 
   useDashboardSync(["billing"], () => {
@@ -164,7 +156,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
         >
           {collapsed ? (
-            <Link href="/dashboard" className="dashboard-sidebar-icon shrink-0" aria-label="Call IQ">
+            <Link href="/dashboard" className="dashboard-sidebar-icon shrink-0" aria-label="Halla AI">
               <Image
                 src="/logo.png"
                 alt=""
@@ -176,7 +168,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ) : (
             <div className="dashboard-sidebar-logo flex justify-center pr-8">
-              <CallIqLogo href="/dashboard" size="lg" centered className="w-full max-w-[220px]" linkAs={Link} />
+            <HallaAiLogo href="/dashboard" size="lg" centered className="w-full max-w-[220px]" linkAs={Link} />
             </div>
           )}
           {collapsed ? (

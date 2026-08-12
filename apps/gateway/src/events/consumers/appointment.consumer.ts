@@ -37,25 +37,6 @@ export async function handleAppointmentEvent(event: PlatformEvent): Promise<void
     eventType: event.eventType,
   });
 
-  if (event.eventType === PlatformEventTypes.APPOINTMENT_CREATED && payload.appointmentId) {
-    try {
-      const { slackService } = await import('../../services/slack/slack.service.js');
-      await slackService.sendAppointmentBookedNotification(event.tenantId, {
-        customerName: payload.name || 'Customer',
-        customerPhone: payload.phone || '',
-        appointmentTime: payload.scheduledTime
-          ? new Date(payload.scheduledTime)
-          : new Date(),
-        service: payload.service || 'Appointment',
-      });
-    } catch (err) {
-      logger.debug('APPOINTMENT_SLACK_NOTIFY_SKIP', {
-        tenantId: event.tenantId,
-        reason: String(err),
-      });
-    }
-  }
-
   logger.info('APPOINTMENT_EVENT_CONSUMED', {
     tenantId: event.tenantId,
     eventType: event.eventType,

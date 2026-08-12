@@ -1,8 +1,9 @@
 # ============================================
-# Verification Script for Voice Service Setup
+# Verification Script for Halla AI Voice Service Setup
+# hallaai.com | GCC / Middle East
 # ============================================
 
-Write-Host "🔍 Verifying Call IQ Voice Service Setup..." -ForegroundColor Cyan
+Write-Host "🔍 Verifying Halla AI Voice Service Setup..." -ForegroundColor Cyan
 Write-Host ""
 
 $allGood = $true
@@ -34,6 +35,11 @@ if (Test-Path "apps/gateway/.env") {
             Write-Host "   ❌ $var is missing or empty" -ForegroundColor Red
             $allGood = $false
         }
+    }
+
+    # Warn if still using a US number
+    if ($envContent -match "TWILIO_PHONE_NUMBER=\+1") {
+        Write-Host "   ⚠️  TWILIO_PHONE_NUMBER looks like a US number (+1). For GCC use +971 (UAE), +966 (KSA), +974 (Qatar)." -ForegroundColor Yellow
     }
 } else {
     Write-Host "   ❌ apps/gateway/.env not found" -ForegroundColor Red
@@ -115,13 +121,13 @@ Write-Host ""
 # Summary
 Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Gray
 if ($allGood) {
-    Write-Host "✅ All checks passed! Ready to test calls." -ForegroundColor Green
+    Write-Host "✅ All checks passed! Halla AI is ready." -ForegroundColor Green
     Write-Host ""
-    Write-Host "📞 Test by calling: +1 (919) 371-5609" -ForegroundColor Cyan
+    Write-Host "📞 Test by calling your GCC Twilio number (e.g. +971 xx xxx xxxx)" -ForegroundColor Cyan
 } else {
     Write-Host "⚠️  Some checks failed. Fix the issues above." -ForegroundColor Yellow
     Write-Host ""
-    Write-Host "📖 See QUICK_FIX_SUMMARY.md for detailed steps" -ForegroundColor Cyan
+    Write-Host "📖 See README.md for detailed setup steps" -ForegroundColor Cyan
 }
 Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Gray
 Write-Host ""
@@ -131,6 +137,6 @@ Write-Host "📋 Next Steps:" -ForegroundColor Cyan
 Write-Host "1. Fix any ❌ issues above" -ForegroundColor White
 Write-Host "2. Make sure Twilio webhook is configured:" -ForegroundColor White
 Write-Host "   https://your-ngrok-url/api/v1/voice/incoming-call" -ForegroundColor Gray
-Write-Host "3. Call +1 (919) 371-5609 to test" -ForegroundColor White
+Write-Host "3. Call your GCC Twilio number to test" -ForegroundColor White
 Write-Host "4. Check Gateway logs for any errors" -ForegroundColor White
 Write-Host ""

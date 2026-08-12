@@ -18,8 +18,8 @@ function hostFromUrl(url: string): string | null {
     }
 }
 
-/** Hostnames that 404 on Render (no-server) — common typo vs live call-iq-gateway service */
-const INACTIVE_STREAM_HOSTS = new Set(['calliq-gateway.onrender.com']);
+/** Hostnames that 404 on Render (no-server) — common typo or legacy hostname */
+const INACTIVE_STREAM_HOSTS = new Set(['calliq-gateway.onrender.com', 'call-iq-gateway.onrender.com']);
 
 function httpsToWss(httpsUrl: string): string {
     return httpsUrl
@@ -66,8 +66,8 @@ export function configureRenderEnvironment(): void {
     const gatewayPublic = process.env.GATEWAY_PUBLIC_URL?.trim().replace(/\/$/, '') || '';
     const renderHttps = process.env.RENDER_EXTERNAL_URL?.trim().replace(/\/$/, '') || '';
 
-    // Render service name "calliq-gateway" → RENDER_EXTERNAL_URL without hyphen (404).
-    // Never clobber a valid TWILIO_STREAM_WSS_URL (call-iq-gateway) with that hostname.
+    // Legacy Render hostname calliq-gateway → RENDER_EXTERNAL_URL without hyphen (404).
+    // Never clobber a valid TWILIO_STREAM_WSS_URL (gateway.hallaai.com) with that hostname.
     if (explicitActive) {
         const renderInactive = Boolean(renderHttps && !isActiveStreamHost(renderHttps));
         const publicInactive = Boolean(gatewayPublic && !isActiveStreamHost(gatewayPublic));
@@ -118,7 +118,7 @@ export function getGatewayPublicHttpsBase(): string {
     );
 }
 
-const DEFAULT_GATEWAY_HTTPS = 'https://call-iq-gateway.onrender.com';
+const DEFAULT_GATEWAY_HTTPS = 'https://gateway.hallaai.com';
 
 /** Google Calendar OAuth redirect — must match Google Cloud Console exactly. */
 export function getGoogleCalendarRedirectUri(): string {
@@ -355,7 +355,7 @@ export function validateEnvironment(): void {
     if (streamHost && INACTIVE_STREAM_HOSTS.has(streamHost)) {
         throw new Error(
             `Stream URL host "${streamHost}" is not reachable. ` +
-                'Set TWILIO_STREAM_WSS_URL=wss://call-iq-gateway.onrender.com and GATEWAY_PUBLIC_URL=https://call-iq-gateway.onrender.com ' +
+                'Set TWILIO_STREAM_WSS_URL=wss://gateway.hallaai.com and GATEWAY_PUBLIC_URL=https://gateway.hallaai.com ' +
                 '(Render may set RENDER_EXTERNAL_URL to calliq-gateway without hyphen — ignore it).'
         );
     }

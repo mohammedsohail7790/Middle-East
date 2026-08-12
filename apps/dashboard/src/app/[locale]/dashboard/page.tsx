@@ -352,8 +352,8 @@ export default function DashboardHome() {
               <AreaChart data={volumeChart}>
                 <defs>
                   <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0EA5E9" stopOpacity={0.45} />
-                    <stop offset="100%" stopColor="#0EA5E9" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#C9A24B" stopOpacity={0.45} />
+                    <stop offset="100%" stopColor="#C9A24B" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#10B981" stopOpacity={0.35} />
@@ -367,7 +367,7 @@ export default function DashboardHome() {
                   contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, boxShadow: "var(--shadow-md)" }}
                   cursor={{ stroke: "var(--accent)", strokeWidth: 1, strokeDasharray: "4 2" }}
                 />
-                <Area type="monotone" dataKey="calls" stroke="#0EA5E9" fill="url(#g1)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+                <Area type="monotone" dataKey="calls" stroke="#C9A24B" fill="url(#g1)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
                 <Area type="monotone" dataKey="leads" stroke="#10B981" fill="url(#g2)" strokeWidth={2} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
               </AreaChart>
             </ResponsiveContainer>
@@ -385,7 +385,7 @@ export default function DashboardHome() {
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" stroke="currentColor" opacity={0.5} fontSize={11} width={72} />
                   <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }} />
-                  <Bar dataKey="value" fill="#0EA5E9" radius={[0, 8, 8, 0]} />
+                  <Bar dataKey="value" fill="#C9A24B" radius={[0, 8, 8, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}

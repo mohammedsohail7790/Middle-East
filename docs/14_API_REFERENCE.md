@@ -1,8 +1,8 @@
 # 14 — API REFERENCE
 
-## Base URL
+**Base URL**
 
-- **Production:** `https://api.calliq.com` (or Render URL)
+- **Production:** `https://gateway.hallaai.com`
 - **Local:** `http://localhost:3003`
 
 ## Authentication

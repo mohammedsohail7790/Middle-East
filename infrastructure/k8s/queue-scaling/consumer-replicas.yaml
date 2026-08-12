@@ -2,24 +2,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: call-iq-event-consumers
+  name: halla-ai-event-consumers
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: call-iq-event-consumers
+      app: halla-ai-event-consumers
   template:
     metadata:
       labels:
-        app: call-iq-event-consumers
+        app: halla-ai-event-consumers
     spec:
       containers:
         - name: consumer
-          image: call-iq-gateway:latest
+          image: halla-ai-gateway:latest
           env:
-            - name: CALLIQ_P2_EVENT_BUS
+            - name: HALLA_P2_EVENT_BUS
               value: "true"
-            - name: CALLIQ_CONSUMER_ONLY
+            - name: HALLA_CONSUMER_ONLY
               value: "true"
           resources:
             requests:

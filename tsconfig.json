@@ -11,10 +11,10 @@
         "forceConsistentCasingInFileNames": true,
         "strict": true,
         "paths": {
-            "@call-iq/types": ["./packages/types/src"],
-            "@call-iq/db": ["./packages/db/src"],
-            "@call-iq/memory": ["./packages/memory/src"],
-            "@call-iq/mcp-client": ["./packages/mcp-client/src"]
+            "@halla-ai/types": ["./packages/types/src"],
+            "@halla-ai/db": ["./packages/db/src"],
+            "@halla-ai/memory": ["./packages/memory/src"],
+            "@halla-ai/mcp-client": ["./packages/mcp-client/src"]
         }
     }
 }

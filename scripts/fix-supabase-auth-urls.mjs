@@ -15,10 +15,11 @@
 const token = process.env.SUPABASE_ACCESS_TOKEN?.trim();
 const ref = process.env.SUPABASE_PROJECT_REF?.trim();
 
-const SITE_URL = "https://www.calliqlabs.com";
+const SITE_URL = "https://www.hallaai.com";
 const REDIRECT_URLS = [
-  "https://www.calliqlabs.com/auth/callback",
-  "https://calliqlabs.com/auth/callback",
+  "https://www.hallaai.com/auth/callback",
+  "https://hallaai.com/auth/callback",
+  "https://app.hallaai.com/auth/callback",
   "http://localhost:3000/auth/callback",
 ].join(",");
 

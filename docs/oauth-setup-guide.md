@@ -69,7 +69,7 @@ SUPABASE_AUTH_EXTERNAL_GOOGLE_REDIRECT_URI=https://<your-supabase>.supabase.co/a
 
 After setup, test by:
 
-1. Opening `https://www.calliqlabs.com/login`
+1. Opening `https://app.hallaai.com/login`
 2. Clicking "Continue with Google" or "Continue with Microsoft"
 3. Completing the OAuth flow
 4. Verifying redirect back to `/dashboard`

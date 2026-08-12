@@ -33,9 +33,9 @@ export const perMinutePricingArticle: BlogArticle = {
         <p style="font-size: 0.9rem; color: var(--gray-500); margin-top: 4px;">This is the only scenario where per-call pricing makes sense. But what if the call is 15 minutes? Per-minute still wins.</p>
       </div>
 
-      <h2 style="margin-bottom: 16px;">The Call IQ Approach: Per-Minute Pricing</h2>
+      <h2 style="margin-bottom: 16px;">The Halla AI Approach: Per-Minute Pricing</h2>
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 24px;">
-        Call IQ charges <strong>per minute</strong>, not per call. Here's why that's better for you:
+        Halla AI charges <strong>per minute</strong>, not per call. Here's why that's better for you:
       </p>
 
       <div class="grid-2" style="gap: 16px; margin-bottom: 32px;">
@@ -68,7 +68,7 @@ export const perMinutePricingArticle: BlogArticle = {
         </p>
         <ul style="margin-top: 12px; margin-left: 20px; color: var(--gray-600); line-height: 2;">
           <li><strong>Per-call pricing:</strong> 200 calls × $1.50 = <strong>$300/month</strong></li>
-          <li><strong>Per-minute pricing (Call IQ):</strong> (120 spam × 0.5 min × $0.15) + (80 real × 4 min × $0.15) = <strong>$57/month</strong></li>
+          <li><strong>Per-minute pricing (Halla AI):</strong> (120 spam × 0.5 min × $0.15) + (80 real × 4 min × $0.15) = <strong>$57/month</strong></li>
           <li><strong>Annual savings:</strong> <strong>$2,916/year</strong></li>
         </ul>
         <p style="color: var(--gray-500); font-size: 0.9rem; margin-top: 8px;">

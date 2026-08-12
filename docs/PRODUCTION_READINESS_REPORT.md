@@ -48,8 +48,8 @@ Call IQ is a production-grade, multi-tenant AI voice receptionist SaaS platform 
 
 ### Environment Configuration
 
-- **Production:** `calliqlabs.com` — Render (gateway) + Supabase + Upstash Redis
-- **Staging:** `staging.calliqlabs.com` — Render (gateway, free tier) + Supabase staging
+- **Production:** `hallaai.com` — Render (gateway) + Supabase + Upstash Redis
+- **Staging:** `staging.hallaai.com` — Render (gateway, free tier) + Supabase staging
 - **Local:** Docker Compose with local Postgres + Redis
 
 ---
@@ -177,12 +177,12 @@ Call IQ is a production-grade, multi-tenant AI voice receptionist SaaS platform 
 ## 9. Pre-Deployment Steps
 
 1. Configure all secrets in Render dashboard (via `sync: false` env vars)
-2. Point DNS `api.calliqlabs.com` → Render gateway
-3. Point DNS `www.calliqlabs.com` → Render dashboard
-4. Configure Twilio webhook URL → `https://api.calliqlabs.com/ws/realtime/`
+2. Point DNS `gateway.hallaai.com` → Render gateway
+3. Point DNS `app.hallaai.com` → Vercel dashboard
+4. Configure Twilio webhook URL → `https://gateway.hallaai.com/api/v1/voice/incoming-call`
 5. Run `supabase/migrations/` against production database
-6. Configure Stripe webhook → `https://api.calliqlabs.com/api/v1/billing/webhook`
-7. Configure Google OAuth redirect → `https://api.calliqlabs.com/api/v1/calendar/oauth/callback`
+6. Configure Stripe webhook → `https://gateway.hallaai.com/api/v1/billing/webhook`
+7. Configure Google OAuth redirect → `https://gateway.hallaai.com/api/v1/calendar/google/callback`
 8. Verify health checks pass: `/health`, `/ready`, `/health/realtime`
 9. Run load test: `npx tsx tests/load/synthetic-caller.ts --concurrent=10`
 

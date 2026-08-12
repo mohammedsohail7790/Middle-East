@@ -4,7 +4,7 @@ import { PageHero } from "@/components/marketing/PageHero";
 import { FaqList } from "@/components/marketing/FaqList";
 import { FAQ_FULL } from "@/lib/marketing-pages";
 
-export const metadata = { title: "FAQ | Call IQ" };
+export const metadata = { title: "FAQ | Halla AI" };
 
 export default function FaqPage() {
   return (

@@ -1,8 +1,8 @@
 export const brand = {
-  name: "Call IQ",
+  name: "Halla AI",
   tagline: "Smart • Seamless • Always",
-  website: "www.calliqlabs.com",
-  websiteUrl: "https://www.calliqlabs.com",
+  website: "www.hallaai.com",
+  websiteUrl: "https://www.hallaai.com",
   colors: {
     cyan: "#0EA5E9",
     dark: "#0A0A0A",
@@ -49,9 +49,9 @@ export const benefits = [
 export const copy = {
   hook: "Missing calls = lost revenue",
   problem: "Every unanswered call is a customer walking away.",
-  solution: "Call IQ answers, qualifies, and converts — automatically.",
-  cta: "Start Free at calliqlabs.com",
-  ctaShort: "Try Call IQ Free",
+  solution: "Halla AI answers, qualifies, and converts — automatically.",
+  cta: "Start Free at hallaai.com",
+  ctaShort: "Try Halla AI Free",
   downloadCta: "Get Started Free",
   reelHook: "Your AI receptionist is here",
   explainerProblem: "Small businesses lose 62% of calls after hours.",

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// WebSocket connectivity test — run against production Render endpoint
+// WebSocket connectivity test — run against production gateway endpoint
 // Usage: node _test_ws.cjs [path]
-//   Default: wss://call-iq-gateway.onrender.com/ws/test
+//   Default: wss://gateway.hallaai.com/ws/test
 //   Pass a path arg to test e.g.: node _test_ws.cjs /ws/voice/TENANT_ID
 
 const WebSocket = require('ws');
 
-const BASE = 'wss://call-iq-gateway.onrender.com';
+const BASE = 'wss://gateway.hallaai.com';
 const PATH = process.argv[2] || '/ws/test';
 const URL = BASE + PATH;
 

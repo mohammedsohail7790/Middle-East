@@ -13,7 +13,7 @@ export const register = new Registry();
 
 // Default labels
 register.setDefaultLabels({
-  app: 'call-iq-gateway',
+  app: 'halla-ai-gateway',
   environment: process.env.NODE_ENV || 'development',
 });
 

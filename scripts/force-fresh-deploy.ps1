@@ -79,4 +79,4 @@ if (-not $GatewayOnly -and (-not $SkipVercel -or $Vercel)) {
     }
 }
 
-Write-Host "Done. Gateway health: https://call-iq-gateway.onrender.com/health"
+Write-Host "Done. Gateway health: https://gateway.hallaai.com/health"

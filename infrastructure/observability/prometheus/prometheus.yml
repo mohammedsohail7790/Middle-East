@@ -3,7 +3,7 @@ global:
   evaluation_interval: 30s
 
 scrape_configs:
-  - job_name: call-iq-gateway
+  - job_name: halla-ai-gateway
     metrics_path: /metrics/prometheus
     static_configs:
       - targets:

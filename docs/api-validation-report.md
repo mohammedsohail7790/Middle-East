@@ -1,7 +1,7 @@
 # Call IQ — API Validation Report
 
 **Generated:** 2026-06-14  
-**Gateway:** https://call-iq-gateway.onrender.com  
+**Gateway:** https://gateway.hallaai.com  
 **Method:** Code analysis + live endpoint probing
 
 ---

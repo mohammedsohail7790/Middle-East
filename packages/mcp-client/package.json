@@ -1,11 +1,11 @@
 {
-    "name": "@call-iq/mcp-client",
+    "name": "@halla-ai/mcp-client",
     "version": "1.0.0",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "dependencies": {
-        "@call-iq/types": "*"
+        "@halla-ai/types": "*"
     },
     "scripts": {
         "build": "tsc",

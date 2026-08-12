@@ -23,7 +23,7 @@ export function publishPlatformEvent<T extends Record<string, unknown>>(
     .catch(() => {});
 
   bus.emit(eventType, payload, {
-    producedBy: 'call-iq-gateway',
+    producedBy: 'halla-ai-gateway',
     tenantId: ctx.tenantId,
     callSid: ctx.callSid ?? corr.callSid,
     sessionId: ctx.sessionId ?? corr.sessionId,

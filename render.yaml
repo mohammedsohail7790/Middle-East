@@ -1,17 +1,18 @@
-# Call IQ — Render Blueprint (production)
-# deploy-refresh: 2026-06-16 (unified API integration verify+test on connect)
+# Halla AI — Render Blueprint (production)
+# Domain: hallaai.com | Market: GCC / Middle East
+# deploy-refresh: 2026-08-12
 # Deploy: Render Dashboard → New → Blueprint → connect this repo
 #
 # Services created:
-#   calliq-gateway  — API + Twilio webhooks + WebSocket voice (Render)
-#   calliq-redis    — Redis for cache, sessions, queues
+#   halla-ai-gateway  — API + Twilio webhooks + WebSocket voice (Render)
+#   halla-ai-redis    — Redis for cache, sessions, queues
 #
-# Dashboard (marketing + app): deploy on Vercel → www.calliqlabs.com (see DEPLOY_VERCEL.md)
-# Do NOT deploy calliq-frontend-main/ (legacy Vite) unless you need a separate marketing site.
+# Dashboard (app): deploy on Vercel → app.hallaai.com
+# Marketing site:  deploy on Netlify → www.hallaai.com
 
 services:
   - type: web
-    name: calliq-gateway
+    name: halla-ai-gateway
     runtime: node
     region: oregon
     plan: starter
@@ -54,17 +55,19 @@ services:
         value: ""
       - key: TWILIO_ALLOWED_IPS
         value: ""
-      # Custom domains + Render dashboard URL (DASHBOARD_URL added automatically to CORS in code)
+      # Halla AI production domains
       - key: ALLOWED_ORIGINS
-        value: https://www.calliqlabs.com,https://calliqlabs.com,https://call-iq-gateway.onrender.com
+        value: https://www.hallaai.com,https://hallaai.com,https://app.hallaai.com
       - key: VOICE_WS_ALLOWED_ORIGINS
-        value: https://www.calliqlabs.com,https://calliqlabs.com
+        value: https://www.hallaai.com,https://app.hallaai.com
       - key: DASHBOARD_URL
-        value: https://www.calliqlabs.com
+        value: https://app.hallaai.com
+      - key: GATEWAY_PUBLIC_URL
+        value: https://gateway.hallaai.com
       - key: REDIS_URL
         fromService:
           type: redis
-          name: calliq-redis
+          name: halla-ai-redis
           property: connectionString
       # RENDER_EXTERNAL_URL is auto-injected by Render on gateway (Twilio webhooks / WSS)
       # TWILIO_STREAM_WSS_URL auto-derived from RENDER_EXTERNAL_URL if not set (see env.ts)
@@ -87,7 +90,7 @@ services:
       - key: TWILIO_AUTH_TOKEN
         sync: false
       - key: TWILIO_STREAM_WSS_URL
-        value: wss://call-iq-gateway.onrender.com
+        sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
@@ -127,11 +130,13 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: GOOGLE_REDIRECT_URI
-        value: https://call-iq-gateway.onrender.com/api/v1/calendar/google/callback
+        value: https://gateway.hallaai.com/api/v1/calendar/google/callback
       - key: HUBSPOT_CLIENT_ID
         sync: false
       - key: HUBSPOT_CLIENT_SECRET
         sync: false
+      - key: HUBSPOT_REDIRECT_URI
+        value: https://gateway.hallaai.com/api/v1/integrations/hubspot/callback
       - key: HUBSPOT_OAUTH_SCOPES
         value: crm.objects.contacts.read crm.objects.contacts.write crm.objects.deals.read crm.objects.deals.write crm.objects.contracts.read
       - key: SALESFORCE_CLIENT_ID
@@ -142,6 +147,8 @@ services:
         sync: false
       - key: SLACK_CLIENT_SECRET
         sync: false
+      - key: SLACK_REDIRECT_URI
+        value: https://gateway.hallaai.com/api/v1/integrations/slack/callback
       - key: ZOHO_CLIENT_ID
         sync: false
       - key: ZOHO_CLIENT_SECRET
@@ -161,13 +168,9 @@ services:
       - key: JOBBER_CLIENT_SECRET
         sync: false
       - key: JOBBER_REDIRECT_URI
-        value: https://call-iq-gateway.onrender.com/api/v1/integrations/jobber/callback
+        value: https://gateway.hallaai.com/api/v1/integrations/jobber/callback
       - key: JOBBER_API_VERSION
         value: "2025-04-16"
-      - key: CLIO_CLIENT_ID
-        sync: false
-      - key: CLIO_CLIENT_SECRET
-        sync: false
       - key: MS_CLIENT_ID
         sync: false
       - key: MS_CLIENT_SECRET
@@ -175,22 +178,28 @@ services:
       - key: MS_TENANT_ID
         value: common
       - key: MS_REDIRECT_URI
-        value: https://call-iq-gateway.onrender.com/api/v1/calendar/outlook/callback
+        value: https://gateway.hallaai.com/api/v1/calendar/outlook/callback
       - key: CALENDLY_CLIENT_ID
         sync: false
       - key: CALENDLY_CLIENT_SECRET
         sync: false
       - key: CALENDLY_REDIRECT_URI
-        value: https://call-iq-gateway.onrender.com/api/v1/calendar/calendly/callback
+        value: https://gateway.hallaai.com/api/v1/calendar/calendly/callback
       - key: ACUITY_CLIENT_ID
         sync: false
       - key: ACUITY_CLIENT_SECRET
         sync: false
       - key: ACUITY_REDIRECT_URI
-        value: https://call-iq-gateway.onrender.com/api/v1/calendar/acuity/callback
-      - key: GATEWAY_PUBLIC_URL
-        value: https://call-iq-gateway.onrender.com
-      # Supabase session pooler limit is ~15 — stay below it (use port 6543 transaction pooler if needed)
+        value: https://gateway.hallaai.com/api/v1/calendar/acuity/callback
+      # WhatsApp Business (META) — primary channel for GCC market
+      - key: WHATSAPP_BUSINESS_ACCOUNT_ID
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_WEBHOOK_VERIFY_TOKEN
+        sync: false
       - key: PG_POOL_MAX
         value: "8"
       - key: SMTP_HOST
@@ -204,7 +213,7 @@ services:
       - key: RESEND_API_KEY
         sync: false
       - key: EMAIL_FROM
-        sync: false
+        value: noreply@hallaai.com
       - key: VOICE_INTERNAL_API_KEY
         generateValue: true
       - key: ADMIN_API_KEY
@@ -217,9 +226,16 @@ services:
         value: "9090"
       - key: ENABLE_PUBLIC_METRICS
         value: "false"
+      # Localisation defaults
+      - key: DEFAULT_TIMEZONE
+        value: Asia/Dubai
+      - key: DEFAULT_CURRENCY
+        value: AED
+      - key: DEFAULT_LANGUAGE
+        value: ar-SA
 
 redis:
-  - name: calliq-redis
+  - name: halla-ai-redis
     plan: starter
     region: oregon
     maxmemoryPolicy: noeviction

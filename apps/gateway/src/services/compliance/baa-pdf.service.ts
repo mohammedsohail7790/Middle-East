@@ -2,7 +2,7 @@
  * BAA PDF Generator
  *
  * Generates a real, attorney-template Business Associate Agreement PDF for
- * Call IQ Enterprise tenants. The document is stored in Supabase Storage
+ * Halla AI Enterprise tenants. The document is stored in Supabase Storage
  * under the private `baa-documents` bucket and a signed URL is returned.
  *
  * The legal text follows the HHS model BAA language (42 CFR §164.504(e))
@@ -63,7 +63,7 @@ const DEFINITIONS = `\
 
 1.1 "Breach" has the meaning given in 45 CFR § 164.402.
 
-1.2 "Business Associate" means Call IQ Labs, Inc., a provider of AI-powered voice receptionist and call management services.
+1.2 "Business Associate" means Halla AI Labs, Inc., a provider of AI-powered voice receptionist and call management services.
 
 1.3 "Covered Entity" means the healthcare provider or plan identified in the signature block of this Agreement.
 
@@ -166,8 +166,8 @@ export async function generateBaaPdf(input: BaaSigningInput): Promise<Buffer> {
       size: 'LETTER',
       margins: { top: 72, bottom: 72, left: 72, right: 72 },
       info: {
-        Title: 'Business Associate Agreement — Call IQ',
-        Author: 'Call IQ Labs, Inc.',
+        Title: 'Business Associate Agreement — Halla AI',
+        Author: 'Halla AI Labs, Inc.',
         Subject: 'HIPAA Business Associate Agreement',
         Keywords: 'HIPAA, BAA, Business Associate Agreement, PHI',
         CreationDate: new Date(),
@@ -204,7 +204,7 @@ export async function generateBaaPdf(input: BaaSigningInput): Promise<Buffer> {
        .text('PARTIES', doc.page.margins.left + 12, doc.y + 8);
     doc.fillColor(BLACK).fontSize(9).font('Helvetica')
        .text(
-         `Covered Entity: ${input.tenantName}   |   Business Associate: Call IQ Labs, Inc.`,
+         `Covered Entity: ${input.tenantName}   |   Business Associate: Halla AI Labs, Inc.`,
          doc.page.margins.left + 12, doc.y + 2
        );
     doc.fontSize(8).fillColor(GRAY)
@@ -278,7 +278,7 @@ export async function generateBaaPdf(input: BaaSigningInput): Promise<Buffer> {
       ['Email:', input.signedByEmail],
       ['Date:', new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })],
       ['IP address:', input.ipAddress || 'not recorded'],
-      ['Method:', 'Electronic acceptance via Call IQ dashboard'],
+      ['Method:', 'Electronic acceptance via Halla AI dashboard'],
     ];
 
     let lineY = sigY + 32;
@@ -295,7 +295,7 @@ export async function generateBaaPdf(input: BaaSigningInput): Promise<Buffer> {
     doc.fillColor(GRAY).fontSize(8).font('Helvetica')
        .text('Electronic signature — see metadata above', doc.page.margins.left + 12, sigY + 170);
 
-    // Right column — Business Associate (Call IQ)
+    // Right column — Business Associate (Halla AI)
     const rightX = doc.page.margins.left + colW + 24;
     doc.rect(rightX, sigY, colW, 200).fill(LIGHT);
     doc.fillColor(ACCENT).fontSize(9).font('Helvetica-Bold')
@@ -303,7 +303,7 @@ export async function generateBaaPdf(input: BaaSigningInput): Promise<Buffer> {
     doc.fillColor(BLACK).fontSize(9).font('Helvetica');
 
     const baLines = [
-      ['Legal name:', 'Call IQ Labs, Inc.'],
+      ['Legal name:', 'Halla AI Labs, Inc.'],
       ['Signed by:', 'Authorized Officer'],
       ['Title:', 'Chief Executive Officer'],
       ['Email:', 'legal@calliqlabs.ai'],
@@ -322,7 +322,7 @@ export async function generateBaaPdf(input: BaaSigningInput): Promise<Buffer> {
        .lineTo(rightX + colW - 12, sigY + 165)
        .strokeColor('#999999').lineWidth(0.75).stroke();
     doc.fillColor(GRAY).fontSize(8).font('Helvetica')
-       .text('Authorized by Call IQ Terms of Service', rightX + 12, sigY + 170);
+       .text('Authorized by Halla AI Terms of Service', rightX + 12, sigY + 170);
 
     // ── Verification footer ──────────────────────────────────────────────────
     doc.moveDown(14);
@@ -332,8 +332,8 @@ export async function generateBaaPdf(input: BaaSigningInput): Promise<Buffer> {
        .text('DOCUMENT VERIFICATION', doc.page.margins.left + 12, verifyY);
     doc.font('Helvetica').fillColor('#555')
        .text(
-         'This document was electronically generated and signed via the Call IQ Enterprise dashboard. ' +
-         'The SHA-256 hash of this PDF is recorded in Call IQ\'s immutable audit log alongside the ' +
+         'This document was electronically generated and signed via the Halla AI Enterprise dashboard. ' +
+         'The SHA-256 hash of this PDF is recorded in Halla AI\'s immutable audit log alongside the ' +
          'signer\'s IP address, email, and timestamp. This record constitutes a valid electronic ' +
          'signature pursuant to the Electronic Signatures in Global and National Commerce Act (E-SIGN), ' +
          '15 U.S.C. § 7001 et seq.',
@@ -347,7 +347,7 @@ export async function generateBaaPdf(input: BaaSigningInput): Promise<Buffer> {
       doc.switchToPage(i);
       doc.fillColor(GRAY).fontSize(7).font('Helvetica')
          .text(
-           `Call IQ BAA v${input.version}  ·  Tenant: ${input.tenantId}  ·  Page ${i + 1} of ${totalPages}  ·  Confidential`,
+           `Halla AI BAA v${input.version}  ·  Tenant: ${input.tenantId}  ·  Page ${i + 1} of ${totalPages}  ·  Confidential`,
            doc.page.margins.left,
            doc.page.height - 40,
            { align: 'center', width: pageWidth }

@@ -111,7 +111,7 @@ export function RoiCalculator() {
           <div className="roi-result-num" style={{ color: "var(--gray-500)" }}>
             {fmt(cost)}
           </div>
-          <div className="roi-result-label">Annual Call IQ Cost</div>
+          <div className="roi-result-label">Annual Halla AI Cost</div>
         </div>
         <div className="roi-result highlight" style={{ marginTop: 12 }}>
           <div className="roi-result-num">{fmt(net)}</div>

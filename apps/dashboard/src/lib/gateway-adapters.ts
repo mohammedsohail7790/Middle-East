@@ -141,7 +141,7 @@ export function normalizeCalendarEvent(row: Record<string, unknown>) {
     attendeePhone: String(row.phone ?? row.attendee_phone ?? row.attendee ?? ""),
     service: String(row.service ?? row.title ?? "Appointment"),
     location: String(row.location ?? ""),
-    color: String(row.color ?? "#0EA5E9"),
+    color: String(row.color ?? "#C9A24B"),
     status: String(row.status ?? "booked"),
   };
 }
@@ -186,8 +186,8 @@ export function funnelFromMetrics(metrics: {
   const leads = metrics.totalLeads ?? 0;
   const converted = Math.round((calls * (metrics.conversionRate ?? 0)) / 100);
   return [
-    { name: "Calls", value: calls, fill: "#0EA5E9" },
-    { name: "Leads", value: leads, fill: "#38BDF8" },
+    { name: "Calls", value: calls, fill: "#C9A24B" },
+    { name: "Leads", value: leads, fill: "#E4C878" },
     { name: "Converted", value: converted, fill: "#10B981" },
   ];
 }
@@ -196,8 +196,8 @@ export function funnelFromApi(raw: unknown) {
   if (Array.isArray(raw)) return raw;
   const o = (raw && typeof raw === "object" ? raw : {}) as Record<string, number>;
   const steps = [
-    { key: "calls", name: "Calls", fill: "#0EA5E9" },
-    { key: "leads", name: "Leads", fill: "#38BDF8" },
+    { key: "calls", name: "Calls", fill: "#C9A24B" },
+    { key: "leads", name: "Leads", fill: "#E4C878" },
     { key: "qualified", name: "Qualified", fill: "#818CF8" },
     { key: "appointments", name: "Appointments", fill: "#A78BFA" },
     { key: "confirmed", name: "Confirmed", fill: "#10B981" },

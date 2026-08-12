@@ -90,12 +90,13 @@ export class PreLaunchValidator {
       { name: 'SUPABASE_ANON_KEY', critical: true },
       { name: 'SUPABASE_SERVICE_ROLE_KEY', critical: true },
       
-      // OpenAI
+      // OpenAI (handles STT + LLM + TTS via Realtime API — the only AI key needed)
       { name: 'OPENAI_API_KEY', critical: true },
 
-      // Voice pipeline
-      { name: 'DEEPGRAM_API_KEY', critical: true },
-      { name: 'ELEVENLABS_API_KEY', critical: true },
+      // Voice pipeline — Deepgram / ElevenLabs are NOT used in the live call path.
+      // Deepgram: legacy validator only. ElevenLabs: Enterprise voice-cloning only (optional).
+      // { name: 'DEEPGRAM_API_KEY', critical: false },   // not required
+      // { name: 'ELEVENLABS_API_KEY', critical: false },  // not required
 
       // Twilio
       { name: 'TWILIO_ACCOUNT_SID', critical: true },
@@ -173,14 +174,14 @@ export class PreLaunchValidator {
     // Supabase connectivity
     await this.validateSupabaseConnectivity();
 
-    // OpenAI connectivity
+    // OpenAI connectivity (Realtime API handles STT + LLM + TTS — the only AI check needed)
     await this.validateOpenAIConnectivity();
 
-    // Deepgram connectivity
-    await this.validateDeepgramConnectivity();
+    // Deepgram: not in the live call path — skip connectivity check
+    // await this.validateDeepgramConnectivity();
 
-    // ElevenLabs connectivity
-    await this.validateElevenLabsConnectivity();
+    // ElevenLabs: only needed for Enterprise voice cloning — skip connectivity check
+    // await this.validateElevenLabsConnectivity();
 
     // Twilio connectivity
     await this.validateTwilioConnectivity();

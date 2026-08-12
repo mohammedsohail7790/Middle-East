@@ -1,8 +1,8 @@
 <div align="center">
 
-# ⚡ Call IQ
+# 🌙 Halla AI
 
-**The AI voice receptionist platform for service businesses — answers every call, books appointments, captures leads, 24/7.**
+**The AI voice receptionist platform for the GCC & Middle East — answers every call, books appointments, captures leads, 24/7 — in Arabic and English.**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
@@ -18,7 +18,7 @@
 
 [Overview](#-overview) · [Features](#-key-features) · [Architecture](#-architecture) · [Tech Stack](#-technology-stack) · [Getting Started](#-getting-started) · [API](#-api-overview) · [AI Pipeline](#-ai-pipeline) · [Deployment](#-deployment)
 
-**Live:** [www.calliqlabs.com](https://www.calliqlabs.com)
+**Live:** [www.hallaai.com](https://www.hallaai.com)
 
 </div>
 
@@ -26,7 +26,7 @@
 
 ## 📖 Overview
 
-**Call IQ** is a production, multi-tenant SaaS platform that gives service businesses an AI receptionist on their existing phone number. When a customer calls, the AI answers in a natural human voice, holds a real conversation, answers questions from the business's own knowledge base, captures the lead, books the appointment into the business's calendar, and sends confirmations — with a full transcript and summary landing in the dashboard seconds after hangup.
+**Halla AI** is a production, multi-tenant SaaS platform that gives businesses across the GCC and Middle East an AI receptionist on their existing phone number. When a customer calls, the AI answers in a natural human voice — in Arabic or English — holds a real conversation, answers questions from the business's own knowledge base, captures the lead, books the appointment into the business's calendar, and sends confirmations — with a full transcript and summary landing in the dashboard seconds after hangup.
 
 **The problem it solves:** service businesses (HVAC, plumbing, electrical, legal, property management, salons, and dozens of other verticals) lose revenue every time a call rings out — after hours, during jobs, or at peak demand. Live answering services are expensive and inconsistent. Call IQ answers every call, every time, for a flat monthly subscription.
 
@@ -466,7 +466,7 @@ Schema lives in **63 versioned migrations** (`supabase/migrations/`) on Supabase
 
 ## ☁️ Deployment
 
-**Production topology** (as deployed for calliqlabs.com):
+**Production topology** (as deployed for hallaai.com):
 
 | Component | Platform | Notes |
 |---|---|---|

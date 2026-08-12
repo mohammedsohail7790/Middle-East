@@ -125,7 +125,7 @@ Phases 1–3: discovery, remediation, and follow-up actions.
 - [ ] Set production env vars from `.env.example`
 - [ ] Confirm Redis reachable from gateway
 - [ ] Smoke-test: login → dashboard SSE → AI config save → Twilio webhook (staging)
-- [ ] Verify CORS from `https://www.calliqlabs.com` only
+- [ ] Verify CORS from `https://www.hallaai.com` and `https://app.hallaai.com` only
 
 ---
 

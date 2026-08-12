@@ -19,7 +19,7 @@ jobs:
       - run: npm ci
       - name: Run production realtime verify
         env:
-          SMOKE_GATEWAY_URL: https://call-iq-gateway.onrender.com
+          SMOKE_GATEWAY_URL: https://gateway.hallaai.com
           SMOKE_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SMOKE_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SMOKE_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

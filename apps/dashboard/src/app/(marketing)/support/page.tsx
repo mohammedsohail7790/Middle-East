@@ -4,7 +4,7 @@ import { PageHero } from "@/components/marketing/PageHero";
 import { ContactForm } from "@/components/marketing/ContactForm";
 import { CtaBlock } from "@/components/marketing/CtaBlock";
 
-export const metadata = { title: "Support | Call IQ" };
+export const metadata = { title: "Support | Halla AI" };
 // Force per-request rendering — static generation intermittently froze this
 // page's Suspense boundary mid-stream (content correct but hidden forever).
 export const dynamic = "force-dynamic";

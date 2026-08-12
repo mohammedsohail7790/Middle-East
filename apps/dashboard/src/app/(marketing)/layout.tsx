@@ -6,10 +6,10 @@ import "../globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Call IQ – Smart • Seamless • Always",
+  title: "Halla AI – Smart • Seamless • Always",
   description:
-    "Call IQ answers every call 24/7, books appointments, captures leads, and routes emergencies — automatically.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.calliqlabs.com"),
+    "Halla AI answers every call 24/7, books appointments, captures leads, and routes emergencies — automatically.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.hallaai.com"),
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",

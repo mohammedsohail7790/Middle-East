@@ -347,7 +347,7 @@ export class AppointmentService {
                         phone: input.phone,
                         service: input.service,
                         preferred_time: scheduledTime,
-                        notes: `Appointment booked via Call IQ for ${scheduledTime}`,
+                        notes: `Appointment booked via Halla AI for ${scheduledTime}`,
                     },
                     appointment: {
                         name: input.name,

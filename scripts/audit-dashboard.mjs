@@ -18,11 +18,11 @@ const GATEWAY = (() => {
   if (pub && !/localhost|127\.0\.0\.1/i.test(pub)) {
     return pub.replace(/\/$/, '');
   }
-  return 'https://call-iq-gateway.onrender.com';
+  return 'https://gateway.hallaai.com';
 })();
 
 const API = `${GATEWAY}/api/v1`;
-const DASHBOARD = (process.env.DASHBOARD_URL || 'https://www.calliqlabs.com').replace(/\/$/, '');
+const DASHBOARD = (process.env.DASHBOARD_URL || 'https://www.hallaai.com').replace(/\/$/, '');
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/$/, '');
 const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';

@@ -145,7 +145,7 @@ export const WelcomeToCallIQ: React.FC = () => {
     {
       title: "End Benefits",
       narration:
-        `${northline.dba} saves over $3,000 monthly versus a full-time receptionist while capturing 49% more qualified leads. Start your free trial at calliqlabs.com.`,
+        `${northline.dba} saves over $3,000 monthly versus a full-time receptionist while capturing 49% more qualified leads. Start your free trial at hallaai.com.`,
       content: (
         <FeatureScreen
           headline="Smart • Seamless • Always"

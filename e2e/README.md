@@ -58,11 +58,11 @@ Optional repository **secrets** (Settings → Secrets → Actions):
 
 Without Supabase secrets, CI uses placeholders and runs **public-route** tests only.
 
-## Production smoke (calliqlabs.com)
+## Production smoke (hallaai.com)
 
 ```bash
 copy .env.e2e.example .env.e2e   # add real SMOKE_TEST_PASSWORD
-npm run smoke:prod:full          # API smoke + knowledge Playwright on www.calliqlabs.com
+npm run smoke:prod:full          # API smoke + knowledge Playwright on app.hallaai.com
 ```
 
 | Script | What it runs |

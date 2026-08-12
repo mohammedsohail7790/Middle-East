@@ -2,7 +2,7 @@
 
 import { getGatewayBaseUrl } from "./api";
 
-const DEFAULT_GATEWAY = "https://call-iq-gateway.onrender.com";
+const DEFAULT_GATEWAY = "https://gateway.hallaai.com";
 
 function publicApiBase(): string {
   if (typeof window !== "undefined") {

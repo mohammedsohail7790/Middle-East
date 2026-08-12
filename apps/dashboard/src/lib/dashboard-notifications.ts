@@ -80,17 +80,17 @@ export function formatPushNotification(event: DashboardPushEvent): Omit<Dashboar
     case "calendar.updated":
       return {
         type: event.type,
-        title: "Calendar",
+        title: "Appointments",
         body: "Appointment booked or updated",
-        href: "/dashboard/calendar",
+        href: "/dashboard/leads",
         at,
       };
     case "billing.updated":
       return {
         type: event.type,
-        title: "Billing",
-        body: "Subscription or trial status changed",
-        href: "/dashboard/billing",
+        title: "Workspace",
+        body: "Workspace status changed",
+        href: "/dashboard",
         at,
       };
     case "knowledge.updated":
@@ -111,17 +111,6 @@ export function formatPushNotification(event: DashboardPushEvent): Omit<Dashboar
         href: "/dashboard/agent",
         at,
       };
-    case "integrations.updated": {
-      const provider = typeof meta.provider === "string" ? meta.provider : null;
-      const label = provider ? provider.replace(/-/g, " ") : "Integration";
-      return {
-        type: event.type,
-        title: `${label} updated`,
-        body: provider ? `${label} connection changed` : "Connections refreshed",
-        href: "/dashboard/integrations",
-        at,
-      };
-    }
     default:
       return {
         type: event.type || "update",

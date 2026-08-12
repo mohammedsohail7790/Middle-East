@@ -50,7 +50,7 @@ export function ParticleBg({ className = "" }: { className?: string }) {
           const dy = pts[i].y - pts[j].y;
           const d = Math.hypot(dx, dy);
           if (d < 130) {
-            ctx.strokeStyle = `rgba(14,165,233,${(1 - d / 130) * 0.18})`;
+            ctx.strokeStyle = `rgba(201,162,75,${(1 - d / 130) * 0.18})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(pts[i].x, pts[i].y);
@@ -60,7 +60,7 @@ export function ParticleBg({ className = "" }: { className?: string }) {
         }
       }
       for (const p of pts) {
-        ctx.fillStyle = "rgba(14,165,233,0.45)";
+        ctx.fillStyle = "rgba(201,162,75,0.45)";
         ctx.beginPath();
         ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
         ctx.fill();

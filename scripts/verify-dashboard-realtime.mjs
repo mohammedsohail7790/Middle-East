@@ -27,7 +27,7 @@ function resolveGatewayUrl() {
   if (pub && !/localhost|127\.0\.0\.1/i.test(pub)) {
     return pub.replace(/\/$/, '');
   }
-  return 'https://call-iq-gateway.onrender.com';
+  return 'https://gateway.hallaai.com';
 }
 
 const GATEWAY = resolveGatewayUrl();
@@ -116,7 +116,7 @@ function resolveDashboardUrl() {
   if (fromEnv && !/localhost|127\.0\.0\.1/i.test(fromEnv)) {
     return fromEnv.replace(/\/$/, '');
   }
-  return 'https://www.calliqlabs.com';
+  return 'https://www.hallaai.com';
 }
 
 const DASHBOARD_ORIGIN = resolveDashboardUrl();

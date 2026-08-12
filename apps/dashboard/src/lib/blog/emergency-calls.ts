@@ -16,7 +16,7 @@ export const emergencyCallsArticle: BlogArticle = {
       </p>
 
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 24px;">
-        If you have Call IQ, your AI receptionist answers immediately — not with a robotic script, but with a calm, 
+        If you have Halla AI, your AI receptionist answers immediately — not with a robotic script, but with a calm, 
         empathetic voice that collects critical details and dispatches help instantly.
       </p>
 
@@ -53,7 +53,7 @@ export const emergencyCallsArticle: BlogArticle = {
       <div style="background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 32px;">
         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
           <div style="background: var(--red); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;">1</div>
-          <div><strong>Answer with urgency:</strong> "I'm Call IQ, the AI dispatcher for [Your Business]. Are you reporting an emergency?"</div>
+          <div><strong>Answer with urgency:</strong> "I'm Halla AI, the AI dispatcher for [Your Business]. Are you reporting an emergency?"</div>
         </div>
         <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;">
           <div style="background: var(--accent); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0;">2</div>
@@ -108,7 +108,7 @@ export const emergencyCallsArticle: BlogArticle = {
       <h2 style="margin-bottom: 16px;">The Bottom Line</h2>
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 24px;">
         Emergency calls are the most important calls your business receives. A single missed emergency call can mean a lost customer, 
-        a bad review, or worse — property damage or even injury. With Call IQ, you never miss an emergency call again.
+        a bad review, or worse — property damage or even injury. With Halla AI, you never miss an emergency call again.
       </p>
 
       <div style="text-align: center; padding: 32px; background: var(--gray-50); border-radius: var(--radius-lg); margin-bottom: 32px;">

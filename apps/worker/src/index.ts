@@ -8,7 +8,7 @@
 import dotenv from 'dotenv';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { assertProductionSafety } from '@call-iq/gateway/security/production-safety';
+import { assertProductionSafety } from '@halla-ai/gateway/security/production-safety';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: resolve(__dirname, '../../../apps/gateway/.env') });
@@ -25,18 +25,15 @@ process.stdout.write(
   }) + '\n'
 );
 
-const { startRetentionWorker, startIntegrationSyncWorker, startScimSyncWorker } =
-  await import('@call-iq/gateway/workers');
+const { startRetentionWorker } = await import('@halla-ai/gateway/workers');
 
 startRetentionWorker();
-startIntegrationSyncWorker();
-startScimSyncWorker();
 
 process.stdout.write(
   JSON.stringify({
     level: 'info',
     msg: 'worker_started',
-    workers: ['retention', 'integration-sync', 'scim-sync'],
+    workers: ['retention'],
     ts: new Date().toISOString(),
   }) + '\n'
 );

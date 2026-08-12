@@ -118,7 +118,7 @@ export default function LoginPage() {
     <AuthPageShell>
       <AuthCard
         title="Welcome back"
-        description="Sign in to your Call IQ workspace"
+        description="Sign in to your Halla AI workspace"
       >
         {/* Social login */}
         <div className="mt-6 space-y-3">

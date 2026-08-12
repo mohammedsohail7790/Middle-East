@@ -83,7 +83,7 @@ export function TeamAccountPanel() {
         { email: inviteEmail.trim(), name: inviteName.trim(), role: inviteRole }
       );
       setMessage(
-        res.message || "Invitation sent — they will receive the Call IQ invite email."
+        res.message || "Invitation sent — they will receive the Halla AI invite email."
       );
       setInviteEmail("");
       setInviteName("");
@@ -113,7 +113,7 @@ export function TeamAccountPanel() {
       );
       if (updateErr) throw updateErr;
       setMessage(
-        `We sent a confirmation link to ${next}. Your login email updates after you confirm (Call IQ "Change email" template).`
+        `We sent a confirmation link to ${next}. Your login email updates after you confirm (Halla AI "Change email" template).`
       );
       setNewEmail("");
     } catch (e) {

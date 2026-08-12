@@ -1,7 +1,7 @@
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { PageHero } from "@/components/marketing/PageHero";
 
-export const metadata = { title: "About | Call IQ" };
+export const metadata = { title: "About | Halla AI" };
 
 export default function AboutPage() {
   return (
@@ -20,7 +20,7 @@ export default function AboutPage() {
       <section className="section">
         <div className="container-sm">
           <p style={{ fontSize: "1.05rem", marginBottom: 24 }}>
-            Call IQ was founded in 2025 by a team of former small business owners and AI engineers. We saw the same
+            Halla AI was founded in 2025 by a team of former small business owners and AI engineers. We saw the same
             problem everywhere: brilliant plumbers, lawyers, and mechanics were missing calls — not because they were
             lazy, but because they were working.
           </p>

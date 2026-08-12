@@ -1,12 +1,14 @@
-# Call IQ — Production Deployment
+# Halla AI — Production Deployment
 
 **Canonical stack:** `apps/gateway` (API + voice) + `apps/dashboard` (Next.js UI)
+
+Domain: **hallaai.com** | Market: GCC / Middle East
 
 Production stack is only `apps/gateway` + `apps/dashboard`. Legacy Vite/Python/marketing folders were removed from the repo.
 
 ## Vercel (dashboard) + Render (gateway)
 
-See **[DEPLOY_VERCEL.md](./DEPLOY_VERCEL.md)** for www.calliqlabs.com on Vercel.
+See **[DEPLOY_VERCEL.md](./DEPLOY_VERCEL.md)** for app.hallaai.com on Vercel.
 
 ## Render (gateway)
 

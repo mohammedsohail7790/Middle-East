@@ -6,7 +6,7 @@ services:
   # GATEWAY SERVICE (Primary Application)
   # ============================================================================
   - type: web
-    name: call-iq-gateway-production
+    name: halla-ai-gateway-production
     runtime: node
     region: oregon
     plan: pro # Pro plan for autoscaling
@@ -116,7 +116,7 @@ services:
   # STAGING ENVIRONMENT
   # ============================================================================
   - type: web
-    name: call-iq-gateway-staging
+    name: halla-ai-gateway-staging
     runtime: node
     region: oregon
     plan: starter

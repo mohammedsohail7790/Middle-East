@@ -18,7 +18,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function setup() {
-  const email = process.env.ADMIN_EMAIL || 'admin@calliqlabs.com';
+  const email = process.env.ADMIN_EMAIL || 'admin@hallaai.com';
   const password = process.env.ADMIN_PASSWORD;
   const tenantId = process.env.SMOKE_TENANT_ID || process.env.E2E_TENANT_ID || '2a9ea1e6-fa09-497c-8107-e704af6b1802';
 
@@ -82,10 +82,10 @@ async function setup() {
   }
 
   // Also link the existing test user
-  const testUser = existingUsers.users.find(u => u.email === 'test@calliq.com');
+  const testUser = existingUsers.users.find(u => u.email === 'test@hallaai.com');
   if (testUser) {
     console.log('\nExisting test user also available:');
-    console.log('Email: test@calliq.com');
+    console.log('Email: test@hallaai.com');
   }
 }
 

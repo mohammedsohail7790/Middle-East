@@ -38,7 +38,7 @@ export function createPlatformEvent<TPayload extends Record<string, unknown>>(
     eventType,
     eventVersion: ctx.eventVersion ?? 1,
     occurredAt: new Date().toISOString(),
-    producedBy: ctx.producedBy ?? 'call-iq-gateway',
+    producedBy: ctx.producedBy ?? 'halla-ai-gateway',
     tenantId: ctx.tenantId,
     callSid: ctx.callSid,
     sessionId: ctx.sessionId,

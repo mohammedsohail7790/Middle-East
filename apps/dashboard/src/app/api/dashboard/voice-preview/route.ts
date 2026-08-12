@@ -6,7 +6,7 @@ function gatewayBase(): string {
   return (
     process.env.GATEWAY_PROXY_URL ||
     process.env.NEXT_PUBLIC_GATEWAY_API_URL ||
-    "https://call-iq-gateway.onrender.com"
+    "https://gateway.hallaai.com"
   ).replace(/\/$/, "");
 }
 

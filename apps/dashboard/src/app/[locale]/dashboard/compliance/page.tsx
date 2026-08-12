@@ -135,7 +135,7 @@ function DisclaimerBanner() {
     <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 px-4 py-3">
       <AlertTriangle className="size-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" strokeWidth={ICON_STROKE} />
       <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-        <strong>Important:</strong> These settings give your business control over Call IQ&apos;s
+        <strong>Important:</strong> These settings give your business control over Halla AI&apos;s
         behavior. They are not a substitute for legal advice. Consult an attorney to ensure your
         configuration complies with applicable laws (state recording laws, TCPA, etc.)
         for your industry and jurisdiction.
@@ -751,7 +751,7 @@ export default function CompliancePage() {
         <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 p-4">
           <p className="text-sm text-amber-900 dark:text-amber-200">
             HIPAA Business Associate Agreements (BAA) are not currently offered on any plan.
-            Call IQ does support healthcare compliance settings — including AI disclosure, call recording,
+            Halla AI does support healthcare compliance settings — including AI disclosure, call recording,
             and caller consent — through the settings above. However, a formal BAA is not available.
             If your business requires HIPAA compliance, contact{" "}
             <a href={`mailto:${SUPPORT_EMAIL}`} className="underline">{SUPPORT_EMAIL}</a> and

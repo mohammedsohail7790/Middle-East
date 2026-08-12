@@ -83,7 +83,7 @@ export function createWebhooksRouter(): express.Router {
     gate,
     asyncHandler(async (req: any, res: any) => {
       const tenantId = getTenantScope(req);
-      await customWebhooksService.dispatchEvent(tenantId, 'test.ping', { message: 'This is a test webhook from Call IQ' });
+      await customWebhooksService.dispatchEvent(tenantId, 'test.ping', { message: 'This is a test webhook from Halla AI' });
       res.json({ success: true, message: 'Test webhook dispatched' });
     })
   );

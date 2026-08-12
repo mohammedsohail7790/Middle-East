@@ -10,7 +10,7 @@
  *   - Industry compliance profile (real_estate, general)
  *
  * Industry profiles provide safe defaults but every setting is individually
- * overridable by the tenant — Call IQ provides the tools, not legal advice.
+ * overridable by the tenant — Halla AI provides the tools, not legal advice.
  *
  * Healthcare and Legal are not launch verticals — HIPAA/BAA and attorney-client
  * privilege obligations need dedicated evaluation before we support them, so

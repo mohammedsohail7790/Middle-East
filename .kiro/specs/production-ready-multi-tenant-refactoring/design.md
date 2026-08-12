@@ -632,9 +632,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000  # Render default
+        value: gateway.hallaai.com
       - key: DOMAIN
-        value: api.calliqlabs.com
+        value: gateway.hallaai.com
     healthCheckPath: /health
     autoDeploy: true
     branch: main
@@ -642,7 +642,7 @@ services:
 
 **Custom Domain Setup on Render**:
 1. Go to Render Dashboard → Your Service → Settings
-2. Add custom domain: `api.calliqlabs.com`
+2. Add custom domain: `gateway.hallaai.com`
 3. Render provides SSL certificate automatically (Let's Encrypt)
 4. Update DNS: Add CNAME record pointing to Render's URL
 5. Wait for DNS propagation (~5-10 minutes)
@@ -675,7 +675,7 @@ ELEVENLABS_API_KEY=...
 # Twilio
 TWILIO_ACCOUNT_SID=AC...
 TWILIO_AUTH_TOKEN=...
-TWILIO_STREAM_WSS_URL=wss://api.calliqlabs.com
+TWILIO_STREAM_WSS_URL=wss://gateway.hallaai.com
 
 # Redis (optional, for caching)
 REDIS_URL=redis://...
@@ -694,18 +694,18 @@ VOICE_MAX_CALL_DURATION_MS=900000
 ### HTTPS/WSS Endpoints
 
 **Twilio Webhook Endpoint**:
-- URL: `https://api.calliqlabs.com/api/voice/incoming-call`
+- URL: `https://gateway.hallaai.com/api/voice/incoming-call`
 - Method: POST
 - Content-Type: application/x-www-form-urlencoded
 - Response: text/xml (TwiML)
 
 **WebSocket Endpoint**:
-- URL: `wss://api.calliqlabs.com/ws/voice/{tenantId}`
+- URL: `wss://gateway.hallaai.com/ws/voice/{tenantId}`
 - Protocol: WebSocket (RFC 6455)
 - Origin Validation: Twilio IPs only
 
 **Health Check Endpoint**:
-- URL: `https://api.calliqlabs.com/health`
+- URL: `https://gateway.hallaai.com/health`
 - Method: GET
 - Response: JSON `{ "status": "ok", "timestamp": "..." }`
 

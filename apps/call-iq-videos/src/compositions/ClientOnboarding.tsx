@@ -13,10 +13,10 @@ export const ClientOnboarding: React.FC = () => {
     {
       title: "Sign Up",
       narration:
-        "Start your free trial at calliqlabs.com — fourteen days, no credit card. Enter your name, work email, password, and company name.",
+        "Start your free trial at hallaai.com — fourteen days, no credit card. Enter your name, work email, password, and company name.",
       content: (
         <OnboardingScreen
-          url="https://www.calliqlabs.com/signup"
+          url="https://www.hallaai.com/signup"
           headline="Start your free trial"
           subtitle="14 days. No credit card."
           fields={[
@@ -35,7 +35,7 @@ export const ClientOnboarding: React.FC = () => {
         "Call IQ sends a confirmation link to your inbox — not a code. Click the link to verify your account, then continue to setup.",
       content: (
         <OnboardingScreen
-          url="https://www.calliqlabs.com/signup"
+          url="https://www.hallaai.com/signup"
           headline="Check your email"
           subtitle="Confirm your account to continue."
           notice={`We sent a confirmation link to ${ob.signupEmail}. Open the link in your email to verify your account and finish setup.`}
@@ -154,7 +154,7 @@ export const ClientOnboarding: React.FC = () => {
         "You're all set. Sarah is ready for Northline Home Services on a fourteen-day trial with sixty included minutes. Run a test call, then open your dashboard.",
       content: (
         <OnboardingScreen
-          url="https://www.calliqlabs.com/onboarding"
+          url="https://www.hallaai.com/onboarding"
           headline="You're all set!"
           completion={{
             agentName: agents.northline.displayName,

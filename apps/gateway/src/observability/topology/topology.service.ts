@@ -43,7 +43,7 @@ export async function buildRuntimeTopology(tenantId?: string): Promise<RuntimeTo
   }
 
   const nodes: TopologyNode[] = [
-    { id: 'gateway', type: 'gateway', label: 'Call IQ Gateway', status: 'healthy' },
+    { id: 'gateway', type: 'gateway', label: 'Halla AI Gateway', status: 'healthy' },
     {
       id: 'runtime',
       type: 'runtime',

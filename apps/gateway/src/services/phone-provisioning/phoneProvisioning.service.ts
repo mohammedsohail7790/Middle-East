@@ -158,7 +158,7 @@ export class PhoneProvisioningService {
       // Purchase the number via Twilio
       const incomingNumber = await getTwilioClient().incomingPhoneNumbers.create({
         phoneNumber,
-        friendlyName: `Call IQ - Tenant ${tenantId.slice(0, 8)}`,
+        friendlyName: `Halla AI - Tenant ${tenantId.slice(0, 8)}`,
         voiceUrl: webhookUrl,
         voiceMethod: 'POST',
         smsUrl: smsWebhookUrl,

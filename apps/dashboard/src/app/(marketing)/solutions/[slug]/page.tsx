@@ -11,7 +11,7 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   return params.then(({ slug }) => {
     const sol = SOLUTIONS[slug];
-    return { title: sol ? `${sol.title} | Call IQ` : "Solutions | Call IQ" };
+    return { title: sol ? `${sol.title} | Halla AI` : "Solutions | Halla AI" };
   });
 }
 

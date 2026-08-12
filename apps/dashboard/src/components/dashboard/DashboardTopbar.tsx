@@ -2,7 +2,6 @@
 
 import { Link } from "@/i18n/navigation";
 import { usePathname } from "@/i18n/navigation";
-import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Phone,
@@ -22,8 +21,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
-import { cn } from "@/lib/utils";
-import { getPlan } from "@/lib/store";
 import { navPageTitle, navPageSubtitle } from "@/lib/dashboard-nav";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { ThemeToggle } from "@/components/ui-kit/ThemeToggle";
@@ -31,13 +28,6 @@ import { NotificationsCenter } from "@/components/dashboard/NotificationsCenter"
 import { LanguageSwitcher } from "@/components/dashboard/LanguageSwitcher";
 import { useDashboardLive } from "@/components/dashboard/DashboardRealtimeProvider";
 import type { WorkspaceProfile } from "@/lib/ensure-tenant";
-
-const PLAN_LABELS: Record<string, string> = {
-  trial: "Trial",
-  essential: "Essential",
-  starter: "Essential",
-  professional: "Professional",
-};
 
 function usePageMeta() {
   const pathname = usePathname();
@@ -111,15 +101,7 @@ type Props = {
 
 export function DashboardTopbar({ workspace, onOpenMenu, planTick }: Props) {
   const { title, subtitle, icon: PageIcon } = usePageMeta();
-  const [planId, setPlanId] = useState("trial");
-  const [planLabel, setPlanLabel] = useState("");
-
-  useEffect(() => {
-    void planTick;
-    const plan = getPlan();
-    setPlanId(plan);
-    setPlanLabel(PLAN_LABELS[plan] ?? plan);
-  }, [planTick]);
+  void planTick;
 
   const initials = workspaceInitials(workspace);
   const company = workspace?.companyName?.trim() || "Your workspace";
@@ -184,11 +166,6 @@ export function DashboardTopbar({ workspace, onOpenMenu, planTick }: Props) {
           <div className="dashboard-workspace-meta hidden sm:block min-w-0">
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="dashboard-workspace-name truncate">{company}</span>
-              {planLabel && (
-                <span className={cn("dashboard-plan-badge", `dashboard-plan-badge--${planId}`)}>
-                  {planLabel}
-                </span>
-              )}
             </div>
             <span className="dashboard-workspace-email truncate">{email}</span>
           </div>

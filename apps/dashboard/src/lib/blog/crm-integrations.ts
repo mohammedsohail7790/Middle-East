@@ -5,7 +5,7 @@ export const crmIntegrationsArticle: BlogArticle = {
   slug: "crm-integrations",
   title: `7 CRM Integrations That Will Double Your Lead Conversion`,
   date: `Published February 20, 2025 · 6 min read`,
-  subtitle: `Zapier + Call IQ + these CRMs = automatic follow-up that never sleeps. Turn every call into a customer.`,
+  subtitle: `Zapier + Halla AI + these CRMs = automatic follow-up that never sleeps. Turn every call into a customer.`,
   bodyHtml: `
 <section class="section">
     <div class="container" style="max-width: 720px;">
@@ -17,15 +17,15 @@ export const crmIntegrationsArticle: BlogArticle = {
       </div>
 
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 32px;">
-        When Call IQ captures a lead, it can automatically push that lead into your CRM — instantly. No manual data entry. No delays. Just automatic follow-up that happens while you're sleeping. Here are the 7 best CRMs to pair with Call IQ.
+        When Halla AI captures a lead, it can automatically push that lead into your CRM — instantly. No manual data entry. No delays. Just automatic follow-up that happens while you're sleeping. Here are the 7 best CRMs to pair with Halla AI.
       </p>
 
       <h2 style="margin-bottom: 16px;">1. HubSpot CRM</h2>
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 24px;">
-        <strong>Native integration.</strong> When Call IQ captures a qualified lead, it automatically creates a contact in HubSpot, logs the call transcript, and assigns the lead to your sales team.
+        <strong>Native integration.</strong> When Halla AI captures a qualified lead, it automatically creates a contact in HubSpot, logs the call transcript, and assigns the lead to your sales team.
       </p>
       <div style="background: var(--gray-50); padding: 12px 16px; border-radius: var(--radius); margin-bottom: 24px; font-size: 0.9rem; color: var(--gray-600);">
-        <strong>🔥 Zap Idea:</strong> "When Call IQ captures a lead → Create contact in HubSpot → Assign to owner → Send welcome email"
+        <strong>🔥 Zap Idea:</strong> "When Halla AI captures a lead → Create contact in HubSpot → Assign to owner → Send welcome email"
       </div>
 
       <h2 style="margin-bottom: 16px;">2. Salesforce</h2>
@@ -33,23 +33,23 @@ export const crmIntegrationsArticle: BlogArticle = {
         <strong>Native integration (Basic).</strong> Leads captured by the AI are automatically created as leads or contacts in Salesforce. Advanced workflows available via Zapier.
       </p>
       <div style="background: var(--gray-50); padding: 12px 16px; border-radius: var(--radius); margin-bottom: 24px; font-size: 0.9rem; color: var(--gray-600);">
-        <strong>🔥 Zap Idea:</strong> "When Call IQ captures a lead → Create lead in Salesforce → Assign to queue → Log call activity"
+        <strong>🔥 Zap Idea:</strong> "When Halla AI captures a lead → Create lead in Salesforce → Assign to queue → Log call activity"
       </div>
 
       <h2 style="margin-bottom: 16px;">3. Pipedrive</h2>
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 24px;">
-        <strong>Zapier integration.</strong> Automatically create deals in Pipedrive from Call IQ leads. Perfect for sales teams that want to track every opportunity.
+        <strong>Zapier integration.</strong> Automatically create deals in Pipedrive from Halla AI leads. Perfect for sales teams that want to track every opportunity.
       </p>
       <div style="background: var(--gray-50); padding: 12px 16px; border-radius: var(--radius); margin-bottom: 24px; font-size: 0.9rem; color: var(--gray-600);">
-        <strong>🔥 Zap Idea:</strong> "When Call IQ captures a lead → Create deal in Pipedrive → Add call transcript as note → Set follow-up reminder"
+        <strong>🔥 Zap Idea:</strong> "When Halla AI captures a lead → Create deal in Pipedrive → Add call transcript as note → Set follow-up reminder"
       </div>
 
       <h2 style="margin-bottom: 16px;">4. Zoho CRM</h2>
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 24px;">
-        <strong>Zapier integration.</strong> Automatically push leads from Call IQ into Zoho CRM with all conversation details.
+        <strong>Zapier integration.</strong> Automatically push leads from Halla AI into Zoho CRM with all conversation details.
       </p>
       <div style="background: var(--gray-50); padding: 12px 16px; border-radius: var(--radius); margin-bottom: 24px; font-size: 0.9rem; color: var(--gray-600);">
-        <strong>🔥 Zap Idea:</strong> "When Call IQ captures a lead → Create contact in Zoho → Add lead details → Assign to sales rep"
+        <strong>🔥 Zap Idea:</strong> "When Halla AI captures a lead → Create contact in Zoho → Add lead details → Assign to sales rep"
       </div>
 
       <h2 style="margin-bottom: 16px;">5. Copper (formerly ProsperWorks)</h2>
@@ -59,7 +59,7 @@ export const crmIntegrationsArticle: BlogArticle = {
 
       <h2 style="margin-bottom: 16px;">6. Freshsales</h2>
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 24px;">
-        <strong>Zapier integration.</strong> Automatically create contacts and deals in Freshsales from Call IQ calls.
+        <strong>Zapier integration.</strong> Automatically create contacts and deals in Freshsales from Halla AI calls.
       </p>
 
       <h2 style="margin-bottom: 16px;">7. Insightly</h2>

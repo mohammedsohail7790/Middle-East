@@ -1,6 +1,6 @@
 /**
- * Import Desktop landing (index.html + calliq_styles.css), apply production fixes,
- * keep wired calliq_main.js, and sync into apps/dashboard/public.
+ * Import Desktop landing (index.html + hallaai_styles.css), apply production fixes,
+ * keep wired hallaai_main.js, and sync into apps/dashboard/public.
  *
  * Usage:
  *   node scripts/import-landing.mjs
@@ -22,17 +22,22 @@ const LANDING_DIR =
 
 const SOURCES = {
   html: path.join(LANDING_DIR, "index.html"),
-  css: path.join(LANDING_DIR, "calliq_styles.css"),
-  js: path.join(LANDING_DIR, "calliq_main.js"),
+  // Accept either the old calliq_ names or new hallaai_ names from the designer's export
+  css: fs.existsSync(path.join(LANDING_DIR, "hallaai_styles.css"))
+    ? path.join(LANDING_DIR, "hallaai_styles.css")
+    : path.join(LANDING_DIR, "calliq_styles.css"),
+  js: fs.existsSync(path.join(LANDING_DIR, "hallaai_main.js"))
+    ? path.join(LANDING_DIR, "hallaai_main.js")
+    : path.join(LANDING_DIR, "calliq_main.js"),
 };
 
 const ROOT = {
   html: path.join(REPO_ROOT, "index.html"),
-  css: path.join(REPO_ROOT, "calliq_styles.css"),
-  js: path.join(REPO_ROOT, "calliq_main.js"),
+  css: path.join(REPO_ROOT, "hallaai_styles.css"),
+  js: path.join(REPO_ROOT, "hallaai_main.js"),
 };
 
-const PRODUCTION_JS = path.join(DASHBOARD, "public", "calliq_main.js");
+const PRODUCTION_JS = path.join(DASHBOARD, "public", "hallaai_main.js");
 
 function requireFile(filePath, label) {
   if (!fs.existsSync(filePath)) {
@@ -45,21 +50,21 @@ function resolveJs() {
   if (fs.existsSync(SOURCES.js)) {
     const body = fs.readFileSync(SOURCES.js, "utf8").trim();
     if (body.length > 200 && body.includes("function go")) {
-      console.log("[import-landing] Using landing calliq_main.js");
+      console.log("[import-landing] Using landing hallaai_main.js");
       return body;
     }
   }
   if (!fs.existsSync(PRODUCTION_JS)) {
-    console.error("[import-landing] No production calliq_main.js at", PRODUCTION_JS);
+    console.error("[import-landing] No production hallaai_main.js at", PRODUCTION_JS);
     process.exit(1);
   }
-  console.log("[import-landing] landing calliq_main.js empty — using production router");
+  console.log("[import-landing] landing hallaai_main.js empty — using production router");
   return fs.readFileSync(PRODUCTION_JS, "utf8");
 }
 
 function main() {
   requireFile(SOURCES.html, "index.html");
-  requireFile(SOURCES.css, "calliq_styles.css");
+  requireFile(SOURCES.css, "hallaai_styles.css (or calliq_styles.css)");
 
   const html = prepareLandingHtml(fs.readFileSync(SOURCES.html, "utf8"));
   const css = prepareLandingCss(fs.readFileSync(SOURCES.css, "utf8"));
@@ -77,7 +82,7 @@ function main() {
   });
   if (sync.status !== 0) process.exit(sync.status ?? 1);
 
-  const check = spawnSync(process.execPath, ["--check", path.join(DASHBOARD, "public", "calliq_main.js")], {
+  const check = spawnSync(process.execPath, ["--check", path.join(DASHBOARD, "public", "hallaai_main.js")], {
     stdio: "inherit",
   });
   if (check.status !== 0) process.exit(check.status ?? 1);

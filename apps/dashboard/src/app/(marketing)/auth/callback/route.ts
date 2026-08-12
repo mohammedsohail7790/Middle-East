@@ -64,7 +64,7 @@ export async function GET(request: Request) {
   const gatewayBase = (
     process.env.NEXT_PUBLIC_GATEWAY_API_URL ||
     process.env.NEXT_PUBLIC_API_URL ||
-    "https://call-iq-gateway.onrender.com"
+    "https://gateway.hallaai.com"
   ).replace(/\/$/, "");
 
   let tenantId =

@@ -9,7 +9,7 @@ import { verifyInternalServiceRequest } from '../services/auth/internal-service-
 import { verifySseDashboardToken } from '../security/sse-token.js';
 
 /**
- * Zero-trust tenant middleware (Call IQ V4).
+ * Zero-trust tenant middleware (Halla AI V4).
  * Sets req.tenant from verified JWT or scoped internal service key.
  */
 export async function requireTenant(

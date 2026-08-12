@@ -7,7 +7,11 @@ export function isLocalHostname(hostname: string): boolean {
 
 export function isProductionDashboardHostname(hostname: string): boolean {
   const h = hostname.toLowerCase();
-  return h === "calliqlabs.com" || h === "www.calliqlabs.com";
+  return (
+    h === "hallaai.com" ||
+    h === "www.hallaai.com" ||
+    h === "app.hallaai.com"
+  );
 }
 
 /** Origin used in auth emails and OAuth return URLs. */

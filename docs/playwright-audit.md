@@ -1,14 +1,14 @@
 # Call IQ — Playwright Audit Report
 
 **Generated:** 2026-06-14  
-**Method:** Code-based analysis + live site inspection at www.calliqlabs.com  
+**Method:** Code-based analysis + live site inspection at app.hallaai.com  
 **Note:** Full browser automation requires running stack with test credentials. This report documents code-identified issues with remediation status.
 
 ---
 
 ## Routes Audited
 
-### Public Routes (www.calliqlabs.com)
+### Public Routes (app.hallaai.com)
 
 | Route | Status | Issues | Fixed |
 |-------|--------|--------|-------|

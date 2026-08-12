@@ -45,19 +45,14 @@ export function clearTenantId() {
   document.cookie = "calliq_tenant_id=; path=/; max-age=0; samesite=lax";
 }
 
-export function hasAccess(requiredPlan?: string): boolean {
-  if (!requiredPlan) return true;
-  const current = getPlan();
-  return (PLAN_LEVEL[current] ?? 0) >= (PLAN_LEVEL[normalizePlanId(requiredPlan)] ?? 0);
+/** Skeleton has no billing/plan tiers — every feature is unlocked. */
+export function hasAccess(_requiredPlan?: string): boolean {
+  return true;
 }
 
-/** Sidebar gate: lock paid nav only when trial is exhausted (not during active trial). */
-export function isNavItemLocked(requiredPlan?: string): boolean {
-  if (!requiredPlan) return false;
-  if (typeof window !== "undefined" && localStorage.getItem("calliq_trial_locked") === "1") {
-    return true;
-  }
-  return !hasAccess(requiredPlan);
+/** Skeleton has no billing/plan tiers — nothing is nav-locked. */
+export function isNavItemLocked(_requiredPlan?: string): boolean {
+  return false;
 }
 
 /** Sync plan for sidebar — active trial gets professional routes; locked trial does not. */
@@ -69,42 +64,7 @@ export function subscribePlanUpdates(listener: () => void): () => void {
   return () => window.removeEventListener("calliq-plan-updated", handler);
 }
 
-export function syncPlanFromAccount(input: {
-  subscriptionPlan?: string;
-  subscriptionStatus?: string;
-  isTrialing?: boolean;
-  trialLocked?: boolean;
-}): void {
-  if (typeof window === "undefined") return;
-  if (input.subscriptionStatus) {
-    localStorage.setItem("calliq_subscription_status", input.subscriptionStatus);
-  }
-  if (input.trialLocked) {
-    localStorage.setItem("calliq_trial_locked", "1");
-    setPlan("trial");
-    return;
-  }
-  localStorage.removeItem("calliq_trial_locked");
-  if (input.isTrialing) {
-    setPlan("professional");
-    window.dispatchEvent(new Event("calliq-plan-updated"));
-    return;
-  }
-  if (input.subscriptionPlan) {
-    setPlan(
-      normalizePlanId(
-        input.subscriptionStatus === "trialing" ? "professional" : input.subscriptionPlan
-      )
-    );
-  }
-}
-
-/** Active paid subscription (not free trial). */
+/** Skeleton has no billing provider — always reports as an active customer. */
 export function isPayingCustomer(): boolean {
-  if (typeof window === "undefined") return false;
-  if (localStorage.getItem("calliq_trial_locked") === "1") return false;
-  const status = localStorage.getItem("calliq_subscription_status");
-  if (status === "active" || status === "past_due") return true;
-  const plan = getPlan();
-  return plan === "essential" || plan === "professional";
+  return true;
 }

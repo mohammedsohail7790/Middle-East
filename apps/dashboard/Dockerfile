@@ -4,7 +4,7 @@ FROM base AS builder
 WORKDIR /app
 COPY . .
 RUN npm install
-RUN npm run build --workspace=@call-iq/dashboard
+RUN npm run build --workspace=@halla-ai/dashboard
 
 FROM base AS runner
 WORKDIR /app

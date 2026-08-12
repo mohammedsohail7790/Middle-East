@@ -22,7 +22,7 @@ export function CtaBlock({
       {label && (
         <div
           className="label"
-          style={{ background: "rgba(14,165,233,0.15)", color: "var(--accent-mid)" }}
+          style={{ background: "rgba(201,162,75,0.15)", color: "var(--accent-mid)" }}
         >
           {label}
         </div>

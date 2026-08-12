@@ -42,7 +42,7 @@ This implementation plan transforms Call IQ into a production-ready, multi-tenan
 
 - [ ] 1.4 Return TwiML with WebSocket URL
   - Build TwiML response with `<Connect><Stream>` element
-  - Include WebSocket URL: `wss://api.calliqlabs.com/ws/voice/${callId}`
+  - Include WebSocket URL: `wss://gateway.hallaai.com/ws/voice/${callId}`
   - Set content-type to `text/xml`
   - Return HTTP 200 with valid TwiML
   - _Requirements: 1.6_
@@ -552,7 +552,7 @@ This implementation plan transforms Call IQ into a production-ready, multi-tenan
 
 - [ ] 6.2a Configure custom domain on Render
   - Go to Render Dashboard → Service → Settings → Custom Domains
-  - Add custom domain: `api.calliqlabs.com`
+  - Add custom domain: `gateway.hallaai.com`
   - Copy CNAME target provided by Render
   - Update DNS: Add CNAME record pointing to Render's URL
   - Wait for SSL certificate provisioning (automatic, ~5-10 minutes)
@@ -574,7 +574,7 @@ This implementation plan transforms Call IQ into a production-ready, multi-tenan
   - _Requirements: 16.6_
 
 - [ ] 6.5 Update Twilio webhook configuration
-  - Set webhook URL to production domain: `https://api.calliqlabs.com/api/voice/incoming-call`
+  - Set webhook URL to production domain: `https://gateway.hallaai.com/api/voice/incoming-call`
   - Verify HTTPS endpoint is accessible
   - Verify WSS endpoint is accessible
   - _Requirements: 16.2, 16.3_

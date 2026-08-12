@@ -1,5 +1,5 @@
 {
-    "name": "@call-iq/db",
+    "name": "@halla-ai/db",
     "version": "1.0.0",
     "type": "module",
     "main": "./dist/index.js",

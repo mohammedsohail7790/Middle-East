@@ -3,7 +3,7 @@ import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { PageHero } from "@/components/marketing/PageHero";
 import { HOW_IT_WORKS } from "@/lib/marketing-content";
 
-export const metadata = { title: "How It Works | Call IQ" };
+export const metadata = { title: "How It Works | Halla AI" };
 
 export default function HowItWorksPage() {
   return (

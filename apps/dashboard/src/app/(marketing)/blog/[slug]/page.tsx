@@ -9,9 +9,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const article = getBlogArticle(slug);
-  if (!article) return { title: "Blog | Call IQ" };
+  if (!article) return { title: "Blog | Halla AI" };
   return {
-    title: `${article.title} | Call IQ Blog`,
+    title: `${article.title} | Halla AI Blog`,
     description: article.subtitle,
   };
 }

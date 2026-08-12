@@ -68,7 +68,7 @@ function localWsUrl(streamUrl) {
     u.host = '127.0.0.1:3003';
     return u.toString();
   } catch {
-    return streamUrl.replace(/^wss:/i, 'ws:').replace(/call-iq-gateway\.onrender\.com/i, '127.0.0.1:3003');
+    return streamUrl.replace(/^wss:/i, 'ws:').replace(/halla-ai-gateway\.onrender\.com|call-iq-gateway\.onrender\.com/i, '127.0.0.1:3003');
   }
 }
 

@@ -2,14 +2,14 @@ import Link from "next/link";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { PageHero } from "@/components/marketing/PageHero";
 
-export const metadata = { title: "Call Forwarding | Call IQ" };
+export const metadata = { title: "Call Forwarding | Halla AI" };
 
 export default function ForwardingPage() {
   return (
     <MarketingShell>
       <PageHero
         label="Call Forwarding"
-        title="Set Up Call IQ in Minutes"
+        title="Set Up Halla AI in Minutes"
         subtitle="Step-by-step instructions for every major phone carrier."
       />
       <section className="section">
@@ -17,7 +17,7 @@ export default function ForwardingPage() {
           <div className="alert alert-info">
             <span>📱</span>
             <span className="alert-text">
-              You have 3 setup options: (1) Port your number to Call IQ — free, 5–10 days. (2) Get a new number from us —
+              You have 3 setup options: (1) Port your number to Halla AI — free, 5–10 days. (2) Get a new number from us —
               instant. (3) Forward calls from your existing carrier — 5–15 minutes. This guide covers option #3.
             </span>
           </div>
@@ -32,7 +32,7 @@ export default function ForwardingPage() {
                 <li>
                   Click <span className="chip">Call Handling & Forwarding</span>
                 </li>
-                <li>Add forwarding number: your Call IQ number</li>
+                <li>Add forwarding number: your Halla AI number</li>
                 <li>Set: Ring desk first, forward after 15 seconds</li>
                 <li>Save and test</li>
               </ol>
@@ -47,7 +47,7 @@ export default function ForwardingPage() {
                 <li>
                   Click <span className="chip">Call Forwarding</span>
                 </li>
-                <li>Enable &quot;Forward when unanswered&quot; and enter your Call IQ number</li>
+                <li>Enable &quot;Forward when unanswered&quot; and enter your Halla AI number</li>
                 <li>Set ring time to 15–20 seconds. Save.</li>
               </ol>
             </div>
@@ -73,7 +73,7 @@ export default function ForwardingPage() {
           </div>
           <div style={{ textAlign: "center", marginTop: 40 }}>
             <Link href="/signup" className="btn btn-primary btn-lg">
-              Get My Call IQ Number →
+              Get My Halla AI Number →
             </Link>
           </div>
         </div>

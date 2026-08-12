@@ -1,7 +1,7 @@
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { PageHero } from "@/components/marketing/PageHero";
 
-export const metadata = { title: "Security | Call IQ" };
+export const metadata = { title: "Security | Halla AI" };
 
 export default function SecurityPage() {
   return (
@@ -16,7 +16,7 @@ export default function SecurityPage() {
           <div className="alert alert-warn">
             <span>⚠️</span>
             <span className="alert-text">
-              Call IQ is <strong>not HIPAA-compliant</strong> on Essential or Professional plans. A signed BAA
+              Halla AI is <strong>not HIPAA-compliant</strong> on Essential or Professional plans. A signed BAA
               is not currently offered on any plan.
             </span>
           </div>

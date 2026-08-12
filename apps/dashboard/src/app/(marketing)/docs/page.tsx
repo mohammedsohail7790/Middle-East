@@ -3,7 +3,7 @@ import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { PageHero } from "@/components/marketing/PageHero";
 import { CtaBlock } from "@/components/marketing/CtaBlock";
 
-export const metadata = { title: "Help Center | Call IQ" };
+export const metadata = { title: "Help Center | Halla AI" };
 // Force per-request rendering — static generation intermittently froze this
 // page's Suspense boundary mid-stream (content correct but hidden forever).
 export const dynamic = "force-dynamic";
@@ -25,20 +25,10 @@ const SECTIONS: DocSection[] = [
     title: "Getting Started",
     description: "Set up your AI receptionist and start taking calls in minutes.",
     links: [
-      { label: "How Call IQ Works", href: "/how-it-works" },
+      { label: "How Halla AI Works", href: "/how-it-works" },
       { label: "Call Forwarding Setup Guides", href: "/forwarding" },
       { label: "Plans & Pricing", href: "/pricing" },
       { label: "Start Free Trial", href: "/signup" },
-    ],
-  },
-  {
-    icon: "🔗",
-    iconClass: "",
-    title: "Integrations",
-    description: "Connect your CRM, calendar, and field service tools.",
-    links: [
-      { label: "Browse All Integrations", href: "/integrations" },
-      { label: "Dashboard: Manage Connections", href: "/dashboard/integrations" },
     ],
   },
   {
@@ -60,16 +50,6 @@ const SECTIONS: DocSection[] = [
     links: [
       { label: "Dashboard: Knowledge", href: "/dashboard/knowledge" },
       { label: "Dashboard: Settings", href: "/dashboard/settings" },
-    ],
-  },
-  {
-    icon: "💳",
-    iconClass: "feat-icon-blue",
-    title: "Billing & Plans",
-    description: "Manage your subscription, usage, and invoices.",
-    links: [
-      { label: "Dashboard: Billing", href: "/dashboard/billing" },
-      { label: "Plans & Pricing", href: "/pricing" },
     ],
   },
   {

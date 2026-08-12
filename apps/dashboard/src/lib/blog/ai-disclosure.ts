@@ -13,7 +13,7 @@ export const aiDisclosureArticle: BlogArticle = {
       <div style="background: var(--gray-50); border-left: 3px solid var(--accent); padding: 16px 20px; border-radius: var(--radius); margin-bottom: 32px;">
         <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 0;">
           <strong>Quick Answer:</strong> Yes, you must disclose you're using an AI receptionist to callers in most US jurisdictions. 
-          Call IQ handles this automatically. Here's everything you need to know.
+          Halla AI handles this automatically. Here's everything you need to know.
         </p>
       </div>
 
@@ -94,13 +94,13 @@ export const aiDisclosureArticle: BlogArticle = {
         </span>
       </div>
 
-      <h2 style="margin-bottom: 16px;">How Call IQ Handles AI Disclosure</h2>
+      <h2 style="margin-bottom: 16px;">How Halla AI Handles AI Disclosure</h2>
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 16px;">
-        Call IQ handles AI disclosure automatically. Our AI says:
+        Halla AI handles AI disclosure automatically. Our AI says:
       </p>
 
       <div style="background: var(--gray-100); padding: 16px 20px; border-radius: var(--radius); margin-bottom: 24px; font-style: italic; color: var(--gray-700);">
-        "Hi, you've reached [Your Business]. I'm Call IQ, an AI receptionist. How can I help you today?"
+        "Hi, you've reached [Your Business]. I'm Halla AI, an AI receptionist. How can I help you today?"
       </div>
 
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 24px;">
@@ -118,7 +118,7 @@ export const aiDisclosureArticle: BlogArticle = {
       </p>
 
       <div style="background: var(--gray-100); padding: 16px 20px; border-radius: var(--radius); margin-bottom: 24px; color: var(--gray-700);">
-        "Calls are answered by Call IQ, an AI receptionist. By calling us, you agree to speak with an automated system."
+        "Calls are answered by Halla AI, an AI receptionist. By calling us, you agree to speak with an automated system."
       </div>
 
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 24px;">
@@ -134,7 +134,7 @@ export const aiDisclosureArticle: BlogArticle = {
       <h2 style="margin-bottom: 16px;">The Bottom Line</h2>
       <p style="color: var(--gray-600); line-height: 1.8; margin-bottom: 24px;">
         AI disclosure isn't just a legal requirement in many states — it's also a best practice for building trust with your customers. 
-        Call IQ makes it automatic and effortless. You never have to think about it again.
+        Halla AI makes it automatic and effortless. You never have to think about it again.
       </p>
 
       <div style="text-align: center; padding: 32px; background: var(--gray-50); border-radius: var(--radius-lg); margin-bottom: 32px;">

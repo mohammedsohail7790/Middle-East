@@ -3,17 +3,15 @@ import { buildAnomalyIntelligence } from '../intelligence/anomaly-intelligence/a
 import { getReplayStatus } from '../operations/replay-orchestration/replay.service.js';
 import { getGovernanceEffectiveness } from '../intelligence/governance-intelligence/governance-intelligence.service.js';
 import { collectRuntimeDiagnostics } from '../observability/diagnostics/runtime-diagnostics.js';
-import { buildBillingForecast } from '../services/billing/billing-forecast.service.js';
 import { detectReconnectStorm } from '../services/runtime-reliability/reconnect-storm.js';
 
 export async function buildTenantDiagnosticsPack(tenantId: string) {
-  const [health, anomalies, replay, governance, runtime, billing, storm] = await Promise.all([
+  const [health, anomalies, replay, governance, runtime, storm] = await Promise.all([
     buildTenantHealthReport(tenantId),
     buildAnomalyIntelligence(tenantId),
     getReplayStatus(),
     Promise.resolve(getGovernanceEffectiveness(tenantId)),
     collectRuntimeDiagnostics(tenantId),
-    buildBillingForecast(tenantId),
     Promise.resolve(detectReconnectStorm(tenantId)),
   ]);
 
@@ -25,11 +23,6 @@ export async function buildTenantDiagnosticsPack(tenantId: string) {
     replay,
     governance,
     runtime,
-    billing: {
-      forecast: billing.totalForecast30d,
-      confidence: billing.forecastConfidence,
-      expensiveCalls: billing.expensiveCalls,
-    },
     reconnectStorm: storm,
     supportSummary:
       health.healthScore >= 80

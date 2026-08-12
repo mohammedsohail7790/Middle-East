@@ -1,12 +1,12 @@
-# www.calliqlabs.com — static marketing (marketing/)
-# Set CALLIQ_APP_URL to your Netlify *app* site URL (apps/dashboard deploy).
+# www.hallaai.com — static marketing site
+# Set HALLA_APP_URL to your Netlify *app* site URL (apps/dashboard deploy).
 
 [build]
   base = "marketing"
   publish = "."
-  command = "node scripts/write-calliq-config.mjs"
+  command = "node scripts/write-hallaai-config.mjs"
 
 [build.environment]
   NODE_VERSION = "20"
   # After you deploy apps/dashboard on a second Netlify site, paste its URL here or in Netlify UI env vars:
-  CALLIQ_APP_URL = "https://app.calliqlabs.com"
+  HALLA_APP_URL = "https://app.hallaai.com"

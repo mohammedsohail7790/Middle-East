@@ -17,7 +17,6 @@ import {
 import { setTenantId, setPlan } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { OnboardingPersonalityVoice } from "@/components/onboarding/OnboardingPersonalityVoice";
-import { OnboardingIntegrations } from "@/components/onboarding/OnboardingIntegrations";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 
 const FALLBACK_INDUSTRIES = [
@@ -225,12 +224,6 @@ export default function OnboardingPage() {
       setCreatedTenantId(tenantId);
       await supabase.auth.updateUser({ data: { tenant_id: tenantId } });
       await supabase.auth.refreshSession();
-
-      try {
-        await api.post("/billing/start-trial", {});
-      } catch {
-        /* trial may already exist from POST /tenants */
-      }
 
       try {
         await api.post("/onboarding/progress", { step: "twilio", completed: false });
@@ -680,8 +673,11 @@ export default function OnboardingPage() {
             )}
 
             {step === 5 && (
-              <motion.div key="s5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <OnboardingIntegrations onProgress={() => {}} />
+              <motion.div key="s5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center py-6 space-y-3">
+                <h2 className="text-xl font-bold">Almost there</h2>
+                <p className="text-foreground-secondary max-w-sm mx-auto">
+                  Your workspace is ready. Continue to finish setup.
+                </p>
               </motion.div>
             )}
 
