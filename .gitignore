@@ -97,6 +97,12 @@ tmp-*
 /calliq_main.js
 /calliq_styles.css
 /index.html
+# Root marketing source files (local only — Vercel uses apps/dashboard/public/ outputs)
+/hallaai_styles.css
+/hallaai_main.js
+/halla_styles.css
+/halla_main.js
+/halla_preview.html
 
 # Tool state (ruflo/claude-flow swarm memory)
 .swarm/

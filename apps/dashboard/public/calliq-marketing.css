@@ -58,7 +58,7 @@
   padding: 13px 26px; border-radius: var(--radius-full); cursor: pointer;
   border: none; text-decoration: none; transition: all 0.18s ease;
   white-space: nowrap; line-height: 1;
-}.calliq-marketing .btn-primary{ background: var(--black); color: var(--white); }.calliq-marketing .btn-primary:hover{ background: var(--gray-800); transform: translateY(-1px); box-shadow: var(--shadow-md); }.calliq-marketing .btn-outline{ background: transparent; color: var(--black); border: 1.5px solid var(--gray-200); }.calliq-marketing .btn-outline:hover{ border-color: var(--gray-400); background: var(--gray-50); }.calliq-marketing .btn-blue{ background: var(--accent); color: var(--black); }.calliq-marketing .btn-blue:hover{ background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201, 162, 75,0.3); }.calliq-marketing .btn-lg{ padding: 16px 34px; font-size: 1rem; }.calliq-marketing .btn-sm{ padding: 9px 18px; font-size: 0.85rem; }/* ============ NAV ============ */.calliq-marketing nav{
+}.calliq-marketing .btn-primary{ background: var(--black); color: var(--white); }.calliq-marketing .btn-primary:hover{ background: var(--gray-800); transform: translateY(-1px); box-shadow: var(--shadow-md); }.calliq-marketing .btn-outline{ background: transparent; color: var(--black); border: 1.5px solid var(--gray-200); }.calliq-marketing .btn-outline:hover{ border-color: var(--gray-400); background: var(--gray-50); }.calliq-marketing .btn-blue{ background: var(--accent); color: var(--white); }.calliq-marketing .btn-blue:hover{ background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201, 162, 75,0.3); }.calliq-marketing .btn-lg{ padding: 16px 34px; font-size: 1rem; }.calliq-marketing .btn-sm{ padding: 9px 18px; font-size: 0.85rem; }/* ============ NAV ============ */.calliq-marketing nav{
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
   background: rgba(255,255,255,0.94); backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--gray-100);
@@ -216,10 +216,6 @@
 .calliq-marketing .logo-pill:active,
 .calliq-marketing .pricing-card:active {
   transform: none !important;
-}
-.calliq-marketing .btn:focus-visible {
-  outline: 2px solid var(--black);
-  outline-offset: 3px;
 }
 @media (hover: hover) and (pointer: fine) {
   .calliq-marketing .nav-item:hover .dropdown {
