@@ -3,14 +3,40 @@
 export function prepareLandingHtml(html) {
   let out = html;
 
+  // Wire "Log In" / "Sign In" nav button → real Next.js /login route
   out = out.replace(
     /<a class="btn btn-outline btn-sm" href="javascript:void\(0\)" onclick="go\('pricing'\)">Sign In<\/a>/g,
-    '<a class="btn btn-outline btn-sm" href="javascript:void(0)" onclick="go(\'login\')">Sign In</a>'
+    '<a class="btn btn-outline btn-sm" href="/login">Sign In</a>'
+  );
+  out = out.replace(
+    /onclick="go\('login'\)"/g,
+    'onclick="window.location.href=\'/login\'"'
   );
 
+  // Wire all "Start Free Trial" / signup CTAs → real Next.js /signup route
+  out = out.replace(
+    /onclick="go\('signup'\)"/g,
+    'onclick="window.location.href=\'/signup\'"'
+  );
   out = out.replace(
     /onclick="alert\('Thank you! We will contact you within 24 hours to complete your setup\.'\)"/g,
-    'onclick="go(\'signup\')"'
+    'onclick="window.location.href=\'/signup\'"'
+  );
+
+  // Wire "Log In" button in nav (the btn-outline variant)
+  out = out.replace(
+    /onclick="showDashboard\('overview'\)"/g,
+    'onclick="window.location.href=\'/login\'"'
+  );
+
+  // Wire pricing CTA buttons that point to signup
+  out = out.replace(
+    /onclick="go\('contact'\)"/g,
+    'onclick="window.location.href=\'/contact\'"'
+  );
+  out = out.replace(
+    /onclick="go\('pricing'\)"/g,
+    'onclick="window.location.href=\'/pricing\'"'
   );
 
   out = out.replace(
@@ -30,7 +56,7 @@ export function prepareLandingHtml(html) {
     out = out.replace(
       /<meta name="viewport"[^>]*>/i,
       (match) =>
-        `${match}\n<link rel="icon" href="/logo.png" type="image/png">\n<meta name="description" content="Call IQ answers every call 24/7, books appointments, captures leads, and routes emergencies — automatically.">\n<meta property="og:title" content="Call IQ – Pure AI Receptionist">\n<meta property="og:description" content="Never miss a call again. AI receptionist for service businesses.">\n<meta property="og:type" content="website">`
+        `${match}\n<link rel="icon" href="/logo.png" type="image/png">\n<meta name="description" content="Halla AI answers every business call 24/7, books appointments, captures leads, and routes emergencies — automatically.">\n<meta property="og:title" content="Halla AI – Never Miss a Call">\n<meta property="og:description" content="Never miss a customer call again. AI receptionist for businesses. Starting at $79/mo.">\n<meta property="og:type" content="website">\n<meta property="og:image" content="/logo.png">\n<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:title" content="Halla AI – Never Miss a Call">\n<meta name="twitter:description" content="Every call answered in under 2 seconds. Books appointments, captures leads, blocks spam.">`
     );
   }
 

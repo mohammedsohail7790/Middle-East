@@ -13,7 +13,8 @@ export function ThemeProvider({ children, defaultTheme = "light" }: { children: 
   const [theme, setTheme] = useState<Theme>(defaultTheme);
 
   useEffect(() => {
-    const stored = localStorage.getItem("calliq_theme") as Theme | null;
+    // Support both old calliq_theme key and new halla_theme key during transition
+    const stored = (localStorage.getItem("halla_theme") || localStorage.getItem("calliq_theme")) as Theme | null;
     if (stored === "dark" || stored === "light") {
       setTheme(stored);
     } else {
@@ -25,7 +26,9 @@ export function ThemeProvider({ children, defaultTheme = "light" }: { children: 
     const root = document.documentElement;
     root.classList.remove("dark", "light");
     root.classList.add(theme);
-    localStorage.setItem("calliq_theme", theme);
+    localStorage.setItem("halla_theme", theme);
+    // Remove legacy key if present
+    localStorage.removeItem("calliq_theme");
   }, [theme]);
 
   return (

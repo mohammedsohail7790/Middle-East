@@ -22,7 +22,7 @@ export const viewport = {
   maximumScale: 5,
 };
 
-const themeInitScript = `(function(){try{var t=localStorage.getItem('calliq_theme');document.documentElement.classList.remove('light','dark');document.documentElement.classList.add(t==='dark'?'dark':'light');}catch(e){document.documentElement.classList.add('light');}})();`;
+const themeInitScript = `(function(){try{var t=localStorage.getItem('halla_theme')||localStorage.getItem('calliq_theme');document.documentElement.classList.remove('light','dark');document.documentElement.classList.add(t==='dark'?'dark':'light');}catch(e){document.documentElement.classList.add('light');}})();`;
 
 export default function MarketingRootLayout({ children }: { children: React.ReactNode }) {
   return (

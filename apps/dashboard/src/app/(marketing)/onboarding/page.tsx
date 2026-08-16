@@ -79,8 +79,8 @@ export default function OnboardingPage() {
   const [company, setCompany] = useState("");
   const [services, setServices] = useState("");
   const [timezone, setTimezone] = useState(() => {
-    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"; }
-    catch { return "America/New_York"; }
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Riyadh"; }
+    catch { return "Asia/Riyadh"; }
   });
   const [industries, setIndustries] = useState<string[]>([]);
   const [days, setDays] = useState(["Mon", "Tue", "Wed", "Thu", "Fri"]);
@@ -434,10 +434,38 @@ export default function OnboardingPage() {
                 <div>
                   <label className="text-sm text-foreground-secondary mb-1.5 block">Timezone</label>
                   <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className="input">
-                    <option value="America/New_York">Eastern</option>
-                    <option value="America/Chicago">Central</option>
-                    <option value="America/Denver">Mountain</option>
-                    <option value="America/Los_Angeles">Pacific</option>
+                    <optgroup label="Middle East &amp; Gulf">
+                      <option value="Asia/Riyadh">Saudi Arabia (AST, UTC+3)</option>
+                      <option value="Asia/Dubai">UAE / Dubai (GST, UTC+4)</option>
+                      <option value="Asia/Qatar">Qatar (AST, UTC+3)</option>
+                      <option value="Asia/Kuwait">Kuwait (AST, UTC+3)</option>
+                      <option value="Asia/Bahrain">Bahrain (AST, UTC+3)</option>
+                      <option value="Asia/Muscat">Oman (GST, UTC+4)</option>
+                      <option value="Asia/Baghdad">Iraq / Baghdad (UTC+3)</option>
+                      <option value="Asia/Amman">Jordan (UTC+3)</option>
+                      <option value="Asia/Beirut">Lebanon (UTC+3)</option>
+                      <option value="Asia/Jerusalem">Israel (UTC+3)</option>
+                      <option value="Africa/Cairo">Egypt (EET, UTC+2)</option>
+                    </optgroup>
+                    <optgroup label="United States">
+                      <option value="America/New_York">Eastern (UTC−5/−4)</option>
+                      <option value="America/Chicago">Central (UTC−6/−5)</option>
+                      <option value="America/Denver">Mountain (UTC−7/−6)</option>
+                      <option value="America/Los_Angeles">Pacific (UTC−8/−7)</option>
+                      <option value="America/Phoenix">Arizona (UTC−7)</option>
+                      <option value="Pacific/Honolulu">Hawaii (UTC−10)</option>
+                    </optgroup>
+                    <optgroup label="Europe">
+                      <option value="Europe/London">London (GMT/BST)</option>
+                      <option value="Europe/Paris">Paris / Berlin (CET)</option>
+                      <option value="Europe/Istanbul">Istanbul (UTC+3)</option>
+                    </optgroup>
+                    <optgroup label="Asia / Pacific">
+                      <option value="Asia/Karachi">Pakistan (PKT, UTC+5)</option>
+                      <option value="Asia/Kolkata">India (IST, UTC+5:30)</option>
+                      <option value="Asia/Singapore">Singapore (SGT, UTC+8)</option>
+                      <option value="Australia/Sydney">Sydney (AEST)</option>
+                    </optgroup>
                   </select>
                 </div>
               </motion.div>

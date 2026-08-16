@@ -4,6 +4,26 @@
    © 2025 Halla AI
 ================================================ */
 
+// ============ NEXT.JS INTEGRATION DETECTION ============
+// When served from the Next.js app (app.hallaai.com or via hallaai-spa.html),
+// certain go() calls redirect to real Next.js routes instead of showing
+// the internal SPA page.
+const _isNextJs = (function() {
+  try {
+    // Next.js injects __NEXT_DATA__ on the page
+    return typeof window !== 'undefined' && !!window.__NEXT_DATA__;
+  } catch(e) { return false; }
+})();
+
+// Routes that should navigate to a real Next.js page when inside Next.js
+const _NEXTJS_ROUTES = {
+  'signup':   '/signup',
+  'login':    '/login',
+  'pricing':  '/pricing',
+  'contact':  '/contact',
+  'dashboard': '/dashboard',
+};
+
 // ============ MODE: marketing vs dashboard ============
 let _mode = 'marketing'; // 'marketing' | 'dashboard'
 
@@ -15,6 +35,8 @@ function showMarketing() {
 }
 
 function showDashboard(page) {
+  // Always redirect to real login when running inside Next.js
+  if (_isNextJs) { window.location.href = '/login'; return; }
   _mode = 'dashboard';
   document.getElementById('marketing-wrap').style.display = 'none';
   document.getElementById('site-nav').style.display = 'none';
@@ -24,6 +46,11 @@ function showDashboard(page) {
 
 // ============ MARKETING ROUTING ============
 function go(page) {
+  // When running inside Next.js, redirect key pages to real routes
+  if (_isNextJs && _NEXTJS_ROUTES[page]) {
+    window.location.href = _NEXTJS_ROUTES[page];
+    return;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = document.getElementById('page-' + page);
   if (el) { el.classList.add('active'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
