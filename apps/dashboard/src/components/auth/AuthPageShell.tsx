@@ -3,7 +3,6 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { cn } from "@/lib/utils";
@@ -14,7 +13,7 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     const prev = document.body.getAttribute("style") ?? "";
     document.body.style.cssText =
-      "overflow:auto!important;background:#f1f5f9!important;background-image:none!important;min-height:100dvh";
+      "overflow:auto!important;background:#F9FAFB!important;background-image:none!important;min-height:100dvh;font-family:'Hanken Grotesk',-apple-system,BlinkMacSystemFont,sans-serif";
     document.documentElement.style.overflow = "auto";
     return () => {
       document.body.setAttribute("style", prev);
@@ -23,29 +22,42 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="min-h-dvh grid grid-rows-[auto_1fr_auto] bg-slate-50 font-sans text-[#0A0A0A] antialiased">
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur-md">
-        <div className="mx-auto flex h-16 w-full max-w-[1120px] items-center gap-3 px-4 sm:px-6">
-          <Link href="/" className="flex shrink-0 items-center">
-            <Image
-              src="/logo.png"
-              alt="Halla AI"
-              width={160}
-              height={48}
-              className="block h-[48px] w-auto object-contain object-left"
-              priority
-            />
+    <div
+      className="min-h-dvh grid grid-rows-[auto_1fr_auto] antialiased"
+      style={{ fontFamily: "'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif", background: "#F9FAFB", color: "#0A0A0A" }}
+    >
+      {/* ── Header matching marketing site nav ── */}
+      <header
+        className="sticky top-0 z-50 border-b border-gray-200"
+        style={{ background: "rgba(255,255,255,0.95)", backdropFilter: "blur(16px)" }}
+      >
+        <div className="mx-auto flex h-[72px] w-full max-w-[1280px] items-center gap-4 px-6">
+          <Link href="/" className="flex shrink-0 items-center no-underline">
+            <span
+              style={{
+                fontSize: "1.5rem",
+                fontWeight: 800,
+                letterSpacing: "-0.02em",
+                color: "#0A0A0A",
+              }}
+            >
+              Halla<span style={{ color: "#0D9488" }}>AI</span>
+            </span>
           </Link>
-          <nav className="hidden sm:flex items-center gap-0.5 flex-1 pl-3">
+          <nav className="hidden sm:flex items-center gap-1 flex-1 pl-2">
             <Link
               href="/pricing"
-              className="inline-flex items-center rounded-lg px-3 py-[7px] text-sm font-medium text-gray-500 no-underline transition-colors hover:bg-gray-100 hover:text-[#0A0A0A] whitespace-nowrap"
+              className="inline-flex items-center rounded-lg px-3 py-[7px] text-sm font-medium no-underline transition-colors"
+              style={{ color: "#6B7280" }}
+              onMouseOver={e => { (e.target as HTMLElement).style.color = "#0A0A0A"; (e.target as HTMLElement).style.background = "#F3F4F6"; }}
+              onMouseOut={e => { (e.target as HTMLElement).style.color = "#6B7280"; (e.target as HTMLElement).style.background = ""; }}
             >
               Pricing
             </Link>
             <Link
               href="/how-it-works"
-              className="inline-flex items-center rounded-lg px-3 py-[7px] text-sm font-medium text-gray-500 no-underline transition-colors hover:bg-gray-100 hover:text-[#0A0A0A] whitespace-nowrap"
+              className="inline-flex items-center rounded-lg px-3 py-[7px] text-sm font-medium no-underline transition-colors"
+              style={{ color: "#6B7280" }}
             >
               How it works
             </Link>
@@ -53,13 +65,15 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
           <div className="ml-auto flex items-center gap-2 shrink-0">
             <Link
               href="/login"
-              className="inline-flex items-center rounded-full border border-gray-200 bg-transparent px-4 py-2 text-sm font-medium text-gray-600 no-underline whitespace-nowrap transition-colors hover:border-gray-400 hover:bg-white hover:text-[#0A0A0A]"
+              className="inline-flex items-center rounded-full border px-4 py-2 text-sm font-medium no-underline whitespace-nowrap transition-colors"
+              style={{ borderColor: "#E5E7EB", color: "#4B5563", background: "transparent" }}
             >
               Sign in
             </Link>
             <Link
               href="/signup"
-              className="inline-flex items-center rounded-full bg-[var(--gold)] px-[18px] py-[9px] text-sm font-semibold text-white no-underline shadow-[0_2px_10px_var(--gold-glow)] whitespace-nowrap transition-all hover:bg-[var(--gold-dark)] hover:shadow-[0_4px_16px_var(--gold-glow)] hover:-translate-y-px"
+              className="inline-flex items-center rounded-full px-[18px] py-[9px] text-sm font-semibold text-white no-underline whitespace-nowrap transition-all"
+              style={{ background: "#0D9488", boxShadow: "0 2px 10px rgba(13,148,136,0.35)" }}
             >
               Start free trial
             </Link>
@@ -72,26 +86,27 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
       </main>
 
       <footer className="border-t border-gray-200 bg-white">
-        <div className="mx-auto flex w-full max-w-[1120px] flex-col items-center justify-between gap-3 px-4 py-4 sm:flex-row sm:px-6">
+        <div className="mx-auto flex w-full max-w-[1280px] flex-col items-center justify-between gap-3 px-6 py-4 sm:flex-row">
           <p className="text-center text-[0.78rem] text-gray-400 sm:text-left">
-            &copy; {new Date().getFullYear()} Halla AI Labs &middot;{" "}
-            <Link href="/privacy" className="text-gray-400 no-underline transition-colors hover:text-[#0A0A0A]">Privacy</Link> &middot;{" "}
-            <Link href="/terms" className="text-gray-400 no-underline transition-colors hover:text-[#0A0A0A]">Terms</Link> &middot;{" "}
-            <Link href="/security" className="text-gray-400 no-underline transition-colors hover:text-[#0A0A0A]">Security</Link>
+            &copy; {new Date().getFullYear()} Halla AI &middot;{" "}
+            <Link href="/privacy" className="text-gray-400 no-underline hover:text-gray-700">Privacy</Link>{" "}&middot;{" "}
+            <Link href="/terms" className="text-gray-400 no-underline hover:text-gray-700">Terms</Link>
           </p>
-          <div className="flex items-center gap-[14px]">
-            <span className="flex items-center gap-[5px] text-[0.7rem] font-semibold uppercase tracking-wide text-gray-400">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-3 shrink-0 stroke-gray-400"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-              SOC 2 Type II
-            </span>
-            <span className="flex items-center gap-[5px] text-[0.7rem] font-semibold uppercase tracking-wide text-gray-400">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-3 shrink-0 stroke-gray-400"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-              256-bit SSL
-            </span>
-            <span className="flex items-center gap-[5px] text-[0.7rem] font-semibold uppercase tracking-wide text-gray-400">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-3 shrink-0 stroke-gray-400"><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></svg>
-              99.9% Uptime
-            </span>
+          <div className="flex items-center gap-3">
+            {[
+              { icon: "shield", label: "SOC 2 Type II" },
+              { icon: "lock", label: "256-bit SSL" },
+              { icon: "clock", label: "99.9% Uptime" },
+            ].map(({ icon, label }) => (
+              <span key={label} className="flex items-center gap-[5px] text-[0.7rem] font-semibold uppercase tracking-wide text-gray-400">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-3 shrink-0">
+                  {icon === "shield" && <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />}
+                  {icon === "lock" && <><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>}
+                  {icon === "clock" && <><circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" /></>}
+                </svg>
+                {label}
+              </span>
+            ))}
           </div>
         </div>
       </footer>
@@ -161,7 +176,7 @@ export function AuthFooterLink({
   return (
     <p className="mt-6 text-center text-sm text-gray-500">
       {prompt}{" "}
-      <Link href={href} className="font-semibold text-[#0A0A0A] no-underline transition-colors hover:text-[var(--gold-dark)]">
+      <Link href={href} className="font-semibold no-underline transition-colors hover:underline" style={{ color: "#0D9488" }}>
         {linkLabel}
       </Link>
     </p>
