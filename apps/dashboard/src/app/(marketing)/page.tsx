@@ -1,12 +1,7 @@
-import type { Metadata } from "next";
-import HomeMarketingPage from "@/app/HomeMarketingPage";
+﻿import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Halla AI – Pure AI Receptionist | Never Miss a Call Again",
-  description:
-    "Halla AI answers every call 24/7, books appointments, captures leads, and routes emergencies — automatically.",
-};
-
+// Marketing site is served separately.
+// Root path redirects to login until the new site is connected.
 export default function HomePage() {
-  return <HomeMarketingPage />;
+  redirect("/login");
 }
