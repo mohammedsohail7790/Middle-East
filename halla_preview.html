@@ -572,141 +572,26 @@ footer {
 .lang-toggle button.active { background: var(--white); color: var(--black); box-shadow: var(--shadow-sm); }
 
 /* ============ RTL (ARABIC) SUPPORT ============ */
-
-/* Base RTL font & direction */
-html[dir="rtl"] body {
-  font-family: 'Cairo', 'Hanken Grotesk', -apple-system, sans-serif;
-  direction: rtl;
-  text-align: right;
-}
-
-/* Remove letter-spacing for Arabic (it breaks glyph shaping) */
-html[dir="rtl"] h1,
-html[dir="rtl"] h2,
-html[dir="rtl"] h3,
-html[dir="rtl"] h4,
-html[dir="rtl"] .stat-num,
-html[dir="rtl"] .pricing-price,
-html[dir="rtl"] .halla-wordmark {
-  letter-spacing: 0;
-}
-
-/* Remove text-transform (Arabic has no case) */
-html[dir="rtl"] .label,
-html[dir="rtl"] .dd-section,
-html[dir="rtl"] .mob-section,
-html[dir="rtl"] .pricing-plan,
-html[dir="rtl"] .stat-label,
-html[dir="rtl"] .roi-result-label,
-html[dir="rtl"] .footer-col h5 {
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-/* Nav layout */
+html[dir="rtl"] body { font-family: 'Cairo', 'Hanken Grotesk', -apple-system, sans-serif; }
 html[dir="rtl"] .nav-inner { flex-direction: row-reverse; }
 html[dir="rtl"] .logo { margin-right: 0; margin-left: 20px; }
 html[dir="rtl"] .nav-links { flex-direction: row-reverse; }
-html[dir="rtl"] .nav-actions { flex-direction: row-reverse; margin-left: 0; margin-right: auto; }
+html[dir="rtl"] .nav-actions { flex-direction: row-reverse; }
 html[dir="rtl"] .lang-toggle { margin-left: 0; margin-right: 12px; }
 html[dir="rtl"] .dropdown { left: auto; right: 0; }
 html[dir="rtl"] .dropdown-link { flex-direction: row-reverse; text-align: right; }
 html[dir="rtl"] .ddi { margin-right: 0; margin-left: 10px; }
-html[dir="rtl"] .dd-section { text-align: right; }
-
-/* Mobile nav */
-html[dir="rtl"] .mob-nav { direction: rtl; text-align: right; }
-html[dir="rtl"] .mob-link { text-align: right; }
-
-/* Hero */
-html[dir="rtl"] .hero-sub { text-align: center; }
-html[dir="rtl"] .hero-actions { flex-direction: row-reverse; }
-html[dir="rtl"] .hero-eyebrow { flex-direction: row-reverse; }
-
-/* Stats bar */
-html[dir="rtl"] .stats-bar { flex-direction: row-reverse; }
-html[dir="rtl"] .stat-item { border-right: none; border-left: 1px solid var(--gray-200); }
-html[dir="rtl"] .stat-item:last-child { border-left: none; }
-
-/* Grids & lists */
-html[dir="rtl"] .grid-2,
-html[dir="rtl"] .grid-3,
-html[dir="rtl"] .grid-4 { direction: rtl; }
-html[dir="rtl"] .pills-wrap { flex-direction: row-reverse; flex-wrap: wrap; }
-html[dir="rtl"] .btn-group { flex-direction: row-reverse; }
-
-/* Cards */
-html[dir="rtl"] .card { text-align: right; }
-html[dir="rtl"] .feat-icon { margin-left: 0; }
-html[dir="rtl"] .pricing-feature { flex-direction: row-reverse; text-align: right; }
-html[dir="rtl"] .pricing-feature::before { margin-top: 1px; }
-
-/* Step rows */
-html[dir="rtl"] .step-row { flex-direction: row-reverse; }
-
-/* Value items */
-html[dir="rtl"] .value-item { flex-direction: row-reverse; text-align: right; }
-
-/* Testi */
-html[dir="rtl"] .testi-author { flex-direction: row-reverse; }
-html[dir="rtl"] .testi-text { text-align: right; }
-
-/* FAQ */
-html[dir="rtl"] .faq-q { flex-direction: row-reverse; text-align: right; }
-html[dir="rtl"] .faq-a { text-align: right; max-width: 100%; }
-
-/* ROI calc */
-html[dir="rtl"] .roi-label { text-align: right; }
-html[dir="rtl"] .roi-input,
-html[dir="rtl"] .roi-select { text-align: right; direction: rtl; }
-
-/* Table */
-html[dir="rtl"] .comp-table th,
-html[dir="rtl"] .comp-table td { text-align: right; }
-
-/* Footer */
 html[dir="rtl"] .footer-grid { direction: rtl; }
-html[dir="rtl"] .footer-brand p { text-align: right; }
-html[dir="rtl"] .footer-bottom { flex-direction: row-reverse; }
-html[dir="rtl"] .footer-links-row { flex-direction: row-reverse; }
-
-/* Browser bar */
+html[dir="rtl"] .mob-nav { direction: rtl; text-align: right; }
+html[dir="rtl"] .btn-group { flex-direction: row-reverse; }
+html[dir="rtl"] .stats-bar { flex-direction: row-reverse; }
+html[dir="rtl"] .grid-2, html[dir="rtl"] .grid-3, html[dir="rtl"] .grid-4 { direction: rtl; }
+html[dir="rtl"] .pills-wrap { flex-direction: row-reverse; flex-wrap: wrap; }
 html[dir="rtl"] .browser-bar { flex-direction: row-reverse; }
-html[dir="rtl"] .browser-url { flex-direction: row-reverse; }
-
-/* CTA block: keep centered */
-html[dir="rtl"] .cta-block { text-align: center; }
-html[dir="rtl"] .cta-block .btn-group { justify-content: center; }
-
-/* Mockup badge */
-html[dir="rtl"] .mock-badge { flex-direction: row-reverse; }
-html[dir="rtl"] .mock-badge-1 { right: auto; left: -20px; }
-html[dir="rtl"] .mock-badge-2 { left: auto; right: -30px; }
-
-/* Alert */
-html[dir="rtl"] .alert { flex-direction: row-reverse; text-align: right; }
-
-/* Page hero */
-html[dir="rtl"] .page-hero { text-align: right; }
-
-/* Industry card */
-html[dir="rtl"] .ind-card { text-align: right; }
-
-/* Lang switching */
 .lang-ar { display: none; }
 html[dir="rtl"] .lang-en { display: none; }
 html[dir="rtl"] .lang-ar { display: inline; }
 html[dir="rtl"] .lang-ar.lang-block { display: block; }
-
-/* Fix: when lang-ar is the only child of a block element (like h2, p), show as block */
-html[dir="rtl"] h1 .lang-ar,
-html[dir="rtl"] h2 .lang-ar,
-html[dir="rtl"] h3 .lang-ar,
-html[dir="rtl"] h4 .lang-ar { display: block; }
-
-/* Inline containers that hold both lang-en and lang-ar spans */
-html[dir="rtl"] .label .lang-ar { display: inline; }
-
 </style>
 </head>
 <body>
