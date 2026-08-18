@@ -58,12 +58,14 @@ export default function MarketingSPA({ bodyHtml }: Props) {
       <Script src="/halla_main.js" strategy="afterInteractive" />
 
       {/*
-       * Bridge script: patch go() so key pages route to real Next.js routes.
-       * halla_main.js already checks window.__NEXT_DATA__, but we patch early
-       * just in case the SPA calls go() before the main script finishes patching.
+       * Bridge script:
+       * 1. Patch go() so key pages route to real Next.js routes.
+       * 2. Patch setLang() to apply dir= on #marketing-spa-root instead of <html>
+       *    so React hydration doesn't strip the dir attribute off <html>.
        */}
       <Script id="marketing-bridge" strategy="afterInteractive">{`
-        (function patchGoRouter() {
+        (function() {
+          // ── Route patching ──────────────────────────────────────────────
           var ROUTES = {
             signup: '/signup',
             login: '/login',
@@ -77,11 +79,34 @@ export default function MarketingSPA({ bodyHtml }: Props) {
               if (ROUTES[page]) { window.location.href = ROUTES[page]; return; }
               if (typeof orig === 'function') orig.call(window, page);
               else {
-                // SPA not loaded yet — queue re-try
                 setTimeout(function() { window.go(page); }, 80);
               }
             };
+
+            // ── Language toggle patch ──────────────────────────────────────
+            // Apply dir/lang on the SPA root div, not on <html>, so React
+            // hydration does not reset the attribute.
+            window.setLang = function(lang) {
+              var root = document.getElementById('marketing-spa-root');
+              if (root) {
+                root.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+                root.setAttribute('lang', lang);
+              }
+              // Also set on <html> for font/body rules
+              document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+              document.documentElement.setAttribute('lang', lang);
+              document.querySelectorAll('.lang-toggle button').forEach(function(b) {
+                b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+              });
+              try { localStorage.setItem('halla_lang', lang); } catch(e) {}
+            };
+
+            // Apply saved language immediately
+            var saved = 'en';
+            try { saved = localStorage.getItem('halla_lang') || 'en'; } catch(e) {}
+            window.setLang(saved);
           }
+
           if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', installPatch);
           } else {

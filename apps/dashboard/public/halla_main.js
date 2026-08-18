@@ -217,13 +217,16 @@ function loadInd(key) {
 
 // ============ LANGUAGE TOGGLE ============
 function setLang(lang) {
+  const isAr = lang === 'ar';
+  const dir = isAr ? 'rtl' : 'ltr';
+  const htmlLang = isAr ? 'ar' : 'en';
   const html = document.documentElement;
-  if (lang === 'ar') {
-    html.setAttribute('dir', 'rtl');
-    html.setAttribute('lang', 'ar');
-  } else {
-    html.setAttribute('dir', 'ltr');
-    html.setAttribute('lang', 'en');
+  html.setAttribute('dir', dir);
+  html.setAttribute('lang', htmlLang);
+  const root = document.getElementById('marketing-spa-root');
+  if (root) {
+    root.setAttribute('dir', dir);
+    root.setAttribute('lang', htmlLang);
   }
   document.querySelectorAll('.lang-toggle button').forEach(b => {
     b.classList.toggle('active', b.dataset.lang === lang);

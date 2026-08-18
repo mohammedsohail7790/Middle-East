@@ -14,7 +14,9 @@
             "@halla-ai/types": ["./packages/types/src"],
             "@halla-ai/db": ["./packages/db/src"],
             "@halla-ai/memory": ["./packages/memory/src"],
-            "@halla-ai/mcp-client": ["./packages/mcp-client/src"]
+            "@halla-ai/mcp-client": ["./packages/mcp-client/src"],
+            "@halla-ai/gateway/security/production-safety": ["./apps/gateway/src/security/production-safety.ts"],
+            "@halla-ai/gateway/workers": ["./apps/gateway/src/workers/index.ts"]
         }
     }
 }
