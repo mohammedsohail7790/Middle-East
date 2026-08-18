@@ -21,6 +21,8 @@
   "scripts": {
     "sync:marketing": "node scripts/sync-marketing.mjs",
     "sync:marketing:watch": "node scripts/sync-marketing.mjs --watch",
+    "sync:halla": "node scripts/sync-halla-marketing.mjs",
+    "sync:halla:watch": "node scripts/sync-halla-marketing.mjs --watch",
     "import:landing": "node scripts/import-landing.mjs",
     "dev": "concurrently -n \"gateway,dashboard\" -c \"cyan,magenta\" \"npx --yes cross-env PORT=3003 npm run dev -w @halla-ai/gateway\" \"npx --yes wait-on http-get://127.0.0.1:3003/health -t 180000 -i 2500 && npx --yes cross-env PORT=3000 npm run dev -w @halla-ai/dashboard\"",
     "dev:dashboard": "npx --yes cross-env PORT=3000 npm run dev -w @halla-ai/dashboard",

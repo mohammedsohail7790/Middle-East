@@ -1,4 +1,4 @@
-﻿/* ================================================
+/* ================================================
    Halla AI — Stylesheet
    Design: SkipCalls/SideShift inspired
    Font: Hanken Grotesk | Primary: #0A0A0A | Accent: #0D9488
@@ -560,22 +560,22 @@ footer {
 .lang-toggle button.active { background: var(--white); color: var(--black); box-shadow: var(--shadow-sm); }
 
 /* ============ RTL (ARABIC) SUPPORT ============ */
-html[dir="rtl"] body, [dir="rtl"] body, [dir="rtl"] { font-family: 'Cairo', 'Hanken Grotesk', -apple-system, sans-serif; }
-html[dir="rtl"] .nav-inner, [dir="rtl"] .nav-inner { flex-direction: row-reverse; }
-html[dir="rtl"] .logo, [dir="rtl"] .logo { margin-right: 0; margin-left: 20px; }
-html[dir="rtl"] .nav-links, [dir="rtl"] .nav-links { flex-direction: row-reverse; }
-html[dir="rtl"] .nav-actions, [dir="rtl"] .nav-actions { flex-direction: row-reverse; }
-html[dir="rtl"] .lang-toggle, [dir="rtl"] .lang-toggle { margin-left: 0; margin-right: 12px; }
-html[dir="rtl"] .dropdown, [dir="rtl"] .dropdown { left: auto; right: 0; }
-html[dir="rtl"] .dropdown, [dir="rtl"] .dropdown-link { flex-direction: row-reverse; text-align: right; }
-html[dir="rtl"] .ddi, [dir="rtl"] .ddi { margin-right: 0; margin-left: 10px; }
-html[dir="rtl"] .footer-grid, [dir="rtl"] .footer-grid { direction: rtl; }
-html[dir="rtl"] .mob-nav, [dir="rtl"] .mob-nav { direction: rtl; text-align: right; }
-html[dir="rtl"] .btn-group, [dir="rtl"] .btn-group { flex-direction: row-reverse; }
-html[dir="rtl"] .stats-bar, [dir="rtl"] .stats-bar { flex-direction: row-reverse; }
-html[dir="rtl"] .grid-2, html[dir="rtl"] .grid-3, html[dir="rtl"] .grid-4, [dir="rtl"] .grid-2, [dir="rtl"] .grid-3, [dir="rtl"] .grid-4 { direction: rtl; }
-html[dir="rtl"] .pills-wrap, [dir="rtl"] .pills-wrap { flex-direction: row-reverse; flex-wrap: wrap; }
-html[dir="rtl"] .browser-bar, [dir="rtl"] .browser-bar { flex-direction: row-reverse; }
+html[dir="rtl"] body { font-family: 'Cairo', 'Hanken Grotesk', -apple-system, sans-serif; }
+html[dir="rtl"] .nav-inner { flex-direction: row-reverse; }
+html[dir="rtl"] .logo { margin-right: 0; margin-left: 20px; }
+html[dir="rtl"] .nav-links { flex-direction: row-reverse; }
+html[dir="rtl"] .nav-actions { flex-direction: row-reverse; }
+html[dir="rtl"] .lang-toggle { margin-left: 0; margin-right: 12px; }
+html[dir="rtl"] .dropdown { left: auto; right: 0; }
+html[dir="rtl"] .dropdown-link { flex-direction: row-reverse; text-align: right; }
+html[dir="rtl"] .ddi { margin-right: 0; margin-left: 10px; }
+html[dir="rtl"] .footer-grid { direction: rtl; }
+html[dir="rtl"] .mob-nav { direction: rtl; text-align: right; }
+html[dir="rtl"] .btn-group { flex-direction: row-reverse; }
+html[dir="rtl"] .stats-bar { flex-direction: row-reverse; }
+html[dir="rtl"] .grid-2, html[dir="rtl"] .grid-3, html[dir="rtl"] .grid-4 { direction: rtl; }
+html[dir="rtl"] .pills-wrap { flex-direction: row-reverse; flex-wrap: wrap; }
+html[dir="rtl"] .browser-bar { flex-direction: row-reverse; }
 .lang-ar { display: none; }
 html[dir="rtl"] .lang-en,
 #marketing-spa-root[dir="rtl"] .lang-en,

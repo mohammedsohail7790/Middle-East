@@ -577,6 +577,12 @@ html[dir="rtl"] .grid-2, html[dir="rtl"] .grid-3, html[dir="rtl"] .grid-4 { dire
 html[dir="rtl"] .pills-wrap { flex-direction: row-reverse; flex-wrap: wrap; }
 html[dir="rtl"] .browser-bar { flex-direction: row-reverse; }
 .lang-ar { display: none; }
-html[dir="rtl"] .lang-en { display: none; }
-html[dir="rtl"] .lang-ar { display: inline; }
-html[dir="rtl"] .lang-ar.lang-block { display: block; }
+html[dir="rtl"] .lang-en,
+#marketing-spa-root[dir="rtl"] .lang-en,
+[dir="rtl"] .lang-en { display: none; }
+html[dir="rtl"] .lang-ar,
+#marketing-spa-root[dir="rtl"] .lang-ar,
+[dir="rtl"] .lang-ar { display: inline; }
+html[dir="rtl"] .lang-ar.lang-block,
+#marketing-spa-root[dir="rtl"] .lang-ar.lang-block,
+[dir="rtl"] .lang-ar.lang-block { display: block; }

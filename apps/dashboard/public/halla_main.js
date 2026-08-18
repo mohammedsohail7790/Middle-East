@@ -6,23 +6,9 @@
 ================================================ */
 
 // ============ ROUTING ============
-// Pages that should navigate to real Next.js routes when inside the app
-var _NEXTJS_ROUTES = {
-  'signup': '/signup',
-  'login': '/login',
-  'pricing': '/pricing',
-  'contact': '/contact',
-  'dashboard': '/dashboard',
-};
-
 function go(page) {
-  // When __NEXT_DATA__ exists, we're inside the Next.js app — use real routes
-  if (typeof window !== 'undefined' && window.__NEXT_DATA__ && _NEXTJS_ROUTES[page]) {
-    window.location.href = _NEXTJS_ROUTES[page];
-    return;
-  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  var el = document.getElementById('page-' + page);
+  const el = document.getElementById('page-' + page);
   if (el) { el.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
   closeMob();
   closeAllDropdowns();

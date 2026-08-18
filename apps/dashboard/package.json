@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "dev": "next dev -p 3000",
+        "prebuild": "node ../../scripts/sync-halla-marketing.mjs",
         "scope:marketing": "node scripts/scope-marketing-css.mjs",
         "build": "next build",
         "typecheck": "tsc --noEmit",
