@@ -41,6 +41,8 @@ CREATE INDEX IF NOT EXISTS idx_phone_number_logs_tenant ON public.phone_number_l
 ALTER TABLE public.phone_number_logs ENABLE ROW LEVEL SECURITY;
 
 -- 3. LOOKUP FUNCTION
+DROP FUNCTION IF EXISTS public.get_tenant_by_phone_number(text);
+
 CREATE OR REPLACE FUNCTION get_tenant_by_phone_number(p_phone_number TEXT)
 RETURNS TABLE (
   tenant_id UUID,

@@ -1,39 +1,91 @@
-﻿{
+{
   "installCommand": "npm install",
   "buildCommand": "npm run build:dashboard",
   "outputDirectory": "apps/dashboard/.next",
-
   "redirects": [
-    { "source": "/roi-calculator", "destination": "/roi",       "permanent": true  },
-    { "source": "/home",           "destination": "/",          "permanent": true  },
-    { "source": "/sign-up",        "destination": "/signup",    "permanent": true  },
-    { "source": "/sign-in",        "destination": "/login",     "permanent": true  },
-    { "source": "/register",       "destination": "/signup",    "permanent": true  },
-    { "source": "/app",            "destination": "/dashboard", "permanent": false }
+    {
+      "source": "/roi-calculator",
+      "destination": "/roi",
+      "permanent": true
+    },
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/sign-up",
+      "destination": "/signup",
+      "permanent": true
+    },
+    {
+      "source": "/sign-in",
+      "destination": "/login",
+      "permanent": true
+    },
+    {
+      "source": "/register",
+      "destination": "/signup",
+      "permanent": true
+    },
+    {
+      "source": "/app",
+      "destination": "/dashboard",
+      "permanent": false
+    }
   ],
-
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options",  "value": "nosniff" },
-        { "key": "X-Frame-Options",         "value": "SAMEORIGIN" },
-        { "key": "X-XSS-Protection",        "value": "1; mode=block" },
-        { "key": "Referrer-Policy",         "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy",      "value": "camera=(), microphone=(), geolocation=()" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
       ]
     },
     {
       "source": "/hallaai_main.js",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/hallaai_styles.css",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/hallaai-marketing.css",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ]
 }

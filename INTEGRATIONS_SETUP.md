@@ -677,14 +677,14 @@ META_PAGE_ACCESS_TOKEN=EAAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```env
 # Option A — Resend
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-EMAIL_FROM=noreply@hallaai.com
+EMAIL_FROM=hello@hallaai.com
 
 # Option B — SMTP (SendGrid, Mailgun, etc.)
 SMTP_HOST=smtp.sendgrid.net
 SMTP_PORT=587
 SMTP_USER=apikey
 SMTP_PASS=SG.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-EMAIL_FROM=noreply@hallaai.com
+EMAIL_FROM=hello@hallaai.com
 ```
 
 ---

@@ -125,6 +125,10 @@ CREATE INDEX IF NOT EXISTS idx_automation_rules_enabled ON public.automation_rul
 
 ALTER TABLE public.automation_rules ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their tenant's automation rules" ON public.automation_rules;
+DROP POLICY IF EXISTS "Admins can manage automation rules" ON public.automation_rules;
+DROP TRIGGER IF EXISTS automation_rules_updated_at ON public.automation_rules;
+
 CREATE POLICY "Users can view their tenant's automation rules"
   ON public.automation_rules FOR SELECT
   USING (tenant_id IN (SELECT id FROM public.voice_tenants WHERE owner_user_id = auth.uid()));
@@ -223,8 +227,17 @@ ADD COLUMN IF NOT EXISTS timezone TEXT DEFAULT 'UTC';
 ALTER TABLE public.business_hours
 DROP CONSTRAINT IF EXISTS business_hours_tenant_id_day_of_week_key;
 
-ALTER TABLE public.business_hours
-ADD CONSTRAINT IF NOT EXISTS business_hours_tenant_day_unique UNIQUE (tenant_id, day_of_week);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'business_hours_tenant_day_unique'
+      AND conrelid = 'public.business_hours'::regclass
+  ) THEN
+    ALTER TABLE public.business_hours
+      ADD CONSTRAINT business_hours_tenant_day_unique UNIQUE (tenant_id, day_of_week);
+  END IF;
+END $$;
 
 -- =====================================================
 -- 11. TEAM MEMBERS — Ensure proper structure

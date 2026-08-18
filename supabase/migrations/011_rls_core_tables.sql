@@ -111,22 +111,37 @@ CREATE POLICY "Admins can manage sms conversations"
   ));
 
 -- =====================================================
--- 6. INTEGRATION_STATUS — RLS policies (if not already present)
+-- 6. INTEGRATION_STATUS — RLS policies (table only; skip if view)
 -- =====================================================
 
-ALTER TABLE public.integration_status ENABLE ROW LEVEL SECURITY;
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname = 'integration_status'
+      AND c.relkind = 'r'
+  ) THEN
+    ALTER TABLE public.integration_status ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view their tenant's integration status"
-  ON public.integration_status FOR SELECT
-  USING (tenant_id IN (SELECT id FROM public.voice_tenants WHERE owner_user_id = auth.uid()));
+    DROP POLICY IF EXISTS "Users can view their tenant's integration status" ON public.integration_status;
+    DROP POLICY IF EXISTS "Admins can manage integration status" ON public.integration_status;
 
-CREATE POLICY "Admins can manage integration status"
-  ON public.integration_status FOR ALL
-  USING (tenant_id IN (
-    SELECT tenant_id FROM public.team_members 
-    WHERE user_id = auth.uid() 
-    AND role IN ('owner', 'admin')
-  ));
+    CREATE POLICY "Users can view their tenant's integration status"
+      ON public.integration_status FOR SELECT
+      USING (tenant_id IN (SELECT id FROM public.voice_tenants WHERE owner_user_id = auth.uid()));
+
+    CREATE POLICY "Admins can manage integration status"
+      ON public.integration_status FOR ALL
+      USING (tenant_id IN (
+        SELECT tenant_id FROM public.team_members
+        WHERE user_id = auth.uid()
+        AND role IN ('owner', 'admin')
+      ));
+  END IF;
+END $$;
 
 -- =====================================================
 -- COMMENTS

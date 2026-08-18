@@ -11,11 +11,27 @@ BEGIN
       AND udt_name = '_text'
   ) THEN
     ALTER TABLE public.ai_agent_configs
+      ALTER COLUMN services_offered DROP DEFAULT,
+      ALTER COLUMN service_areas DROP DEFAULT,
+      ALTER COLUMN required_fields DROP DEFAULT,
+      ALTER COLUMN optional_fields DROP DEFAULT,
+      ALTER COLUMN do_instructions DROP DEFAULT,
+      ALTER COLUMN dont_instructions DROP DEFAULT;
+
+    ALTER TABLE public.ai_agent_configs
       ALTER COLUMN services_offered TYPE jsonb USING to_jsonb(services_offered),
       ALTER COLUMN service_areas TYPE jsonb USING to_jsonb(service_areas),
       ALTER COLUMN required_fields TYPE jsonb USING to_jsonb(required_fields),
       ALTER COLUMN optional_fields TYPE jsonb USING to_jsonb(optional_fields),
       ALTER COLUMN do_instructions TYPE jsonb USING to_jsonb(do_instructions),
       ALTER COLUMN dont_instructions TYPE jsonb USING to_jsonb(dont_instructions);
+
+    ALTER TABLE public.ai_agent_configs
+      ALTER COLUMN services_offered SET DEFAULT '[]'::jsonb,
+      ALTER COLUMN service_areas SET DEFAULT '[]'::jsonb,
+      ALTER COLUMN required_fields SET DEFAULT '["name","phone","service"]'::jsonb,
+      ALTER COLUMN optional_fields SET DEFAULT '["email","preferred_time","notes"]'::jsonb,
+      ALTER COLUMN do_instructions SET DEFAULT '[]'::jsonb,
+      ALTER COLUMN dont_instructions SET DEFAULT '[]'::jsonb;
   END IF;
 END $$;

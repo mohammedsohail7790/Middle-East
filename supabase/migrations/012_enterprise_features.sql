@@ -262,7 +262,7 @@ CREATE TABLE IF NOT EXISTS public.ai_agents (
   system_prompt TEXT NOT NULL,
   voice_id TEXT,
   tone TEXT DEFAULT 'professional',
-  services TEXT[] DEFAULT '[]'::TEXT[],
+  services TEXT[] DEFAULT '{}'::TEXT[],
   max_duration_seconds INTEGER DEFAULT 600,
   transfer_on_timeout BOOLEAN DEFAULT false,
   transfer_number TEXT,

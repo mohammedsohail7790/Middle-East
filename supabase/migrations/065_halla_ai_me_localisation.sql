@@ -39,6 +39,9 @@ ALTER TABLE public.voice_tenants
 -- ─── 2. subscriptions: AED currency ─────────────────────────────────────────
 
 ALTER TABLE public.subscriptions
+  ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'aed';
+
+ALTER TABLE public.subscriptions
   ALTER COLUMN currency SET DEFAULT 'aed';
 
 -- ─── 3. crm_deals: AED currency ─────────────────────────────────────────────

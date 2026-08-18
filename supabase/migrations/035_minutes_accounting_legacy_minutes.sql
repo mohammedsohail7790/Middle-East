@@ -1,34 +1,44 @@
 -- Production DBs may have legacy NOT NULL `minutes` (numeric) alongside billed_minutes.
 -- Gateway 016+ only wrote billed_minutes, causing: null value in column "minutes".
 
-ALTER TABLE public.minutes_accounting
-  ALTER COLUMN minutes DROP NOT NULL;
-
-UPDATE public.minutes_accounting
-SET minutes = COALESCE(billed_minutes, GREATEST(1, CEIL(duration_seconds::numeric / 60)), 1)
-WHERE minutes IS NULL;
-
-CREATE OR REPLACE FUNCTION public.minutes_accounting_sync_legacy_minutes()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
+DO $$
 BEGIN
-  IF TG_OP = 'INSERT' AND NEW.minutes IS NULL THEN
-    NEW.minutes := COALESCE(
-      NEW.billed_minutes,
-      CASE
-        WHEN NEW.duration_seconds IS NOT NULL AND NEW.duration_seconds > 0
-        THEN GREATEST(1, CEIL(NEW.duration_seconds::numeric / 60))
-        ELSE 1
-      END
-    );
-  END IF;
-  RETURN NEW;
-END;
-$$;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'minutes_accounting'
+      AND column_name = 'minutes'
+  ) THEN
+    ALTER TABLE public.minutes_accounting
+      ALTER COLUMN minutes DROP NOT NULL;
 
-DROP TRIGGER IF EXISTS trg_minutes_accounting_sync_legacy ON public.minutes_accounting;
-CREATE TRIGGER trg_minutes_accounting_sync_legacy
-  BEFORE INSERT ON public.minutes_accounting
-  FOR EACH ROW
-  EXECUTE FUNCTION public.minutes_accounting_sync_legacy_minutes();
+    UPDATE public.minutes_accounting
+    SET minutes = COALESCE(billed_minutes, GREATEST(1, CEIL(duration_seconds::numeric / 60)), 1)
+    WHERE minutes IS NULL;
+
+    CREATE OR REPLACE FUNCTION public.minutes_accounting_sync_legacy_minutes()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql
+    AS $fn$
+    BEGIN
+      IF TG_OP = 'INSERT' AND NEW.minutes IS NULL THEN
+        NEW.minutes := COALESCE(
+          NEW.billed_minutes,
+          CASE
+            WHEN NEW.duration_seconds IS NOT NULL AND NEW.duration_seconds > 0
+            THEN GREATEST(1, CEIL(NEW.duration_seconds::numeric / 60))
+            ELSE 1
+          END
+        );
+      END IF;
+      RETURN NEW;
+    END;
+    $fn$;
+
+    DROP TRIGGER IF EXISTS trg_minutes_accounting_sync_legacy ON public.minutes_accounting;
+    CREATE TRIGGER trg_minutes_accounting_sync_legacy
+      BEFORE INSERT ON public.minutes_accounting
+      FOR EACH ROW
+      EXECUTE FUNCTION public.minutes_accounting_sync_legacy_minutes();
+  END IF;
+END $$;
