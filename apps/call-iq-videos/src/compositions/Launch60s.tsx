@@ -7,7 +7,7 @@ import {
   useCurrentFrame,
 } from "remotion";
 import { brand, copy, features } from "../brand";
-import { CallIqLogo } from "../components/CallIqLogo";
+import { HallaAiLogo } from "../components/HallaAiLogo";
 import { CTAButton } from "../components/CTAButton";
 import { DashboardMockUI } from "../components/DashboardMockUI";
 import { FeaturePhoneScreen } from "../components/FeaturePhoneScreen";
@@ -123,7 +123,7 @@ const BrandScene = () => {
           gap: 8,
         }}
       >
-        <CallIqLogo size="lg" />
+        <HallaAiLogo size="lg" />
         <div
           style={{
             width: lineWidth,
@@ -401,7 +401,7 @@ const CTAScene = () => {
           opacity: fadeIn(frame),
         }}
       >
-        <CallIqLogo size="lg" showTagline />
+        <HallaAiLogo size="lg" showTagline />
         <div
           style={{
             fontFamily,

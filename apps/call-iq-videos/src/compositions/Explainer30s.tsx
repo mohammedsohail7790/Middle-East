@@ -3,7 +3,7 @@ import { fade } from "@remotion/transitions/fade";
 import { slide } from "@remotion/transitions/slide";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { brand, copy } from "../brand";
-import { CallIqLogo } from "../components/CallIqLogo";
+import { HallaAiLogo } from "../components/HallaAiLogo";
 import { CTAButton } from "../components/CTAButton";
 import { SceneBackground } from "../components/SceneBackground";
 import { BackgroundMusic } from "../lib/audio";
@@ -227,7 +227,7 @@ const OutroScene = () => (
         gap: 32,
       }}
     >
-      <CallIqLogo size="lg" />
+      <HallaAiLogo size="lg" />
       <div
         style={{
           fontFamily,

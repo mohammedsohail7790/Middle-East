@@ -2,7 +2,7 @@ import { TransitionSeries } from "@remotion/transitions";
 import { slide } from "@remotion/transitions/slide";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { brand, copy } from "../brand";
-import { CallIqLogo } from "../components/CallIqLogo";
+import { HallaAiLogo } from "../components/HallaAiLogo";
 import { CTAButton } from "../components/CTAButton";
 import { DashboardMockUI } from "../components/DashboardMockUI";
 import { PhoneMockup } from "../components/PhoneMockup";
@@ -54,7 +54,7 @@ const IntroScene = () => (
         gap: 24,
       }}
     >
-      <CallIqLogo size="lg" />
+      <HallaAiLogo size="lg" />
       <div
         style={{
           fontFamily,
@@ -109,7 +109,7 @@ const DownloadCTAScene = () => (
         padding: 48,
       }}
     >
-      <CallIqLogo size="md" />
+      <HallaAiLogo size="md" />
       <div
         style={{
           fontFamily,

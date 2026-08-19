@@ -28,7 +28,7 @@
 
 **Halla AI** is a production, multi-tenant SaaS platform that gives businesses across the GCC and Middle East an AI receptionist on their existing phone number. When a customer calls, the AI answers in a natural human voice — in Arabic or English — holds a real conversation, answers questions from the business's own knowledge base, captures the lead, books the appointment into the business's calendar, and sends confirmations — with a full transcript and summary landing in the dashboard seconds after hangup.
 
-**The problem it solves:** service businesses (HVAC, plumbing, electrical, legal, property management, salons, and dozens of other verticals) lose revenue every time a call rings out — after hours, during jobs, or at peak demand. Live answering services are expensive and inconsistent. Call IQ answers every call, every time, for a flat monthly subscription.
+**The problem it solves:** service businesses (HVAC, plumbing, electrical, legal, property management, salons, and dozens of other verticals) lose revenue every time a call rings out — after hours, during jobs, or at peak demand. Live answering services are expensive and inconsistent. Halla AI answers every call, every time, for a flat monthly subscription.
 
 **Who it's built for:**
 
@@ -36,7 +36,7 @@
 - **Multi-location operators and MSPs** managing many tenants from one platform
 - **Engineers** who want a reference implementation of a real-time voice AI SaaS at production depth
 
-**What makes it different:** most voice-AI demos glue together separate STT → LLM → TTS services with compounding latency. Call IQ bridges Twilio Media Streams directly to the **OpenAI Realtime API** over WebSockets — one bidirectional audio session with native speech understanding, reasoning, function calling, and speech synthesis. Combined with connection pre-warming, prompt prefetching, and server-side voice-activity tuning, the result is conversation that feels immediate rather than transactional. Around that core sits a complete SaaS: metered Stripe billing, 20+ CRM/calendar integrations, compliance tooling (consent capture, recording controls, HIPAA-oriented policies), team management, SSO/SCIM, and a full analytics dashboard.
+**What makes it different:** most voice-AI demos glue together separate STT → LLM → TTS services with compounding latency. Halla AI bridges Twilio Media Streams directly to the **OpenAI Realtime API** over WebSockets — one bidirectional audio session with native speech understanding, reasoning, function calling, and speech synthesis. Combined with connection pre-warming, prompt prefetching, and server-side voice-activity tuning, the result is conversation that feels immediate rather than transactional. Around that core sits a complete SaaS: metered Stripe billing, 20+ CRM/calendar integrations, compliance tooling (consent capture, recording controls, HIPAA-oriented policies), team management, SSO/SCIM, and a full analytics dashboard.
 
 ---
 
@@ -575,6 +575,6 @@ Built on the shoulders of: [OpenAI](https://platform.openai.com/) (Realtime API,
 
 <div align="center">
 
-**Call IQ** — never miss a call again.
+**Halla AI** — never miss a call again.
 
 </div>

@@ -1,6 +1,6 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { brand } from "../brand";
-import { CallIqLogo } from "../components/CallIqLogo";
+import { HallaAiLogo } from "../components/HallaAiLogo";
 import { fontFamily } from "../lib/fonts";
 import { SceneBackground } from "../components/SceneBackground";
 
@@ -24,7 +24,7 @@ export const OutroBumper: React.FC = () => {
           gap: 28,
         }}
       >
-        <CallIqLogo size="md" showTagline />
+        <HallaAiLogo size="md" showTagline />
         <div
           style={{
             fontFamily,

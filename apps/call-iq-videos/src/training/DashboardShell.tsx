@@ -113,7 +113,7 @@ export const DashboardShell: React.FC<DashboardShellProps> = ({
               color: brand.colors.white,
             }}
           >
-            Call IQ
+            Halla AI
           </span>
         </div>
 

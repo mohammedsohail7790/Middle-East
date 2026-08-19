@@ -4,7 +4,7 @@ import { wipe } from "@remotion/transitions/wipe";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { brand, benefits, copy } from "../brand";
 import { BenefitIcon } from "../components/BenefitIcon";
-import { CallIqLogo } from "../components/CallIqLogo";
+import { HallaAiLogo } from "../components/HallaAiLogo";
 import { CTAButton } from "../components/CTAButton";
 import { FeaturePhoneScreen } from "../components/FeaturePhoneScreen";
 import { PhoneMockup } from "../components/PhoneMockup";
@@ -75,7 +75,7 @@ const ProductScene = () => (
     >
       <PhoneMockup enterFrom="scale">
         <FeaturePhoneScreen
-          title="Call IQ"
+          title="Halla AI"
           icon="🤖"
           lines={[
             "AI answering live call...",
@@ -137,7 +137,7 @@ const LogoCTAScene = () => (
         gap: 36,
       }}
     >
-      <CallIqLogo size="lg" />
+      <HallaAiLogo size="lg" />
       <CTAButton label={copy.ctaShort} />
     </div>
   </AbsoluteFill>

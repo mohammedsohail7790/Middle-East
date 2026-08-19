@@ -56,7 +56,7 @@ export const copy = {
   reelHook: "Your AI receptionist is here",
   explainerProblem: "Small businesses lose 62% of calls after hours.",
   explainerSteps: [
-    "Call IQ answers instantly with natural AI voice",
+    "Halla AI answers instantly with natural AI voice",
     "Qualifies leads and books appointments",
     "Delivers insights to your dashboard",
   ],

@@ -1,6 +1,6 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { brand } from "../brand";
-import { CallIqLogo } from "../components/CallIqLogo";
+import { HallaAiLogo } from "../components/HallaAiLogo";
 import { fontFamily } from "../lib/fonts";
 import { PhoneDevice3D } from "../three/PhoneDevice3D";
 import { IntegrationOrbit3D } from "../three/IntegrationOrbit3D";
@@ -125,7 +125,7 @@ export const ProblemScene = () => {
   );
 };
 
-/* ── SCENE 2: INTRODUCING CALL IQ (0:12–0:22) ── */
+/* ── SCENE 2: INTRODUCING HALLA AI (0:12–0:22) ── */
 export const IntroScene = () => {
   const frame = useCurrentFrame();
   const logoScale = cScale(frame, t(8), t(22), 0.2, 1);
@@ -152,7 +152,7 @@ export const IntroScene = () => {
                 zIndex: 2,
               }}
             >
-              <CallIqLogo size="lg" animate={false} showTagline={false} />
+              <HallaAiLogo size="lg" animate={false} showTagline={false} />
             </div>
           </div>
           <div style={{ marginTop: 48, textAlign: "center" }}>
@@ -173,9 +173,9 @@ export const AIAnswersScene = () => {
   const frame = useCurrentFrame();
   const messages = [
     { who: "Customer", text: "Hi, I need to schedule a service appointment.", at: t(16) },
-    { who: "Call IQ AI", text: "I'd be happy to help. What service do you need?", at: t(36) },
+    { who: "Halla AI", text: "I'd be happy to help. What service do you need?", at: t(36) },
     { who: "Customer", text: "HVAC maintenance for my office.", at: t(56) },
-    { who: "Call IQ AI", text: "Perfect. I have availability tomorrow at 2 PM.", at: t(76) },
+    { who: "Halla AI", text: "Perfect. I have availability tomorrow at 2 PM.", at: t(76) },
   ];
 
   return (
@@ -624,7 +624,7 @@ export const IndustriesScene = () => {
               {active.name}
             </div>
             <div style={{ fontFamily, fontSize: 15, color: brand.colors.cyan, marginTop: 12, fontWeight: 600 }}>
-              Call IQ handles every call perfectly
+              Halla AI handles every call perfectly
             </div>
           </div>
 
@@ -738,7 +738,7 @@ export const FinaleScene = () => {
             <div style={{ position: "relative" }}>
               <LogoEnergyRing size={560} />
               <div style={{ position: "relative", zIndex: 2 }}>
-                <CallIqLogo size="lg" animate={false} showTagline={false} />
+                <HallaAiLogo size="lg" animate={false} showTagline={false} />
               </div>
             </div>
             <div style={{ marginTop: 48, textAlign: "center" }}>

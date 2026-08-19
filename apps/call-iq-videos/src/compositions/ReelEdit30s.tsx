@@ -8,7 +8,7 @@ import {
 } from "remotion";
 import { brand, copy } from "../brand";
 import { BoldSubtitle } from "../components/BoldSubtitle";
-import { CallIqLogo } from "../components/CallIqLogo";
+import { HallaAiLogo } from "../components/HallaAiLogo";
 import { FeaturePhoneScreen } from "../components/FeaturePhoneScreen";
 import { PhoneMockup } from "../components/PhoneMockup";
 import { SceneBackground } from "../components/SceneBackground";
@@ -53,7 +53,7 @@ const MockVideoClip: React.FC<{
         {showPhone ? (
           <PhoneMockup enterFrom="scale" delay={0}>
             <FeaturePhoneScreen
-              title="Call IQ"
+              title="Halla AI"
               icon={clipIndex % 2 === 0 ? "🤖" : "📊"}
               lines={[
                 "Live call in progress...",
@@ -63,7 +63,7 @@ const MockVideoClip: React.FC<{
             />
           </PhoneMockup>
         ) : (
-          <CallIqLogo size="lg" />
+          <HallaAiLogo size="lg" />
         )}
       </div>
       <BoldSubtitle text={clip.subtitle} size={38} position="bottom" />
@@ -137,7 +137,7 @@ const FinalClip = () => (
         gap: 28,
       }}
     >
-      <CallIqLogo size="lg" />
+      <HallaAiLogo size="lg" />
       <BoldSubtitle
         text={`Follow @calliq · ${brand.website}`}
         size={28}

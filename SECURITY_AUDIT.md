@@ -1,4 +1,4 @@
-# Call IQ Security Audit — May 2026
+# Halla AI Security Audit — May 2026
 
 Phases 1–3: discovery, remediation, and follow-up actions.
 

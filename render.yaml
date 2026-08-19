@@ -234,8 +234,9 @@ services:
       - key: DEFAULT_LANGUAGE
         value: ar-SA
 
-redis:
-  - name: halla-ai-redis
+  - type: redis
+    name: halla-ai-redis
     plan: starter
     region: oregon
     maxmemoryPolicy: noeviction
+    ipAllowList: []

@@ -56,7 +56,7 @@ export const DashboardMockUI: React.FC<DashboardMockUIProps> = ({ screen }) => {
           color: brand.colors.cyan,
         }}
       >
-        Call IQ
+        Halla AI
       </div>
       <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>
         {titles[screen]}

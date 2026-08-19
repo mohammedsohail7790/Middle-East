@@ -4,7 +4,7 @@ import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { brand, copy, features } from "../brand";
-import { CallIqLogo } from "../components/CallIqLogo";
+import { HallaAiLogo } from "../components/HallaAiLogo";
 import { CTAButton } from "../components/CTAButton";
 import { ProductMockScene } from "../components/ProductMockScene";
 import {
@@ -45,7 +45,7 @@ const HookScene = () => {
         }}
       >
         <GlassPanel frame={frame} style={{ textAlign: "center", maxWidth: 1040 }}>
-          <EnterpriseLabel frame={frame}>Call IQ Launch</EnterpriseLabel>
+          <EnterpriseLabel frame={frame}>Halla AI Launch</EnterpriseLabel>
           <EnterpriseHeadline frame={frame} size={68} align="center" maxWidth={920}>
             The AI receptionist built for enterprise teams
           </EnterpriseHeadline>
@@ -75,7 +75,7 @@ const BrandScene = () => {
           transform: `scale(${scaleIn(frame, 6, 32)})`,
         }}
       >
-        <CallIqLogo size="lg" animate={false} showTagline={false} />
+        <HallaAiLogo size="lg" animate={false} showTagline={false} />
         <div
           style={{
             fontFamily,
@@ -249,7 +249,7 @@ const CTAScene = () => {
         }}
       >
         <GlassPanel frame={frame} style={{ textAlign: "center", minWidth: 640 }}>
-          <CallIqLogo size="lg" animate={false} showTagline={false} />
+          <HallaAiLogo size="lg" animate={false} showTagline={false} />
           <EnterpriseHeadline frame={frame} size={36} align="center" delay={8}>
             Start your free trial today
           </EnterpriseHeadline>

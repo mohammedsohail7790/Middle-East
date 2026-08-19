@@ -7,7 +7,7 @@ import {
   useCurrentFrame,
 } from "remotion";
 import { brand, copy, features } from "../brand";
-import { CallIqLogo } from "../components/CallIqLogo";
+import { HallaAiLogo } from "../components/HallaAiLogo";
 import { CTAButton } from "../components/CTAButton";
 import { FeaturePhoneScreen } from "../components/FeaturePhoneScreen";
 import { PhoneMockup } from "../components/PhoneMockup";
@@ -83,7 +83,7 @@ const BrandScene = () => (
         justifyContent: "center",
       }}
     >
-      <CallIqLogo size="lg" />
+      <HallaAiLogo size="lg" />
     </div>
   </AbsoluteFill>
 );
@@ -139,7 +139,7 @@ const CTAScene = () => (
         gap: 40,
       }}
     >
-      <CallIqLogo size="md" showTagline />
+      <HallaAiLogo size="md" showTagline />
       <CTAButton label={copy.ctaShort} />
       <div
         style={{

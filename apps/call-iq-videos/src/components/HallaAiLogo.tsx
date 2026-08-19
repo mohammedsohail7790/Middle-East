@@ -2,7 +2,7 @@ import { Img, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { brand } from "../brand";
 import { fontFamily } from "../lib/fonts";
 
-type CallIqLogoProps = {
+type HallaAiLogoProps = {
   size?: "sm" | "md" | "lg";
   showTagline?: boolean;
   animate?: boolean;
@@ -14,7 +14,7 @@ const sizes = {
   lg: { width: 400, fontSize: 22 },
 };
 
-export const CallIqLogo: React.FC<CallIqLogoProps> = ({
+export const HallaAiLogo: React.FC<HallaAiLogoProps> = ({
   size = "md",
   showTagline = true,
   animate = true,

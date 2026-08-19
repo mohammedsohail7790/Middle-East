@@ -1,6 +1,6 @@
 import { interpolate, useCurrentFrame } from "remotion";
 import { brand } from "../../brand";
-import { CallIqLogo } from "../../components/CallIqLogo";
+import { HallaAiLogo } from "../../components/HallaAiLogo";
 import { fontFamily } from "../../lib/fonts";
 
 export const WelcomeScreen: React.FC = () => {
@@ -21,7 +21,7 @@ export const WelcomeScreen: React.FC = () => {
         fontFamily,
       }}
     >
-      <CallIqLogo size="lg" />
+      <HallaAiLogo size="lg" />
       <div
         style={{
           fontSize: 32,

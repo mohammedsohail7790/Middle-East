@@ -1,6 +1,6 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { brand } from "../brand";
-import { CallIqLogo } from "../components/CallIqLogo";
+import { HallaAiLogo } from "../components/HallaAiLogo";
 import { SceneBackground } from "../components/SceneBackground";
 
 export const IntroBumper: React.FC = () => {
@@ -24,7 +24,7 @@ export const IntroBumper: React.FC = () => {
           gap: 32,
         }}
       >
-        <CallIqLogo size="lg" />
+        <HallaAiLogo size="lg" />
         <div
           style={{
             width: lineWidth,
