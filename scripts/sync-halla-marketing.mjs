@@ -9,7 +9,9 @@
  *
  * Outputs:
  *   Marketing site/*
- *   apps/dashboard/public/index.html
+ *   apps/dashboard/public/marketing-body.html (NOT index.html — Next.js serves
+ *     public/index.html as a static file at "/", shadowing the real React
+ *     marketing page that reads this file and wires up auth navigation)
  *   apps/dashboard/public/halla_main.js
  *   apps/dashboard/public/halla_styles.css
  */
@@ -119,7 +121,7 @@ function syncOnce() {
   const absent = missing(Object.values(ROOT_FILES));
   if (absent.length > 0) {
     const dashboardOutputs = [
-      path.join(DASHBOARD_PUBLIC, "index.html"),
+      path.join(DASHBOARD_PUBLIC, "marketing-body.html"),
       path.join(DASHBOARD_PUBLIC, "halla_main.js"),
       path.join(DASHBOARD_PUBLIC, "halla_styles.css"),
     ];
@@ -149,7 +151,7 @@ function syncOnce() {
   writeFileAtomic(path.join(MARKETING_DIR, "halla_styles.css"), css);
   writeFileAtomic(path.join(MARKETING_DIR, "halla_main.js"), js);
 
-  writeFileAtomic(path.join(DASHBOARD_PUBLIC, "index.html"), indexHtml);
+  writeFileAtomic(path.join(DASHBOARD_PUBLIC, "marketing-body.html"), indexHtml);
   writeFileAtomic(path.join(DASHBOARD_PUBLIC, "halla_styles.css"), css);
   writeFileAtomic(path.join(DASHBOARD_PUBLIC, "halla_main.js"), js);
 

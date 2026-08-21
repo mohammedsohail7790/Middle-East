@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 
 function getMarketingBodyHtml(): string {
   try {
-    const filePath = join(process.cwd(), "public", "index.html");
+    const filePath = join(process.cwd(), "public", "marketing-body.html");
     const html = readFileSync(filePath, "utf8");
     // Extract content between <body> and </body>
     const bodyStart = html.indexOf("<body");
