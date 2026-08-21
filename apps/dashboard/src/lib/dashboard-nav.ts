@@ -41,6 +41,7 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
       { href: "/dashboard/leads", label: "Leads", labelKey: "nav.leads", subtitle: "Pipeline stages and conversion", subtitleKey: "nav.leadsSubtitle" },
       { href: "/dashboard/agent", label: "Voice Agents", labelKey: "nav.voiceAgents", subtitle: "Voice, tone, and routing rules", subtitleKey: "nav.voiceAgentsSubtitle" },
       { href: "/dashboard/calls", label: "Calls", labelKey: "nav.calls", subtitle: "Transcripts, outcomes, and call history", subtitleKey: "nav.callsSubtitle" },
+      { href: "/dashboard/outbound", label: "Outbound", labelKey: "nav.outbound", subtitle: "Click-to-call, campaigns, and reminders", subtitleKey: "nav.outboundSubtitle" },
       { href: "/dashboard/analytics", label: "Analytics", labelKey: "nav.analytics", subtitle: "Trends, funnels, and KPIs", subtitleKey: "nav.analyticsSubtitle" },
       { href: "/dashboard/quality", label: "Quality", labelKey: "nav.quality", subtitle: "Call scoring, sentiment, and lead quality", subtitleKey: "nav.qualitySubtitle" },
     ],

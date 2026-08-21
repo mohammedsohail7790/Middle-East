@@ -703,13 +703,26 @@ export class RealtimeGateway {
     const greetingWithDisclosure =
       [aiDisclosure, bundle.greeting].filter(Boolean).join(' ') || undefined;
 
+    // Outbound calls (campaigns, reminders, follow-ups, click-to-call) carry why we're
+    // calling and what to open with, set by outbound.service.ts before Twilio dials.
+    const outboundReason = String(
+      customParameters?.outboundReason || customParameters?.outboundreason || ''
+    ).trim();
+    const outboundContext = String(
+      customParameters?.outboundContext || customParameters?.outboundcontext || ''
+    ).trim();
+    const isOutbound = String(customParameters?.direction || '').toLowerCase() === 'outbound';
+    const instructions = isOutbound && outboundContext
+      ? `${bundle.instructions}\n\nThis is an outbound call you are placing (reason: ${outboundReason || 'follow-up'}). The recipient did not call you — open with why you're calling using this context: ${outboundContext}`
+      : bundle.instructions;
+
     const config: RealtimeSessionConfig = {
       tenantId: state.tenantId!,
       callSid,
       streamSid,
       language: effectiveLanguage,
       voice: bundle.voice,
-      instructions: bundle.instructions,
+      instructions,
       tools: buildToolsList(state.tenantConfig!, tenantPlan),
       temperature: 0.92,
       greeting: greetingWithDisclosure,

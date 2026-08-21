@@ -1,5 +1,6 @@
 import express from 'express';
 import { createCallsRouter, createVoiceRouter, createTenantsRouter } from '../services/voice/voice.controller.js';
+import { createCampaignsRouter } from '../services/voice/campaigns.controller.js';
 import { createDashboardRouter } from '../services/dashboard/dashboard.controller.js';
 import { createDashboardAssistantRouter } from '../services/dashboard-assistant/dashboard-assistant.controller.js';
 import { createKnowledgeRouter } from '../services/knowledge/knowledge.controller.js';
@@ -61,6 +62,7 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/integrations', createIntegrationsRouter());
     apiRouter.use('/leads', createLeadsRouter());
     apiRouter.use('/calls', createCallsRouter());
+    apiRouter.use('/campaigns', createCampaignsRouter());
     apiRouter.use('/appointments', createAppointmentsRouter());
     apiRouter.use('/dashboard', createDashboardRouter());
     apiRouter.use('/dashboard-assistant', createDashboardAssistantRouter());

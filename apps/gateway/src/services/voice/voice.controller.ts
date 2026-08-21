@@ -577,6 +577,65 @@ export function createVoiceRouter(): express.Router {
     router.get('/test-outbound-twiml', twilioWebhookGuard, testOutboundTwiml);
     router.post('/test-outbound-twiml', twilioWebhookGuard, testOutboundTwiml);
 
+    /** Twilio hits this once the callee picks up on a gateway-initiated outbound call
+     *  (campaigns, click-to-call, reminders, follow-ups). Connects the same AI media
+     *  stream pipeline used for inbound calls, primed with why we're calling. */
+    router.post('/outbound-answer', twilioWebhookGuard, async (req: any, res: any) => {
+        const callSid = String(req.body.CallSid || '');
+        try {
+            const { getOutboundCallContext } = await import('./outbound.service.js');
+            const ctx = callSid ? await getOutboundCallContext(callSid) : null;
+
+            if (!ctx) {
+                logger.error('OUTBOUND_ANSWER_MISSING_CONTEXT', { callSid });
+                return res.type('text/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say>We're unable to connect this call right now. Goodbye.</Say>
+  <Hangup/>
+</Response>`);
+            }
+
+            await ensureCallRecord(ctx.tenantId, callSid);
+            const { issueStreamAuthToken } = await import('./ws-stream-auth.js');
+            const streamToken = await issueStreamAuthToken(callSid, ctx.tenantId, ctx.agentId || undefined);
+
+            const streamUrl = getStreamUrl(req, ctx.tenantId, streamToken);
+            const streamStatusCallback = `${getGatewayPublicBase(req)}/api/v1/voice/stream-status`;
+            const agentParam = ctx.agentId ? `<Parameter name="agentId" value="${ctx.agentId}" />` : '';
+            const escapeAttr = (s: string) =>
+                s.replace(/[<>&"']/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c] ?? c));
+            const outboundContextParam = ctx.openingContext
+                ? `<Parameter name="outboundContext" value="${escapeAttr(ctx.openingContext.slice(0, 800))}" />`
+                : '';
+            const outboundReasonParam = `<Parameter name="outboundReason" value="${escapeAttr(ctx.reason)}" />`;
+
+            const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Connect>
+    <Stream url="${streamUrl}" statusCallback="${streamStatusCallback}" statusCallbackMethod="POST">
+      <Parameter name="from" value="${ctx.fromNumber}" />
+      <Parameter name="to" value="${ctx.toNumber}" />
+      <Parameter name="streamToken" value="${streamToken}" />
+      <Parameter name="direction" value="outbound" />
+      ${agentParam}
+      ${outboundReasonParam}
+      ${outboundContextParam}
+    </Stream>
+  </Connect>
+</Response>`;
+
+            logger.info('OUTBOUND_ANSWER_TWIML_GENERATED', { tenantId: ctx.tenantId, callSid });
+            return res.type('text/xml').send(twiml);
+        } catch (error) {
+            logger.error('OUTBOUND_ANSWER_ERROR', { callSid, error: String(error) });
+            return res.type('text/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say>We're experiencing technical difficulties. Goodbye.</Say>
+  <Hangup/>
+</Response>`);
+        }
+    });
+
     router.post('/incoming-call', twilioWebhookGuard, async (req: any, res: any) => {
         // Dedup: Twilio sometimes retries the webhook with a new CallSid if the Stream fails
         if (!dedupCallSid(req.body.CallSid)) {
@@ -1010,6 +1069,43 @@ export function createCallsRouter(): express.Router {
     };
     router.use(requireVoiceApiAccess);
     router.use(voiceRateLimit);
+
+    /** Click-to-call / single outbound dial (reminders, follow-ups, ad-hoc agent-triggered calls). */
+    router.post('/outbound', async (req: any, res: any) => {
+        try {
+            const tenantId = getTenantScope(req);
+            const toNumber = String(req.body?.toNumber || '').trim();
+            const reason = String(req.body?.reason || 'click_to_call').trim();
+            const openingContext = typeof req.body?.openingContext === 'string' ? req.body.openingContext.trim() : undefined;
+
+            if (!toNumber) {
+                return res.status(400).json({ success: false, error: 'toNumber is required' });
+            }
+
+            const tenantRow = await voiceDb.query(
+                `select phone_number, ai_agent_id from public.voice_tenants where id = $1`,
+                [tenantId]
+            );
+            const fromNumber = tenantRow.rows[0]?.phone_number;
+            if (!fromNumber) {
+                return res.status(400).json({ success: false, error: 'Tenant has no phone number configured' });
+            }
+
+            const { initiateOutboundCall } = await import('./outbound.service.js');
+            const { callSid } = await initiateOutboundCall({
+                tenantId,
+                toNumber,
+                fromNumber,
+                agentId: tenantRow.rows[0]?.ai_agent_id || null,
+                reason,
+                openingContext,
+            });
+
+            return res.json({ success: true, callSid });
+        } catch (error) {
+            res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to place outbound call') });
+        }
+    });
 
     router.get('/', async (req, res) => {
         try {

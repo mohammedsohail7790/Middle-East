@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Phone, Users, Bot, BarChart3,
   BookOpen, Lock, Hash, LogOut, Shield,
   PanelLeftClose, PanelLeft, X, LifeBuoy, type LucideIcon,
-  Star,
+  Star, PhoneOutgoing,
 } from "lucide-react";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ import { getLastBootstrap } from "@/lib/dashboard-bootstrap";
 const NAV_ICONS: Record<string, LucideIcon> = {
   "/dashboard": LayoutDashboard,
   "/dashboard/calls": Phone,
+  "/dashboard/outbound": PhoneOutgoing,
   "/dashboard/leads": Users,
   "/dashboard/agent": Bot,
   "/dashboard/analytics": BarChart3,

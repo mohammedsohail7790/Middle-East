@@ -21,6 +21,8 @@
     "qualitySubtitle": "Call scoring, sentiment, and lead quality",
     "calls": "Calls",
     "callsSubtitle": "Transcripts, outcomes, and call history",
+    "outbound": "Outbound",
+    "outboundSubtitle": "Click-to-call, campaigns, and reminders",
     "sms": "SMS",
     "smsSubtitle": "Text conversations and templates",
     "whatsapp": "WhatsApp",
