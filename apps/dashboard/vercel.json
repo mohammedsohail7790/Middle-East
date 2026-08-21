@@ -5,14 +5,6 @@
   "buildCommand": "cd ../.. && npm run build:dashboard",
   "outputDirectory": ".next",
   "regions": ["iad1"],
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "hallaai.com" }],
-      "destination": "https://www.hallaai.com/:path*",
-      "permanent": true
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
