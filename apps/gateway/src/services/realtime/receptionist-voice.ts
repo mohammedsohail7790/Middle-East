@@ -81,11 +81,9 @@ export function mapVoiceForOpenAiTts(voice: string | undefined): string {
 
 const LANGUAGE_NAMES: Record<string, string> = {
   en: 'English',
-  es: 'Spanish',
-  fr: 'French',
-  ru: 'Russian',
-  zh: 'Mandarin',
+  ar: 'Arabic',
   hi: 'Hindi',
+  ru: 'Russian',
 };
 
 /** Shared delivery rules — language-agnostic */
@@ -142,6 +140,19 @@ export function buildHumanRealtimePreamble(language?: string): string {
     return HUMAN_REALTIME_PREAMBLE_EN;
   }
 
+  if (code === 'ar') {
+    return `You are a real human receptionist on a live phone call — not a phone tree, not a narrator, not an AI.
+
+Language and dialect (required — highest priority):
+- Speak ONLY in Saudi Arabic (اللهجة السعودية) — everyday colloquial Gulf/Saudi speech, the way a real front-desk receptionist in Riyadh or Jeddah talks. NOT Modern Standard Arabic (الفصحى), NOT a formal news-anchor register, NOT Egyptian/Levantine dialect.
+- Use natural Saudi phrasing and filler words (يا هلا، حياك الله، تمام، إن شاء الله، أبشر، ثانية وحدة) where a real Saudi receptionist would.
+- Do NOT use English accent or English phrases unless the caller uses English first.
+
+${HUMAN_DELIVERY_RULES}
+
+${buildHumanSpeechAppendix()}`;
+  }
+
   const langName = getLanguageDisplayName(code);
   return `You are a real human receptionist on a live phone call — not a phone tree, not a narrator, not an AI.
 
@@ -160,6 +171,9 @@ export function buildGreetingDeliveryHint(language?: string): string {
   if (code === 'en') {
     return 'You literally just picked up a ringing phone — relaxed, warm, normal speaking speed, slight smile in your voice. Not announcer-voice, not customer-service script.';
   }
+  if (code === 'ar') {
+    return 'You just picked up the phone — speak in everyday Saudi colloquial Arabic only (not formal MSA), warm and natural, normal pace (not announcer or robot).';
+  }
   return `You just picked up the phone — speak in ${getLanguageDisplayName(code)} only, warm and natural, normal pace (not announcer or robot).`;
 }
 
@@ -177,10 +191,8 @@ Then stop talking and listen for the caller. Do not add "how can I help you" if 
 /** Natural spoken preview lines per language (for TTS test — must be in target language) */
 const PREVIEW_GREETING_BY_LANG: Record<string, (agentName: string) => string> = {
   en: (agent) => `Thanks for calling. This is ${agent}. How can I help you?`,
-  es: (agent) => `Gracias por llamar. Habla ${agent}. ¿En qué puedo ayudarle?`,
-  fr: (agent) => `Merci d'avoir appelé. Ici ${agent}. Comment puis-je vous aider ?`,
+  ar: (agent) => `هلا والله، ${agent} تتكلم. كيف أقدر أخدمك؟`,
   ru: (agent) => `Спасибо за звонок. Вас приветствует ${agent}. Чем могу помочь?`,
-  zh: (agent) => `您好，感谢来电。我是${agent}。请问有什么可以帮您？`,
   hi: (agent) => `धन्यवाद, कॉल करने के लिए। मैं ${agent} बोल रहा हूँ। मैं आपकी कैसे मदद कर सकता हूँ?`,
 };
 
@@ -196,6 +208,10 @@ export function buildReceptionistRoleBlock(options: {
 
   if (code === 'en') {
     return `You are ${agentName}, the receptionist at ${businessName} (New York area). ${personalityDesc}. You are a real person on the phone — not a bot. Speak natural New York English: direct, warm, conversational — never monotone or corporate. Use contractions and brief replies. One question at a time. Say "how can I help you" (never "what can I help you with"). Avoid menu-style lists and jargon.`;
+  }
+
+  if (code === 'ar') {
+    return `You are ${agentName}, the receptionist at ${businessName}. ${personalityDesc}. You are a real person on the phone — not a bot. Speak ONLY in everyday Saudi colloquial Arabic (اللهجة السعودية) — never Modern Standard Arabic, never a formal register. Native, warm, conversational Saudi phone manner. Never monotone or corporate. One question at a time. Avoid menu-style lists and jargon. Never switch to English unless the caller does first.`;
   }
 
   const langName = getLanguageDisplayName(code);
