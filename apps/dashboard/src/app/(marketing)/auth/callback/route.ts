@@ -118,5 +118,13 @@ export async function GET(request: Request) {
     destination = "/dashboard";
   }
 
+  // "/dashboard" and "/onboarding" only exist as [locale]-prefixed App Router
+  // pages — there's no middleware that rewrites bare paths to the default
+  // locale, so a bare redirect here 404s. Prefix with the default locale
+  // (no reliable server-side signal for a saved language preference).
+  if (destination.startsWith("/dashboard") || destination.startsWith("/onboarding")) {
+    destination = `/en${destination}`;
+  }
+
   return NextResponse.redirect(`${origin}${destination}`);
 }

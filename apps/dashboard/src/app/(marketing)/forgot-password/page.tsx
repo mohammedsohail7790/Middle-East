@@ -7,6 +7,7 @@ import { Mail } from "lucide-react";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { supabase } from "@/lib/supabase";
 import { getSiteUrl } from "@/lib/site-url";
+import { navigateAfterSignIn } from "@/lib/auth-navigate";
 import {
   AuthCard,
   AuthError,
@@ -64,7 +65,7 @@ export default function ForgotPasswordPage() {
       return;
     }
     setUpdated(true);
-    window.setTimeout(() => router.replace("/dashboard"), 1200);
+    window.setTimeout(() => navigateAfterSignIn(router, "/dashboard"), 1200);
   }
 
   if (recovery) {

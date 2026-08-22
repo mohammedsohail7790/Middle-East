@@ -15,6 +15,7 @@ import {
   type PhoneProvisioningStatus,
 } from "@/lib/phone-setup";
 import { setTenantId, setPlan } from "@/lib/store";
+import { navigateAfterSignIn, localizedDashboardPath } from "@/lib/auth-navigate";
 import { cn } from "@/lib/utils";
 import { OnboardingPersonalityVoice } from "@/components/onboarding/OnboardingPersonalityVoice";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
@@ -119,7 +120,7 @@ export default function OnboardingPage() {
         }
         if (cancelled) return;
         if (entry.redirectToDashboard) {
-          router.replace("/dashboard");
+          navigateAfterSignIn(router, "/dashboard");
           return;
         }
         if (entry.tenantId) {
@@ -373,7 +374,7 @@ export default function OnboardingPage() {
       } catch {
         /* non-fatal */
       }
-      router.push("/dashboard");
+      navigateAfterSignIn(router, "/dashboard");
     } finally {
       setLoading(false);
     }
@@ -693,7 +694,7 @@ export default function OnboardingPage() {
 
                 <p className="text-xs text-foreground-secondary text-center">
                   Need more control?{" "}
-                  <button type="button" className="text-accent font-semibold underline" onClick={() => router.push("/dashboard/phone-numbers?from=onboarding")}>
+                  <button type="button" className="text-accent font-semibold underline" onClick={() => router.push(localizedDashboardPath("/dashboard/phone-numbers?from=onboarding"))}>
                     Open Phone Numbers
                   </button>
                 </p>
