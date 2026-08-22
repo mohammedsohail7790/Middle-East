@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
-import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google";
+import { Inter, IBM_Plex_Sans_Arabic, Noto_Sans_Devanagari } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Providers } from "@/components/providers";
 import "../globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-sans" });
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-arabic",
+});
+const notoSansDevanagari = Noto_Sans_Devanagari({
+  subsets: ["devanagari"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-devanagari",
 });
 
 export const metadata: Metadata = {
@@ -51,7 +56,7 @@ export default async function LocaleLayout({
         <script>{themeInitScript}</script>
       </head>
       <body
-        className={`${inter.variable} ${ibmPlexSansArabic.variable} ${locale === "ar" ? "font-arabic" : "font-sans"} min-h-screen`}
+        className={`${inter.variable} ${ibmPlexSansArabic.variable} ${notoSansDevanagari.variable} ${locale === "ar" ? "font-arabic" : "font-sans"} min-h-screen`}
         suppressHydrationWarning
       >
         <NextIntlClientProvider>

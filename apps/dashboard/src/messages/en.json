@@ -64,6 +64,8 @@
     "couldNotLoad": "Could not load data",
     "language": "Language",
     "english": "English",
-    "arabic": "العربية"
+    "arabic": "العربية",
+    "hindi": "हिन्दी",
+    "russian": "Русский"
   }
 }

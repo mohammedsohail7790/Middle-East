@@ -64,6 +64,8 @@
     "couldNotLoad": "تعذر تحميل البيانات",
     "language": "اللغة",
     "english": "English",
-    "arabic": "العربية"
+    "arabic": "العربية",
+    "hindi": "हिन्दी",
+    "russian": "Русский"
   }
 }
