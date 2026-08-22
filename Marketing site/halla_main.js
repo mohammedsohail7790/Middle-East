@@ -203,7 +203,7 @@ function loadInd(key) {
 
 // ============ LANGUAGE TOGGLE ============
 function setLang(lang) {
-  const supported = ['en', 'ar', 'hi', 'ru'];
+  const supported = ['en', 'ar'];
   const safeLang = supported.includes(lang) ? lang : 'en';
   const dir = safeLang === 'ar' ? 'rtl' : 'ltr';
   const html = document.documentElement;

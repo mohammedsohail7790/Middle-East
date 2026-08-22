@@ -32,37 +32,25 @@ const ROOT_FILES = {
 };
 
 const LANG_CSS_BLOCK = `
-.lang-en, .lang-ar, .lang-hi, .lang-ru { display: none; }
+.lang-en, .lang-ar { display: none; }
 html[lang="en"] .lang-en,
 #marketing-spa-root[lang="en"] .lang-en,
 [lang="en"] .lang-en { display: inline; }
 html[lang="ar"] .lang-ar,
 #marketing-spa-root[lang="ar"] .lang-ar,
 [lang="ar"] .lang-ar { display: inline; }
-html[lang="hi"] .lang-hi,
-#marketing-spa-root[lang="hi"] .lang-hi,
-[lang="hi"] .lang-hi { display: inline; }
-html[lang="ru"] .lang-ru,
-#marketing-spa-root[lang="ru"] .lang-ru,
-[lang="ru"] .lang-ru { display: inline; }
 html[lang="en"] .lang-en.lang-block,
 #marketing-spa-root[lang="en"] .lang-en.lang-block,
 [lang="en"] .lang-en.lang-block { display: block; }
 html[lang="ar"] .lang-ar.lang-block,
 #marketing-spa-root[lang="ar"] .lang-ar.lang-block,
-[lang="ar"] .lang-ar.lang-block { display: block; }
-html[lang="hi"] .lang-hi.lang-block,
-#marketing-spa-root[lang="hi"] .lang-hi.lang-block,
-[lang="hi"] .lang-hi.lang-block { display: block; }
-html[lang="ru"] .lang-ru.lang-block,
-#marketing-spa-root[lang="ru"] .lang-ru.lang-block,
-[lang="ru"] .lang-ru.lang-block { display: block; }`;
+[lang="ar"] .lang-ar.lang-block { display: block; }`;
 
 const LANG_CSS_PATTERN =
-  /(?:\.lang-en,\s*\.lang-ar,\s*\.lang-hi,\s*\.lang-ru\s*\{\s*display:\s*none;\s*\}[\s\S]*?(?:html\[lang="ru"\]\s*\.lang-ru\.lang-block|#marketing-spa-root\[lang="ru"\]\s*\.lang-ru\.lang-block)[^{]*\{\s*display:\s*block;\s*\})/;
+  /(?:\.lang-en,\s*\.lang-ar\s*\{\s*display:\s*none;\s*\}[\s\S]*?(?:html\[lang="ar"\]\s*\.lang-ar\.lang-block|#marketing-spa-root\[lang="ar"\]\s*\.lang-ar\.lang-block)[^{]*\{\s*display:\s*block;\s*\})/;
 
 const SETLANG_REPLACEMENT = `function setLang(lang) {
-  const supported = ['en', 'ar', 'hi', 'ru'];
+  const supported = ['en', 'ar'];
   const safeLang = supported.includes(lang) ? lang : 'en';
   const dir = safeLang === 'ar' ? 'rtl' : 'ltr';
   const html = document.documentElement;
