@@ -118,11 +118,13 @@ export async function GET(request: Request) {
     destination = "/dashboard";
   }
 
-  // "/dashboard" and "/onboarding" only exist as [locale]-prefixed App Router
-  // pages — there's no middleware that rewrites bare paths to the default
-  // locale, so a bare redirect here 404s. Prefix with the default locale
-  // (no reliable server-side signal for a saved language preference).
-  if (destination.startsWith("/dashboard") || destination.startsWith("/onboarding")) {
+  // "/dashboard" only exists as a [locale]-prefixed App Router page —
+  // there's no middleware that rewrites bare paths to the default locale,
+  // so a bare redirect here 404s. Prefix with the default locale (no
+  // reliable server-side signal for a saved language preference).
+  // "/onboarding" lives at app/(marketing)/onboarding (no locale segment)
+  // and must NOT be prefixed, or it 404s the same way.
+  if (destination.startsWith("/dashboard")) {
     destination = `/en${destination}`;
   }
 

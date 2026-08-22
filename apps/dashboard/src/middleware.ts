@@ -7,8 +7,23 @@ import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase-env";
 // via the matcher; these prefixes cover any public routes nested under /api.
 const PUBLIC_API_PREFIXES = ["/api/auth/callback"];
 
+// "/dashboard" only exists as a [locale]-prefixed App Router page
+// (e.g. /en/dashboard) — "/onboarding" is not locale-prefixed — so the
+// auth check must strip a locale segment before matching, otherwise it
+// never fires for the real dashboard routes.
+const LOCALES = ["en", "ar"];
+
+function stripLocale(path: string): string {
+  const [, first, ...rest] = path.split("/");
+  if (LOCALES.includes(first)) {
+    return `/${rest.join("/")}`;
+  }
+  return path;
+}
+
 function isProtectedPath(path: string): boolean {
-  if (path.startsWith("/dashboard") || path.startsWith("/onboarding")) {
+  const unprefixed = stripLocale(path);
+  if (unprefixed.startsWith("/dashboard") || unprefixed.startsWith("/onboarding")) {
     return true;
   }
   if (path.startsWith("/api/")) {
@@ -63,5 +78,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding", "/api/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/onboarding",
+    "/(en|ar)/dashboard/:path*",
+    "/api/:path*",
+  ],
 };

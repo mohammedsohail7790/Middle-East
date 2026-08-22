@@ -1,10 +1,11 @@
 type AuthRouter = { replace: (href: string) => void };
 
 /**
- * "/dashboard" and "/onboarding" only exist as [locale]-prefixed App Router
- * pages (app/[locale]/dashboard, app/[locale]/onboarding) — there's no
- * middleware that rewrites bare paths to the default locale, so navigating
- * to a bare path 404s. Always prefix with the active locale.
+ * "/dashboard" only exists as a [locale]-prefixed App Router page
+ * (app/[locale]/dashboard) — there's no middleware that rewrites bare paths
+ * to the default locale, so navigating to a bare path 404s. Always prefix
+ * it with the active locale. "/onboarding" lives at app/(marketing)/onboarding
+ * (no locale segment) and must NOT be prefixed, or it 404s the same way.
  */
 function activeLocale(): string {
   try {
@@ -15,10 +16,10 @@ function activeLocale(): string {
 }
 
 function withLocale(path: "/dashboard" | "/onboarding"): string {
-  return `/${activeLocale()}${path}`;
+  return path === "/dashboard" ? `/${activeLocale()}${path}` : path;
 }
 
-/** Prefix any dashboard sub-path (e.g. "/dashboard/phone-numbers?from=onboarding")
+/** Prefix a dashboard sub-path (e.g. "/dashboard/phone-numbers?from=onboarding")
  *  with the active locale — same 404 concern as withLocale() above. */
 export function localizedDashboardPath(pathWithQuery: string): string {
   return `/${activeLocale()}${pathWithQuery}`;
