@@ -32,39 +32,54 @@ const ROOT_FILES = {
 };
 
 const LANG_CSS_BLOCK = `
-.lang-ar { display: none; }
-html[dir="rtl"] .lang-en,
-#marketing-spa-root[dir="rtl"] .lang-en,
-[dir="rtl"] .lang-en { display: none; }
-html[dir="rtl"] .lang-ar,
-#marketing-spa-root[dir="rtl"] .lang-ar,
-[dir="rtl"] .lang-ar { display: inline; }
-html[dir="rtl"] .lang-ar.lang-block,
-#marketing-spa-root[dir="rtl"] .lang-ar.lang-block,
-[dir="rtl"] .lang-ar.lang-block { display: block; }`;
+.lang-en, .lang-ar, .lang-hi, .lang-ru { display: none; }
+html[lang="en"] .lang-en,
+#marketing-spa-root[lang="en"] .lang-en,
+[lang="en"] .lang-en { display: inline; }
+html[lang="ar"] .lang-ar,
+#marketing-spa-root[lang="ar"] .lang-ar,
+[lang="ar"] .lang-ar { display: inline; }
+html[lang="hi"] .lang-hi,
+#marketing-spa-root[lang="hi"] .lang-hi,
+[lang="hi"] .lang-hi { display: inline; }
+html[lang="ru"] .lang-ru,
+#marketing-spa-root[lang="ru"] .lang-ru,
+[lang="ru"] .lang-ru { display: inline; }
+html[lang="en"] .lang-en.lang-block,
+#marketing-spa-root[lang="en"] .lang-en.lang-block,
+[lang="en"] .lang-en.lang-block { display: block; }
+html[lang="ar"] .lang-ar.lang-block,
+#marketing-spa-root[lang="ar"] .lang-ar.lang-block,
+[lang="ar"] .lang-ar.lang-block { display: block; }
+html[lang="hi"] .lang-hi.lang-block,
+#marketing-spa-root[lang="hi"] .lang-hi.lang-block,
+[lang="hi"] .lang-hi.lang-block { display: block; }
+html[lang="ru"] .lang-ru.lang-block,
+#marketing-spa-root[lang="ru"] .lang-ru.lang-block,
+[lang="ru"] .lang-ru.lang-block { display: block; }`;
 
 const LANG_CSS_PATTERN =
-  /(?:\.lang-ar\s*\{\s*display:\s*none;\s*\}[\s\S]*?(?:html\[dir="rtl"\]\s*\.lang-ar\.lang-block|#marketing-spa-root\[dir="rtl"\]\s*\.lang-ar\.lang-block)[^{]*\{\s*display:\s*block;\s*\})/;
+  /(?:\.lang-en,\s*\.lang-ar,\s*\.lang-hi,\s*\.lang-ru\s*\{\s*display:\s*none;\s*\}[\s\S]*?(?:html\[lang="ru"\]\s*\.lang-ru\.lang-block|#marketing-spa-root\[lang="ru"\]\s*\.lang-ru\.lang-block)[^{]*\{\s*display:\s*block;\s*\})/;
 
 const SETLANG_REPLACEMENT = `function setLang(lang) {
-  const isAr = lang === 'ar';
-  const dir = isAr ? 'rtl' : 'ltr';
-  const htmlLang = isAr ? 'ar' : 'en';
+  const supported = ['en', 'ar', 'hi', 'ru'];
+  const safeLang = supported.includes(lang) ? lang : 'en';
+  const dir = safeLang === 'ar' ? 'rtl' : 'ltr';
   const html = document.documentElement;
   html.setAttribute('dir', dir);
-  html.setAttribute('lang', htmlLang);
+  html.setAttribute('lang', safeLang);
   const root = document.getElementById('marketing-spa-root');
   if (root) {
     root.setAttribute('dir', dir);
-    root.setAttribute('lang', htmlLang);
+    root.setAttribute('lang', safeLang);
   }
   document.querySelectorAll('.lang-toggle button').forEach(b => {
-    b.classList.toggle('active', b.dataset.lang === lang);
+    b.classList.toggle('active', b.dataset.lang === safeLang);
   });
-  try { localStorage.setItem('halla_lang', lang); } catch (e) {}
+  try { localStorage.setItem('halla_lang', safeLang); } catch (e) {}
 }`;
 
-const SETLANG_PATTERN = /function setLang\(lang\)\s*\{[\s\S]*?try\s*\{\s*localStorage\.setItem\('halla_lang', lang\);\s*\}\s*catch\s*\([^)]*\)\s*\{\s*\}\s*\}/;
+const SETLANG_PATTERN = /function setLang\(lang\)\s*\{[\s\S]*?try\s*\{\s*localStorage\.setItem\('halla_lang', safeLang\);\s*\}\s*catch\s*\([^)]*\)\s*\{\s*\}\s*\}/;
 
 function missing(paths) {
   return paths.filter((p) => !fs.existsSync(p));

@@ -203,21 +203,21 @@ function loadInd(key) {
 
 // ============ LANGUAGE TOGGLE ============
 function setLang(lang) {
-  const isAr = lang === 'ar';
-  const dir = isAr ? 'rtl' : 'ltr';
-  const htmlLang = isAr ? 'ar' : 'en';
+  const supported = ['en', 'ar', 'hi', 'ru'];
+  const safeLang = supported.includes(lang) ? lang : 'en';
+  const dir = safeLang === 'ar' ? 'rtl' : 'ltr';
   const html = document.documentElement;
   html.setAttribute('dir', dir);
-  html.setAttribute('lang', htmlLang);
+  html.setAttribute('lang', safeLang);
   const root = document.getElementById('marketing-spa-root');
   if (root) {
     root.setAttribute('dir', dir);
-    root.setAttribute('lang', htmlLang);
+    root.setAttribute('lang', safeLang);
   }
   document.querySelectorAll('.lang-toggle button').forEach(b => {
-    b.classList.toggle('active', b.dataset.lang === lang);
+    b.classList.toggle('active', b.dataset.lang === safeLang);
   });
-  try { localStorage.setItem('halla_lang', lang); } catch (e) {}
+  try { localStorage.setItem('halla_lang', safeLang); } catch (e) {}
 }
 
 // ============ INIT ============

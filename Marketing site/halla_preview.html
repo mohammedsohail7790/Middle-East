@@ -588,10 +588,15 @@ html[dir="rtl"] .stats-bar, [dir="rtl"] .stats-bar { flex-direction: row-reverse
 html[dir="rtl"] .grid-2, html[dir="rtl"] .grid-3, html[dir="rtl"] .grid-4, [dir="rtl"] .grid-2, [dir="rtl"] .grid-3, [dir="rtl"] .grid-4 { direction: rtl; }
 html[dir="rtl"] .pills-wrap, [dir="rtl"] .pills-wrap { flex-direction: row-reverse; flex-wrap: wrap; }
 html[dir="rtl"] .browser-bar, [dir="rtl"] .browser-bar { flex-direction: row-reverse; }
-.lang-ar { display: none; }
-html[dir="rtl"] .lang-en, [dir="rtl"] .lang-en { display: none; }
-html[dir="rtl"] .lang-ar, [dir="rtl"] .lang-ar { display: inline; }
-html[dir="rtl"] .lang-ar.lang-block, [dir="rtl"] .lang-ar.lang-block { display: block; }
+.lang-en, .lang-ar, .lang-hi, .lang-ru { display: none; }
+html[lang="en"] .lang-en, [lang="en"] .lang-en { display: inline; }
+html[lang="ar"] .lang-ar, [lang="ar"] .lang-ar { display: inline; }
+html[lang="hi"] .lang-hi, [lang="hi"] .lang-hi { display: inline; }
+html[lang="ru"] .lang-ru, [lang="ru"] .lang-ru { display: inline; }
+html[lang="en"] .lang-en.lang-block, [lang="en"] .lang-en.lang-block { display: block; }
+html[lang="ar"] .lang-ar.lang-block, [lang="ar"] .lang-ar.lang-block { display: block; }
+html[lang="hi"] .lang-hi.lang-block, [lang="hi"] .lang-hi.lang-block { display: block; }
+html[lang="ru"] .lang-ru.lang-block, [lang="ru"] .lang-ru.lang-block { display: block; }
 </style>
 </head>
 <body>
@@ -669,6 +674,8 @@ html[dir="rtl"] .lang-ar.lang-block, [dir="rtl"] .lang-ar.lang-block { display: 
         <div class="lang-toggle">
           <button data-lang="en" onclick="setLang('en')" class="active">EN</button>
           <button data-lang="ar" onclick="setLang('ar')">عربي</button>
+          <button data-lang="hi" onclick="setLang('hi')">हिं</button>
+          <button data-lang="ru" onclick="setLang('ru')">RU</button>
         </div>
         <a class="btn btn-outline btn-sm" href="javascript:void(0)" onclick="go('pricing')">Sign In</a>
         <a class="btn btn-primary btn-sm" href="javascript:void(0)" onclick="go('signup')">Get My AI Receptionist →</a>
@@ -11009,18 +11016,15 @@ function loadInd(key) {
 
 // ============ LANGUAGE TOGGLE ============
 function setLang(lang) {
+  const supported = ['en', 'ar', 'hi', 'ru'];
+  const safeLang = supported.includes(lang) ? lang : 'en';
   const html = document.documentElement;
-  if (lang === 'ar') {
-    html.setAttribute('dir', 'rtl');
-    html.setAttribute('lang', 'ar');
-  } else {
-    html.setAttribute('dir', 'ltr');
-    html.setAttribute('lang', 'en');
-  }
+  html.setAttribute('dir', safeLang === 'ar' ? 'rtl' : 'ltr');
+  html.setAttribute('lang', safeLang);
   document.querySelectorAll('.lang-toggle button').forEach(b => {
-    b.classList.toggle('active', b.dataset.lang === lang);
+    b.classList.toggle('active', b.dataset.lang === safeLang);
   });
-  try { localStorage.setItem('halla_lang', lang); } catch (e) {}
+  try { localStorage.setItem('halla_lang', safeLang); } catch (e) {}
 }
 
 // ============ INIT ============
