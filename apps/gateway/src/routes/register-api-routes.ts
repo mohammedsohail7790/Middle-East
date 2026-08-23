@@ -35,7 +35,12 @@ import { createOnboardingRouter } from '../services/onboarding/onboarding.contro
 import { createOrganizationsRouter } from '../services/organizations/organization.controller.js';
 import { createCrmRouter } from '../services/crm/crm.controller.js';
 import { createChannelsRouter } from '../services/channels/channels.controller.js';
-import { createIntegrationsRouter } from '../services/integrations/integrations.controller.js';
+import { createIntegrationRouter } from '../services/integrations/integration.controller.js';
+import { createIntegrationOAuthRouter } from '../services/integrations/oauth.controller.js';
+import { createCalendarRouter } from '../services/calendar/calendar.controller.js';
+import { createSlackRouter } from '../services/slack/slack.controller.js';
+import { createSSORouter } from '../services/sso/sso.controller.js';
+import { createAutomationRouter } from '../services/automation/automation.controller.js';
 import { createBillingRouter } from '../services/billing/billing.controller.js';
 import { createCostRouter } from '../services/billing/cost.controller.js';
 import { createBillingIntelligenceRouter } from '../services/billing/billing-intelligence.controller.js';
@@ -62,7 +67,8 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/organizations', createOrganizationsRouter());
     apiRouter.use('/crm', createCrmRouter());
     apiRouter.use('/channels', createChannelsRouter());
-    apiRouter.use('/integrations', createIntegrationsRouter());
+    apiRouter.use('/integrations', createIntegrationOAuthRouter());
+    apiRouter.use('/integrations', createIntegrationRouter());
     apiRouter.use('/leads', createLeadsRouter());
     apiRouter.use('/calls', createCallsRouter());
     apiRouter.use('/campaigns', createCampaignsRouter());
@@ -73,9 +79,12 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/recordings', createRecordingRouter());
     apiRouter.use('/analytics', createAnalyticsRouter());
     apiRouter.use('/sms', createSmsRouter());
+    apiRouter.use('/calendar', createCalendarRouter());
     apiRouter.use('/team', createTeamRouter());
     apiRouter.use('/billing', createBillingRouter());
+    apiRouter.use('/automation', createAutomationRouter());
     apiRouter.use('/business-hours', createBusinessHoursRouter());
+    apiRouter.use('/slack', createSlackRouter());
     apiRouter.use('/ai-config', createAIConfigRouter());
     apiRouter.use('/phone-numbers', createPhoneNumbersRouter());
 
@@ -83,6 +92,7 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/api-keys', createApiKeysRouter());
     apiRouter.use('/webhooks', createWebhooksRouter());
     apiRouter.use('/qa', createQARouter());
+    apiRouter.use('/sso', createSSORouter());
     apiRouter.use('/ivr', createIVRRouter());
     apiRouter.use('/retention', createRetentionRouter());
     apiRouter.use('/reports', createReportsRouter());

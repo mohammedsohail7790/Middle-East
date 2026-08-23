@@ -1,30 +1,37 @@
-/**
- * Google Calendar integration — skeleton stub.
- * No external calendar sync in the skeleton; hasConnection() always reports
- * false so callers fall through to internal-only appointment booking.
- */
+import { calendarService } from './calendar.service.js';
 
-export interface CalendarSlot {
-  start: string;
-  end: string;
-  available: boolean;
+export class GoogleCalendarService {
+    async hasConnection(tenantId: string): Promise<boolean> {
+        return calendarService.hasActiveConnection(tenantId);
+    }
+
+    async getAvailability(tenantId: string, start: Date, end: Date): Promise<boolean> {
+        try {
+            if (!(await this.hasConnection(tenantId))) {
+                return true;
+            }
+            const slots = await calendarService.getAvailability(tenantId, start, end);
+            const freeSlots = slots.filter((s) => s.available);
+            return freeSlots.length > 0;
+        } catch {
+            return true;
+        }
+    }
+
+    /** Google Calendar event id (external), not local appointments.id */
+    async createEvent(tenantId: string, eventDetails: { summary: string, start: Date, end: Date, description: string }): Promise<string> {
+        return calendarService.createGoogleEventOnly(
+            tenantId,
+            eventDetails.summary,
+            eventDetails.start,
+            eventDetails.end,
+            eventDetails.description
+        );
+    }
+
+    async updateEvent(tenantId: string, eventId: string, start: Date, end: Date): Promise<void> {
+        await calendarService.updateEvent(tenantId, eventId, start, end);
+    }
 }
 
-export const googleCalendarService = {
-  async hasConnection(_tenantId: string): Promise<boolean> {
-    return false;
-  },
-
-  /** Returns whether the given window is free on the tenant's Google Calendar. */
-  async getAvailability(_tenantId: string, _start: Date, _end: Date): Promise<boolean> {
-    return true;
-  },
-
-  async createEvent(_tenantId: string, _event: Record<string, unknown>): Promise<string | null> {
-    return null;
-  },
-
-  async updateEvent(_tenantId: string, _eventId: string, _start: Date, _end: Date): Promise<boolean> {
-    return false;
-  },
-};
+export const googleCalendarService = new GoogleCalendarService();

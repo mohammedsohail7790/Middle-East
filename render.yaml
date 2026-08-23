@@ -143,6 +143,28 @@ services:
         sync: false
       - key: SALESFORCE_CLIENT_SECRET
         sync: false
+      - key: SALESFORCE_LOGIN_URL
+        value: https://login.salesforce.com
+      - key: CLIO_CLIENT_ID
+        sync: false
+      - key: CLIO_CLIENT_SECRET
+        sync: false
+      - key: CLIO_OAUTH_SCOPES
+        value: openid
+      - key: COPPER_CLIENT_ID
+        sync: false
+      - key: COPPER_CLIENT_SECRET
+        sync: false
+      - key: SERVICETITAN_CLIENT_ID
+        sync: false
+      - key: SERVICETITAN_CLIENT_SECRET
+        sync: false
+      - key: SQUARE_CLIENT_ID
+        sync: false
+      - key: SQUARE_CLIENT_SECRET
+        sync: false
+      - key: INTEGRATION_CREDENTIALS_KEY
+        sync: false
       - key: SLACK_CLIENT_ID
         sync: false
       - key: SLACK_CLIENT_SECRET
