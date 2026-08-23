@@ -5,7 +5,7 @@ export const forwardingGuideArticle: BlogArticle = {
   slug: "forwarding-guide",
   title: `Call Forwarding Guides for Every Carrier`,
   date: `Published · 4 min read`,
-  subtitle: `Step-by-step for RingCentral, Nextiva, Vonage, Verizon, AT&T, and more.`,
+  subtitle: `Step-by-step for RingCentral, Nextiva, Vonage, Verizon, AT&T, Etisalat, du, STC, Ooredoo, Zain, and more.`,
   bodyHtml: `
 <section class="section">
     <div class="container" style="max-width: 720px;">
@@ -84,6 +84,42 @@ export const forwardingGuideArticle: BlogArticle = {
           <div style="margin: 8px 0;"><span class="chip">Example: **21*18881234567#</span></div>
           <div><strong>Cancel:</strong> Dial <span class="chip">##21#</span></div>
         </div>
+      </div>
+
+      <h2 style="margin-bottom: 16px;">Middle East Mobile Carriers (UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman)</h2>
+      <div class="alert alert-warn" style="margin-bottom: 16px;">
+        <span>⚠️</span>
+        <span class="alert-text"><strong>Note:</strong> Call forwarding is a standard GSM network feature, so the same codes work across Etisalat, du, STC, Mobily, Zain (Saudi Arabia and Kuwait), Ooredoo, Vodafone Qatar, Batelco, stc Bahrain, and Omantel. If a code doesn't activate, confirm forwarding is enabled on your specific plan with your carrier.</span>
+      </div>
+
+      <div class="grid-3" style="gap: 16px; margin-bottom: 16px;">
+        <div class="card" style="text-align: center;">
+          <h4 style="margin-bottom: 8px;">Forward all calls</h4>
+          <div><strong>Activate:</strong> Dial <span class="chip">*21*</span> + Halla AI number + <span class="chip">#</span></div>
+          <div style="margin: 8px 0;"><span class="chip">Example: *21*18881234567#</span></div>
+          <div><strong>Cancel:</strong> Dial <span class="chip">#21#</span></div>
+        </div>
+        <div class="card" style="text-align: center;">
+          <h4 style="margin-bottom: 8px;">Forward when unanswered</h4>
+          <div><strong>Activate:</strong> Dial <span class="chip">*61*</span> + Halla AI number + <span class="chip">#</span></div>
+          <div style="margin: 8px 0;"><span class="chip">Example: *61*18881234567#</span></div>
+          <div><strong>Cancel:</strong> Dial <span class="chip">#61#</span></div>
+        </div>
+        <div class="card" style="text-align: center;">
+          <h4 style="margin-bottom: 8px;">Forward when busy</h4>
+          <div><strong>Activate:</strong> Dial <span class="chip">*67*</span> + Halla AI number + <span class="chip">#</span></div>
+          <div style="margin: 8px 0;"><span class="chip">Example: *67*18881234567#</span></div>
+          <div><strong>Cancel:</strong> Dial <span class="chip">#67#</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 32px;">
+        <ol style="color: var(--gray-600); font-size: 0.9rem; line-height: 2.2; padding-left: 20px; margin-bottom: 0;">
+          <li>Recommended: use <strong>"Forward when unanswered"</strong> (*61*) so your team can still answer directly first, and Halla AI only picks up calls you miss</li>
+          <li>Replace <span class="chip">18881234567</span> with your actual Halla AI number, including the <span class="chip">1</span> country code prefix for US numbers</li>
+          <li>To cancel every type of forwarding at once, dial <span class="chip">##002#</span></li>
+          <li>Business landline / PABX systems: forwarding setup varies by provider — contact your telecom provider's business support line for exact steps</li>
+        </ol>
       </div>
 
       <h2 style="margin-bottom: 16px;">Google Voice</h2>

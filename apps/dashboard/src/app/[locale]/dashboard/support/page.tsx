@@ -14,6 +14,10 @@ const FAQS = [
     a: "Go to Phone Numbers in the sidebar and click 'Add Number'. Search by area code and purchase — it activates instantly.",
   },
   {
+    q: "Do I need a Middle East number, or can I keep my existing local number?",
+    a: "Keep your existing local number — no need to switch. In Phone Numbers, click 'Add Number' and choose 'Forward my number'. Etisalat, du, STC, Ooredoo, Zain, and other Middle East carriers all support call forwarding: dial *61* followed by your Halla AI number and # to forward calls you miss. Your customers keep calling the number they already know.",
+  },
+  {
     q: "How do I connect my CRM (HubSpot, Salesforce, etc.)?",
     a: "Go to Integrations. For HubSpot and Salesforce use the Direct OAuth section. For Pipedrive, Zoho, and others use the Zapier webhook — it works with 5,000+ apps.",
   },

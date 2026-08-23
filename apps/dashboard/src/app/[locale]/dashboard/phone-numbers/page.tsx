@@ -4,8 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Phone, Plus, X, Search, Trash2,
-  PhoneCall, MessageSquare, Globe,
+  PhoneCall, MessageSquare, Globe, PhoneForwarded, ArrowUpRight,
 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { api, asArray } from "@/lib/api";
 import {
   friendlyPhoneSetupError,
@@ -50,6 +51,7 @@ export default function PhoneNumbersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [addMode, setAddMode] = useState<"forward" | "new">("forward");
   const [areaCode, setAreaCode] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -353,77 +355,127 @@ export default function PhoneNumbersPage() {
               </div>
 
               <div className="p-5 sm:p-6">
-              <p className="text-xs text-foreground-secondary/70 mb-4">
-                Your number runs on Halla AI&apos;s US-based calling infrastructure — reliable, carrier-grade voice quality for businesses across the Middle East.
-              </p>
-              {/* Search by Area Code */}
-              <div className="mb-6">
-                <label htmlFor="phone-area-code" className="text-xs text-foreground-secondary mb-1.5 block">Search by Area Code</label>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    id="phone-area-code"
-                    type="text"
-                    value={areaCode}
-                    onChange={(e) => setAreaCode(e.target.value.replace(/\D/g, "").slice(0, 3))}
-                    placeholder="e.g. 415"
-                    maxLength={3}
-                    className="input flex-1"
-                  />
-                  <button
-                    type="button"
-                    onClick={searchNumbers}
-                    disabled={areaCode.length < 3 || searching}
-                    className="btn-primary"
-                  >
-                    <Search className="size-4" strokeWidth={ICON_STROKE} /> {searching ? "..." : "Search"}
-                  </button>
-                </div>
+              <div className="flex gap-2 mb-5 p-1 rounded-xl bg-muted">
+                <button
+                  type="button"
+                  onClick={() => setAddMode("forward")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-lg transition-colors",
+                    addMode === "forward" ? "bg-background text-foreground shadow-sm" : "text-foreground-secondary"
+                  )}
+                >
+                  <PhoneForwarded className="size-4" strokeWidth={ICON_STROKE} /> Forward my number
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAddMode("new")}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1.5 text-sm font-medium py-2 rounded-lg transition-colors",
+                    addMode === "new" ? "bg-background text-foreground shadow-sm" : "text-foreground-secondary"
+                  )}
+                >
+                  <Plus className="size-4" strokeWidth={ICON_STROKE} /> Get a new number
+                </button>
               </div>
 
-              {/* Results */}
-              {searching ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-14 bg-muted animate-pulse rounded-xl" />
-                  ))}
+              {addMode === "forward" ? (
+                <div className="space-y-4">
+                  <p className="text-sm text-foreground-secondary">
+                    Keep your existing local number (Etisalat, du, STC, Ooredoo, Zain, and other Middle East carriers all support this). Your customers keep calling the number they already know — it just forwards to Halla AI in the background.
+                  </p>
+                  <div className="dashboard-panel-padded space-y-2">
+                    <p className="text-xs font-medium text-foreground">Quick version</p>
+                    <ol className="text-xs text-foreground-secondary space-y-1.5 list-decimal list-inside">
+                      <li>Get your Halla AI number below (or from an existing entry in your number list)</li>
+                      <li>On your phone, dial <span className="font-mono">*61*[your Halla AI number]#</span> to forward calls you miss</li>
+                      <li>Test by calling your own number from another phone</li>
+                    </ol>
+                  </div>
+                  <Link
+                    href="/dashboard/support"
+                    className="btn-ghost text-sm w-full justify-center border border-border"
+                  >
+                    Need help with your carrier? Contact support <ArrowUpRight className="size-3.5" strokeWidth={ICON_STROKE} />
+                  </Link>
+                  <p className="text-xs text-foreground-secondary/70">
+                    Need a Halla AI number to forward to first? Switch to &quot;Get a new number&quot; above.
+                  </p>
                 </div>
-              ) : searchResults.length > 0 ? (
-                <div className="space-y-2">
-                  <p className="text-xs text-foreground-secondary mb-2">{searchResults.length} numbers available</p>
-                  {searchResults.map((result) => (
-                    <div key={result.phoneNumber} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 rounded-xl bg-muted border border-border">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground">{formatPhone(result.phoneNumber)}</p>
-                        <p className="text-xs text-foreground-secondary">
-                          {result.locality}, {result.region} • ${result.cost}/mo
-                        </p>
-                        <div className="flex gap-1 mt-1">
-                          {(result.capabilities || []).map((cap) => (
-                            <span key={cap} className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-foreground-secondary">
-                              {cap}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+              ) : (
+                <>
+                  <p className="text-xs text-foreground-secondary/70 mb-4">
+                    Your number runs on Halla AI&apos;s US-based calling infrastructure — reliable, carrier-grade voice quality for businesses across the Middle East.
+                  </p>
+                  {/* Search by Area Code */}
+                  <div className="mb-6">
+                    <label htmlFor="phone-area-code" className="text-xs text-foreground-secondary mb-1.5 block">Search by Area Code</label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        id="phone-area-code"
+                        type="text"
+                        value={areaCode}
+                        onChange={(e) => setAreaCode(e.target.value.replace(/\D/g, "").slice(0, 3))}
+                        placeholder="e.g. 415"
+                        maxLength={3}
+                        className="input flex-1"
+                      />
                       <button
                         type="button"
-                        onClick={() => purchaseNumber(result.phoneNumber)}
-                        disabled={purchasing === result.phoneNumber}
-                        className="btn-primary text-xs px-3 py-1.5 w-full sm:w-auto shrink-0"
+                        onClick={searchNumbers}
+                        disabled={areaCode.length < 3 || searching}
+                        className="btn-primary"
                       >
-                        {purchasing === result.phoneNumber ? "..." : "Purchase"}
+                        <Search className="size-4" strokeWidth={ICON_STROKE} /> {searching ? "..." : "Search"}
                       </button>
                     </div>
-                  ))}
-                </div>
-              ) : areaCode.length >= 3 && !searching ? (
-                <EmptyState
-                  icon={Phone}
-                  title={`No numbers for ${areaCode}`}
-                  description="Try a different area code or search again in a moment."
-                  iconVariant="muted"
-                />
-              ) : null}
+                  </div>
+
+                  {/* Results */}
+                  {searching ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-14 bg-muted animate-pulse rounded-xl" />
+                      ))}
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <div className="space-y-2">
+                      <p className="text-xs text-foreground-secondary mb-2">{searchResults.length} numbers available</p>
+                      {searchResults.map((result) => (
+                        <div key={result.phoneNumber} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 rounded-xl bg-muted border border-border">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground">{formatPhone(result.phoneNumber)}</p>
+                            <p className="text-xs text-foreground-secondary">
+                              {result.locality}, {result.region} • ${result.cost}/mo
+                            </p>
+                            <div className="flex gap-1 mt-1">
+                              {(result.capabilities || []).map((cap) => (
+                                <span key={cap} className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-foreground-secondary">
+                                  {cap}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => purchaseNumber(result.phoneNumber)}
+                            disabled={purchasing === result.phoneNumber}
+                            className="btn-primary text-xs px-3 py-1.5 w-full sm:w-auto shrink-0"
+                          >
+                            {purchasing === result.phoneNumber ? "..." : "Purchase"}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : areaCode.length >= 3 && !searching ? (
+                    <EmptyState
+                      icon={Phone}
+                      title={`No numbers for ${areaCode}`}
+                      description="Try a different area code or search again in a moment."
+                      iconVariant="muted"
+                    />
+                  ) : null}
+                </>
+              )}
               </div>
             </motion.div>
           </motion.div>
