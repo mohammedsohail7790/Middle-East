@@ -1105,11 +1105,11 @@ function sampleZapierLeadPayload() {
         callId: 'test-call',
         provider: 'zapier',
         lead: {
-            name: 'Test Lead (Call IQ)',
+            name: 'Test Lead (Halla AI)',
             phone: '+15551234567',
             email: 'test@example.com',
             service: 'HVAC service call',
-            notes: 'Sample payload from Call IQ — map lead.name, lead.phone, lead.email in Zapier.',
+            notes: 'Sample payload from Halla AI — map lead.name, lead.phone, lead.email in Zapier.',
         },
         timestamp: new Date().toISOString(),
     };
@@ -1242,11 +1242,11 @@ const TEST_LEAD_PAYLOAD = {
     callId: `test-${Date.now()}`,
     type: 'lead' as const,
     lead: {
-        name: 'Test Lead (Call IQ)',
+        name: 'Test Lead (Halla AI)',
         phone: '+15551234567',
         email: 'test-lead@calliq.example',
         service: 'Connection test',
-        notes: 'This test lead was created by Call IQ to verify your CRM connection.',
+        notes: 'This test lead was created by Halla AI to verify your CRM connection.',
     },
 };
 

@@ -44,7 +44,7 @@ export function leadNotes(payload: IntegrationPayload): string {
         lead.notes,
         lead.service ? `Service: ${lead.service}` : null,
         lead.preferred_time ? `Preferred time: ${lead.preferred_time}` : null,
-        `Call IQ reference: ${payload.callId}`,
+        `Halla AI reference: ${payload.callId}`,
     ].filter(Boolean);
     return lines.join('\n');
 }

@@ -416,7 +416,7 @@ export class CalendarService {
 
   /**
    * Create event in Google Calendar only (no local appointments row).
-   * Used by appointment booking so Call IQ DB stays the source of truth for the dashboard.
+   * Used by appointment booking so Halla AI DB stays the source of truth for the dashboard.
    */
   async createGoogleEventOnly(
     tenantId: string,

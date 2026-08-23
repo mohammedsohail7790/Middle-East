@@ -349,7 +349,7 @@ export class AcuityService {
 
     await acuityRequestForConnection(conn, `/appointments/${acuityAppointmentId}/cancel`, {
       method: 'PUT',
-      body: JSON.stringify({ reason: 'Cancelled via Call IQ' }),
+      body: JSON.stringify({ reason: 'Cancelled via Halla AI' }),
     });
 
     await pool.query(

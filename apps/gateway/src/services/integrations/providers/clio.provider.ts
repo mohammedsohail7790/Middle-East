@@ -81,11 +81,11 @@ export class ClioProvider {
             callId: `test-${Date.now()}`,
             type: 'lead',
             lead: {
-                name: 'Test Lead (Call IQ)',
+                name: 'Test Lead (Halla AI)',
                 phone: '+15551234567',
                 email: 'test-lead@calliq.example',
                 service: 'Connection test',
-                notes: 'This test contact was created by Call IQ to verify your Clio connection.',
+                notes: 'This test contact was created by Halla AI to verify your Clio connection.',
             },
         });
     }

@@ -39,7 +39,7 @@ export class HouseCallProProvider {
             notes: [
                 `Preferred Time: ${lead.preferred_time || 'ASAP'}`,
                 `Notes: ${lead.notes || 'None'}`,
-                `Source: Call IQ Voice AI`,
+                `Source: Halla AI Voice AI`,
                 `Call ID: ${payload.callId}`,
             ].join('\n'),
             scheduledStart,

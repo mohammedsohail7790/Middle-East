@@ -7,7 +7,7 @@ export interface ZohoConfig {
     clientId?: string;
     clientSecret?: string;
     refreshToken?: string;
-    /** Short-lived; Call IQ stores refresh tokens from OAuth */
+    /** Short-lived; Halla AI stores refresh tokens from OAuth */
     accessToken?: string;
     /** From token response — preferred API base (region-specific) */
     apiDomain?: string;
@@ -187,11 +187,11 @@ export class ZohoProvider {
             callId: `test-${Date.now()}`,
             type: 'lead',
             lead: {
-                name: 'Test Lead (Call IQ)',
+                name: 'Test Lead (Halla AI)',
                 phone: '+15551234567',
                 email: 'test-lead@calliq.example',
                 service: 'Connection test',
-                notes: 'This test lead was created by Call IQ to verify your Zoho CRM connection.',
+                notes: 'This test lead was created by Halla AI to verify your Zoho CRM connection.',
             },
         });
     }
@@ -220,9 +220,9 @@ export class ZohoProvider {
                         First_Name: firstName,
                         Phone: lead.phone || undefined,
                         Email: lead.email || undefined,
-                        Company: lead.service || 'Call IQ Lead',
+                        Company: lead.service || 'Halla AI Lead',
                         Description: lead.notes || `Service: ${lead.service || 'N/A'}`,
-                        Lead_Source: 'Call IQ',
+                        Lead_Source: 'Halla AI',
                     },
                 ],
             };

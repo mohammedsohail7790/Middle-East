@@ -58,7 +58,7 @@ export class VagaroProvider {
             email: lead.email || undefined,
             mobilePhone: lead.phone || undefined,
             notes: leadNotes(payload),
-            source: 'Call IQ',
+            source: 'Halla AI',
         };
 
         try {

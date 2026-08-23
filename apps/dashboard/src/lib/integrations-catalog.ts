@@ -203,7 +203,7 @@ export const DIRECT_INTEGRATIONS: DirectIntegrationDef[] = [
     name: "Calendly",
     icon: "📆",
     category: "calendar",
-    description: "Import Calendly bookings and scheduling links into Call IQ.",
+    description: "Import Calendly bookings and scheduling links into Halla AI.",
     connection: "oauth",
     plan_required: "professional",
     fields: [],

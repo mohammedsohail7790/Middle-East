@@ -223,11 +223,11 @@ export class FreshsalesProvider {
             callId: `test-${Date.now()}`,
             type: 'lead',
             lead: {
-                name: 'Test Lead (Call IQ)',
+                name: 'Test Lead (Halla AI)',
                 phone: '+15551234567',
                 email: `test-${Date.now()}@calliq.example`,
                 service: 'Connection test',
-                notes: 'Created by Call IQ to verify your Freshsales connection.',
+                notes: 'Created by Halla AI to verify your Freshsales connection.',
             },
         });
     }
@@ -269,7 +269,7 @@ export class FreshsalesProvider {
                 last_name: lastName,
                 mobile_number: phone,
                 email,
-                company: { name: lead.service || 'Call IQ Lead' },
+                company: { name: lead.service || 'Halla AI Lead' },
                 custom_field: { cf_notes: notes },
             },
         };

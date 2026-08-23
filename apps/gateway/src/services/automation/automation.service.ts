@@ -446,9 +446,9 @@ export class AutomationService {
         return;
       }
 
-      const from = process.env.EMAIL_FROM || 'noreply@calliqlabs.com';
+      const from = process.env.EMAIL_FROM || 'noreply@hallaai.com';
       await resend.emails.send({
-        from: `Call IQ <${from}>`,
+        from: `Halla AI <${from}>`,
         to,
         subject,
         html,

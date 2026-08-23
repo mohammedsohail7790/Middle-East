@@ -70,7 +70,7 @@ ${preheaderBlock}
         <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width: 560px; width: 100%; background: ${BRAND.white}; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
           <tr>
             <td style="background: ${BRAND.black}; padding: 26px 40px;">
-              <img src="${logoUrl}" alt="Call IQ" width="110" style="width: 110px; height: auto; display: block; border: 0;">
+              <img src="${logoUrl}" alt="Halla AI" width="110" style="width: 110px; height: auto; display: block; border: 0;">
             </td>
           </tr>
           <tr>
@@ -89,9 +89,9 @@ ${preheaderBlock}
           <tr>
             <td style="padding: 22px 40px; border-top: 1px solid ${BRAND.gray200};">
               <p style="margin: 0; font-family: ${FONT}; font-size: 12px; line-height: 1.6; color: ${BRAND.gray400};">
-                Sent by <strong style="color: ${BRAND.gray500};">Call IQ</strong> — your AI receptionist, answering every call 24/7.
+                Sent by <strong style="color: ${BRAND.gray500};">Halla AI</strong> — your AI receptionist, answering every call 24/7.
                 <br>
-                <a href="${getDashboardBaseUrl()}" style="color: ${BRAND.gray500}; text-decoration: underline;">calliqlabs.com</a>
+                <a href="${getDashboardBaseUrl()}" style="color: ${BRAND.gray500}; text-decoration: underline;">hallaai.com</a>
               </p>
             </td>
           </tr>

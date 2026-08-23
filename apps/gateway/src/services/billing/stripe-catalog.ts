@@ -10,7 +10,7 @@ export type BillingInterval = 'monthly' | 'annual';
 
 const PLAN_KEYS: PlanKey[] = ['essential', 'professional'];
 
-/** Halla AI Stripe products (reused from the same account as Call IQ; safe to commit — not secret). Override via env on Render. */
+/** Halla AI Stripe products (reused from the same account as the earlier Call IQ product; safe to commit — not secret). Override via env on Render. */
 const DEFAULT_STRIPE_PRODUCTS: Record<PlanKey, Record<BillingInterval, string>> = {
   essential: {
     monthly: 'prod_UevJDYfmBcR9Id',

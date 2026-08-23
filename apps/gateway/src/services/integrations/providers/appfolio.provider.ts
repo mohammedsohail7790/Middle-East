@@ -59,11 +59,11 @@ export class AppFolioProvider {
             callId: `test-${Date.now()}`,
             type: 'lead',
             lead: {
-                name: 'Test Lead (Call IQ)',
+                name: 'Test Lead (Halla AI)',
                 phone: '+15551234567',
                 email: 'test-lead@calliq.example',
                 service: 'Connection test',
-                notes: 'This test lead was created by Call IQ to verify your AppFolio connection.',
+                notes: 'This test lead was created by Halla AI to verify your AppFolio connection.',
             },
         });
     }
@@ -86,7 +86,7 @@ export class AppFolioProvider {
             email: lead.email || undefined,
             phone: lead.phone || undefined,
             notes: leadNotes(payload),
-            source: 'Call IQ',
+            source: 'Halla AI',
         };
 
         try {

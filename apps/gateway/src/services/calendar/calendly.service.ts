@@ -325,7 +325,7 @@ export class CalendlyService {
 
     await calendlyRequest(`/scheduled_events/${eventUri}/cancellation`, conn.accessToken, {
       method: 'POST',
-      body: JSON.stringify({ reason: 'Cancelled via Call IQ' }),
+      body: JSON.stringify({ reason: 'Cancelled via Halla AI' }),
     });
 
     await pool.query(

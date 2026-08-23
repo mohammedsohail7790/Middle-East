@@ -63,7 +63,7 @@ const ACTION_LABELS: Record<string, string> = {
 
 const DEFAULT_TEMPLATES: Record<string, string> = {
   send_email: "Subject: Your inquiry at {business}\n\nHi {name},\n\nThank you for reaching out. Our team will be in touch soon.",
-  notify_team: "New {trigger} from {name} ({phone}). Check your Call IQ dashboard.",
+  notify_team: "New {trigger} from {name} ({phone}). Check your Halla AI dashboard.",
   create_task: "Follow up with {name} — {trigger} on {date}",
 };
 

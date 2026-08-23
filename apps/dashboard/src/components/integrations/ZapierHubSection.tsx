@@ -127,11 +127,11 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
   };
 
   const copyClientInstructions = () => {
-    const text = `Connect your app to Call IQ via Zapier:
+    const text = `Connect your app to Halla AI via Zapier:
 1. In Zapier, create a Zap with Webhooks by Zapier → Catch Hook as the trigger
 2. Add your CRM or app as the action step
 3. Turn the Zap ON and copy the Catch Hook URL
-4. In Call IQ: Dashboard → Integrations → Zapier → paste the URL and save
+4. In Halla AI: Dashboard → Integrations → Zapier → paste the URL and save
 5. Click Send test lead to verify`;
     void navigator.clipboard.writeText(text);
     setCopied(true);

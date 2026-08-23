@@ -309,11 +309,11 @@ export function createIntegrationOAuthRouter(): express.Router {
         callId: `oauth-test-${Date.now()}`,
         type: 'lead' as const,
         lead: {
-          name: 'Test Lead (Call IQ)',
+          name: 'Test Lead (Halla AI)',
           phone: '+15551234567',
           email: 'test-lead@calliq.example',
           service: 'Connection test',
-          notes: 'OAuth connection test from Call IQ.',
+          notes: 'OAuth connection test from Halla AI.',
         },
       };
       try {

@@ -60,11 +60,11 @@ export class JobberProvider {
                 callId: `test-${Date.now()}`,
                 type: 'lead',
                 lead: {
-                    name: 'Test Lead (Call IQ)',
+                    name: 'Test Lead (Halla AI)',
                     phone: '+15551234567',
                     email: 'test-lead@calliq.example',
                     service: 'Connection test',
-                    notes: 'This test lead was created by Call IQ to verify your Jobber connection.',
+                    notes: 'This test lead was created by Halla AI to verify your Jobber connection.',
                 },
             });
             return {
@@ -98,9 +98,9 @@ export class JobberProvider {
                 `Scheduled Time: ${scheduledTime || 'ASAP'}`,
                 `Preferred Time: ${scheduledTime || 'ASAP'}`,
                 `Notes: ${lead.notes || 'None'}`,
-                `Source: Call IQ Voice AI`,
+                `Source: Halla AI Voice AI`,
                 `Call ID: ${payload.callId}`,
-                payload.type === 'appointment' ? 'Call IQ booking: confirmed appointment' : '',
+                payload.type === 'appointment' ? 'Halla AI booking: confirmed appointment' : '',
             ]
                 .filter(Boolean)
                 .join('\n'),

@@ -1,7 +1,7 @@
 import { getGatewayPublicHttpsBase, getJobberRedirectUri, getSlackRedirectUri } from '../env.js';
 
 export function getGatewayOAuthBaseUrl(): string {
-  return (getGatewayPublicHttpsBase() || 'https://call-iq-gateway.onrender.com').replace(/\/$/, '');
+  return (getGatewayPublicHttpsBase() || 'https://gateway.hallaai.com').replace(/\/$/, '');
 }
 
 /** Must match HubSpot developer app → Auth → Required scopes exactly. */

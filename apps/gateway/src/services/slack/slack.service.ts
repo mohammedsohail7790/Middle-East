@@ -429,7 +429,7 @@ export class SlackService {
   async testConnection(webhookUrl: string): Promise<boolean> {
     try {
       const message = {
-        text: '✅ Slack integration test successful! Call IQ is now connected.',
+        text: '✅ Slack integration test successful! Halla AI is now connected.',
       };
 
       await this.sendMessage(webhookUrl, message);

@@ -56,11 +56,11 @@ export class InsightlyProvider {
             callId: `test-${Date.now()}`,
             type: 'lead',
             lead: {
-                name: 'Test Lead (Call IQ)',
+                name: 'Test Lead (Halla AI)',
                 phone: '+15551234567',
                 email: 'test-lead@calliq.example',
                 service: 'Connection test',
-                notes: 'This test contact was created by Call IQ to verify your CRM connection.',
+                notes: 'This test contact was created by Halla AI to verify your CRM connection.',
             },
         });
     }
@@ -90,7 +90,7 @@ export class InsightlyProvider {
             BACKGROUND: [
                 lead.service ? `Service: ${lead.service}` : null,
                 lead.notes ? `Notes: ${lead.notes}` : null,
-                'Source: Call IQ Voice AI',
+                'Source: Halla AI Voice AI',
             ]
                 .filter(Boolean)
                 .join('\n'),

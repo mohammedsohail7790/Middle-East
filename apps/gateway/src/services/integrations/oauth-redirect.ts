@@ -1,4 +1,4 @@
-const PRODUCTION_DASHBOARD = 'https://www.calliqlabs.com';
+const PRODUCTION_DASHBOARD = 'https://www.hallaai.com';
 
 /** Production dashboard base URL (Vercel). Set DASHBOARD_URL on Render gateway. */
 export function getDashboardBaseUrl(): string {
@@ -57,21 +57,21 @@ export function oauthProviderErrorDetail(error?: string, errorDescription?: stri
     return 'Slack OAuth scopes mismatch — in api.slack.com → OAuth & Permissions add bot scopes: incoming-webhook and chat:write';
   }
   if (/redirect_uri_mismatch|invalid_redirect_uri/i.test(raw)) {
-    return 'Slack redirect URL mismatch — add https://call-iq-gateway.onrender.com/api/v1/integrations/slack/callback under OAuth & Permissions → Redirect URLs';
+    return 'Slack redirect URL mismatch — add https://gateway.hallaai.com/api/v1/integrations/slack/callback under OAuth & Permissions → Redirect URLs';
   }
   if (/access_denied|user_denied/i.test(raw)) {
     return 'Slack authorization was cancelled — click Connect again and choose Allow';
   }
   if (/don.?t have access to CRM|cannot grant these permissions|permission to share your data/i.test(raw)) {
     return (
-      'Your Zoho sign-in cannot access CRM — use a Zoho CRM Administrator account, or in Call IQ choose ' +
+      'Your Zoho sign-in cannot access CRM — use a Zoho CRM Administrator account, or in Halla AI choose ' +
       '"Connect with refresh token instead" and paste tokens from Zoho API Console → Self Client'
     );
   }
   if (/no_org/i.test(raw)) {
     return (
       'Your Zoho account has no CRM organization — open crm.zoho.com and create or join a CRM org first. ' +
-      'Or use "Connect with refresh token instead" in Call IQ: Self Client → Generate Code → pick your CRM org when prompted.'
+      'Or use "Connect with refresh token instead" in Halla AI: Self Client → Generate Code → pick your CRM org when prompted.'
     );
   }
   if (/AADSTS50020/i.test(raw)) {
@@ -84,7 +84,7 @@ export function oauthProviderErrorDetail(error?: string, errorDescription?: stri
     return (
       'Salesforce External Client Apps only work in the org where they were created — paste YOUR Consumer Key/Secret ' +
       'from Setup → External Client App Manager (Local app in your org), sign in to that same org, then Connect. ' +
-      'Callback: https://call-iq-gateway.onrender.com/api/v1/integrations/salesforce/callback'
+      'Callback: https://gateway.hallaai.com/api/v1/integrations/salesforce/callback'
     );
   }
   if (/external client app is not installed|OAUTH_EC_APP_NOT_FOUND/i.test(raw)) {

@@ -58,7 +58,7 @@ export class ServiceTitanProvider {
             priority: 'Normal',
             summary: `${lead.service || 'Service Request'} - ${lead.name || 'Customer'} - ${lead.preferred_time || 'ASAP'}`,
             customFields: {
-                source: 'Call IQ Voice AI',
+                source: 'Halla AI Voice AI',
                 callId: payload.callId,
                 preferredTime: lead.preferred_time,
                 notes: lead.notes,

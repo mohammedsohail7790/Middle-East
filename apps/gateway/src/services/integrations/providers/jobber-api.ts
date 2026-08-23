@@ -102,7 +102,7 @@ export function jobberHttpErrorMessage(status: number, rawText: string): string 
     if (status === 404) {
         return (
             'Could not reach Jobber (HTTP 404). Confirm your Jobber plan includes API access, ' +
-            'and that the OAuth callback URL in the Jobber Developer Center matches Call IQ exactly.'
+            'and that the OAuth callback URL in the Jobber Developer Center matches Halla AI exactly.'
         );
     }
 

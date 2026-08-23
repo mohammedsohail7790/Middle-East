@@ -12,7 +12,7 @@ function authHeaders(config: FollowUpBossConfig): Record<string, string> {
     return {
         Authorization: `Basic ${token}`,
         'Content-Type': 'application/json',
-        'X-System': 'Call IQ',
+        'X-System': 'Halla AI',
         'X-System-Key': 'callIQ',
     };
 }
@@ -37,11 +37,11 @@ export class FollowUpBossProvider {
             callId: `test-${Date.now()}`,
             type: 'lead',
             lead: {
-                name: 'Test Lead (Call IQ)',
+                name: 'Test Lead (Halla AI)',
                 phone: '+15551234567',
                 email: 'test-lead@calliq.example',
                 service: 'Connection test',
-                notes: 'This test lead was created by Call IQ to verify your Follow Up Boss connection.',
+                notes: 'This test lead was created by Halla AI to verify your Follow Up Boss connection.',
             },
         });
     }
@@ -62,8 +62,8 @@ export class FollowUpBossProvider {
         const lastName = parts.slice(1).join(' ') || 'Call';
 
         const body = {
-            source: 'Call IQ',
-            system: 'Call IQ',
+            source: 'Halla AI',
+            system: 'Halla AI',
             type: 'Inquiry',
             message: lead.notes || `Service: ${lead.service || 'N/A'}`,
             person: {

@@ -36,11 +36,11 @@ export class MyCaseProvider {
             callId: `test-${Date.now()}`,
             type: 'lead',
             lead: {
-                name: 'Test Lead (Call IQ)',
+                name: 'Test Lead (Halla AI)',
                 phone: '+15551234567',
                 email: 'test-lead@calliq.example',
                 service: 'Connection test',
-                notes: 'This test lead was created by Call IQ to verify your MyCase connection.',
+                notes: 'This test lead was created by Halla AI to verify your MyCase connection.',
             },
         });
     }
@@ -63,7 +63,7 @@ export class MyCaseProvider {
             email: lead.email || undefined,
             cell_phone_number: lead.phone || undefined,
             notes: leadNotes(payload),
-            source: 'Call IQ',
+            source: 'Halla AI',
         };
 
         try {

@@ -18,7 +18,7 @@ export interface SalesforceConfig {
  * Handles:
  *  - Automatic access token refresh via refresh_token (fix: tokens expire in ~2h)
  *  - Upsert-by-phone to prevent duplicate Lead records
- *  - Proper Company field from caller context (fix: was hardcoded 'Call IQ Lead')
+ *  - Proper Company field from caller context (fix: was hardcoded 'Halla AI Lead')
  */
 export class SalesforceProvider {
     /**
@@ -148,7 +148,7 @@ export class SalesforceProvider {
             Phone: lead.phone || '',
             Company: company,
             Status: 'Open - Not Contacted',
-            LeadSource: 'Call IQ Voice AI',
+            LeadSource: 'Halla AI Voice AI',
             Description: [
                 `Service: ${lead.service || 'Not specified'}`,
                 `Preferred Time: ${lead.preferred_time || 'ASAP'}`,

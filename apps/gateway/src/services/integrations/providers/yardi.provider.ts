@@ -48,11 +48,11 @@ export class YardiProvider {
             callId: `test-${Date.now()}`,
             type: 'lead',
             lead: {
-                name: 'Test Lead (Call IQ)',
+                name: 'Test Lead (Halla AI)',
                 phone: '+15551234567',
                 email: 'test-lead@calliq.example',
                 service: 'Connection test',
-                notes: 'This test lead was created by Call IQ to verify your Yardi connection.',
+                notes: 'This test lead was created by Halla AI to verify your Yardi connection.',
             },
         });
     }
@@ -78,7 +78,7 @@ export class YardiProvider {
             email: lead.email || undefined,
             phone: lead.phone || undefined,
             comments: leadNotes(payload),
-            source: 'Call IQ',
+            source: 'Halla AI',
         };
 
         try {

@@ -121,11 +121,11 @@ export class CopperProvider {
             callId: `test-${Date.now()}`,
             type: 'lead',
             lead: {
-                name: 'Test Lead (Call IQ)',
+                name: 'Test Lead (Halla AI)',
                 phone: '+15551234567',
                 email: 'test-lead@calliq.example',
                 service: 'Connection test',
-                notes: 'This test lead was created by Call IQ to verify your Copper connection.',
+                notes: 'This test lead was created by Halla AI to verify your Copper connection.',
             },
         });
     }

@@ -131,7 +131,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     ready: true,
     planRequired: "professional",
     vendorRequirement:
-      "You need a HubSpot account with permission to authorize apps. In your HubSpot developer app → Auth → Scopes, enable exactly these as Required: contacts.read, contacts.write, deals.read, deals.write, contracts.read — nothing else is required unless Call IQ requests it.",
+      "You need a HubSpot account with permission to authorize apps. In your HubSpot developer app → Auth → Scopes, enable exactly these as Required: contacts.read, contacts.write, deals.read, deals.write, contracts.read — nothing else is required unless Halla AI requests it.",
     oauthAuthPath: OAUTH_AUTH_PATHS.hubspot,
   },
 
@@ -146,7 +146,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     planRequired: "professional",
     zapierOnly: true,
     vendorRequirement:
-      "Connect Salesforce through Zapier — create a Zap with Call IQ as the trigger and Salesforce as the action.",
+      "Connect Salesforce through Zapier — create a Zap with Halla AI as the trigger and Salesforce as the action.",
   },
 
 
@@ -176,7 +176,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
         placeholder: "From your Zoho Server-based Application",
         helpTitle: "Your Zoho OAuth client",
         helpBody:
-          "In api-console.zoho.com create a Server-based Application (same region as CRM). Copy Client ID and Client Secret from that app — not Call IQ's shared credentials.",
+          "In api-console.zoho.com create a Server-based Application (same region as CRM). Copy Client ID and Client Secret from that app — not Halla AI's shared credentials.",
       },
       {
         key: "clientSecret",
@@ -198,7 +198,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
       "Confirm you can open Zoho CRM (crm.zoho.com or your region) as an admin",
       "Select your data center, then Connect — or use refresh token if OAuth is blocked",
       "Approve lead permissions (OAuth) or paste Client ID, Secret, and refresh token",
-      "Send a test lead from Call IQ to confirm sync",
+      "Send a test lead from Halla AI to confirm sync",
     ],
   },
   {
@@ -212,7 +212,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     planRequired: "professional",
     zapierOnly: true,
     vendorRequirement:
-      "Connect Copper through Zapier — create a Zap with Call IQ as the trigger and Copper as the action.",
+      "Connect Copper through Zapier — create a Zap with Halla AI as the trigger and Copper as the action.",
     loginUrl: "https://app.copper.com/",
   },
   {
@@ -237,13 +237,13 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
         placeholder: "Paste your Follow Up Boss API key",
         helpTitle: "Where to find your API key",
         helpBody:
-          "In Follow Up Boss: click Admin in the top navigation → API. Click 'Generate API Key', give it a name like 'Call IQ', then copy the key that appears. The button above opens that page directly.",
+          "In Follow Up Boss: click Admin in the top navigation → API. Click 'Generate API Key', give it a name like 'Halla AI', then copy the key that appears. The button above opens that page directly.",
       },
     ],
     helpSteps: [
       "Sign in to Follow Up Boss using the button above",
       "Go to Admin → API",
-      "Click Create API Key and name it Call IQ",
+      "Click Create API Key and name it Halla AI",
       "Copy the key immediately — you only see it once",
       "Paste below and click Connect",
     ],
@@ -264,7 +264,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     screenshots: guidedScreenshots("clio", 3),
     helpSteps: [
       "Click Connect with Clio",
-      "Sign in to Clio and approve Call IQ",
+      "Sign in to Clio and approve Halla AI",
       "After redirect, send a test contact to confirm sync",
     ],
   },
@@ -311,7 +311,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     ready: true,
     planRequired: null,
     vendorRequirement:
-      "Sign in with the Google account whose calendar Call IQ should read and book. Calendar permissions are granted during OAuth.",
+      "Sign in with the Google account whose calendar Halla AI should read and book. Calendar permissions are granted during OAuth.",
     oauthAuthPath: OAUTH_AUTH_PATHS["google-calendar"],
   },
   {
@@ -356,7 +356,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     screenshots: guidedScreenshots("acuity", 4),
     helpSteps: [
       "Click Connect with Acuity Scheduling",
-      "Sign in to Acuity and approve Call IQ",
+      "Sign in to Acuity and approve Halla AI",
       "After redirect, verify your calendar connection",
     ],
   },
@@ -407,7 +407,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     loginUrl: "https://squareup.com/login",
     helpSteps: [
       "Click Connect with Square Appointments",
-      "Sign in to Square and approve Call IQ",
+      "Sign in to Square and approve Halla AI",
       "After redirect, verify your calendar connection",
     ],
   },
@@ -496,7 +496,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     planRequired: "professional",
     zapierOnly: true,
     vendorRequirement:
-      "Connect ServiceTitan through Zapier — create a Zap with Call IQ as the trigger and ServiceTitan as the action.",
+      "Connect ServiceTitan through Zapier — create a Zap with Halla AI as the trigger and ServiceTitan as the action.",
   },
   {
     id: "housecallpro",
@@ -545,7 +545,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     ready: true,
     planRequired: "professional",
     vendorRequirement:
-      "Sign in with the Jobber account that should receive new clients and requests from Call IQ.",
+      "Sign in with the Jobber account that should receive new clients and requests from Halla AI.",
     oauthAuthPath: OAUTH_AUTH_PATHS.jobber,
   },
 
@@ -699,16 +699,16 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     ready: true,
     planRequired: null,
     vendorRequirement:
-      "Sign in to Slack, then on the Allow screen pick a channel for Call IQ notifications. A workspace admin may need to approve the app.",
+      "Sign in to Slack, then on the Allow screen pick a channel for Halla AI notifications. A workspace admin may need to approve the app.",
     oauthAuthPath: OAUTH_AUTH_PATHS.slack,
     helpTitle: "Slack connect tips",
     helpBody:
-      "Use your normal Slack sign-in. After login you should see “Call IQ wants to access…” — click Allow and choose a channel. If you only see password reset, finish sign-in first, then retry Connect from Call IQ.",
+      "Use your normal Slack sign-in. After login you should see “Halla AI wants to access…” — click Allow and choose a channel. If you only see password reset, finish sign-in first, then retry Connect from Halla AI.",
     helpSteps: [
-      "Click Connect with Slack in Call IQ",
+      "Click Connect with Slack in Halla AI",
       "Sign in to your Slack workspace (use the workspace URL if prompted, e.g. yourteam.slack.com)",
       "On the permission screen, click Allow and select a channel for notifications",
-      "You should return to Call IQ with Slack marked connected",
+      "You should return to Halla AI with Slack marked connected",
     ],
   },
 
@@ -830,13 +830,13 @@ export function isGuidedApiConnect(integration: IntegrationDef): boolean {
   return integration.authType === "api_credentials";
 }
 
-/** Notes shown in the connect wizard (vendor plan gates, approvals, Call IQ plan). */
+/** Notes shown in the connect wizard (vendor plan gates, approvals, Halla AI plan). */
 export function getWizardRequirementNotes(integration: IntegrationDef): string[] {
   const notes: string[] = [];
   if (integration.vendorRequirement) notes.push(integration.vendorRequirement);
   if (integration.planRequired) {
     notes.push(
-      `Your Call IQ workspace must be on the ${integration.planRequired.charAt(0).toUpperCase()}${integration.planRequired.slice(1)} plan or higher to connect ${integration.name}.`
+      `Your Halla AI workspace must be on the ${integration.planRequired.charAt(0).toUpperCase()}${integration.planRequired.slice(1)} plan or higher to connect ${integration.name}.`
     );
   }
   return notes;
