@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { motion, useReducedMotion } from "framer-motion";
 import { Phone, Bot, Users, BarChart3, ArrowUpRight } from "lucide-react";
 
