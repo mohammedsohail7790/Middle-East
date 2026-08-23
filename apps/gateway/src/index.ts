@@ -23,6 +23,7 @@ process.on('unhandledRejection', (reason) => {
 
 import { createServer } from 'http';
 import express from 'express';
+import { handleStripeBillingWebhook } from './services/billing/stripe-webhook.js';
 import cors from 'cors';
 
 import {
@@ -116,6 +117,13 @@ registerDefaultHealthChecks();
 app.use(MiddlewareFactory.security() as any);
 app.use(MiddlewareFactory.compressionMiddleware());
 app.use(MiddlewareFactory.requestId());
+
+// Stripe webhook needs the raw request body for signature verification —
+// must be mounted before the global JSON parser below.
+app.post('/api/v1/billing/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+    void handleStripeBillingWebhook(req, res);
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(requestHardeningMiddleware);
 

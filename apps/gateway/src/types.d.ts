@@ -92,12 +92,17 @@ declare namespace express {
     use(...handlers: any[]): void;
     set(setting: string, value: any): void;
     get(path: string, ...handlers: any[]): void;
+    post(path: string, ...handlers: any[]): void;
+    put(path: string, ...handlers: any[]): void;
+    delete(path: string, ...handlers: any[]): void;
+    patch(path: string, ...handlers: any[]): void;
     listen(port: number, host?: string, callback?: () => void): any;
   }
   type NextFunction = (err?: any) => void;
   function json(options?: any): any;
   function urlencoded(options?: any): any;
   function static(root: string, options?: any): any;
+  function raw(options?: any): any;
   function Router(): Router;
 }
 

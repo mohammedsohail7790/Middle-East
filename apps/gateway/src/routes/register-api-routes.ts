@@ -36,6 +36,9 @@ import { createOrganizationsRouter } from '../services/organizations/organizatio
 import { createCrmRouter } from '../services/crm/crm.controller.js';
 import { createChannelsRouter } from '../services/channels/channels.controller.js';
 import { createIntegrationsRouter } from '../services/integrations/integrations.controller.js';
+import { createBillingRouter } from '../services/billing/billing.controller.js';
+import { createCostRouter } from '../services/billing/cost.controller.js';
+import { createBillingIntelligenceRouter } from '../services/billing/billing-intelligence.controller.js';
 import { ipAllowlistMiddleware } from '../services/security/ipAllowlist.js';
 import { apiAuthUnlessPublic } from '../middleware/api-auth-unless-public.js';
 import { csrfProtectionMiddleware } from '../middleware/csrf.js';
@@ -71,6 +74,7 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/analytics', createAnalyticsRouter());
     apiRouter.use('/sms', createSmsRouter());
     apiRouter.use('/team', createTeamRouter());
+    apiRouter.use('/billing', createBillingRouter());
     apiRouter.use('/business-hours', createBusinessHoursRouter());
     apiRouter.use('/ai-config', createAIConfigRouter());
     apiRouter.use('/phone-numbers', createPhoneNumbersRouter());
@@ -87,11 +91,13 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/voice-cloning', createVoiceCloningRouter());
     apiRouter.use('/spam', createSpamRouter());
     apiRouter.use('/onboarding', createOnboardingRouter());
+    apiRouter.use('/cost', createCostRouter());
     apiRouter.use('/search', createSearchRouter());
     apiRouter.use('/compliance', createComplianceRouter());
     apiRouter.use('/compliance/center', createComplianceCenterRouter());
     apiRouter.use('/runtime-reliability', createRuntimeReliabilityRouter());
     apiRouter.use('/operations', createOperationsRouter());
+    apiRouter.use('/billing-intelligence', createBillingIntelligenceRouter());
     apiRouter.use('/support', createSupportRouter());
     apiRouter.use('/feature-flags', createFeatureFlagsRouter());
 
