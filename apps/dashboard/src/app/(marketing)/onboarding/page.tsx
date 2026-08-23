@@ -423,6 +423,9 @@ export default function OnboardingPage() {
                   <Building className="w-10 h-10 text-accent mx-auto mb-3" />
                   <h2 className="text-xl font-bold">Tell us about your business</h2>
                   <p className="text-sm text-foreground-secondary mt-1">We&apos;ll personalize your AI receptionist.</p>
+                  <p className="text-xs text-foreground-secondary/70 mt-2">
+                    Halla AI — American-built AI receptionist technology, made for businesses across the Middle East.
+                  </p>
                 </div>
                 <div>
                   <label className="text-sm text-foreground-secondary mb-1.5 block">Company name *</label>

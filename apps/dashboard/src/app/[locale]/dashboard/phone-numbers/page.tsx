@@ -353,6 +353,9 @@ export default function PhoneNumbersPage() {
               </div>
 
               <div className="p-5 sm:p-6">
+              <p className="text-xs text-foreground-secondary/70 mb-4">
+                Your number runs on Halla AI&apos;s US-based calling infrastructure — reliable, carrier-grade voice quality for businesses across the Middle East.
+              </p>
               {/* Search by Area Code */}
               <div className="mb-6">
                 <label htmlFor="phone-area-code" className="text-xs text-foreground-secondary mb-1.5 block">Search by Area Code</label>

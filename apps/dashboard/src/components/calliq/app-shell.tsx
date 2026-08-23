@@ -250,6 +250,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
               {!collapsed && <span>Sign out</span>}
             </button>
+            {!collapsed && (
+              <p className="px-2 pt-2 text-[10px] leading-snug text-muted-foreground/60">
+                Halla AI — US-based, built for the Middle East.
+              </p>
+            )}
           </div>
         </div>
       </aside>
