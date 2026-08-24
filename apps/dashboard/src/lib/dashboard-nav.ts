@@ -51,18 +51,12 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
     items: [
       { href: "/dashboard/calls", label: "Calls", labelKey: "nav.calls", subtitle: "Transcripts, outcomes, and call history", subtitleKey: "nav.callsSubtitle" },
       { href: "/dashboard/outbound", label: "Outbound", labelKey: "nav.outbound", subtitle: "Click-to-call, campaigns, and reminders", subtitleKey: "nav.outboundSubtitle" },
-      { href: "/dashboard/channels/sms", label: "SMS", labelKey: "nav.sms", subtitle: "Text conversations and templates", subtitleKey: "nav.smsSubtitle" },
-      { href: "/dashboard/channels/whatsapp", label: "WhatsApp", labelKey: "nav.whatsapp", subtitle: "WhatsApp Business conversations", subtitleKey: "nav.whatsappSubtitle" },
-      { href: "/dashboard/channels/web-chat", label: "Web Chat", labelKey: "nav.webChat", subtitle: "Website chat widget conversations", subtitleKey: "nav.webChatSubtitle" },
-      { href: "/dashboard/channels/instagram", label: "Instagram", labelKey: "nav.instagram", subtitle: "Instagram Direct conversations", subtitleKey: "nav.instagramSubtitle" },
-      { href: "/dashboard/channels/facebook", label: "Facebook", labelKey: "nav.facebook", subtitle: "Facebook Messenger conversations", subtitleKey: "nav.facebookSubtitle" },
     ],
   },
   {
     label: "CRM",
     labelKey: "navGroups.crm",
     items: [
-      { href: "/dashboard/crm/pipeline", label: "Pipeline", labelKey: "nav.crmPipeline", subtitle: "Deal stages and pipeline value", subtitleKey: "nav.crmPipelineSubtitle" },
       { href: "/dashboard/crm/contacts", label: "Contacts", labelKey: "nav.crmContacts", subtitle: "People associated with your business", subtitleKey: "nav.crmContactsSubtitle" },
       { href: "/dashboard/crm/companies", label: "Companies", labelKey: "nav.crmCompanies", subtitle: "Organizations you do business with", subtitleKey: "nav.crmCompaniesSubtitle" },
       { href: "/dashboard/crm/deals", label: "Deals", labelKey: "nav.crmDeals", subtitle: "Open and closed opportunities", subtitleKey: "nav.crmDealsSubtitle" },
@@ -73,7 +67,6 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
     labelKey: "navGroups.platform",
     items: [
       { href: "/dashboard/integrations", label: "Integrations", labelKey: "nav.integrations", subtitle: "CRMs, calendars, and automations", subtitleKey: "nav.integrationsSubtitle" },
-      { href: "/dashboard/automation", label: "Automations", labelKey: "nav.automations", subtitle: "Trigger-based rules and workflows", subtitleKey: "nav.automationsSubtitle" },
       { href: "/dashboard/knowledge", label: "Knowledge Base", labelKey: "nav.knowledgeBase", subtitle: "Company details, service area, and AI training content", subtitleKey: "nav.knowledgeBaseSubtitle" },
       { href: "/dashboard/phone-numbers", label: "Phone Numbers", labelKey: "nav.phoneNumbers", subtitle: "Inbound numbers and routing", subtitleKey: "nav.phoneNumbersSubtitle" },
       { href: "/dashboard/compliance", label: "Compliance", labelKey: "nav.compliance", subtitle: "AI disclosure, call recording, retention, and audit log", subtitleKey: "nav.complianceSubtitle" },
