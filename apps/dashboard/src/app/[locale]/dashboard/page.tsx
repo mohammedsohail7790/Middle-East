@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Phone, Users, TrendingUp, Clock, BarChart3, Filter, CalendarDays } from "lucide-react";
 import { IconBox, outcomeIconVariant } from "@/components/ui-kit/IconBox";
-import { StatusBadge } from "@/components/calliq/glass-card";
+import { StatusBadge } from "@/components/dashboard-shell/glass-card";
 import {
   Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar, CartesianGrid,
 } from "recharts";

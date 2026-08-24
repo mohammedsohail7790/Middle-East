@@ -132,9 +132,3 @@ export function HallaAiMark({
   }
   return inner;
 }
-
-// ─── Backward-compat aliases (remove once all consumers are updated) ─────────
-/** @deprecated Use HallaAiLogo */
-export const CallIqLogo = HallaAiLogo;
-/** @deprecated Use HallaAiMark */
-export const CallIqMark = HallaAiMark;

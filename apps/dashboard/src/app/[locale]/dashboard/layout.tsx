@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { supabase } from "@/lib/supabase";
-import { AppShell } from "@/components/calliq/app-shell";
+import { AppShell } from "@/components/dashboard-shell/app-shell";
 import { setTenantId, getTenantId, syncPlanFromAccount } from "@/lib/store";
 import { api, clearAuthCache, prefetchCsrfToken } from "@/lib/api";
 import { ensureTenantSession } from "@/lib/ensure-tenant";

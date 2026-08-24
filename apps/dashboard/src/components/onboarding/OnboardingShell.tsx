@@ -3,7 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { CallIqLogo } from "@/components/brand/CallIqLogo";
+import { HallaAiLogo } from "@/components/brand/HallaAiLogo";
 import { cn } from "@/lib/utils";
 import { IconBox } from "@/components/ui-kit/IconBox";
 
@@ -28,7 +28,7 @@ export function OnboardingShell({
     <div className="onboarding-page min-h-[100dvh] flex flex-col">
       <header className="onboarding-header">
         <div className="onboarding-header-inner">
-          <CallIqLogo href="/" size="md" className="onboarding-logo" />
+          <HallaAiLogo href="/" size="md" className="onboarding-logo" />
           <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">
             Sign in
           </Link>

@@ -17,9 +17,9 @@ import {
   navLockedTitle,
   type DashboardNavItem,
 } from "@/lib/dashboard-nav";
-import { HallaAiLogo } from "@/components/brand/CallIqLogo";
+import { HallaAiLogo } from "@/components/brand/HallaAiLogo";
 import Image from "next/image";
-import { MobileBottomNav } from "@/components/halla/MobileBottomNav";
+import { MobileBottomNav } from "@/components/dashboard-shell/MobileBottomNav";
 import { DashboardTopbar } from "@/components/dashboard/DashboardTopbar";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { fetchWorkspaceProfile, type WorkspaceProfile } from "@/lib/ensure-tenant";

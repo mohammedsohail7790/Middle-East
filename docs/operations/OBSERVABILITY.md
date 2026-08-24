@@ -28,7 +28,7 @@ Import dashboards from `infrastructure/observability/grafana/`:
 - `runtime-continuity.json`
 - `ai-governance.json`
 - `event-bus.json`
-- `calliq-overview.json`
+- `halla-ai-overview.json`
 
 Prometheus config: `infrastructure/observability/prometheus/prometheus.yml`  
 Alert rules: `infrastructure/observability/prometheus/alert-rules.yml`
