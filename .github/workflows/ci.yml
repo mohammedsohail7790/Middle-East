@@ -60,7 +60,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
       - run: npm ci
-      - run: npm run test
+      - run: npm run test -- --exclude '**/tests/integration/**'
 
   gateway-integration:
     name: Gateway Integration (Redis)
@@ -93,6 +93,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint-and-typecheck
     timeout-minutes: 25
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -122,6 +127,18 @@ jobs:
             "NEXT_PUBLIC_GATEWAY_API_URL=$GW" \
             > .env.local
       - run: npm run build -w @halla-ai/dashboard
+      - name: Build and start gateway
+        env:
+          PORT: '3003'
+          NODE_ENV: 'test'
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: e2e-test-secret
+          ENABLE_VOICE_AGENT: 'false'
+        run: |
+          npm run build:packages
+          npm run build:gateway
+          npm run start -w @halla-ai/gateway &
+          npx --yes wait-on@7.2.0 -t 60000 http://127.0.0.1:3003/health
       - name: Start production dashboard
         run: |
           npm run start -w @halla-ai/dashboard &

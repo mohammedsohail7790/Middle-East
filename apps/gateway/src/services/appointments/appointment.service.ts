@@ -332,43 +332,49 @@ export class AppointmentService {
             })
             .catch(() => {});
 
-        void import('../dashboard/dashboard-events.js').then(({ publishDashboardPushType }) => {
-            publishDashboardPushType(input.tenantId, 'calendar.updated', [], { appointmentId });
-        });
+        void import('../dashboard/dashboard-events.js')
+            .then(({ publishDashboardPushType }) => {
+                publishDashboardPushType(input.tenantId, 'calendar.updated', [], { appointmentId });
+            })
+            .catch(() => {});
 
-        void import('../integrations/integration.service.js').then(({ integrationService }) => {
-            const crmCallId = input.callSid?.trim() || appointmentId;
-            integrationService
-                .sendRealtime(input.tenantId, {
-                    callId: crmCallId,
-                    type: 'appointment',
-                    lead: {
-                        name: input.name,
-                        phone: input.phone,
-                        service: input.service,
-                        preferred_time: scheduledTime,
-                        notes: `Appointment booked via Halla AI for ${scheduledTime}`,
-                    },
-                    appointment: {
-                        name: input.name,
-                        phone: input.phone,
-                        service: input.service,
-                        time: scheduledTime,
-                    },
-                })
-                .catch(() => {});
-        });
+        void import('../integrations/integration.service.js')
+            .then(({ integrationService }) => {
+                const crmCallId = input.callSid?.trim() || appointmentId;
+                integrationService
+                    .sendRealtime(input.tenantId, {
+                        callId: crmCallId,
+                        type: 'appointment',
+                        lead: {
+                            name: input.name,
+                            phone: input.phone,
+                            service: input.service,
+                            preferred_time: scheduledTime,
+                            notes: `Appointment booked via Halla AI for ${scheduledTime}`,
+                        },
+                        appointment: {
+                            name: input.name,
+                            phone: input.phone,
+                            service: input.service,
+                            time: scheduledTime,
+                        },
+                    })
+                    .catch(() => {});
+            })
+            .catch(() => {});
 
-        void import('../slack/slack.service.js').then(({ slackService }) => {
-            slackService
-                .sendAppointmentBookedNotification(input.tenantId, {
-                    customerName: input.name,
-                    customerPhone: input.phone,
-                    service: input.service || 'Appointment',
-                    appointmentTime: new Date(scheduledTime),
-                })
-                .catch(() => {});
-        });
+        void import('../slack/slack.service.js')
+            .then(({ slackService }) => {
+                slackService
+                    .sendAppointmentBookedNotification(input.tenantId, {
+                        customerName: input.name,
+                        customerPhone: input.phone,
+                        service: input.service || 'Appointment',
+                        appointmentTime: new Date(scheduledTime),
+                    })
+                    .catch(() => {});
+            })
+            .catch(() => {});
 
         invalidateTenantAvailabilityCache(input.tenantId);
 
