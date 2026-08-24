@@ -31,7 +31,7 @@ export default function MarketingSPA({ bodyHtml }: Props) {
       link.id = "tabler-icons";
       link.rel = "stylesheet";
       link.href =
-        "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css";
+        "https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css";
       document.head.appendChild(link);
     }
     // Google Fonts

@@ -58,9 +58,14 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // supabase.auth.getUser() has no built-in timeout — if Supabase is slow,
+  // unreachable, or misconfigured (e.g. a placeholder URL), every protected
+  // request would otherwise hang until the underlying fetch gives up. Bound
+  // it so a Supabase outage degrades to "redirect to login", not a hang.
+  const user = await Promise.race([
+    supabase.auth.getUser().then(({ data }) => data.user),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), 5_000)),
+  ]);
 
   if (!user) {
     if (path.startsWith("/api/")) {

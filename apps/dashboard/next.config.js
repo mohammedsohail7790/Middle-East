@@ -95,7 +95,14 @@ const nextConfig = {
     // Headers for caching and security
     async headers() {
         const isDev = process.env.NODE_ENV !== 'production';
-        const localGatewayConnect = isDev
+        // Allow the local gateway origin whenever the app is actually configured to
+        // talk to one — dev mode, or a production build pointed at a local gateway
+        // for E2E/CI (NEXT_PUBLIC_GATEWAY_API_URL=http://127.0.0.1:3003). Checking
+        // NODE_ENV alone missed the latter case, breaking every gateway fetch under
+        // CSP in CI's production-mode Playwright job.
+        const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_API_URL || '';
+        const usesLocalGateway = isDev || /^https?:\/\/(127\.0\.0\.1|localhost)(:|\/)/.test(gatewayUrl);
+        const localGatewayConnect = usesLocalGateway
             ? ' http://127.0.0.1:3003 http://localhost:3003 ws://127.0.0.1:3003 ws://localhost:3003'
             : '';
         // Tawk.to live chat widget — script, websocket, and its embedded iframe.
@@ -109,13 +116,15 @@ const nextConfig = {
         const tawkStyleSrc = ' https://embed.tawk.to https://fonts.googleapis.com';
         const tawkFontSrc = ' https://fonts.gstatic.com';
         const connectSrc = `'self' https://gateway.hallaai.com https://*.supabase.co wss://gateway.hallaai.com wss://*.supabase.co${tawkConnectSrc}${localGatewayConnect}`;
+        // Marketing page's Tabler icon webfont is loaded from jsDelivr.
+        const jsdelivrSrc = ' https://cdn.jsdelivr.net';
 
         /** Marketing SPA is embedded in an iframe on `/` — must allow same-origin framing. */
         const marketingSpaCsp = [
             "default-src 'self'",
             `script-src 'self' 'unsafe-inline' 'unsafe-eval'${tawkScriptSrc}`,
-            `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com${tawkStyleSrc}`,
-            `font-src 'self' https://fonts.gstatic.com data:${tawkFontSrc}`,
+            `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com${tawkStyleSrc}${jsdelivrSrc}`,
+            `font-src 'self' https://fonts.gstatic.com data:${tawkFontSrc}${jsdelivrSrc}`,
             "img-src 'self' data: https:",
             "media-src 'self' blob:",
             `connect-src ${connectSrc}`,
@@ -126,8 +135,8 @@ const nextConfig = {
         const appCsp = [
             "default-src 'self'",
             `script-src 'self' 'unsafe-inline' 'unsafe-eval'${tawkScriptSrc}`,
-            `style-src 'self' 'unsafe-inline'${tawkStyleSrc}`,
-            `font-src 'self' data:${tawkFontSrc}`,
+            `style-src 'self' 'unsafe-inline'${tawkStyleSrc}${jsdelivrSrc}`,
+            `font-src 'self' data:${tawkFontSrc}${jsdelivrSrc}`,
             "img-src 'self' data: https:",
             "media-src 'self' blob:",
             `connect-src ${connectSrc}`,
