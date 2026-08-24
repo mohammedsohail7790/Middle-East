@@ -134,6 +134,8 @@ jobs:
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: e2e-test-secret
           ENABLE_VOICE_AGENT: 'false'
+          SUPABASE_URL: https://e2e-placeholder.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: e2e-placeholder-service-role-key
         run: |
           npm run build:packages
           npm run build:gateway
