@@ -61,6 +61,4 @@ node_modules
 # Config
 .prettierignore
 .prettierrc.json
-tsconfig.json
 vitest.config.ts
-package-lock.json
