@@ -52,7 +52,7 @@
     "verify:realtime:prod": "node scripts/verify-dashboard-realtime.mjs",
     "verify:realtime": "vitest run tests/integration/dashboard-sync-scopes.test.ts && playwright test e2e/api/dashboard-realtime-api.spec.ts e2e/journeys/dashboard-realtime.spec.ts",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:install": "playwright install chromium webkit firefox winldd",
+    "test:e2e:install": "playwright install chromium webkit firefox",
     "test:workspaces": "npm run test --workspaces --if-present",
     "test:watch": "npm run test:watch --workspaces --if-present",
     "test:coverage": "npm run test:coverage --workspaces --if-present",

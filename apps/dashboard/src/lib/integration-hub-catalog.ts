@@ -93,6 +93,7 @@ export const OAUTH_AUTH_PATHS: Record<string, string> = {
   zoho: "/integrations/zoho/auth-url",
   copper: "/integrations/copper/auth-url",
   clio: "/integrations/clio/auth-url",
+  pipedrive: "/integrations/pipedrive/auth-url",
   slack: "/integrations/slack/auth-url",
   "google-calendar": "/calendar/google/auth-url",
   outlook: "/calendar/outlook/auth-url",
@@ -214,6 +215,57 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     vendorRequirement:
       "Connect Copper through Zapier — create a Zap with Halla AI as the trigger and Copper as the action.",
     loginUrl: "https://app.copper.com/",
+  },
+  {
+    id: "freshsales",
+    name: "Freshsales",
+    category: "crm",
+    tagline: "Freshworks sales CRM",
+    authType: "api_credentials",
+    isAdvanced: false,
+    ready: true,
+    planRequired: "professional",
+    vendorRequirement:
+      "Use your personal API key from Freshsales (Profile → Settings → API Settings). Freshworks external OAuth often cannot call the CRM API — API key is the supported path.",
+    loginUrl: "https://www.freshworks.com/freshsales-crm/login/",
+    screenshots: guidedScreenshots("freshsales", 4),
+    fields: [
+      {
+        key: "apiKey",
+        label: "API key",
+        type: "password",
+        placeholder: "Paste your Freshsales API key",
+        helpTitle: "Where to find your API key",
+        helpBody:
+          "In Freshsales click your profile picture → Settings → API Settings. Copy the API key shown there (not OAuth client credentials from the developer portal).",
+      },
+    ],
+    helpSteps: [
+      "Sign in to Freshsales using the button above",
+      "Click your profile picture → Settings → API Settings",
+      "Copy the API key shown there",
+      "Paste below and click Connect",
+    ],
+  },
+  {
+    id: "pipedrive",
+    name: "Pipedrive",
+    category: "crm",
+    tagline: "Sales pipeline CRM",
+    authType: "oauth",
+    isAdvanced: false,
+    ready: true,
+    planRequired: "professional",
+    vendorRequirement:
+      "Sign in with the Pipedrive account that should receive new leads and deals from Halla AI.",
+    oauthAuthPath: OAUTH_AUTH_PATHS.pipedrive,
+    loginUrl: "https://app.pipedrive.com/auth/login",
+    screenshots: guidedScreenshots("pipedrive", 3),
+    helpSteps: [
+      "Click Connect with Pipedrive",
+      "Sign in to Pipedrive and approve Halla AI",
+      "After redirect, send a test lead to confirm sync",
+    ],
   },
   {
     id: "followupboss",
@@ -497,6 +549,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     zapierOnly: true,
     vendorRequirement:
       "Connect ServiceTitan through Zapier — create a Zap with Halla AI as the trigger and ServiceTitan as the action.",
+    loginUrl: "https://go.servicetitan.com/",
   },
   {
     id: "housecallpro",
@@ -547,6 +600,7 @@ export const ALL_INTEGRATION_DEFS: IntegrationDef[] = [
     vendorRequirement:
       "Sign in with the Jobber account that should receive new clients and requests from Halla AI.",
     oauthAuthPath: OAUTH_AUTH_PATHS.jobber,
+    loginUrl: "https://secure.getjobber.com/login",
   },
 
   // ───────────────────────── Property Management ─────────────────────────
