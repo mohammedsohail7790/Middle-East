@@ -694,6 +694,7 @@ function invalidateAfterMutation(path: string) {
   const base = path.split("?")[0];
   invalidateApiGetCache(base.split("/").slice(0, 2).join("/") || "/");
   if (base.startsWith("/leads")) invalidateApiGetCache("/leads");
+  if (base.startsWith("/crm")) invalidateApiGetCache("/crm");
   if (base.startsWith("/calls")) invalidateApiGetCache("/calls");
   if (base.startsWith("/dashboard")) invalidateApiGetCache("/dashboard");
   if (base.startsWith("/integrations")) invalidateApiGetCache("/integrations");

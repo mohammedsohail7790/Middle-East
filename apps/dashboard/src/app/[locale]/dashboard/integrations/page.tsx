@@ -28,13 +28,10 @@ import { subscribePlanUpdates, getPlan, hasAccess } from "@/lib/store";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
-import { IntegrationIcon } from "@/components/integrations/IntegrationIcon";
-import { cn } from "@/lib/utils";
 import {
   IntegrationConnectWizard,
   type IntegrationConnectionInfo,
 } from "@/components/integrations/IntegrationConnectWizard";
-import { ZapierHubSection } from "@/components/integrations/ZapierHubSection";
 import {
   IntegrationCategoryTabs,
   type IntegrationTabId,
@@ -43,7 +40,6 @@ import { ConnectedIntegrationsBar } from "@/components/integrations/ConnectedInt
 import {
   CATEGORY_LABELS,
   OAUTH_INTEGRATIONS,
-  ZAPIER_ONLY_INTEGRATIONS,
   getIntegrationDef,
   getIntegrationsByCategory,
   filterAvailableOAuthIntegrations,
@@ -353,7 +349,7 @@ export default function IntegrationsPage() {
   return (
     <DashboardPage
       title="Integrations"
-      description="Connect apps directly or route through Zapier."
+      description="Connect apps directly with one click."
       loading={loading && Object.keys(connections).length === 0}
       actions={
         <button
@@ -484,72 +480,12 @@ export default function IntegrationsPage() {
               title={searchActive ? "No matching integrations" : "No direct apps enabled"}
               description={
                 searchActive
-                  ? "Try a different search term, or connect other apps through Zapier below."
-                  : "Your workspace has no direct apps configured yet. Use Zapier below for any CRM or tool."
-              }
-              action={
-                !searchActive ? (
-                  <button type="button" className="btn-primary text-sm" onClick={scrollToZapier}>
-                    Set up Zapier
-                  </button>
-                ) : undefined
+                  ? "Try a different search term."
+                  : "Your workspace has no direct apps configured yet. Ask an admin to enable one of the apps above."
               }
             />
           )}
         </div>
-      </DashboardPageSection>
-
-      {ZAPIER_ONLY_INTEGRATIONS.length > 0 && (
-        <DashboardPageSection
-          step="More apps"
-          title="More Integrations"
-          description="Connect any of these apps to route leads and bookings automatically."
-          icon={Plug}
-          iconVariant="accent"
-        >
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {ZAPIER_ONLY_INTEGRATIONS.map((integration) => {
-              const connected = connections[integration.id]?.status === "connected";
-              return (
-                <button
-                  key={integration.id}
-                  type="button"
-                  onClick={scrollToZapier}
-                  className={cn(
-                    "dashboard-panel p-4 flex flex-col items-center text-center gap-2.5 hover:border-accent/40 hover:-translate-y-0.5",
-                    connected && "border-emerald-200 dark:border-emerald-800"
-                  )}
-                  style={{ transition: "border-color 160ms ease-out, transform 160ms ease-out" }}
-                >
-                  <IntegrationIcon id={integration.id} size="lg" />
-                  <p className="text-sm font-semibold text-foreground truncate w-full">{integration.name}</p>
-                  {connected ? (
-                    <span className="inline-flex items-center gap-1 shrink-0 text-[10px] font-medium text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-full px-2 py-0.5">
-                      <CheckCircle className="size-3" />
-                      Connected
-                    </span>
-                  ) : (
-                    <span className="text-[11px] text-muted-foreground">Tap to connect</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </DashboardPageSection>
-      )}
-
-      <DashboardPageSection
-        id="zapier-connect"
-        step="Universal routing"
-        title="Zapier"
-        description="Paste your Catch Hook URL to route leads to any app not listed above."
-        icon={CATEGORY_ICONS.automation}
-        iconVariant={CATEGORY_ICON_VARIANTS.automation}
-      >
-        <ZapierHubSection
-          connected={zapierConnected}
-          onConnectedChange={() => void reloadCatalog({ silent: true })}
-        />
       </DashboardPageSection>
     </DashboardPage>
   );
