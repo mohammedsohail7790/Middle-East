@@ -22,7 +22,7 @@ async function loadPipedriveMetadata(tenantId: string): Promise<Record<string, u
   return parseMetadata(row.metadata);
 }
 
-async function persistPipedriveTokens(
+export async function persistPipedriveTokens(
   tenantId: string,
   patch: {
     accessToken: string;

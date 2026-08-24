@@ -28,7 +28,10 @@ import {
   getFreshsalesOAuthConfig,
   getZohoOAuthConfig,
   getClioOAuthConfig,
+  getPipedriveOAuthConfig,
 } from './oauth-config.js';
+import { persistPipedriveTokens } from './pipedrive-token.service.js';
+import { PipedriveProvider } from './providers/pipedrive.provider.js';
 import {
   normalizeFreshworksOrgDomain,
   FreshsalesProvider,
@@ -1060,6 +1063,108 @@ export function createIntegrationOAuthRouter(): express.Router {
       userId: req.body?.user_id,
     });
     res.sendStatus(200);
+  });
+
+  // ═══ Pipedrive OAuth ═══
+
+  router.get('/pipedrive/auth-url', requireVoiceApiAccess, async (req: any, res: any) => {
+    const tenantId = getTenantId(req);
+    if (await denyIfPlanBlocked(req, res, 'pipedrive', tenantId)) return;
+
+    const config = getPipedriveOAuthConfig();
+    if (!config.clientId || !config.clientSecret) {
+      return res.status(501).json({ success: false, error: 'Pipedrive OAuth not configured' });
+    }
+
+    const state = await storeOAuthState(tenantId, 'pipedrive', config.redirectUri, getDashboardBaseUrl());
+    const url =
+      'https://oauth.pipedrive.com/oauth/authorize' +
+      `?client_id=${encodeURIComponent(config.clientId)}` +
+      `&redirect_uri=${encodeURIComponent(config.redirectUri)}` +
+      `&state=${encodeURIComponent(state)}`;
+
+    res.json({ success: true, data: { authUrl: url } });
+  });
+
+  router.get('/pipedrive/callback', async (req: any, res: any) => {
+    const started = beginOAuthCallback(res, 'pipedrive', req.query as Record<string, unknown>);
+    if (!started) return;
+
+    const { code, state } = started;
+    const verified = await verifyOAuthState(state);
+    if (!verified) {
+      redirectInvalidOAuthState(res, 'pipedrive');
+      return;
+    }
+
+    try {
+      const config = getPipedriveOAuthConfig();
+      const basicAuth = Buffer.from(`${config.clientId}:${config.clientSecret}`).toString('base64');
+      const tokenRes = await fetch('https://oauth.pipedrive.com/oauth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Basic ${basicAuth}`,
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          code,
+          redirect_uri: config.redirectUri,
+        }),
+      });
+      const tokens = (await tokenRes.json()) as {
+        access_token?: string;
+        refresh_token?: string;
+        api_domain?: string;
+        error?: string;
+      };
+
+      if (!tokenRes.ok || !tokens.access_token || !tokens.refresh_token) {
+        logger.error('Pipedrive OAuth token exchange failed', { error: tokens });
+        return res.redirect(
+          integrationsPageUrl(
+            'pipedrive',
+            'error',
+            verified.dashboardReturnBase,
+            oauthProviderErrorDetail(tokens.error, undefined)
+          )
+        );
+      }
+
+      const apiDomain = tokens.api_domain || 'https://api.pipedrive.com';
+      const provider = new PipedriveProvider();
+      const verifyResult = await provider.verifyConnection({
+        accessToken: tokens.access_token,
+        apiDomain,
+      });
+      if (!verifyResult.success) {
+        logger.error('Pipedrive OAuth verify failed after token exchange', { message: verifyResult.message });
+        return res.redirect(
+          integrationsPageUrl('pipedrive', 'error', verified.dashboardReturnBase, verifyResult.message)
+        );
+      }
+
+      await persistPipedriveTokens(verified.tenantId, {
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        apiDomain,
+      });
+
+      logger.info('Pipedrive OAuth connected', { tenantId: verified.tenantId });
+      publishIntegrationsUpdated(verified.tenantId, 'pipedrive');
+      scheduleIntegrationSyncForProvider(verified.tenantId, 'pipedrive');
+      res.redirect(integrationsPageUrl('pipedrive', 'connected', verified.dashboardReturnBase));
+    } catch (error) {
+      logger.error('Pipedrive OAuth callback error', { error: String(error) });
+      res.redirect(
+        integrationsPageUrl(
+          'pipedrive',
+          'error',
+          verified.dashboardReturnBase,
+          clientErrorMessage(error, 'Pipedrive connection failed')
+        )
+      );
+    }
   });
 
   return router;
