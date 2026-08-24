@@ -194,7 +194,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="dashboard-boot-glow dashboard-boot-glow--tl" aria-hidden />
         <div className="dashboard-boot-glow dashboard-boot-glow--br" aria-hidden />
         <div className="dashboard-boot-card">
-          <Image src="/logo.png" alt="Halla AI" width={200} height={72} className="h-16 w-auto max-w-[180px] object-contain" priority />
+          <Image src="/logo.png" alt="Halla AI" width={200} height={72} className="h-16 w-auto max-w-[180px] object-contain dark:hidden" priority />
+          <Image src="/logo-dark.png" alt="Halla AI" width={200} height={72} className="hidden h-16 w-auto max-w-[180px] object-contain dark:block" priority />
           <div className="dashboard-boot-dots" role="status" aria-label="Loading">
             <span className="dashboard-boot-dot" style={{ animationDelay: "0ms" }} />
             <span className="dashboard-boot-dot" style={{ animationDelay: "150ms" }} />

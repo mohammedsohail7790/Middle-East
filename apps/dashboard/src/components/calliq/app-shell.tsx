@@ -159,11 +159,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           {collapsed ? (
             <Link href="/dashboard" className="dashboard-sidebar-icon shrink-0" aria-label="Halla AI">
               <Image
-                src="/logo.png"
+                src="/logo-icon.png"
                 alt=""
                 width={40}
-                height={80}
-                className="h-10 w-10 object-cover object-top"
+                height={40}
+                className="h-10 w-10 object-contain"
                 priority
               />
             </Link>
