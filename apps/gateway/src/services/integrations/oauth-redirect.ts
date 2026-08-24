@@ -25,7 +25,10 @@ export function integrationsPageUrl(
   if (message?.trim()) {
     params.set('message', message.trim().slice(0, 240));
   }
-  return `${base}/dashboard/integrations?${params.toString()}`;
+  // Dashboard uses next-intl with localePrefix: "always" and no middleware
+  // rewrite for bare paths — "/dashboard/integrations" 404s. Must include
+  // the locale segment explicitly.
+  return `${base}/en/dashboard/integrations?${params.toString()}`;
 }
 
 function queryString(value: unknown): string | undefined {

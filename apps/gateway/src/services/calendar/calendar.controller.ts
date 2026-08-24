@@ -80,11 +80,10 @@ export function createCalendarRouter(): Router {
     void (async () => {
       const { code, state } = req.query;
       const tenantId = state as string;
-      const dashboard = getDashboardBaseUrl();
 
       if (!code || !tenantId) {
         res.redirect(
-          `${dashboard}/dashboard/integrations?provider=google-calendar&status=error&message=missing_oauth_code`
+          integrationsPageUrl('google-calendar', 'error', getDashboardBaseUrl(), 'missing_oauth_code')
         );
         return;
       }
@@ -94,21 +93,16 @@ export function createCalendarRouter(): Router {
         logger.info('[Calendar] Google OAuth connected', { tenantId });
         publishIntegrationsUpdated(tenantId, 'google-calendar');
         scheduleIntegrationSyncForProvider(tenantId, 'google-calendar');
-        res.redirect(
-          `${dashboard}/dashboard/integrations?provider=google-calendar&status=connected`
-        );
+        res.redirect(integrationsPageUrl('google-calendar', 'connected', getDashboardBaseUrl()));
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Google Calendar connection failed';
         logger.error('[Calendar] Google OAuth callback error', { tenantId, error: String(error) });
-        res.redirect(
-          `${dashboard}/dashboard/integrations?provider=google-calendar&status=error&message=${encodeURIComponent(message)}`
-        );
+        res.redirect(integrationsPageUrl('google-calendar', 'error', getDashboardBaseUrl(), message));
       }
     })().catch((err) => {
       logger.error('[Calendar] Google OAuth callback fatal', { error: String(err) });
-      const dashboard = getDashboardBaseUrl();
       res.redirect(
-        `${dashboard}/dashboard/integrations?provider=google-calendar&status=error&message=connection_failed`
+        integrationsPageUrl('google-calendar', 'error', getDashboardBaseUrl(), 'connection_failed')
       );
     });
   });
