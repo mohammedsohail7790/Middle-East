@@ -6,7 +6,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@react-three/fiber": "^8.17.10",
+    "@react-three/fiber": "^9.4.2",
     "@remotion/cli": "^4.0.476",
     "@remotion/google-fonts": "4.0.475",
     "@remotion/media": "4.0.475",
