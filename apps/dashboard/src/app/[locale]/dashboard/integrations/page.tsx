@@ -37,6 +37,7 @@ import {
   type IntegrationTabId,
 } from "@/components/integrations/IntegrationCategoryTabs";
 import { ConnectedIntegrationsBar } from "@/components/integrations/ConnectedIntegrationsBar";
+import { ZapierHubSection } from "@/components/integrations/ZapierHubSection";
 import {
   CATEGORY_LABELS,
   OAUTH_INTEGRATIONS,
@@ -403,6 +404,21 @@ export default function IntegrationsPage() {
         zapierConnected={zapierConnected}
         onOpenZapier={scrollToZapier}
       />
+
+      <div id="zapier-connect">
+        <DashboardPageSection
+          step="Advanced automation"
+          title="Zapier"
+          description="Connect 5,000+ apps with a Catch Hook webhook — no API keys required."
+          icon={Zap}
+          iconVariant="neutral"
+        >
+          <ZapierHubSection
+            connected={zapierConnected}
+            onConnectedChange={() => void reloadCatalog({ silent: true })}
+          />
+        </DashboardPageSection>
+      </div>
 
       <DashboardPageSection
         step="Direct connect"
