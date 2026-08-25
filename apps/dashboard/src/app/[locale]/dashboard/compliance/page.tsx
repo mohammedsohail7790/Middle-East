@@ -162,7 +162,7 @@ function ProfileCard({
       type="button"
       onClick={onSelect}
       className={cn(
-        "w-full text-left rounded-xl border p-4",
+        "w-full text-left rounded-xl border p-4 vibe-profile-card",
         selected ? "border-accent bg-accent/5 dark:bg-accent/10" : "border-border bg-card hover:border-accent/50"
       )}
       style={{ transition: "border-color 200ms ease-out, background-color 200ms ease-out" }}
@@ -392,7 +392,7 @@ export default function CompliancePage() {
           <DisclaimerBanner />
 
           {/* ── Industry Profile ─────────────────────────────────────────── */}
-          <section className="dashboard-panel-padded space-y-4">
+          <section className="dashboard-panel-padded vibe-compliance-section space-y-4">
             <SectionHeader
               icon={Building2}
               title={t("industryProfile")}
@@ -414,7 +414,7 @@ export default function CompliancePage() {
           </section>
 
           {/* ── AI Disclosure ────────────────────────────────────────────── */}
-          <section className="dashboard-panel-padded space-y-4">
+          <section className="dashboard-panel-padded vibe-compliance-section space-y-4">
             <SectionHeader
               icon={MessageSquare}
               title={t("aiDisclosure")}
@@ -458,7 +458,7 @@ export default function CompliancePage() {
           </section>
 
           {/* ── Call Recording ───────────────────────────────────────────── */}
-          <section className="dashboard-panel-padded space-y-4">
+          <section className="dashboard-panel-padded vibe-compliance-section space-y-4">
             <SectionHeader
               icon={Mic}
               title={t("callRecording")}
@@ -519,7 +519,7 @@ export default function CompliancePage() {
           </section>
 
           {/* ── Caller Consent ───────────────────────────────────────────── */}
-          <section className="dashboard-panel-padded space-y-4">
+          <section className="dashboard-panel-padded vibe-compliance-section space-y-4">
             <SectionHeader
               icon={Shield}
               title={t("callerConsent")}
@@ -585,7 +585,7 @@ export default function CompliancePage() {
           </section>
 
           {/* ── Data Retention ───────────────────────────────────────────── */}
-          <section className="dashboard-panel-padded space-y-4">
+          <section className="dashboard-panel-padded vibe-compliance-section space-y-4">
             <SectionHeader
               icon={Clock}
               title={t("dataRetention")}
@@ -620,7 +620,7 @@ export default function CompliancePage() {
           </section>
 
           {/* ── Current configuration summary ─────────────────────────────── */}
-          <section className="dashboard-panel-padded">
+          <section className="dashboard-panel-padded vibe-compliance-section">
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-3">
               {t("activeSummary")}
             </p>

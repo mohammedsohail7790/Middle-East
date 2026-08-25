@@ -20,6 +20,7 @@ import { cn, formatPhone } from "@/lib/utils";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { IconBox, ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { useConfirm } from "@/components/ui-kit/ConfirmDialog";
@@ -252,7 +253,8 @@ export default function PhoneNumbersPage() {
         </div>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="dashboard-panel overflow-hidden">
+      <VibePanel beam className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="dashboard-panel overflow-hidden !border-0 !shadow-none !rounded-none">
         {loading ? (
           <div className="p-6 space-y-3">
             {[1, 2, 3].map((i) => (
@@ -279,7 +281,7 @@ export default function PhoneNumbersPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.05 }}
-                className="dashboard-list-row sm:p-5"
+                className="dashboard-list-row vibe-phone-row sm:p-5"
               >
                 <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                   <IconBox icon={Phone} variant="accent" size="md" />
@@ -334,6 +336,7 @@ export default function PhoneNumbersPage() {
           </div>
         )}
       </motion.div>
+      </VibePanel>
 
       {/* Add Number Modal */}
       <AnimatePresence>

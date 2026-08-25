@@ -24,6 +24,7 @@ import { timeAgo, formatDuration } from "@/lib/utils";
 import { useTranslations, useLocale } from "next-intl";
 import { StatCard } from "@/components/ui-kit/StatCard";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 
 function greetingForHour(
@@ -346,7 +347,8 @@ export default function DashboardHome() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-w-0">
-        <div className="wb-panel-padded lg:col-span-2 min-w-0">
+        <VibePanel beam className="lg:col-span-2 min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+        <div className="wb-panel-padded min-w-0 !border-0 !shadow-none !rounded-none">
           <div className="flex items-start justify-between gap-4 mb-4">
             <SectionHeader
               icon={BarChart3}
@@ -391,8 +393,10 @@ export default function DashboardHome() {
             </ResponsiveContainer>
           </div>
         </div>
+        </VibePanel>
 
-        <div className="wb-panel-padded min-w-0">
+        <VibePanel className="min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+        <div className="wb-panel-padded min-w-0 !border-0 !shadow-none !rounded-none">
           <SectionHeader icon={Filter} title={t("conversionFunnel")} size="sm" className="mb-4" />
           {!analyticsUnlocked ? (
             <div className="flex flex-col items-center justify-center text-center gap-3 py-10 px-4 rounded-xl border border-dashed border-border bg-muted/30">
@@ -421,9 +425,11 @@ export default function DashboardHome() {
           </div>
           )}
         </div>
+        </VibePanel>
       </div>
 
-      <div className="wb-panel-padded min-w-0">
+      <VibePanel className="min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+      <div className="wb-panel-padded min-w-0 !border-0 !shadow-none !rounded-none">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <SectionHeader title={t("recentActivity")} size="sm" />
           <Link href="/dashboard/calls" className="text-xs font-semibold text-primary hover:underline min-h-[44px] sm:min-h-0 flex items-center shrink-0">
@@ -458,7 +464,7 @@ export default function DashboardHome() {
               <Link
                 key={call.id}
                 href={`/dashboard/calls/${call.id}`}
-                className="wb-activity-row cursor-pointer"
+                className="wb-activity-row vibe-call-row cursor-pointer"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <IconBox icon={Phone} variant={outcomeIconVariant(call.outcome)} size="md" />
@@ -483,6 +489,7 @@ export default function DashboardHome() {
           )}
         </div>
       </div>
+      </VibePanel>
     </DashboardPage>
   );
 }

@@ -18,6 +18,7 @@ import {
   useLiveCallDetailRefresh,
 } from "@/lib/use-live-call-detail";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 import { IconBox, ICON_STROKE, outcomeIconVariant } from "@/components/ui-kit/IconBox";
 import { CallTranscript } from "@/components/calls/CallTranscript";
@@ -297,7 +298,8 @@ export default function CallDetailPage() {
           </Link>
       }
     >
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="dashboard-panel-padded space-y-6 min-w-0">
+      <VibePanel beam className="rounded-2xl border border-border/70 bg-card shadow-card">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="dashboard-panel-padded space-y-6 min-w-0 !border-0 !shadow-none !rounded-none">
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
           <IconBox icon={Phone} variant={outcomeIconVariant(call.outcome)} size="md" className="shrink-0" />
           <span className="flex items-center gap-1.5"><Clock className="size-4" strokeWidth={ICON_STROKE} />{timeAgo(call.created_at)}</span>
@@ -314,7 +316,7 @@ export default function CallDetailPage() {
         </div>
 
         {audioUrl ? (
-          <div className="space-y-3">
+          <div className="vibe-audio-player space-y-3 rounded-xl border border-border/70 bg-muted/20 p-4">
             <audio
               ref={audioRef}
               src={audioUrl}
@@ -347,7 +349,7 @@ export default function CallDetailPage() {
           <CallTranscript transcript={call.transcript} agentName={call.agent_name} />
         </div>
 
-        <div className="dashboard-panel-padded !p-4 space-y-3">
+        <div className="vibe-event-panel dashboard-panel-padded !p-4 space-y-3">
           <SectionHeader
             icon={Calendar}
             title="Appointment"
@@ -522,6 +524,7 @@ export default function CallDetailPage() {
           </div>
         </div>
       </motion.div>
+      </VibePanel>
       {confirmDialog}
     </DashboardPage>
   );

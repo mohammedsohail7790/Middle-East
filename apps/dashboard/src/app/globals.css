@@ -5173,3 +5173,61 @@ body:has(.dashboard-app) {
   box-shadow: 0 10px 32px color-mix(in srgb, var(--accent) 12%, transparent);
   transform: translateY(-2px);
 }
+
+.vibe-phone-row {
+  transition:
+    background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.vibe-phone-row:hover {
+  background: color-mix(in srgb, var(--accent) 5%, var(--card));
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.vibe-audio-player {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 6%, var(--card)),
+    color-mix(in srgb, var(--accent) 2%, var(--muted))
+  );
+}
+
+.vibe-compliance-section {
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.vibe-compliance-section:hover {
+  border-color: color-mix(in srgb, var(--accent) 18%, var(--border));
+  box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.vibe-profile-card {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.vibe-profile-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.vibe-quality-row {
+  transition: background-color 0.18s ease;
+}
+
+.vibe-quality-row:hover {
+  background: color-mix(in srgb, var(--accent) 4%, var(--card));
+}
+
+.vibe-faq-row {
+  transition: background-color 0.15s ease;
+}
+
+.vibe-faq-row:hover {
+  background: color-mix(in srgb, var(--accent) 3%, transparent);
+}
