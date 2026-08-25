@@ -15,6 +15,7 @@ import { useRealtimeQuery } from "@/lib/use-realtime-query";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { DashboardPageSection } from "@/components/ui-kit/DashboardPageSection";
 import { OutboundCampaignRow } from "@/components/outbound/OutboundCampaignRow";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { PlanFeatureGate } from "@/components/billing/PlanFeatureGate";
 import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
@@ -283,7 +284,8 @@ function OutboundPageContent() {
             description={t("noCampaignsDesc")}
           />
         ) : (
-          <div className="space-y-2">
+          <VibePanel beam className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+          <div className="space-y-2 p-3 sm:p-4">
             {campaigns.map((c) => {
               const meta = PURPOSE_META[c.purpose ?? "campaign"];
               return (
@@ -313,6 +315,7 @@ function OutboundPageContent() {
               );
             })}
           </div>
+          </VibePanel>
         )}
       </DashboardPageSection>
 

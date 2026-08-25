@@ -34,6 +34,7 @@ import { IconBox } from "@/components/ui-kit/IconBox";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 import { NeonGradientCard } from "@/components/magic-ui/neon-gradient-card";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { useConfirm } from "@/components/ui-kit/ConfirmDialog";
 
 const BILLING_PORTAL_FLAG = "calliq_billing_portal_return";
@@ -374,10 +375,11 @@ function BillingPageContent() {
       )}
 
       {trialState?.isTrialing && (
+        <VibePanel className="mb-6 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="dashboard-panel-padded mb-6 border-[var(--cyan-border)] bg-gradient-to-r from-background to-[var(--accent-light)]"
+          className="dashboard-panel-padded !border-0 !shadow-none !rounded-none border-[var(--cyan-border)] bg-gradient-to-r from-background to-[var(--accent-light)]"
         >
           <SectionHeader title={t("trialUsage")} size="sm" className="mb-1" />
           <p className="text-xs text-foreground-secondary mb-4">
@@ -395,11 +397,13 @@ function BillingPageContent() {
           </div>
           <p className="text-xs text-foreground-tertiary">{t("trialWarnings")}</p>
         </motion.div>
+        </VibePanel>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Current Plan */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="dashboard-panel-padded">
+        <VibePanel className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="dashboard-panel-padded !border-0 !shadow-none !rounded-none">
           <div className="flex items-center justify-between mb-4 gap-3">
             <SectionHeader title={t("currentPlan")} size="sm" />
             <IconBox icon={Crown} variant="accent" size="sm" />
@@ -444,9 +448,10 @@ function BillingPageContent() {
             </div>
           )}
         </motion.div>
+        </VibePanel>
 
-        {/* Usage */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-panel-padded">
+        <VibePanel className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-panel-padded !border-0 !shadow-none !rounded-none">
           <SectionHeader title={t("usagePeriod")} size="sm" className="mb-4" />
           {usage ? (
             <div className="space-y-4">
@@ -483,10 +488,11 @@ function BillingPageContent() {
             <p className="text-foreground-tertiary text-sm">{t("noUsageData")}</p>
           )}
         </motion.div>
+        </VibePanel>
       </div>
 
-      {/* Invoices */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="dashboard-panel overflow-hidden">
+      <VibePanel beam className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="dashboard-panel overflow-hidden !border-0 !shadow-none !rounded-none">
         <div className="p-6 border-b border-border">
           <SectionHeader title={t("invoices")} size="sm" />
         </div>
@@ -510,7 +516,7 @@ function BillingPageContent() {
               </thead>
               <tbody>
                 {invoices.map((invoice) => (
-                  <tr key={invoice.id} className="border-b border-border hover:bg-muted/50">
+                  <tr key={invoice.id} className="vibe-billing-row border-b border-border hover:bg-muted/50">
                     <td className="px-6 py-4 text-sm text-foreground-secondary">
                       {new Date(invoice.date).toLocaleDateString()}
                     </td>
@@ -539,6 +545,7 @@ function BillingPageContent() {
           </div>
         )}
       </motion.div>
+      </VibePanel>
 
       {/* Change Plan Modal */}
       <AnimatePresence>

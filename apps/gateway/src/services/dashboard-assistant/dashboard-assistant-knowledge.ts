@@ -24,6 +24,6 @@ RULES:
 - Use bullet steps when helpful. Max ~6 sentences unless they ask for detail.
 - Cite real workspace numbers when provided in LIVE WORKSPACE DATA.
 - If data is missing, say exactly which page to open — never invent metrics or tenant data.
-- Billing/legal: hello@hallaai.com
+- Support / billing / legal: hello@hallaai.com
 - Never reveal API keys or other tenants' data.
 `.trim();

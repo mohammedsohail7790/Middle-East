@@ -40,6 +40,7 @@ import {
 } from "@/components/integrations/IntegrationCategoryTabs";
 import { ConnectedIntegrationsBar } from "@/components/integrations/ConnectedIntegrationsBar";
 import { IntegrationHubVisual } from "@/components/integrations/IntegrationHubVisual";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { ZapierHubSection } from "@/components/integrations/ZapierHubSection";
 import {
   CATEGORY_LABELS,
@@ -418,10 +419,12 @@ export default function IntegrationsPage() {
           icon={Zap}
           iconVariant="neutral"
         >
-          <ZapierHubSection
-            connected={zapierConnected}
-            onConnectedChange={() => void reloadCatalog({ silent: true })}
-          />
+          <VibePanel className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+            <ZapierHubSection
+              connected={zapierConnected}
+              onConnectedChange={() => void reloadCatalog({ silent: true })}
+            />
+          </VibePanel>
         </DashboardPageSection>
       </div>
 
@@ -432,7 +435,8 @@ export default function IntegrationsPage() {
         icon={Plug}
         iconVariant="violet"
       >
-        <div className="dashboard-panel overflow-hidden">
+        <VibePanel beam className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+        <div className="dashboard-panel overflow-hidden !border-0 !shadow-none !rounded-none">
           {displayableIntegrations.length > 0 && (
             <IntegrationCategoryTabs
               tabs={categoryTabs}
@@ -507,6 +511,7 @@ export default function IntegrationsPage() {
             />
           )}
         </div>
+        </VibePanel>
       </DashboardPageSection>
     </DashboardPage>
   );
