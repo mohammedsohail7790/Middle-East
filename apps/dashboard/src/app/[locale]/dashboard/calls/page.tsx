@@ -12,6 +12,7 @@ import { DASHBOARD_POLL_MS } from "@/lib/dashboard-sync";
 import { useRealtimeQuery } from "@/lib/use-realtime-query";
 import { timeAgo, formatDuration, formatPhone } from "@/lib/utils";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 import { DashboardTabs } from "@/components/ui-kit/DashboardTabs";
 
@@ -209,7 +210,8 @@ export default function CallsPage() {
         </>
       }
     >
-      <div className="dashboard-panel">
+      <VibePanel beam className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
+      <div className="dashboard-panel !border-0 !shadow-none !rounded-none">
         {isSpamTab ? (
           spamLog.length === 0 && !spamLoading ? (
             <EmptyState
@@ -265,7 +267,7 @@ export default function CallsPage() {
                 <Link
                   key={call.id}
                   href={`/dashboard/calls/${call.id}`}
-                  className="dashboard-list-row group cursor-pointer"
+                  className="dashboard-list-row vibe-call-row group cursor-pointer"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1 w-full">
                     <IconBox icon={Phone} variant={outcomeIconVariant(call.outcome)} size="md" />
@@ -325,6 +327,7 @@ export default function CallsPage() {
           </>
         )}
       </div>
+      </VibePanel>
     </DashboardPage>
   );
 }

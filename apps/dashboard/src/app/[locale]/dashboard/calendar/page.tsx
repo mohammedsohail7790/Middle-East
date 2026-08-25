@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { useRealtimeQuery } from "@/lib/use-realtime-query";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 import { useConfirm } from "@/components/ui-kit/ConfirmDialog";
@@ -228,8 +229,10 @@ export default function CalendarPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-        className="dashboard-panel p-4 sm:p-6 lg:col-span-2 min-w-0 overflow-hidden"
+          className="lg:col-span-2"
         >
+        <VibePanel beam className="rounded-2xl border border-border/70 bg-card shadow-card min-w-0 overflow-hidden">
+        <div className="p-4 sm:p-6 min-w-0 overflow-hidden">
           <div className="flex flex-col gap-3 min-[400px]:flex-row min-[400px]:items-center min-[400px]:justify-between mb-6">
             <h2 className="text-lg font-semibold text-foreground">{monthYearLabel}</h2>
             <div className="flex items-center gap-2 shrink-0">
@@ -292,11 +295,12 @@ export default function CalendarPage() {
                       key={`day-${day}`}
                       onClick={() => setSelectedDay(day)}
                       className={cn(
-                        "min-h-[4rem] sm:min-h-[5rem] h-full p-1 sm:p-1.5 rounded-lg border text-left transition-colors min-w-0",
+                        "vibe-calendar-day min-h-[4rem] sm:min-h-[5rem] h-full p-1 sm:p-1.5 rounded-lg border text-left transition-colors min-w-0",
                         isSelected && "ring-2 ring-accent ring-offset-1",
                         isToday
                           ? "border-accent/30 bg-accent/[0.05]"
-                          : "border-border hover:bg-muted/50"
+                          : "border-border hover:bg-muted/50",
+                        dayEvents.length > 0 && "has-events",
                       )}
                     >
                       <span
@@ -336,6 +340,8 @@ export default function CalendarPage() {
               </div>
             </>
           )}
+        </div>
+        </VibePanel>
         </motion.div>
 
         <motion.div
@@ -345,7 +351,7 @@ export default function CalendarPage() {
           className="space-y-6"
         >
           {selectedDay != null && (
-            <div className="dashboard-panel p-6">
+            <div className="dashboard-panel vibe-event-panel p-6">
               <SectionHeader
                 icon={CalendarIcon}
                 title={selectedDayLabel}
@@ -364,7 +370,7 @@ export default function CalendarPage() {
             </div>
           )}
 
-          <div className="dashboard-panel p-6">
+          <div className="dashboard-panel vibe-event-panel p-6">
             <SectionHeader icon={Clock} title={t("upcoming")} size="sm" className="mb-4" />
             {loading ? (
               <div className="space-y-3">
@@ -484,7 +490,7 @@ function EventCard({
   };
 
   return (
-    <div className="p-3 rounded-xl bg-background border border-border">
+    <div className="vibe-event-card rounded-xl border border-border bg-background p-3">
       <div className="flex items-start gap-3">
         <div
           className={cn(

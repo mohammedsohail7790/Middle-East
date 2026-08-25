@@ -34,6 +34,8 @@ import { syncDashboardAction } from "@/lib/dashboard-actions";
 import { normalizeKnowledgeImportUrl } from "@/lib/knowledge-url";
 import { isTemplateKnowledgeSource } from "@/lib/knowledge-templates";
 import { KnowledgeBusinessTemplates } from "@/components/knowledge/KnowledgeBusinessTemplates";
+import { BusinessProfileHero } from "@/components/business-profile/BusinessProfileHero";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
 interface CompanyProfile {
@@ -411,6 +413,12 @@ export default function BusinessProfilePage() {
       )}
 
       {profile && (
+        <>
+        <BusinessProfileHero
+          companyName={profile.companyName}
+          services={profile.services}
+          serviceAreaEnabled={profile.serviceAreaEnabled}
+        />
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -556,6 +564,7 @@ export default function BusinessProfilePage() {
             </button>
           </div>
         </motion.div>
+        </>
       )}
 
       <KnowledgeBusinessTemplates />
@@ -574,7 +583,8 @@ export default function BusinessProfilePage() {
         icon={BookOpen}
         iconVariant="accent"
       >
-      <div className="dashboard-content-grid">
+      <VibePanel beam className="rounded-2xl border border-border/70 bg-card shadow-card overflow-hidden">
+      <div className="dashboard-content-grid !border-0 !shadow-none !rounded-none">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -841,6 +851,7 @@ export default function BusinessProfilePage() {
           </div>
         </motion.div>
       </div>
+      </VibePanel>
       </DashboardPageSection>
       {confirmDialog}
     </DashboardPage>

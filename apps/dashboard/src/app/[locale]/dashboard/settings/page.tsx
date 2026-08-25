@@ -1,13 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { Shield, Building2, ChevronRight } from "lucide-react";
+import { Shield, Building2 } from "lucide-react";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
-import { SectionHeader } from "@/components/ui-kit/SectionHeader";
-import { ICON_STROKE } from "@/components/ui-kit/IconBox";
+import { SettingsNavCard } from "@/components/settings/SettingsNavCard";
 import { TeamAccountPanel } from "@/components/settings/TeamAccountPanel";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
 export default function SettingsPage() {
@@ -24,33 +23,27 @@ export default function SettingsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6 min-w-0"
       >
-        <Link
+        <SettingsNavCard
           href="/dashboard/business-profile"
-          className="dashboard-panel-padded space-y-1 flex items-center justify-between gap-4 hover:bg-muted/40 transition-colors"
-        >
-          <SectionHeader
-            icon={Building2}
-            title={t("businessProfileLink")}
-            iconVariant="accent"
-            description={t("businessProfileDesc")}
-          />
-          <ChevronRight className="size-5 text-muted-foreground shrink-0" strokeWidth={ICON_STROKE} />
-        </Link>
+          icon={Building2}
+          title={t("businessProfileLink")}
+          description={t("businessProfileDesc")}
+          iconVariant="accent"
+        />
 
-        <Link
+        <SettingsNavCard
           href="/dashboard/settings/spam"
-          className="dashboard-panel-padded space-y-1 flex items-center justify-between gap-4 hover:bg-muted/40 transition-colors"
-        >
-          <SectionHeader
-            icon={Shield}
-            title={t("spamLink")}
-            iconVariant="violet"
-            description={t("spamDesc")}
-          />
-          <ChevronRight className="size-5 text-muted-foreground shrink-0" strokeWidth={ICON_STROKE} />
-        </Link>
+          icon={Shield}
+          title={t("spamLink")}
+          description={t("spamDesc")}
+          iconVariant="violet"
+        />
 
-        <TeamAccountPanel />
+        <VibePanel beam className="rounded-2xl border border-border/70 bg-card shadow-card">
+          <div className="p-1 sm:p-2">
+            <TeamAccountPanel />
+          </div>
+        </VibePanel>
       </motion.div>
     </DashboardPage>
   );

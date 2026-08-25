@@ -7,6 +7,7 @@ import { Save, Shield, ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/api";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { showDashboardToast } from "@/lib/dashboard-toast";
@@ -101,8 +102,9 @@ export default function SpamSettingsPage() {
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="dashboard-panel-padded space-y-6 max-w-2xl"
         >
+        <VibePanel beam className="max-w-2xl rounded-2xl border border-border/70 bg-card shadow-card">
+        <div className="dashboard-panel-padded space-y-6 !border-0 !shadow-none !rounded-none">
           <SectionHeader icon={Shield} title={t("sectionTitle")} iconVariant="violet" />
           <div className="space-y-2">
             <label
@@ -187,6 +189,8 @@ export default function SpamSettingsPage() {
               {saving ? tCommon("saving") : t("saveSpam")}
             </button>
           </div>
+        </div>
+        </VibePanel>
         </motion.div>
       )}
     </DashboardPage>
