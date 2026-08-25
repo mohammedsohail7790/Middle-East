@@ -5052,3 +5052,31 @@ body:has(.dashboard-app) {
 .auth-marketing-shell .auth-btn-primary:hover:not(:disabled)::after {
   transform: translateX(120%);
 }
+
+/* Neon gradient card (billing / highlights) */
+.neon-gradient-card::before,
+.neon-gradient-card::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--neon-border-size) * -1);
+  border-radius: var(--neon-radius);
+  background: linear-gradient(0deg, var(--neon-first), var(--neon-second));
+  background-size: 100% 200%;
+  animation: background-position-spin 3s linear infinite;
+  z-index: -1;
+}
+
+.neon-gradient-card::after {
+  filter: blur(var(--neon-blur));
+  opacity: 0.45;
+}
+
+.neon-gradient-card-inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* Marketing trust marquee injected by React */
+.marketing-vibe-trust {
+  margin-top: -1px;
+}

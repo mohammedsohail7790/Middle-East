@@ -33,6 +33,7 @@ import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 import { IconBox } from "@/components/ui-kit/IconBox";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
+import { NeonGradientCard } from "@/components/magic-ui/neon-gradient-card";
 import { useConfirm } from "@/components/ui-kit/ConfirmDialog";
 
 const BILLING_PORTAL_FLAG = "calliq_billing_portal_return";
@@ -596,59 +597,76 @@ function BillingPageContent() {
                   const displayPrice =
                     billingInterval === "annual" ? plan.annualPrice : plan.monthlyPrice;
                   const priceSuffix = billingInterval === "annual" ? "/yr" : "/mo";
-                  return (
-                  <div
-                    key={plan.id}
-                    className={cn(
-                      "p-5 rounded-xl border",
-                      plan.popular
-                        ? "border-accent/30 bg-accent/[0.05]"
-                        : "border-border bg-card",
-                      subscription?.plan === plan.id && "ring-2 ring-violet-500/50"
-                    )}
-                    style={{ transition: "border-color 200ms ease-out, background-color 200ms ease-out, box-shadow 200ms ease-out" }}
-                  >
-                    {plan.popular && (
-                      <span className="text-[10px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full">
-                        {t("mostPopular")}
-                      </span>
-                    )}
-                    <h3 className="text-lg font-bold text-foreground mt-2">{plan.name}</h3>
-                    <div className="flex items-baseline gap-1 mt-1 mb-1">
-                      <span className="text-2xl font-bold text-foreground">${displayPrice}</span>
-                      <span className="text-sm text-foreground-secondary">{priceSuffix}</span>
-                    </div>
-                    {billingInterval === "annual" && plan.annualEstimated && (
-                      <p className="text-[10px] text-foreground-tertiary mb-3">{t("billedYearly")}</p>
-                    )}
-                    {billingInterval === "annual" && !plan.annualEstimated && (
-                      <p className="text-[10px] text-emerald-600 mb-3">{t("saveVsMonthly")}</p>
-                    )}
-                    {billingInterval === "monthly" && <div className="mb-3" />}
-                    <ul className="space-y-2 mb-4">
-                      {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-center gap-2 text-xs text-foreground-secondary">
-                          <Check className="w-3 h-3 text-emerald-600 shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                    <button
-                      type="button"
-                      onClick={() => subscription?.plan !== plan.id && changePlan(plan.id, billingInterval)}
-                      className={cn(
-                        "w-full text-xs py-2 rounded-lg",
-                        subscription?.plan === plan.id ? "btn-ghost" : "btn-primary"
+                  const planBody = (
+                    <>
+                      {plan.popular && (
+                        <span className="text-[10px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full">
+                          {t("mostPopular")}
+                        </span>
                       )}
-                      disabled={subscription?.plan === plan.id || changingPlan === plan.id}
+                      <h3 className="text-lg font-bold text-foreground mt-2">{plan.name}</h3>
+                      <div className="flex items-baseline gap-1 mt-1 mb-1">
+                        <span className="text-2xl font-bold text-foreground">${displayPrice}</span>
+                        <span className="text-sm text-foreground-secondary">{priceSuffix}</span>
+                      </div>
+                      {billingInterval === "annual" && plan.annualEstimated && (
+                        <p className="text-[10px] text-foreground-tertiary mb-3">{t("billedYearly")}</p>
+                      )}
+                      {billingInterval === "annual" && !plan.annualEstimated && (
+                        <p className="text-[10px] text-emerald-600 mb-3">{t("saveVsMonthly")}</p>
+                      )}
+                      {billingInterval === "monthly" && <div className="mb-3" />}
+                      <ul className="space-y-2 mb-4">
+                        {plan.features.map((feature) => (
+                          <li key={feature} className="flex items-center gap-2 text-xs text-foreground-secondary">
+                            <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                      <button
+                        type="button"
+                        onClick={() => subscription?.plan !== plan.id && changePlan(plan.id, billingInterval)}
+                        className={cn(
+                          "w-full text-xs py-2 rounded-lg",
+                          subscription?.plan === plan.id ? "btn-ghost" : "btn-primary"
+                        )}
+                        disabled={subscription?.plan === plan.id || changingPlan === plan.id}
+                      >
+                        {changingPlan === plan.id
+                          ? t("updating")
+                          : subscription?.plan === plan.id
+                            ? t("currentPlanBtn")
+                            : t("selectPlan")}
+                      </button>
+                    </>
+                  );
+
+                  if (plan.popular) {
+                    return (
+                      <NeonGradientCard
+                        key={plan.id}
+                        borderRadius={16}
+                        className={cn(
+                          subscription?.plan === plan.id && "ring-2 ring-accent/40",
+                        )}
+                      >
+                        {planBody}
+                      </NeonGradientCard>
+                    );
+                  }
+
+                  return (
+                    <div
+                      key={plan.id}
+                      className={cn(
+                        "p-5 rounded-xl border border-border bg-card",
+                        subscription?.plan === plan.id && "ring-2 ring-accent/30"
+                      )}
+                      style={{ transition: "border-color 200ms ease-out, background-color 200ms ease-out, box-shadow 200ms ease-out" }}
                     >
-                      {changingPlan === plan.id
-                        ? t("updating")
-                        : subscription?.plan === plan.id
-                          ? t("currentPlanBtn")
-                          : t("selectPlan")}
-                    </button>
-                  </div>
+                      {planBody}
+                    </div>
                   );
                 })}
               </div>

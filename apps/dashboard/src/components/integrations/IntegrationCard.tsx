@@ -112,8 +112,10 @@ export function IntegrationCard({
     return (
       <div
         className={cn(
-          "group flex flex-col sm:flex-row sm:items-center gap-4 px-4 sm:px-5 py-4 transition-colors",
-          selected ? "bg-accent/5" : "hover:bg-muted/30"
+          "group relative flex flex-col gap-4 px-4 py-4 transition-colors sm:flex-row sm:items-center sm:px-5",
+          selected
+            ? "bg-accent/5 before:absolute before:left-0 before:top-3 before:bottom-3 before:w-[3px] before:rounded-r-full before:bg-gradient-to-b before:from-accent before:to-accent-mid"
+            : "hover:bg-muted/30"
         )}
       >
         <div className="flex items-center gap-3 min-w-0 flex-1">

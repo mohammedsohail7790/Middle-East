@@ -39,6 +39,7 @@ import {
   type IntegrationTabId,
 } from "@/components/integrations/IntegrationCategoryTabs";
 import { ConnectedIntegrationsBar } from "@/components/integrations/ConnectedIntegrationsBar";
+import { IntegrationHubVisual } from "@/components/integrations/IntegrationHubVisual";
 import { ZapierHubSection } from "@/components/integrations/ZapierHubSection";
 import {
   CATEGORY_LABELS,
@@ -383,6 +384,8 @@ export default function IntegrationsPage() {
           index={2}
         />
       </div>
+
+      <IntegrationHubVisual />
 
       {crmIntegrationsLocked && (
         <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 dark:bg-amber-950/20 dark:border-amber-900/50 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">

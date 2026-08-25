@@ -6,6 +6,8 @@ import Link from "next/link";
 import { HallaAiLogo } from "@/components/brand/HallaAiLogo";
 import { cn } from "@/lib/utils";
 import { IconBox } from "@/components/ui-kit/IconBox";
+import { BorderBeam } from "@/components/magic-ui/border-beam";
+import { DotPattern } from "@/components/magic-ui/dot-pattern";
 
 const STEP_LABELS = ["Business", "Industry", "Hours", "AI agent", "Phone line", "Integrations", "Finish"];
 
@@ -25,8 +27,14 @@ export function OnboardingShell({
   const showProgress = step < totalSteps;
 
   return (
-    <div className="onboarding-page min-h-[100dvh] flex flex-col">
-      <header className="onboarding-header">
+    <div className="onboarding-page auth-marketing-shell relative min-h-[100dvh] flex flex-col overflow-x-hidden">
+      <DotPattern
+        className="absolute inset-0 z-0 text-accent/20 [mask-image:radial-gradient(ellipse_at_center,white,transparent_80%)]"
+        width={22}
+        height={22}
+        cr={1}
+      />
+      <header className="onboarding-header relative z-10">
         <div className="onboarding-header-inner">
           <HallaAiLogo href="/" size="md" className="onboarding-logo" />
           <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground">
@@ -35,7 +43,7 @@ export function OnboardingShell({
         </div>
       </header>
 
-      <main className="flex-1 flex items-start justify-center px-4 py-8 sm:py-12">
+      <main className="relative z-10 flex-1 flex items-start justify-center px-4 py-8 sm:py-12">
         <div className="w-full max-w-xl">
           {showProgress && (
             <div className="mb-8">
@@ -62,7 +70,10 @@ export function OnboardingShell({
             </div>
           )}
 
-          <div className="onboarding-card">{children}</div>
+          <div className="onboarding-card relative overflow-hidden">
+            <BorderBeam size={70} duration={12} colorFrom="#0D9488" colorTo="#2DD4BF" borderWidth={1.5} />
+            {children}
+          </div>
 
           {footer && <div className="mt-6">{footer}</div>}
         </div>

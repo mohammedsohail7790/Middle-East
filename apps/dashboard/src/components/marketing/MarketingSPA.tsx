@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import { MarketingVibeLayer } from "@/components/marketing/MarketingVibeLayer";
 
 interface Props {
   bodyHtml: string;
@@ -18,6 +19,7 @@ export default function MarketingSPA({ bodyHtml, initialPage = "home" }: Props) 
 
   return (
     <>
+      <MarketingVibeLayer />
       <div
         id="marketing-spa-root"
         // eslint-disable-next-line react/no-danger
