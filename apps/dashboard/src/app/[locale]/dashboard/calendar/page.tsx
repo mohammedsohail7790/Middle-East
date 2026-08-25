@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import {
   ChevronLeft,
@@ -22,6 +23,7 @@ import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 import { useConfirm } from "@/components/ui-kit/ConfirmDialog";
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
 interface CalendarEvent {
   id: string;
@@ -86,6 +88,9 @@ async function fetchCalendarEvents(year: number, month: number): Promise<Calenda
 }
 
 export default function CalendarPage() {
+  const t = useTranslations("pages.calendar");
+  const locale = useLocale();
+  const { title } = useDashboardPageLabels("/dashboard/calendar");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -107,11 +112,11 @@ export default function CalendarPage() {
       setEvents(rows);
     } catch (e) {
       setEvents([]);
-      setError(e instanceof Error ? e.message : "Failed to load calendar");
+      setError(e instanceof Error ? e.message : t("loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, [year, month]);
+  }, [year, month, t]);
 
   const addTestAppointment = async () => {
     setError("");
@@ -128,7 +133,7 @@ export default function CalendarPage() {
       await loadEvents();
       syncDashboardAction("calendar");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not create test appointment");
+      setError(e instanceof Error ? e.message : t("createTestFailed"));
     }
   };
 
@@ -160,19 +165,33 @@ export default function CalendarPage() {
   const selectedDayEvents =
     selectedDay != null ? getEventsForDay(selectedDay) : [];
 
-  const days: (number | null)[] = [];
-  for (let i = 0; i < firstDay; i++) days.push(null);
-  for (let i = 1; i <= daysInMonth; i++) days.push(i);
+  const monthYearLabel = useMemo(
+    () => new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(currentDate),
+    [locale, currentDate]
+  );
 
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
-  ];
+  const weekdayLabels = useMemo(() => {
+    const base = new Date(2024, 0, 7);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(base);
+      d.setDate(base.getDate() + i);
+      return new Intl.DateTimeFormat(locale, { weekday: "short" }).format(d);
+    });
+  }, [locale]);
+
+  const selectedDayLabel =
+    selectedDay != null
+      ? new Intl.DateTimeFormat(locale, { month: "long", day: "numeric", year: "numeric" }).format(
+          new Date(year, month, selectedDay)
+        )
+      : "";
+
+  const pageDescription = t("monthAppointments", { count: events.length });
 
   return (
     <DashboardPage
-      title="Calendar"
-      description={`Appointments booked by your AI receptionist · ${events.length} this month`}
+      title={title}
+      description={pageDescription}
       maxWidth="xl"
       loading={loading && events.length === 0}
       actions={
@@ -183,29 +202,23 @@ export default function CalendarPage() {
           disabled={loading}
         >
           <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
-          Refresh
+          {t("refresh")}
         </button>
       }
     >
       {error && (
         <div className="dashboard-alert dashboard-alert-error mb-6">
           <p className="text-sm">{error}</p>
-          <p className="text-xs mt-2 opacity-90">
-            Ensure the gateway is running (npm run dev:gateway). Enable Book Appointments on the AI Agent
-            page, then place a test call with a specific date and time.
-          </p>
+          <p className="text-xs mt-2 opacity-90">{t("errorHint")}</p>
         </div>
       )}
 
       {!loading && events.length === 0 && !error && (
         <div className="dashboard-alert border-amber-200 bg-amber-50 dark:bg-amber-950/20 mb-6">
-          <p className="text-sm text-amber-900 dark:text-amber-200 font-medium">No appointments yet</p>
-          <p className="text-xs text-amber-800 dark:text-amber-300 mt-1">
-            Bookings appear here after a successful call booking or when you add one below. Turn on{" "}
-            <strong>Book Appointments</strong> under AI Agent.
-          </p>
+          <p className="text-sm text-amber-900 dark:text-amber-200 font-medium">{t("noAppointments")}</p>
+          <p className="text-xs text-amber-800 dark:text-amber-300 mt-1">{t("noAppointmentsDesc")}</p>
           <button type="button" onClick={() => void addTestAppointment()} className="btn-primary mt-3 text-sm">
-            Add test appointment (2 days out)
+            {t("addTest")}
           </button>
         </div>
       )}
@@ -218,11 +231,9 @@ export default function CalendarPage() {
         className="dashboard-panel p-4 sm:p-6 lg:col-span-2 min-w-0 overflow-hidden"
         >
           <div className="flex flex-col gap-3 min-[400px]:flex-row min-[400px]:items-center min-[400px]:justify-between mb-6">
-            <h2 className="text-lg font-semibold text-foreground">
-              {monthNames[month]} {year}
-            </h2>
+            <h2 className="text-lg font-semibold text-foreground">{monthYearLabel}</h2>
             <div className="flex items-center gap-2 shrink-0">
-              <button type="button" onClick={prevMonth} className="btn-ghost p-2" aria-label="Previous month">
+              <button type="button" onClick={prevMonth} className="btn-ghost p-2" aria-label={t("prevMonth")}>
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
@@ -233,9 +244,9 @@ export default function CalendarPage() {
                 }}
                 className="btn-ghost px-3 py-1.5 text-xs"
               >
-                Today
+                {t("today")}
               </button>
-              <button type="button" onClick={nextMonth} className="btn-ghost p-2" aria-label="Next month">
+              <button type="button" onClick={nextMonth} className="btn-ghost p-2" aria-label={t("nextMonth")}>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -250,7 +261,7 @@ export default function CalendarPage() {
           ) : (
             <>
               <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-1">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                {weekdayLabels.map((day) => (
                   <div
                     key={day}
                     className="text-center text-[10px] sm:text-xs text-foreground-tertiary py-1.5 sm:py-2 font-medium truncate px-0.5"
@@ -261,7 +272,12 @@ export default function CalendarPage() {
               </div>
 
               <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
-                {days.map((day, i) => {
+                {(() => {
+                  const days: (number | null)[] = [];
+                  for (let i = 0; i < firstDay; i++) days.push(null);
+                  for (let i = 1; i <= daysInMonth; i++) days.push(i);
+                  return days;
+                })().map((day, i) => {
                   if (!day) return <div key={`pad-${i}`} className="min-h-[4rem] sm:min-h-[5rem]" />;
                   const dayEvents = getEventsForDay(day);
                   const isToday =
@@ -310,7 +326,7 @@ export default function CalendarPage() {
                         ))}
                         {dayEvents.length > 2 && (
                           <span className="text-[9px] text-foreground-tertiary">
-                            +{dayEvents.length - 2} more
+                            {t("moreEvents", { count: dayEvents.length - 2 })}
                           </span>
                         )}
                       </div>
@@ -332,12 +348,12 @@ export default function CalendarPage() {
             <div className="dashboard-panel p-6">
               <SectionHeader
                 icon={CalendarIcon}
-                title={`${monthNames[month]} ${selectedDay}, ${year}`}
+                title={selectedDayLabel}
                 size="sm"
                 className="mb-4"
               />
               {selectedDayEvents.length === 0 ? (
-                <p className="text-sm text-foreground-tertiary">No appointments this day</p>
+                <p className="text-sm text-foreground-tertiary">{t("noDayAppointments")}</p>
               ) : (
                 <div className="space-y-3">
                   {selectedDayEvents.map((event) => (
@@ -349,7 +365,7 @@ export default function CalendarPage() {
           )}
 
           <div className="dashboard-panel p-6">
-            <SectionHeader icon={Clock} title="Upcoming" size="sm" className="mb-4" />
+            <SectionHeader icon={Clock} title={t("upcoming")} size="sm" className="mb-4" />
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
@@ -359,8 +375,8 @@ export default function CalendarPage() {
             ) : upcomingEvents.length === 0 ? (
               <EmptyState
                 icon={CalendarIcon}
-                title="No upcoming appointments"
-                description="Synced calendar events will appear here once connected."
+                title={t("noUpcoming")}
+                description={t("noUpcomingDesc")}
                 iconVariant="muted"
               />
             ) : (
@@ -400,6 +416,8 @@ function EventCard({
   onError: (msg: string) => void;
   confirm: (options: import("@/components/ui-kit/ConfirmDialog").ConfirmOptions) => Promise<boolean>;
 }) {
+  const t = useTranslations("pages.calendar");
+  const locale = useLocale();
   const start = new Date(event.start);
   const managed = isManagedAppointment(event);
   const [editing, setEditing] = useState(false);
@@ -418,7 +436,7 @@ function EventCard({
       await onUpdated();
       syncDashboardAction("calendar");
     } catch (e) {
-      onError(e instanceof Error ? e.message : "Reschedule failed");
+      onError(e instanceof Error ? e.message : t("rescheduleFailed"));
     } finally {
       setBusy(false);
     }
@@ -426,10 +444,10 @@ function EventCard({
 
   const handleCancel = async () => {
     const ok = await confirm({
-      title: "Cancel this appointment?",
-      message: "This action cannot be undone.",
-      confirmLabel: "Yes, cancel",
-      cancelLabel: "Keep it",
+      title: t("cancelConfirm"),
+      message: t("cancelMessage"),
+      confirmLabel: t("cancelYes"),
+      cancelLabel: t("cancelKeep"),
     });
     if (!ok) return;
     setBusy(true);
@@ -439,7 +457,7 @@ function EventCard({
       await onUpdated();
       syncDashboardAction("calendar");
     } catch (e) {
-      onError(e instanceof Error ? e.message : "Cancel failed");
+      onError(e instanceof Error ? e.message : t("cancelFailed"));
     } finally {
       setBusy(false);
     }
@@ -459,7 +477,7 @@ function EventCard({
       await onUpdated();
       syncDashboardAction("calendar");
     } catch (e) {
-      onError(e instanceof Error ? e.message : "Could not book appointment");
+      onError(e instanceof Error ? e.message : t("bookFailed"));
     } finally {
       setBusy(false);
     }
@@ -478,22 +496,22 @@ function EventCard({
           <p className="text-sm font-medium text-foreground truncate">{event.title}</p>
           {event.type === "lead" && (
             <div className="mt-2 space-y-2">
-              <p className="text-[10px] text-amber-700">Preferred time — not booked yet</p>
+              <p className="text-[10px] text-amber-700">{t("preferredTime")}</p>
               <button
                 type="button"
                 className="btn-primary text-xs py-1.5 px-3"
                 disabled={busy}
                 onClick={() => void bookLeadAsAppointment()}
               >
-                Book appointment
+                {t("bookAppointment")}
               </button>
             </div>
           )}
           <div className="flex items-center gap-2 mt-1">
             <Clock className="w-3 h-3 text-foreground-tertiary" />
             <span className="text-xs text-foreground-secondary">
-              {start.toLocaleDateString()} at{" "}
-              {start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              {start.toLocaleDateString(locale)} {t("at")}{" "}
+              {start.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
             </span>
           </div>
           {event.attendee && (
@@ -521,7 +539,7 @@ function EventCard({
                 disabled={busy}
               >
                 <CalendarClock className="w-3 h-3" />
-                Reschedule
+                {t("reschedule")}
               </button>
               <button
                 type="button"
@@ -530,14 +548,14 @@ function EventCard({
                 disabled={busy}
               >
                 <X className="w-3 h-3" />
-                Cancel
+                {t("cancel")}
               </button>
             </div>
           )}
 
           {managed && editing && (
             <div className="mt-3 space-y-2">
-              <label htmlFor={`reschedule-${event.id}`} className="text-xs text-foreground-secondary block">New date & time</label>
+              <label htmlFor={`reschedule-${event.id}`} className="text-xs text-foreground-secondary block">{t("newDateTime")}</label>
               <input
                 id={`reschedule-${event.id}`}
                 type="datetime-local"
@@ -552,7 +570,7 @@ function EventCard({
                   disabled={busy}
                   onClick={() => void handleReschedule()}
                 >
-                  Save
+                  {t("save")}
                 </button>
                 <button
                   type="button"
@@ -560,7 +578,7 @@ function EventCard({
                   disabled={busy}
                   onClick={() => setEditing(false)}
                 >
-                  Back
+                  {t("back")}
                 </button>
               </div>
             </div>

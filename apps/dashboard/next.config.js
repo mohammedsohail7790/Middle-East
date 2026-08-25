@@ -72,6 +72,10 @@ const nextConfig = {
     async redirects() {
         return [
             { source: '/roi-calculator', destination: '/roi', permanent: true },
+            { source: '/:locale/dashboard/knowledge', destination: '/:locale/dashboard/business-profile', permanent: true },
+            { source: '/:locale/dashboard/crm/contacts', destination: '/:locale/dashboard/leads', permanent: true },
+            { source: '/:locale/dashboard/crm/companies', destination: '/:locale/dashboard/leads', permanent: true },
+            { source: '/:locale/dashboard/crm/deals', destination: '/:locale/dashboard/leads', permanent: true },
         ];
     },
 
@@ -171,28 +175,6 @@ const nextConfig = {
                     { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
                     { key: 'Content-Security-Policy', value: marketingSpaCsp },
                     { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
-                ],
-            },
-            {
-                source: '/calliq_main.js',
-                headers: [
-                    ...commonHeaders,
-                    { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
-                ],
-            },
-            {
-                source: '/calliq_styles.css',
-                headers: [
-                    ...commonHeaders,
-                    { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
-                ],
-            },
-            {
-                source: '/calliq-spa.html',
-                headers: [
-                    ...commonHeaders,
-                    { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-                    { key: 'Content-Security-Policy', value: marketingSpaCsp },
                 ],
             },
         ];

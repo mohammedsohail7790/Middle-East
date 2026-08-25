@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Phone, Plus, X, Search, Trash2,
@@ -22,6 +23,7 @@ import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { IconBox, ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { useConfirm } from "@/components/ui-kit/ConfirmDialog";
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
 interface PhoneNumber {
   id: string;
@@ -47,6 +49,8 @@ interface SearchResult {
 }
 
 export default function PhoneNumbersPage() {
+  const t = useTranslations("pages.phoneNumbers");
+  const { title } = useDashboardPageLabels("/dashboard/phone-numbers");
   const [numbers, setNumbers] = useState<PhoneNumber[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -136,7 +140,7 @@ export default function PhoneNumbersPage() {
           cost: r.cost,
         }))
       );
-      if (parsed.length === 0) setError("No numbers found for that area code. Try another.");
+      if (parsed.length === 0) setError(t("noSearchResults"));
     } catch (e: unknown) {
       setError(friendlyPhoneSetupError(e instanceof Error ? e.message : "Search failed"));
     } finally {
@@ -178,15 +182,15 @@ export default function PhoneNumbersPage() {
       );
       syncDashboardAction("phone");
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to assign agent");
+      setError(e instanceof Error ? e.message : t("assignFailed"));
     }
   };
 
   const releaseNumber = async (id: string) => {
     const ok = await confirm({
-      title: "Release this number?",
-      message: "This permanently releases the phone number back to Twilio. Any calls to it will stop reaching your AI. This cannot be undone.",
-      confirmLabel: "Release number",
+      title: t("releaseConfirm"),
+      message: t("releaseWarning"),
+      confirmLabel: t("release"),
     });
     if (!ok) return;
     try {
@@ -194,7 +198,7 @@ export default function PhoneNumbersPage() {
       setNumbers((prev) => prev.filter((n) => n.id !== id));
       syncDashboardAction("phone");
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to release number");
+      setError(e instanceof Error ? e.message : t("releaseFailed"));
     }
   };
 
@@ -212,15 +216,19 @@ export default function PhoneNumbersPage() {
   };
 
   const planNote = phoneStats
-    ? `${phoneStats.activeCount} of ${phoneStats.maxAllowed} numbers on your plan${
-        phoneStats.remaining > 0 ? ` · ${phoneStats.remaining} more available` : ""
-      }`
+    ? phoneStats.remaining > 0
+      ? t("planNoteMore", {
+          active: phoneStats.activeCount,
+          max: phoneStats.maxAllowed,
+          remaining: phoneStats.remaining,
+        })
+      : t("planNote", { active: phoneStats.activeCount, max: phoneStats.maxAllowed })
     : undefined;
 
   return (
     <DashboardPage
-      title="Phone Numbers"
-      description={planNote || "Provision and manage lines for your AI receptionist"}
+      title={title}
+      description={planNote || t("description")}
       maxWidth="xl"
       loading={loading && numbers.length === 0}
       error={error || undefined}
@@ -234,7 +242,7 @@ export default function PhoneNumbersPage() {
           disabled={phoneStats !== null && !phoneStats.canAddMore}
           className="btn-primary w-full sm:w-auto justify-center shrink-0 disabled:opacity-50"
         >
-          <Plus className="size-4" strokeWidth={ICON_STROKE} /> Add number
+          <Plus className="size-4" strokeWidth={ICON_STROKE} /> {t("addNumber")}
         </button>
       }
     >
@@ -254,12 +262,12 @@ export default function PhoneNumbersPage() {
         ) : numbers.length === 0 ? (
           <EmptyState
             icon={Phone}
-            title="No phone numbers yet"
-            description="Add a number to start receiving calls with your AI receptionist."
+            title={t("noNumbers")}
+            description={t("noNumbersDesc")}
             iconVariant="muted"
             action={
               <button type="button" onClick={() => setShowModal(true)} className="btn-primary text-sm">
-                <Plus className="size-4" strokeWidth={ICON_STROKE} /> Add your first number
+                <Plus className="size-4" strokeWidth={ICON_STROKE} /> {t("addFirst")}
               </button>
             }
           />
@@ -290,12 +298,12 @@ export default function PhoneNumbersPage() {
                 <div className="dashboard-list-row-actions">
                   {agents.length > 0 && (
                     <select
-                      aria-label={`Assign agent to ${formatPhone(num.phoneNumber)}`}
+                      aria-label={t("assignAgent", { phone: formatPhone(num.phoneNumber) })}
                       className="input text-xs py-1.5 w-full sm:max-w-[160px] min-w-0"
                       value={num.aiAgentId || ""}
                       onChange={(e) => assignAgent(num.id, e.target.value)}
                     >
-                      <option value="">Default agent</option>
+                      <option value="">{t("defaultAgent")}</option>
                       {agents.map((a) => (
                         <option key={a.id} value={a.id}>
                           {a.name}
@@ -347,9 +355,9 @@ export default function PhoneNumbersPage() {
               <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6 border-b border-border">
                 <div className="flex items-center gap-3 min-w-0">
                   <IconBox icon={Phone} variant="accent" size="sm" />
-                  <h2 className="text-lg font-semibold text-foreground truncate">Add phone number</h2>
+                  <h2 className="text-lg font-semibold text-foreground truncate">{t("modalTitle")}</h2>
                 </div>
-                <button type="button" onClick={() => setShowModal(false)} className="dashboard-icon-btn !size-8" aria-label="Close">
+                <button type="button" onClick={() => setShowModal(false)} className="dashboard-icon-btn !size-8" aria-label={t("close")}>
                   <X className="size-4" strokeWidth={ICON_STROKE} />
                 </button>
               </div>
@@ -364,7 +372,7 @@ export default function PhoneNumbersPage() {
                     addMode === "forward" ? "bg-background text-foreground shadow-sm" : "text-foreground-secondary"
                   )}
                 >
-                  <PhoneForwarded className="size-4" strokeWidth={ICON_STROKE} /> Forward my number
+                  <PhoneForwarded className="size-4" strokeWidth={ICON_STROKE} /> {t("forwardMyNumber")}
                 </button>
                 <button
                   type="button"
@@ -374,48 +382,41 @@ export default function PhoneNumbersPage() {
                     addMode === "new" ? "bg-background text-foreground shadow-sm" : "text-foreground-secondary"
                   )}
                 >
-                  <Plus className="size-4" strokeWidth={ICON_STROKE} /> Get a new number
+                  <Plus className="size-4" strokeWidth={ICON_STROKE} /> {t("getNewNumber")}
                 </button>
               </div>
 
               {addMode === "forward" ? (
                 <div className="space-y-4">
-                  <p className="text-sm text-foreground-secondary">
-                    Keep your existing local number (Etisalat, du, STC, Ooredoo, Zain, and other Middle East carriers all support this). Your customers keep calling the number they already know — it just forwards to Halla AI in the background.
-                  </p>
+                  <p className="text-sm text-foreground-secondary">{t("forwardDesc")}</p>
                   <div className="dashboard-panel-padded space-y-2">
-                    <p className="text-xs font-medium text-foreground">Quick version</p>
+                    <p className="text-xs font-medium text-foreground">{t("quickVersion")}</p>
                     <ol className="text-xs text-foreground-secondary space-y-1.5 list-decimal list-inside">
-                      <li>Get your Halla AI number below (or from an existing entry in your number list)</li>
-                      <li>On your phone, dial <span className="font-mono">*61*[your Halla AI number]#</span> to forward calls you miss</li>
-                      <li>Test by calling your own number from another phone</li>
+                      <li>{t("quickStep1")}</li>
+                      <li>{t("quickStep2")}</li>
+                      <li>{t("quickStep3")}</li>
                     </ol>
                   </div>
                   <Link
                     href="/dashboard/support"
                     className="btn-ghost text-sm w-full justify-center border border-border"
                   >
-                    Need help with your carrier? Contact support <ArrowUpRight className="size-3.5" strokeWidth={ICON_STROKE} />
+                    {t("supportLink")} <ArrowUpRight className="size-3.5" strokeWidth={ICON_STROKE} />
                   </Link>
-                  <p className="text-xs text-foreground-secondary/70">
-                    Need a Halla AI number to forward to first? Switch to &quot;Get a new number&quot; above.
-                  </p>
+                  <p className="text-xs text-foreground-secondary/70">{t("needNumberHint")}</p>
                 </div>
               ) : (
                 <>
-                  <p className="text-xs text-foreground-secondary/70 mb-4">
-                    Your number runs on Halla AI&apos;s US-based calling infrastructure — reliable, carrier-grade voice quality for businesses across the Middle East.
-                  </p>
-                  {/* Search by Area Code */}
+                  <p className="text-xs text-foreground-secondary/70 mb-4">{t("newNumberDesc")}</p>
                   <div className="mb-6">
-                    <label htmlFor="phone-area-code" className="text-xs text-foreground-secondary mb-1.5 block">Search by Area Code</label>
+                    <label htmlFor="phone-area-code" className="text-xs text-foreground-secondary mb-1.5 block">{t("areaCode")}</label>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         id="phone-area-code"
                         type="text"
                         value={areaCode}
                         onChange={(e) => setAreaCode(e.target.value.replace(/\D/g, "").slice(0, 3))}
-                        placeholder="e.g. 415"
+                        placeholder={t("areaCodePlaceholder")}
                         maxLength={3}
                         className="input flex-1"
                       />
@@ -425,12 +426,11 @@ export default function PhoneNumbersPage() {
                         disabled={areaCode.length < 3 || searching}
                         className="btn-primary"
                       >
-                        <Search className="size-4" strokeWidth={ICON_STROKE} /> {searching ? "..." : "Search"}
+                        <Search className="size-4" strokeWidth={ICON_STROKE} /> {searching ? "..." : t("search")}
                       </button>
                     </div>
                   </div>
 
-                  {/* Results */}
                   {searching ? (
                     <div className="space-y-3">
                       {[1, 2, 3].map((i) => (
@@ -439,7 +439,7 @@ export default function PhoneNumbersPage() {
                     </div>
                   ) : searchResults.length > 0 ? (
                     <div className="space-y-2">
-                      <p className="text-xs text-foreground-secondary mb-2">{searchResults.length} numbers available</p>
+                      <p className="text-xs text-foreground-secondary mb-2">{t("numbersAvailable", { count: searchResults.length })}</p>
                       {searchResults.map((result) => (
                         <div key={result.phoneNumber} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-3 rounded-xl bg-muted border border-border">
                           <div className="min-w-0">
@@ -461,7 +461,7 @@ export default function PhoneNumbersPage() {
                             disabled={purchasing === result.phoneNumber}
                             className="btn-primary text-xs px-3 py-1.5 w-full sm:w-auto shrink-0"
                           >
-                            {purchasing === result.phoneNumber ? "..." : "Purchase"}
+                            {purchasing === result.phoneNumber ? "..." : t("purchase")}
                           </button>
                         </div>
                       ))}
@@ -469,8 +469,8 @@ export default function PhoneNumbersPage() {
                   ) : areaCode.length >= 3 && !searching ? (
                     <EmptyState
                       icon={Phone}
-                      title={`No numbers for ${areaCode}`}
-                      description="Try a different area code or search again in a moment."
+                      title={t("noResults", { areaCode })}
+                      description={t("noResultsDesc")}
                       iconVariant="muted"
                     />
                   ) : null}

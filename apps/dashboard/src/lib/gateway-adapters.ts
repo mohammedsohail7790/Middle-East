@@ -1,5 +1,7 @@
 /** Normalize gateway API shapes for dashboard UI */
 
+import { DEFAULT_TIMEZONE } from "@/lib/timezones";
+
 export function capabilityList(caps: unknown): string[] {
   if (Array.isArray(caps)) return caps.map(String);
   if (caps && typeof caps === "object") {
@@ -360,7 +362,7 @@ export function normalizeTenantSettings(row: Record<string, unknown>) {
     id: String(row.id ?? ""),
     companyName: String(row.companyName ?? row.company_name ?? ""),
     language: String(row.language ?? row.default_language ?? "en"),
-    timezone: String(row.timezone ?? "America/New_York"),
+    timezone: String(row.timezone ?? DEFAULT_TIMEZONE),
     tone: String(row.tone ?? row.voice_tone ?? "professional"),
     transferNumber: String(
       row.transferNumber ?? row.transfer_phone_number ?? ""

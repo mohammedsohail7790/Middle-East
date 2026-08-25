@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -28,6 +29,7 @@ import { supabase } from "@/lib/supabase";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 import { IconBox } from "@/components/ui-kit/IconBox";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
@@ -106,6 +108,8 @@ function planFeaturesFromGateway(features: Record<string, unknown> | undefined, 
 }
 
 function BillingPageContent() {
+  const t = useTranslations("billing");
+  const { title, description } = useDashboardPageLabels("/dashboard/billing");
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialSubscription = readApiGetCache<Subscription>("/billing/subscription");
@@ -310,25 +314,18 @@ function BillingPageContent() {
 
   const cancelSubscription = async () => {
     const ok = await confirm({
-      title: "Cancel subscription?",
+      title: t("cancelTitle"),
       message: (
         <>
-          <p>
-            Your subscription will remain active until the end of your current billing period.
-            After that, your AI receptionist will stop answering calls.
-          </p>
+          <p>{t("cancelBody1")}</p>
           <p className="mt-3 text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
-            <strong>What you&apos;ll lose:</strong> AI call answering, lead capture, appointment
-            booking, and all integrations will be disabled.
+            <strong>{t("cancelLoseTitle")}</strong> {t("cancelLoseBody")}
           </p>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Need to update your payment method or cancel immediately? Use &ldquo;Manage payment
-            method&rdquo; (Stripe portal) instead.
-          </p>
+          <p className="mt-3 text-xs text-muted-foreground">{t("cancelPortalHint")}</p>
         </>
       ),
-      confirmLabel: "Yes, cancel at period end",
-      cancelLabel: "Keep my subscription",
+      confirmLabel: t("cancelConfirm"),
+      cancelLabel: t("keepSubscription"),
     });
     if (!ok) return;
     setCanceling(true);
@@ -357,20 +354,20 @@ function BillingPageContent() {
 
   return (
     <DashboardPage
-      title="Billing"
-      description="Subscription, usage, and invoices"
+      title={title}
+      description={description}
       maxWidth="xl"
       loading={loading && !subscription && !usage}
       error={error || undefined}
       actions={
         <button type="button" onClick={openBillingPortal} className="btn-ghost text-sm w-full sm:w-auto justify-center shrink-0">
-          Manage payment method
+          {t("managePayment")}
         </button>
       }
     >
       {plansChecked && checkoutEnabled === false && (
         <div className="dashboard-alert border-amber-200 bg-amber-50 dark:bg-amber-950/20 mb-6">
-          <p className="text-amber-900 dark:text-amber-200 text-sm font-medium">Stripe checkout not active</p>
+          <p className="text-amber-900 dark:text-amber-200 text-sm font-medium">{t("stripeNotActive")}</p>
           <p className="text-amber-800 dark:text-amber-300 text-xs mt-1">{PAID_BILLING_NOT_CONFIGURED_MSG}</p>
         </div>
       )}
@@ -381,10 +378,13 @@ function BillingPageContent() {
           animate={{ opacity: 1, y: 0 }}
           className="dashboard-panel-padded mb-6 border-[var(--cyan-border)] bg-gradient-to-r from-background to-[var(--accent-light)]"
         >
-          <SectionHeader title="Free trial usage" size="sm" className="mb-1" />
+          <SectionHeader title={t("trialUsage")} size="sm" className="mb-1" />
           <p className="text-xs text-foreground-secondary mb-4">
-            Professional features • {trialState.daysRemaining} day{trialState.daysRemaining === 1 ? "" : "s"} left •{" "}
-            {trialState.trialMinutesRemaining} minutes remaining (60 total, cumulative)
+            {t("trialDesc", {
+              days: trialState.daysRemaining,
+              daysSuffix: trialState.daysRemaining === 1 ? "" : "s",
+              minutes: trialState.trialMinutesRemaining,
+            })}
           </p>
           <div className="h-3 bg-gray-100 rounded-full overflow-hidden mb-2">
             <div
@@ -392,9 +392,7 @@ function BillingPageContent() {
               style={{ width: `${Math.min(100, trialState.usagePercent)}%`, transition: "width 300ms ease-out" }}
             />
           </div>
-          <p className="text-xs text-foreground-tertiary">
-            Warnings at 40, 50, 55, and 58 minutes. Trial ends when you hit 60 minutes or 14 days — whichever comes first.
-          </p>
+          <p className="text-xs text-foreground-tertiary">{t("trialWarnings")}</p>
         </motion.div>
       )}
 
@@ -402,7 +400,7 @@ function BillingPageContent() {
         {/* Current Plan */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="dashboard-panel-padded">
           <div className="flex items-center justify-between mb-4 gap-3">
-            <SectionHeader title="Current Plan" size="sm" />
+            <SectionHeader title={t("currentPlan")} size="sm" />
             <IconBox icon={Crown} variant="accent" size="sm" />
           </div>
           {subscription ? (
@@ -417,11 +415,14 @@ function BillingPageContent() {
                 </span>
               </div>
               <p className="text-sm text-foreground-secondary mb-4">
-                ${subscription.price}/month • Renews {new Date(subscription.current_period_end).toLocaleDateString()}
+                {t("renews", {
+                  price: subscription.price,
+                  date: new Date(subscription.current_period_end).toLocaleDateString(),
+                })}
               </p>
               <div className="flex gap-2">
                 <button type="button" onClick={() => setShowPlanModal(true)} className="btn-primary text-xs">
-                  Change Plan
+                  {t("changePlan")}
                 </button>
                 <button
                   type="button"
@@ -429,15 +430,15 @@ function BillingPageContent() {
                   disabled={canceling || subscription.status === "canceled"}
                   className="btn-ghost text-xs text-red-600 hover:text-red-300 disabled:opacity-50"
                 >
-                  {canceling ? "Canceling..." : "Cancel Subscription"}
+                  {canceling ? t("canceling") : t("cancelSubscription")}
                 </button>
               </div>
             </div>
           ) : (
             <div className="text-center py-4">
-              <p className="text-foreground-tertiary text-sm">No active subscription</p>
+              <p className="text-foreground-tertiary text-sm">{t("noSubscription")}</p>
               <button type="button" onClick={() => setShowPlanModal(true)} className="btn-primary mt-3 text-xs">
-                Choose a Plan
+                {t("choosePlan")}
               </button>
             </div>
           )}
@@ -445,13 +446,13 @@ function BillingPageContent() {
 
         {/* Usage */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="dashboard-panel-padded">
-          <SectionHeader title="Usage This Period" size="sm" className="mb-4" />
+          <SectionHeader title={t("usagePeriod")} size="sm" className="mb-4" />
           {usage ? (
             <div className="space-y-4">
               {[
-                { label: "Minutes", icon: Phone, variant: "accent" as const, used: usage.minutes?.used ?? 0, limit: usage.minutes?.limit ?? 0, unit: "min" },
-                { label: "SMS", icon: MessageSquare, variant: "violet" as const, used: usage.sms?.used ?? 0, limit: usage.sms?.limit ?? 0, unit: "msgs" },
-                { label: "Storage", icon: HardDrive, variant: "neutral" as const, used: usage.storage?.used ?? 0, limit: usage.storage?.limit ?? 0, unit: "GB" },
+                { label: t("minutes"), icon: Phone, variant: "accent" as const, used: usage.minutes?.used ?? 0, limit: usage.minutes?.limit ?? 0, unit: t("minUnit") },
+                { label: t("sms"), icon: MessageSquare, variant: "violet" as const, used: usage.sms?.used ?? 0, limit: usage.sms?.limit ?? 0, unit: t("msgsUnit") },
+                { label: t("storage"), icon: HardDrive, variant: "neutral" as const, used: usage.storage?.used ?? 0, limit: usage.storage?.limit ?? 0, unit: t("gbUnit") },
               ].map((item) => {
                 const pct = getUsagePercentage(item.used, item.limit);
                 return (
@@ -478,7 +479,7 @@ function BillingPageContent() {
               })}
             </div>
           ) : (
-            <p className="text-foreground-tertiary text-sm">No usage data available</p>
+            <p className="text-foreground-tertiary text-sm">{t("noUsageData")}</p>
           )}
         </motion.div>
       </div>
@@ -486,13 +487,13 @@ function BillingPageContent() {
       {/* Invoices */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="dashboard-panel overflow-hidden">
         <div className="p-6 border-b border-border">
-          <SectionHeader title="Invoices" size="sm" />
+          <SectionHeader title={t("invoices")} size="sm" />
         </div>
         {invoices.length === 0 ? (
           <EmptyState
             icon={CreditCard}
-            title="No invoices yet"
-            description="Invoices will appear here after your first billing cycle."
+            title={t("noInvoices")}
+            description={t("noInvoicesDesc")}
             iconVariant="muted"
           />
         ) : (
@@ -500,10 +501,10 @@ function BillingPageContent() {
             <table className="w-full min-w-[520px]">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left text-xs font-medium text-foreground-secondary px-6 py-3">Date</th>
-                  <th className="text-left text-xs font-medium text-foreground-secondary px-6 py-3">Amount</th>
-                  <th className="text-left text-xs font-medium text-foreground-secondary px-6 py-3">Status</th>
-                  <th className="text-right text-xs font-medium text-foreground-secondary px-6 py-3">Download</th>
+                  <th className="text-left text-xs font-medium text-foreground-secondary px-6 py-3">{t("date")}</th>
+                  <th className="text-left text-xs font-medium text-foreground-secondary px-6 py-3">{t("amount")}</th>
+                  <th className="text-left text-xs font-medium text-foreground-secondary px-6 py-3">{t("status")}</th>
+                  <th className="text-right text-xs font-medium text-foreground-secondary px-6 py-3">{t("download")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -556,12 +557,12 @@ function BillingPageContent() {
               className="dashboard-modal-panel p-6 sm:max-w-3xl"
             >
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-foreground">Choose a Plan</h2>
+                <h2 className="text-lg font-semibold text-foreground">{t("choosePlan")}</h2>
                 <button
                   type="button"
                   onClick={() => setShowPlanModal(false)}
                   className="text-foreground-secondary hover:text-foreground"
-                  aria-label="Close"
+                  aria-label={t("close")}
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -576,7 +577,7 @@ function BillingPageContent() {
                       billingInterval === "monthly" ? "bg-white shadow text-foreground" : "text-foreground-secondary"
                     )}
                   >
-                    Monthly
+                    {t("monthly")}
                   </button>
                   <button
                     type="button"
@@ -586,7 +587,7 @@ function BillingPageContent() {
                       billingInterval === "annual" ? "bg-white shadow text-foreground" : "text-foreground-secondary"
                     )}
                   >
-                    Annual
+                    {t("annual")}
                   </button>
                 </div>
               </div>
@@ -609,7 +610,7 @@ function BillingPageContent() {
                   >
                     {plan.popular && (
                       <span className="text-[10px] font-medium text-accent bg-accent/10 px-2 py-0.5 rounded-full">
-                        Most Popular
+                        {t("mostPopular")}
                       </span>
                     )}
                     <h3 className="text-lg font-bold text-foreground mt-2">{plan.name}</h3>
@@ -618,10 +619,10 @@ function BillingPageContent() {
                       <span className="text-sm text-foreground-secondary">{priceSuffix}</span>
                     </div>
                     {billingInterval === "annual" && plan.annualEstimated && (
-                      <p className="text-[10px] text-foreground-tertiary mb-3">Billed yearly via Stripe</p>
+                      <p className="text-[10px] text-foreground-tertiary mb-3">{t("billedYearly")}</p>
                     )}
                     {billingInterval === "annual" && !plan.annualEstimated && (
-                      <p className="text-[10px] text-emerald-600 mb-3">Save vs monthly</p>
+                      <p className="text-[10px] text-emerald-600 mb-3">{t("saveVsMonthly")}</p>
                     )}
                     {billingInterval === "monthly" && <div className="mb-3" />}
                     <ul className="space-y-2 mb-4">
@@ -642,10 +643,10 @@ function BillingPageContent() {
                       disabled={subscription?.plan === plan.id || changingPlan === plan.id}
                     >
                       {changingPlan === plan.id
-                        ? "Updating…"
+                        ? t("updating")
                         : subscription?.plan === plan.id
-                          ? "Current Plan"
-                          : "Select Plan"}
+                          ? t("currentPlanBtn")
+                          : t("selectPlan")}
                     </button>
                   </div>
                   );
@@ -661,8 +662,9 @@ function BillingPageContent() {
 }
 
 function BillingPageFallback() {
+  const { title, description } = useDashboardPageLabels("/dashboard/billing");
   return (
-    <DashboardPage title="Billing" description="Subscription, usage, and invoices" maxWidth="xl" loading>
+    <DashboardPage title={title} description={description} maxWidth="xl" loading>
       <div />
     </DashboardPage>
   );

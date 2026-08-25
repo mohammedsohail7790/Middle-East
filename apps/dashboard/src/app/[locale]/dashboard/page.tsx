@@ -2,14 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { Phone, Users, TrendingUp, Clock, BarChart3, Filter, CalendarDays } from "lucide-react";
+import { Phone, Users, TrendingUp, Clock, BarChart3, Filter, CalendarDays, Lock } from "lucide-react";
 import { IconBox, outcomeIconVariant } from "@/components/ui-kit/IconBox";
 import { StatusBadge } from "@/components/dashboard-shell/glass-card";
 import {
   Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar, CartesianGrid,
 } from "recharts";
 import { api, asArray, humanizeApiError } from "@/lib/api";
-import { getTenantId } from "@/lib/store";
+import { getTenantId, subscribePlanUpdates } from "@/lib/store";
+import { canUseFeature } from "@/lib/plan-features";
 import {
   readDashboardHomeCache,
   writeDashboardHomeCache,
@@ -20,14 +21,18 @@ import { funnelFromMetrics } from "@/lib/gateway-adapters";
 import { useDashboardLive } from "@/components/dashboard/DashboardRealtimeProvider";
 import { DASHBOARD_POLL_MS, useDashboardSync } from "@/lib/dashboard-sync";
 import { timeAgo, formatDuration } from "@/lib/utils";
-import { DashboardPage } from "@/components/ui-kit/DashboardPage";
+import { useTranslations, useLocale } from "next-intl";
 import { StatCard } from "@/components/ui-kit/StatCard";
+import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 
-function greetingForHour(h: number): string {
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
+function greetingForHour(
+  h: number,
+  t: (key: "greetingMorning" | "greetingAfternoon" | "greetingEvening") => string
+): string {
+  if (h < 12) return t("greetingMorning");
+  if (h < 17) return t("greetingAfternoon");
+  return t("greetingEvening");
 }
 
 interface Metrics { totalCalls: number; leads: number; conversionRate: number; avgResponseLatency: number; avgCallDuration: number; }
@@ -77,6 +82,9 @@ function initialHomeState(tenantId: string | null) {
 }
 
 export default function DashboardHome() {
+  const t = useTranslations("pages.home");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const tenantId = getTenantId();
   const initial = initialHomeState(tenantId);
   const [metrics, setMetrics] = useState<Metrics | null>(() => initial.metrics);
@@ -86,6 +94,10 @@ export default function DashboardHome() {
   const [loading, setLoading] = useState(() => !initial.hasData);
   const [error, setError] = useState("");
   const hadCacheRef = useRef(initial.hasData);
+  const [, setPlanTick] = useState(0);
+  const analyticsUnlocked = canUseFeature("analytics");
+
+  useEffect(() => subscribePlanUpdates(() => setPlanTick((n) => n + 1)), []);
 
   const loadDashboardData = useCallback((showSpinner = false) => {
     if (showSpinner && !hadCacheRef.current) setLoading(true);
@@ -228,13 +240,13 @@ export default function DashboardHome() {
     chartData.length > 0
       ? chartData
       : [
-          { day: "Mon", calls: 0, leads: 0 },
-          { day: "Tue", calls: 0, leads: 0 },
-          { day: "Wed", calls: 0, leads: 0 },
-          { day: "Thu", calls: 0, leads: 0 },
-          { day: "Fri", calls: 0, leads: 0 },
-          { day: "Sat", calls: 0, leads: 0 },
-          { day: "Sun", calls: 0, leads: 0 },
+          { day: t("days.mon"), calls: 0, leads: 0 },
+          { day: t("days.tue"), calls: 0, leads: 0 },
+          { day: t("days.wed"), calls: 0, leads: 0 },
+          { day: t("days.thu"), calls: 0, leads: 0 },
+          { day: t("days.fri"), calls: 0, leads: 0 },
+          { day: t("days.sat"), calls: 0, leads: 0 },
+          { day: t("days.sun"), calls: 0, leads: 0 },
         ];
 
   const funnelData = funnelFromMetrics({
@@ -243,16 +255,22 @@ export default function DashboardHome() {
     conversionRate: metrics?.conversionRate,
   });
 
-  const greeting = greetingForHour(new Date().getHours());
-  const todayLabel = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  const greeting = greetingForHour(new Date().getHours(), t);
+  const todayLabel = new Date().toLocaleDateString(locale === "ar" ? "ar-AE" : "en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <DashboardPage
       title={greeting}
       description={
         live && live.activeCalls > 0
-          ? `Here's what's happening today · ${live.activeCalls} live call${live.activeCalls === 1 ? "" : "s"}`
-          : "Here's what's happening across your business today"
+          ? live.activeCalls === 1
+            ? t("descriptionLive", { count: live.activeCalls })
+            : t("descriptionLivePlural", { count: live.activeCalls })
+          : t("descriptionDefault")
       }
       actions={
         <div className="flex items-center gap-2 shrink-0">
@@ -266,7 +284,7 @@ export default function DashboardHome() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                 <span className="relative inline-flex rounded-full size-2 bg-green-500" />
               </span>
-              {live.activeCalls} live
+              {t("liveBadge", { count: live.activeCalls })}
             </span>
           )}
         </div>
@@ -279,9 +297,9 @@ export default function DashboardHome() {
       <div className="dashboard-stat-grid">
         <Link href="/dashboard/calls" className="block min-w-0">
           <StatCard
-            label="Total calls"
+            label={t("totalCalls")}
             value={metrics ? String(metrics.totalCalls) : loading ? "—" : "0"}
-            hint={live?.callsToday ? `+${live.callsToday} today` : "Across all time"}
+            hint={live?.callsToday ? t("hintToday", { count: live.callsToday }) : t("hintAllTime")}
             trend={callsTrend}
             sparkline={callsSpark}
             icon={Phone}
@@ -292,9 +310,9 @@ export default function DashboardHome() {
         </Link>
         <Link href="/dashboard/leads" className="block min-w-0">
           <StatCard
-            label="Leads captured"
+            label={t("leadsCaptured")}
             value={metrics ? String(metrics.leads) : loading ? "—" : "0"}
-            hint="From answered calls"
+            hint={t("hintFromCalls")}
             trend={leadsTrend}
             sparkline={leadsSpark}
             icon={Users}
@@ -303,24 +321,24 @@ export default function DashboardHome() {
             className="h-full card-hover cursor-pointer"
           />
         </Link>
-        <Link href="/dashboard/analytics" className="block min-w-0">
+        <Link href={analyticsUnlocked ? "/dashboard/analytics" : "/dashboard/billing"} className="block min-w-0">
           <StatCard
-            label="Conversion rate"
-            value={metrics ? `${metrics.conversionRate}%` : loading ? "—" : "0%"}
-            hint="Calls that turned into leads"
-            icon={TrendingUp}
-            iconVariant="success"
+            label={t("conversionRate")}
+            value={analyticsUnlocked ? (metrics ? `${metrics.conversionRate}%` : loading ? "—" : "0%") : t("proBadge")}
+            hint={analyticsUnlocked ? t("hintConversion") : t("hintUpgradeAnalytics")}
+            icon={analyticsUnlocked ? TrendingUp : Lock}
+            iconVariant={analyticsUnlocked ? "success" : "muted"}
             index={2}
             className="h-full card-hover cursor-pointer"
           />
         </Link>
-        <Link href="/dashboard/analytics" className="block min-w-0">
+        <Link href={analyticsUnlocked ? "/dashboard/analytics" : "/dashboard/billing"} className="block min-w-0">
           <StatCard
-            label="Avg response"
-            value={metrics ? `${metrics.avgResponseLatency}ms` : loading ? "—" : "0ms"}
-            hint="AI time-to-first-word"
-            icon={Clock}
-            iconVariant="neutral"
+            label={t("avgResponse")}
+            value={analyticsUnlocked ? (metrics ? `${metrics.avgResponseLatency}ms` : loading ? "—" : "0ms") : t("proBadge")}
+            hint={analyticsUnlocked ? t("hintResponse") : t("hintUpgradeAnalytics")}
+            icon={analyticsUnlocked ? Clock : Lock}
+            iconVariant={analyticsUnlocked ? "neutral" : "muted"}
             index={3}
             className="h-full card-hover cursor-pointer"
           />
@@ -332,18 +350,18 @@ export default function DashboardHome() {
           <div className="flex items-start justify-between gap-4 mb-4">
             <SectionHeader
               icon={BarChart3}
-              title="Call volume"
-              description="Last 7 days"
+              title={t("callVolume")}
+              description={t("last7Days")}
               size="sm"
             />
             <div className="flex items-center gap-3 shrink-0 pt-0.5">
               <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
                 <span className="inline-block w-3 h-0.5 rounded-full bg-accent" />
-                Calls
+                {t("calls")}
               </span>
               <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
                 <span className="inline-block w-3 h-0.5 rounded-full bg-emerald-500" />
-                Leads
+                {t("leads")}
               </span>
             </div>
           </div>
@@ -375,10 +393,21 @@ export default function DashboardHome() {
         </div>
 
         <div className="wb-panel-padded min-w-0">
-          <SectionHeader icon={Filter} title="Conversion funnel" size="sm" className="mb-4" />
+          <SectionHeader icon={Filter} title={t("conversionFunnel")} size="sm" className="mb-4" />
+          {!analyticsUnlocked ? (
+            <div className="flex flex-col items-center justify-center text-center gap-3 py-10 px-4 rounded-xl border border-dashed border-border bg-muted/30">
+              <Lock className="size-5 text-muted-foreground" aria-hidden />
+              <p className="text-sm text-muted-foreground max-w-xs">
+                {t("funnelLocked")}
+              </p>
+              <Link href="/dashboard/billing" className="text-xs font-semibold text-primary hover:underline">
+                {tCommon("viewPlans")}
+              </Link>
+            </div>
+          ) : (
           <div className="h-52 sm:h-64 w-full min-w-0">
             {funnelData.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-12">No data yet</p>
+              <p className="text-sm text-muted-foreground text-center py-12">{tCommon("noData")}</p>
             ) : (
               <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                 <BarChart data={funnelData} layout="vertical" margin={{ left: 8, right: 8 }}>
@@ -390,21 +419,22 @@ export default function DashboardHome() {
               </ResponsiveContainer>
             )}
           </div>
+          )}
         </div>
       </div>
 
       <div className="wb-panel-padded min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <SectionHeader title="Recent activity" size="sm" />
+          <SectionHeader title={t("recentActivity")} size="sm" />
           <Link href="/dashboard/calls" className="text-xs font-semibold text-primary hover:underline min-h-[44px] sm:min-h-0 flex items-center shrink-0">
-            View all
+            {t("viewAll")}
           </Link>
         </div>
         {calls.length > 0 && (
           <div className="enterprise-table-header">
-            <div className="flex-1 min-w-0 enterprise-table-col">Activity</div>
-            <div className="hidden sm:block w-28 text-right enterprise-table-col">Time · Duration</div>
-            <div className="w-20 text-right enterprise-table-col">Status</div>
+            <div className="flex-1 min-w-0 enterprise-table-col">{t("colActivity")}</div>
+            <div className="hidden sm:block w-28 text-right enterprise-table-col">{t("colTimeDuration")}</div>
+            <div className="w-20 text-right enterprise-table-col">{t("colStatus")}</div>
           </div>
         )}
         <div className="divide-y divide-border" style={{ borderColor: "color-mix(in srgb, var(--border) 60%, transparent)" }}>
@@ -422,7 +452,7 @@ export default function DashboardHome() {
               ))}
             </div>
           ) : calls.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No calls yet</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">{t("noCallsYet")}</p>
           ) : (
             calls.map((call) => (
               <Link

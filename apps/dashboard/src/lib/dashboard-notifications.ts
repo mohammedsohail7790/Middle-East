@@ -96,11 +96,11 @@ export function formatPushNotification(event: DashboardPushEvent): Omit<Dashboar
     case "knowledge.updated":
       return {
         type: event.type,
-        title: "Knowledge base",
+        title: "Business profile",
         body: meta.fileName
           ? `${meta.fileName} added to training`
-          : "Knowledge base updated",
-        href: "/dashboard/knowledge",
+          : "Business profile updated",
+        href: "/dashboard/business-profile",
         at,
       };
     case "config.updated":

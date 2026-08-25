@@ -70,7 +70,7 @@ export interface PlanFeature {
   voicemailToText: boolean;
   appointmentBooking: 'basic' | 'native' | 'custom';
   browserDashboard: boolean;
-  bilingual: 'en-es' | 'en-es-plus';
+  bilingual: 'en-es' | 'en-es-plus' | 'en-ar';
   languages: string[];
   emailSmsSummaries: boolean;
   crm: 'zapier_basic' | 'zapier_full' | 'zapier_full';
@@ -122,8 +122,8 @@ export const PLANS: Record<string, PlanDefinition> = {
       voicemailToText: false,
       appointmentBooking: 'basic',
       browserDashboard: true,
-      bilingual: 'en-es',
-      languages: ['en', 'es'],
+      bilingual: 'en-ar',
+      languages: ['en', 'ar'],
       emailSmsSummaries: true,
       crm: 'zapier_basic',
       calendar: 'basic',
@@ -161,13 +161,13 @@ export const PLANS: Record<string, PlanDefinition> = {
       voicemailToText: false,
       appointmentBooking: 'native',
       browserDashboard: true,
-      bilingual: 'en-es',
-      languages: ['en', 'es', 'fr', 'hi'],
+      bilingual: 'en-ar',
+      languages: ['en', 'ar'],
       emailSmsSummaries: true,
       crm: 'zapier_full',
       calendar: 'native',
       customVoice: true,
-      advancedAnalytics: false,
+      advancedAnalytics: true,
       apiAccess: true,
       dedicatedAccountManager: false,
       customOnboarding: false,

@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { cn } from "@/lib/utils";
 
-const LOCALES = ["en", "ar", "hi", "ru"] as const;
+const LOCALES = ["en", "ar"] as const;
 type Locale = (typeof LOCALES)[number];
 
 export function LanguageSwitcher() {
@@ -32,8 +32,6 @@ export function LanguageSwitcher() {
   const labelFor: Record<Locale, string> = {
     en: t("english"),
     ar: t("arabic"),
-    hi: t("hindi"),
-    ru: t("russian"),
   };
 
   function select(next: Locale) {

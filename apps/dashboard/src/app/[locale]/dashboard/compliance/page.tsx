@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Link } from "@/i18n/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
   Shield, Download, Trash2, FileText, Database, Clock,
@@ -21,6 +21,7 @@ import { showDashboardToast } from "@/lib/dashboard-toast";
 import { DASHBOARD_POLL_MS } from "@/lib/dashboard-sync";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
 import { cn } from "@/lib/utils";
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
 // ─── Compliance Center types ────────────────────────────────────────────────
 
@@ -80,15 +81,15 @@ interface AuditEvent {
   created_at: string;
 }
 
-const RETENTION_OPTIONS: { label: string; days: number | null }[] = [
-  { label: "30 days", days: 30 },
-  { label: "60 days", days: 60 },
-  { label: "90 days", days: 90 },
-  { label: "180 days", days: 180 },
-  { label: "1 year", days: 365 },
-  { label: "3 years", days: 1095 },
-  { label: "7 years", days: 2555 },
-  { label: "Keep indefinitely", days: null },
+const RETENTION_OPTION_KEYS: { key: string; days: number | null }[] = [
+  { key: "retention30", days: 30 },
+  { key: "retention60", days: 60 },
+  { key: "retention90", days: 90 },
+  { key: "retention180", days: 180 },
+  { key: "retention1y", days: 365 },
+  { key: "retention3y", days: 1095 },
+  { key: "retention7y", days: 2555 },
+  { key: "retentionIndefinite", days: null },
 ];
 
 // ─── Shared UI bits ──────────────────────────────────────────────────────────
@@ -131,14 +132,12 @@ function ToggleRow({
 }
 
 function DisclaimerBanner() {
+  const t = useTranslations("pages.compliance");
   return (
     <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 px-4 py-3">
       <AlertTriangle className="size-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" strokeWidth={ICON_STROKE} />
       <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-        <strong>Important:</strong> These settings give your business control over Halla AI&apos;s
-        behavior. They are not a substitute for legal advice. Consult an attorney to ensure your
-        configuration complies with applicable laws (state recording laws, TCPA, etc.)
-        for your industry and jurisdiction.
+        <strong>{t("important")}</strong> {t("disclaimer")}
       </p>
     </div>
   );
@@ -157,6 +156,7 @@ function ProfileCard({
   onApply: () => void;
   applying: boolean;
 }) {
+  const t = useTranslations("pages.compliance");
   return (
     <button
       type="button"
@@ -179,7 +179,7 @@ function ProfileCard({
                   : "bg-muted text-muted-foreground"
               )}
             >
-              {profile.strictness === "strict" ? "Stricter defaults" : "Standard defaults"}
+              {profile.strictness === "strict" ? t("stricterDefaults") : t("standardDefaults")}
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{profile.description}</p>
@@ -196,7 +196,7 @@ function ProfileCard({
           disabled={applying}
           className="mt-3 btn-ghost text-xs w-full justify-center"
         >
-          {applying ? "Applying…" : "Reset to these defaults"}
+          {applying ? t("applying") : t("resetDefaults")}
           <ChevronRight className="size-3" strokeWidth={ICON_STROKE} />
         </button>
       )}
@@ -207,6 +207,13 @@ function ProfileCard({
 // ─── Main page ───────────────────────────────────────────────────────────────
 
 export default function CompliancePage() {
+  const t = useTranslations("pages.compliance");
+  const tCommon = useTranslations("common");
+  const { title, description } = useDashboardPageLabels("/dashboard/compliance");
+  const retentionOptions = useMemo(
+    () => RETENTION_OPTION_KEYS.map((opt) => ({ ...opt, label: t(opt.key) })),
+    [t]
+  );
   // Compliance Center state
   const [settings, setSettings] = useState<ComplianceSettings | null>(null);
   const [profiles, setProfiles] = useState<IndustryProfileDef[]>([]);
@@ -297,11 +304,11 @@ export default function CompliancePage() {
       setSettings(saved);
       setDirty(false);
       syncDashboardAction("config");
-      showDashboardToast({ type: "success", title: "Compliance settings saved" });
+      showDashboardToast({ type: "success", title: t("settingsSaved") });
     } catch (e) {
       showDashboardToast({
         type: "error",
-        title: "Save failed",
+        title: t("saveFailed"),
         message: e instanceof Error ? e.message : "Request failed",
       });
     } finally {
@@ -367,15 +374,15 @@ export default function CompliancePage() {
 
   return (
     <DashboardPage
-      title="Compliance"
-      description="AI disclosure, call recording, caller consent, data retention, GDPR requests, and audit trail — all in one place."
+      title={title}
+      description={description}
       loading={ccLoading && !settings}
       error={error || undefined}
       actions={
         settings ? (
           <button onClick={() => void save()} disabled={saving || !dirty} className="btn-primary w-full sm:w-auto justify-center">
             <Save className="size-4" strokeWidth={ICON_STROKE} />
-            {saving ? "Saving…" : "Save changes"}
+            {saving ? tCommon("saving") : t("saveChanges")}
           </button>
         ) : undefined
       }
@@ -388,9 +395,9 @@ export default function CompliancePage() {
           <section className="dashboard-panel-padded space-y-4">
             <SectionHeader
               icon={Building2}
-              title="Industry Compliance Profile"
+              title={t("industryProfile")}
               iconVariant="accent"
-              description="Choose the profile that best matches your industry. Each profile comes with recommended default settings. You can override any setting individually after selecting a profile."
+              description={t("industryProfileDesc")}
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {profiles.map((p) => (
@@ -410,13 +417,13 @@ export default function CompliancePage() {
           <section className="dashboard-panel-padded space-y-4">
             <SectionHeader
               icon={MessageSquare}
-              title="AI Disclosure"
+              title={t("aiDisclosure")}
               iconVariant="violet"
-              description="Announce to callers that they are speaking with an AI assistant. Many jurisdictions and industry standards require this."
+              description={t("aiDisclosureDesc")}
             />
             <ToggleRow
-              label="Announce that the caller is speaking with an AI assistant"
-              hint="Played at the very start of every call, before your AI responds."
+              label={t("announceAi")}
+              hint={t("announceAiHint")}
               checked={settings.aiDisclosureEnabled}
               onChange={(v) => {
                 if (v) {
@@ -435,7 +442,7 @@ export default function CompliancePage() {
             />
             {settings.aiDisclosureEnabled && (
               <div>
-                <label htmlFor="compliance-disclosure-message" className="dashboard-field-label">Disclosure message</label>
+                <label htmlFor="compliance-disclosure-message" className="dashboard-field-label">{t("disclosureMessage")}</label>
                 <input
                   id="compliance-disclosure-message"
                   type="text"
@@ -443,9 +450,9 @@ export default function CompliancePage() {
                   onChange={(e) => patch({ aiDisclosureMessage: e.target.value })}
                   maxLength={500}
                   className="input"
-                  placeholder="This call is handled by an AI assistant."
+                  placeholder={t("disclosurePlaceholder")}
                 />
-                <p className="dashboard-field-hint">Played via text-to-speech. Keep it short and clear.</p>
+                <p className="dashboard-field-hint">{t("disclosureMessageHint")}</p>
               </div>
             )}
           </section>
@@ -454,13 +461,13 @@ export default function CompliancePage() {
           <section className="dashboard-panel-padded space-y-4">
             <SectionHeader
               icon={Mic}
-              title="Call Recording"
+              title={t("callRecording")}
               iconVariant="accent"
-              description="Control whether calls are recorded. Recording laws vary by state and country — check your local requirements."
+              description={t("callRecordingDesc")}
             />
             <ToggleRow
-              label="Record calls"
-              hint="When enabled, calls are recorded and stored according to your data retention policy."
+              label={t("recordCalls")}
+              hint={t("recordCallsHint")}
               checked={settings.recordingEnabled}
               onChange={(v) => {
                 if (!v) {
@@ -480,7 +487,7 @@ export default function CompliancePage() {
             {!settings.recordingEnabled && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <MicOff className="size-4 shrink-0" strokeWidth={ICON_STROKE} />
-                <span>Calls will not be recorded.</span>
+                <span>{t("callsNotRecorded")}</span>
               </div>
             )}
 
@@ -488,7 +495,7 @@ export default function CompliancePage() {
               <>
                 <div className="border-t border-border pt-4">
                   <ToggleRow
-                    label="Play recording announcement"
+                    label={t("playRecordingAnnouncement")}
                     hint={`"This call may be recorded…" — required by many state laws (e.g. California, Illinois) when recording.`}
                     checked={settings.recordingAnnouncementEnabled}
                     onChange={(v) => patch({ recordingAnnouncementEnabled: v })}
@@ -496,7 +503,7 @@ export default function CompliancePage() {
                 </div>
                 {settings.recordingAnnouncementEnabled && (
                   <div>
-                    <label htmlFor="compliance-recording-announcement" className="dashboard-field-label">Announcement message</label>
+                    <label htmlFor="compliance-recording-announcement" className="dashboard-field-label">{t("announcementMessage")}</label>
                     <input
                       id="compliance-recording-announcement"
                       type="text"
@@ -515,12 +522,12 @@ export default function CompliancePage() {
           <section className="dashboard-panel-padded space-y-4">
             <SectionHeader
               icon={Shield}
-              title="Caller Consent"
+              title={t("callerConsent")}
               iconVariant="violet"
-              description="Require callers to actively confirm they agree to speak with an AI and/or be recorded before the conversation starts."
+              description={t("callerConsentDesc")}
             />
             <ToggleRow
-              label="Require caller confirmation to continue"
+              label={t("requireConfirmation")}
               hint="Plays a prompt and waits for the caller to press a key before connecting to the AI. Callers who don't press 1 still reach the AI normally — the call just isn't recorded or transcribed."
               checked={settings.consentRequired}
               onChange={(v) => patch({ consentRequired: v })}
@@ -581,14 +588,14 @@ export default function CompliancePage() {
           <section className="dashboard-panel-padded space-y-4">
             <SectionHeader
               icon={Clock}
-              title="Data Retention Period"
+              title={t("dataRetention")}
               iconVariant="accent"
-              description="How long call recordings, transcripts, and SMS messages are kept. After this period, they are automatically deleted by the retention worker."
+              description={t("dataRetentionDesc")}
             />
             <div>
-              <span id="compliance-retention-label" className="dashboard-field-label">Delete recordings and transcripts after</span>
+              <span id="compliance-retention-label" className="dashboard-field-label">{t("deleteAfter")}</span>
               <div className="flex flex-wrap gap-2 mt-2" role="group" aria-labelledby="compliance-retention-label">
-                {RETENTION_OPTIONS.map((opt) => (
+                {retentionOptions.map((opt) => (
                   <button
                     key={String(opt.days)}
                     type="button"
@@ -615,26 +622,26 @@ export default function CompliancePage() {
           {/* ── Current configuration summary ─────────────────────────────── */}
           <section className="dashboard-panel-padded">
             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-3">
-              Active configuration summary
+              {t("activeSummary")}
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[
-                { label: "AI Disclosure", value: settings.aiDisclosureEnabled ? "On" : "Off", ok: settings.aiDisclosureEnabled },
-                { label: "Call Recording", value: settings.recordingEnabled ? "On" : "Off", ok: null },
+                { label: t("summaryAiDisclosure"), value: settings.aiDisclosureEnabled ? t("on") : t("off"), ok: settings.aiDisclosureEnabled },
+                { label: t("summaryCallRecording"), value: settings.recordingEnabled ? t("on") : t("off"), ok: null },
                 {
-                  label: "Consent Gate",
+                  label: t("summaryConsentGate"),
                   value: settings.consentRequired
-                    ? (settings.consentOffersRecordingChoice ? "Recording choice" : "Required")
-                    : "Not required",
+                    ? (settings.consentOffersRecordingChoice ? t("consentRecordingChoice") : t("consentRequired"))
+                    : t("notRequired"),
                   ok: null,
                 },
                 {
-                  label: "Retention",
-                  value: settings.dataRetentionDays === null ? "Indefinite" : `${settings.dataRetentionDays}d`,
+                  label: t("summaryRetention"),
+                  value: settings.dataRetentionDays === null ? t("indefinite") : `${settings.dataRetentionDays}d`,
                   ok: null,
                 },
                 {
-                  label: "Profile",
+                  label: t("summaryProfile"),
                   value: profiles.find((p) => p.id === settings.industryProfile)?.label ?? settings.industryProfile,
                   ok: null,
                 },
@@ -658,26 +665,26 @@ export default function CompliancePage() {
 
       {/* ── Overview stats ──────────────────────────────────────────────── */}
       <div className="dashboard-stat-grid dashboard-stat-grid--three">
-        <StatCard label="Total calls stored" value={retention?.totalCalls ?? 0} icon={Database} iconVariant="accent" index={0} />
-        <StatCard label="Retention period" value={`${retention?.retentionDays ?? 90}d`} icon={Clock} iconVariant="violet" index={1} />
-        <StatCard label="Audit events" value={auditEvents.length} icon={FileText} iconVariant="neutral" index={2} />
+        <StatCard label={t("totalCallsStored")} value={retention?.totalCalls ?? 0} icon={Database} iconVariant="accent" index={0} />
+        <StatCard label={t("retentionPeriod")} value={`${retention?.retentionDays ?? 90}d`} icon={Clock} iconVariant="violet" index={1} />
+        <StatCard label={t("auditEvents")} value={auditEvents.length} icon={FileText} iconVariant="neutral" index={2} />
       </div>
 
       {/* ── Data Subject Rights + PII Redaction (below the main config) ──── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DashboardPageSection
-          title="Data Subject Rights"
+          title={t("dataSubjectRights")}
           icon={Shield}
           iconVariant="accent"
-          description="GDPR-compliant export and deletion requests."
+          description={t("dataSubjectRightsDesc")}
         >
           <div className="space-y-4">
             <div className="dashboard-panel p-4 space-y-3">
               <div className="flex items-start gap-3">
                 <IconBox icon={Download} variant="accent" size="sm" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">Export all data</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Request a full JSON export of your workspace data. Sent to your account email.</p>
+                  <p className="text-sm font-medium text-foreground">{t("exportAllData")}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("exportAllDataDesc")}</p>
                 </div>
               </div>
               <button
@@ -687,7 +694,7 @@ export default function CompliancePage() {
                 className="btn-ghost w-full text-sm justify-center"
               >
                 <Download className="size-4" strokeWidth={ICON_STROKE} />
-                {exporting ? "Requesting…" : "Request GDPR Export"}
+                {exporting ? t("requesting") : t("requestGdprExport")}
               </button>
             </div>
 
@@ -695,8 +702,8 @@ export default function CompliancePage() {
               <div className="flex items-start gap-3">
                 <IconBox icon={Trash2} variant="error" size="sm" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">Secure deletion</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Request permanent deletion of specific records. Contact support for full account deletion.</p>
+                  <p className="text-sm font-medium text-foreground">{t("secureDeletion")}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("secureDeletionDesc")}</p>
                 </div>
               </div>
               <a
@@ -704,24 +711,24 @@ export default function CompliancePage() {
                 className="btn-ghost w-full text-sm justify-center block text-center"
               >
                 <Trash2 className="size-4 inline mr-1.5" strokeWidth={ICON_STROKE} />
-                Request Deletion
+                {t("requestDeletion")}
               </a>
             </div>
           </div>
         </DashboardPageSection>
 
         <DashboardPageSection
-          title="PII Redaction Tester"
+          title={t("piiTester")}
           icon={FileText}
           iconVariant="violet"
-          description="Test the redaction engine on sample text before enabling it on transcripts."
+          description={t("piiTesterDesc")}
         >
           <div className="space-y-3">
             <textarea
               rows={4}
               value={redactInput}
               onChange={(e) => setRedactInput(e.target.value)}
-              placeholder="Paste text containing names, phone numbers, emails, SSNs…"
+              placeholder={t("redactPlaceholder")}
               className="input resize-none w-full text-sm"
             />
             <button
@@ -730,11 +737,11 @@ export default function CompliancePage() {
               disabled={redacting || !redactInput.trim()}
               className="btn-primary w-full text-sm"
             >
-              {redacting ? "Redacting…" : "Test Redaction"}
+              {redacting ? t("redacting") : t("testRedaction")}
             </button>
             {redactResult && (
               <div className="rounded-xl border border-border bg-muted/50 p-3">
-                <p className="text-xs text-muted-foreground mb-1">Redacted output:</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("redactedOutput")}</p>
                 <p className="text-sm font-mono text-foreground break-all">{redactResult}</p>
               </div>
             )}
@@ -743,10 +750,10 @@ export default function CompliancePage() {
       </div>
 
       <DashboardPageSection
-        title="HIPAA & BAA"
+        title={t("hipaaBaa")}
         icon={FileCheck}
         iconVariant="accent"
-        description="HIPAA BAA agreements are not currently available."
+        description={t("hipaaBaaDesc")}
       >
         <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 p-4">
           <p className="text-sm text-amber-900 dark:text-amber-200">
@@ -761,13 +768,13 @@ export default function CompliancePage() {
       </DashboardPageSection>
 
       <DashboardPageSection
-        title="Audit Trail"
+        title={t("auditTrail")}
         icon={FileText}
         iconVariant="neutral"
-        description="Recent system events for your workspace."
+        description={t("auditTrailDesc")}
       >
         {auditEvents.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-6 text-center">No audit events recorded yet.</p>
+          <p className="text-sm text-muted-foreground py-6 text-center">{t("noAuditEvents")}</p>
         ) : (
           <div className="divide-y divide-border">
             {auditEvents.map((ev) => (

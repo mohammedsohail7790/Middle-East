@@ -42,7 +42,7 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
       { href: "/dashboard/agent", label: "Voice Agents", labelKey: "nav.voiceAgents", subtitle: "Voice, tone, and routing rules", subtitleKey: "nav.voiceAgentsSubtitle" },
       { href: "/dashboard/calendar", label: "Calendar", labelKey: "nav.calendar", subtitle: "Appointments and availability", subtitleKey: "nav.calendarSubtitle" },
       { href: "/dashboard/analytics", label: "Analytics", labelKey: "nav.analytics", plan: "professional", subtitle: "Trends, funnels, and KPIs", subtitleKey: "nav.analyticsSubtitle" },
-      { href: "/dashboard/quality", label: "Quality", labelKey: "nav.quality", subtitle: "Call scoring, sentiment, and lead quality", subtitleKey: "nav.qualitySubtitle" },
+      { href: "/dashboard/quality", label: "Quality", labelKey: "nav.quality", plan: "professional", subtitle: "Call scoring, sentiment, and lead quality", subtitleKey: "nav.qualitySubtitle" },
     ],
   },
   {
@@ -54,20 +54,11 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
     ],
   },
   {
-    label: "CRM",
-    labelKey: "navGroups.crm",
-    items: [
-      { href: "/dashboard/crm/contacts", label: "Contacts", labelKey: "nav.crmContacts", subtitle: "People associated with your business", subtitleKey: "nav.crmContactsSubtitle" },
-      { href: "/dashboard/crm/companies", label: "Companies", labelKey: "nav.crmCompanies", subtitle: "Organizations you do business with", subtitleKey: "nav.crmCompaniesSubtitle" },
-      { href: "/dashboard/crm/deals", label: "Deals", labelKey: "nav.crmDeals", subtitle: "Open and closed opportunities", subtitleKey: "nav.crmDealsSubtitle" },
-    ],
-  },
-  {
     label: "Platform",
     labelKey: "navGroups.platform",
     items: [
       { href: "/dashboard/integrations", label: "Integrations", labelKey: "nav.integrations", subtitle: "CRMs, calendars, and automations", subtitleKey: "nav.integrationsSubtitle" },
-      { href: "/dashboard/knowledge", label: "Knowledge Base", labelKey: "nav.knowledgeBase", subtitle: "Company details, service area, and AI training content", subtitleKey: "nav.knowledgeBaseSubtitle" },
+      { href: "/dashboard/business-profile", label: "Business Profile", labelKey: "nav.businessProfile", subtitle: "Business identity, timezone, and AI training content", subtitleKey: "nav.businessProfileSubtitle" },
       { href: "/dashboard/phone-numbers", label: "Phone Numbers", labelKey: "nav.phoneNumbers", subtitle: "Inbound numbers and routing", subtitleKey: "nav.phoneNumbersSubtitle" },
       { href: "/dashboard/compliance", label: "Compliance", labelKey: "nav.compliance", subtitle: "AI disclosure, call recording, retention, and audit log", subtitleKey: "nav.complianceSubtitle" },
       { href: "/dashboard/billing", label: "Billing", labelKey: "nav.billing", subtitle: "Plan, usage, and invoices", subtitleKey: "nav.billingSubtitle" },

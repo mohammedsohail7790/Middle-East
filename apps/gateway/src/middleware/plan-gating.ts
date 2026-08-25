@@ -52,11 +52,43 @@ export function requireProfessionalOrHigher() {
       return res.status(403).json({ success: false, error: 'No active subscription' });
     }
 
+    if (sub.status === 'trialing') {
+      return next();
+    }
+
     const rank = await billingService.getPlanRank(sub.plan);
     if (rank < 2) {
       return res.status(403).json({
         success: false,
         error: 'This feature requires a Professional plan or higher',
+        currentPlan: sub.plan,
+      });
+    }
+
+    next();
+  };
+}
+
+/** Starter / Essential tier — outbound calling, campaigns, phone numbers. */
+export function requireEssentialOrHigher() {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const tenantId = tenantFromRequest(req, res);
+    if (!tenantId) return;
+
+    const sub = await billingService.getActiveSubscription(tenantId);
+    if (!sub) {
+      return res.status(403).json({ success: false, error: 'No active subscription' });
+    }
+
+    if (sub.status === 'trialing') {
+      return next();
+    }
+
+    const rank = await billingService.getPlanRank(sub.plan);
+    if (rank < 1) {
+      return res.status(403).json({
+        success: false,
+        error: 'This feature requires a Starter plan or higher',
         currentPlan: sub.plan,
       });
     }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Phone, Search, ArrowUpRight, Clock, ChevronLeft, ChevronRight, ShieldBan } from "lucide-react";
 import { IconBox, outcomeIconVariant } from "@/components/ui-kit/IconBox";
@@ -11,6 +12,7 @@ import { DASHBOARD_POLL_MS } from "@/lib/dashboard-sync";
 import { useRealtimeQuery } from "@/lib/use-realtime-query";
 import { timeAgo, formatDuration, formatPhone } from "@/lib/utils";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 import { DashboardTabs } from "@/components/ui-kit/DashboardTabs";
 
 interface Call {
@@ -31,15 +33,9 @@ interface SpamLogEntry {
   createdAt: string;
 }
 
-const CALL_TABS = [
-  { id: "All", label: "All" },
-  { id: "Completed", label: "Completed" },
-  { id: "Failed", label: "Failed" },
-  { id: "Transferred", label: "Transferred" },
-  { id: "Spam", label: "Spam blocked" },
-] as const;
-
 const PAGE_SIZE = 50;
+
+const TAB_IDS = ["All", "Completed", "Failed", "Transferred", "Spam"] as const;
 
 function initialCallsPage(): { calls: Call[]; total: number; hasMore: boolean } {
   const cached = readApiGetCache<{
@@ -59,6 +55,26 @@ function initialCallsPage(): { calls: Call[]; total: number; hasMore: boolean } 
 }
 
 export default function CallsPage() {
+  const t = useTranslations("pages.calls");
+  const tCommon = useTranslations("common");
+  const { title, description: navDescription } = useDashboardPageLabels("/dashboard/calls");
+  const callTabs = useMemo(
+    () =>
+      TAB_IDS.map((id) => ({
+        id,
+        label:
+          id === "All"
+            ? t("tabs.all")
+            : id === "Completed"
+              ? t("tabs.completed")
+              : id === "Failed"
+                ? t("tabs.failed")
+                : id === "Transferred"
+                  ? t("tabs.transferred")
+                  : t("tabs.spam"),
+      })),
+    [t]
+  );
   const [initialData] = useState(() => initialCallsPage());
   const [calls, setCalls] = useState<Call[]>(() => initialData.calls);
   const [loading, setLoading] = useState(() => initialData.calls.length === 0);
@@ -153,24 +169,20 @@ export default function CallsPage() {
   const getOutcomeBadge = (outcome: string | null) => {
     switch (outcome) {
       case "completed":
-        return <span className="badge-success" role="status">Completed</span>;
+        return <span className="badge-success" role="status">{t("tabs.completed")}</span>;
       case "failed":
-        return <span className="badge-error" role="status">Failed</span>;
+        return <span className="badge-error" role="status">{t("tabs.failed")}</span>;
       case "transferred":
-        return <span className="badge-warning" role="status">Transferred</span>;
+        return <span className="badge-warning" role="status">{t("tabs.transferred")}</span>;
       default:
-        return <span className="badge-neutral" role="status">Unknown</span>;
+        return <span className="badge-neutral" role="status">{tCommon("unknown")}</span>;
     }
   };
 
   return (
     <DashboardPage
-      title="Calls"
-      description={
-        isSpamTab
-          ? "Calls blocked by spam protection — configure rules in Settings."
-          : "Recordings, transcripts, and outcomes for every conversation"
-      }
+      title={title}
+      description={isSpamTab ? t("descriptionSpam") : navDescription ?? t("descriptionDefault")}
       loading={(isSpamTab ? spamLoading : loading) && (isSpamTab ? spamLog.length === 0 : calls.length === 0)}
       error={error || undefined}
       toolbar={
@@ -180,8 +192,8 @@ export default function CallsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search by call ID or transcript…"
-                aria-label="Search calls by call ID or transcript"
+                placeholder={t("searchPlaceholder")}
+                aria-label={t("searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="input pl-10 w-full"
@@ -189,7 +201,7 @@ export default function CallsPage() {
             </div>
           )}
           <DashboardTabs
-            tabs={CALL_TABS.map((t) => ({ id: t.id, label: t.label }))}
+            tabs={callTabs}
             activeId={activeTab}
             onChange={setActiveTab}
             className="sm:self-start"
@@ -202,12 +214,12 @@ export default function CallsPage() {
           spamLog.length === 0 && !spamLoading ? (
             <EmptyState
               icon={ShieldBan}
-              title="No blocked spam calls"
-              description="When spam protection rejects a caller, entries appear here."
+              title={t("noSpam")}
+              description={t("noSpamDesc")}
               iconVariant="muted"
               action={
                 <Link href="/dashboard/settings/spam" className="btn-ghost text-sm">
-                  Spam settings
+                  {t("spamSettings")}
                 </Link>
               }
             />
@@ -225,7 +237,7 @@ export default function CallsPage() {
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 shrink-0">
-                    <span className="badge-warning">Blocked</span>
+                    <span className="badge-warning">{t("blocked")}</span>
                     {entry.callSid && (
                       <span className="text-xs text-muted-foreground font-mono">{entry.callSid.slice(0, 12)}…</span>
                     )}
@@ -240,11 +252,9 @@ export default function CallsPage() {
         ) : calls.length === 0 && !loading ? (
           <EmptyState
             icon={Phone}
-            title={search || activeTab !== "All" ? "No calls match your filters" : "No calls yet"}
+            title={search || activeTab !== "All" ? t("noCallsFiltered") : t("noCalls")}
             description={
-              search || activeTab !== "All"
-                ? "Try adjusting your search or filter criteria."
-                : "Calls will appear here once your AI agent starts handling conversations."
+              search || activeTab !== "All" ? t("noCallsFilteredDesc") : t("noCallsDesc")
             }
             iconVariant="muted"
           />
@@ -262,7 +272,7 @@ export default function CallsPage() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-foreground truncate">{call.call_sid}</p>
                       <p className="text-xs text-muted-foreground truncate mt-0.5">
-                        {call.transcript?.substring(0, 60) || "No transcript available"}
+                        {call.transcript?.substring(0, 60) || t("noTranscript")}
                         {(call.transcript?.length ?? 0) > 60 ? "..." : ""}
                       </p>
                     </div>
@@ -285,7 +295,7 @@ export default function CallsPage() {
             {total > PAGE_SIZE && (
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 py-3 border-t border-border">
                 <p className="text-xs text-muted-foreground">
-                  Showing {rangeStart}–{rangeEnd} of {total}
+                  {t("showing", { count: `${rangeStart}–${rangeEnd}`, total })}
                 </p>
                 <div className="flex items-center gap-2">
                   <button
@@ -295,10 +305,10 @@ export default function CallsPage() {
                     onClick={() => setOffset((o) => Math.max(0, o - PAGE_SIZE))}
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    Previous
+                    {tCommon("previous")}
                   </button>
                   <span className="text-xs text-muted-foreground px-2">
-                    Page {page} of {pageCount}
+                    {t("pageOf", { page, total: pageCount })}
                   </span>
                   <button
                     type="button"
@@ -306,7 +316,7 @@ export default function CallsPage() {
                     disabled={!hasMore}
                     onClick={() => setOffset((o) => o + PAGE_SIZE)}
                   >
-                    Next
+                    {tCommon("next")}
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>

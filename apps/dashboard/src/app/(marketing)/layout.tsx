@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || "https://www.hallaai.com"
   ),
   icons: {
-    icon: "/logo.png",
+    icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/logo-icon.png", type: "image/png" }],
     apple: "/apple-touch-icon.png",
   },
 };

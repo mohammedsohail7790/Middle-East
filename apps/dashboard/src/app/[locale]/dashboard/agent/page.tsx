@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
   Bot, Save, Plus, X, Mic, Clock, Phone,
@@ -27,37 +28,27 @@ import { VoicePreviewPanel } from "@/components/agent/VoicePreviewPanel";
 import { cn } from "@/lib/utils";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
-import { AGENT_LANGUAGES } from "@/lib/agent-languages";
+import { AGENT_LANGUAGES, isAgentLanguageAllowed } from "@/lib/agent-languages";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 import { IconBox, ICON_STROKE } from "@/components/ui-kit/IconBox";
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
 type AIConfig = DashboardAIConfigShape;
 
 /** Realtime voice ids — friendly labels; live calls use these, preview maps to OpenAI TTS */
 const VOICES = [
-  { id: "marin", name: "Maya", gender: "Female · live calls (most natural)" },
-  { id: "coral", name: "Sarah", gender: "Female · warm" },
-  { id: "shimmer", name: "Emma", gender: "Female · clear" },
-  { id: "cedar", name: "Chris", gender: "Male · natural" },
-  { id: "ash", name: "Alex", gender: "Male · conversational" },
-  { id: "sage", name: "Sage", gender: "Calm · human" },
-];
+  { id: "marin", name: "Maya" },
+  { id: "coral", name: "Sarah" },
+  { id: "shimmer", name: "Emma" },
+  { id: "cedar", name: "Chris" },
+  { id: "ash", name: "Alex" },
+  { id: "sage", name: "Sage" },
+] as const;
 
-const TONES = ["Professional", "Friendly", "Warm", "Casual", "Formal"];
+const TONE_KEYS = ["professional", "friendly", "warm", "casual", "formal"] as const;
 
-const TIMEZONES = [
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "America/Phoenix",
-  "America/Anchorage",
-  "Pacific/Honolulu",
-  "Europe/London",
-  "Europe/Paris",
-  "Asia/Tokyo",
-];
+import { DASHBOARD_TIMEZONES } from "@/lib/timezones";
 
 interface VoiceRoutingSettings {
   id: string;
@@ -75,6 +66,9 @@ const cachedAgentConfig = (): AIConfig | null => {
 };
 
 export default function AgentPage() {
+  const t = useTranslations("pages.agent");
+  const tCommon = useTranslations("common");
+  const { title, description } = useDashboardPageLabels("/dashboard/agent");
   const initialConfig = cachedAgentConfig();
   const [config, setConfig] = useState<AIConfig | null>(initialConfig);
   const [loading, setLoading] = useState(!initialConfig);
@@ -98,9 +92,9 @@ export default function AgentPage() {
       setVoiceRouting(normalizeTenantSettings(tenant));
       setVoiceRoutingError("");
     } catch (e) {
-      setVoiceRoutingError(e instanceof Error ? e.message : "Failed to load voice & routing settings");
+      setVoiceRoutingError(e instanceof Error ? e.message : t("voiceRoutingLoadFailed"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadVoiceRouting();
@@ -120,11 +114,11 @@ export default function AgentPage() {
       const tenantId = voiceRouting.id || (await resolveTenantId());
       await api.put(`/tenants/${tenantId}`, tenantSettingsToApi(voiceRouting));
       voiceRoutingDirtyRef.current = false;
-      setVoiceRoutingSuccess("Voice & routing saved.");
+      setVoiceRoutingSuccess(t("voiceRoutingSaved"));
       syncDashboardAction("settings");
       setTimeout(() => setVoiceRoutingSuccess(""), 3000);
     } catch (e) {
-      setVoiceRoutingError(e instanceof Error ? e.message : "Failed to save voice & routing settings");
+      setVoiceRoutingError(e instanceof Error ? e.message : t("voiceRoutingSaveFailed"));
     } finally {
       setVoiceRoutingSaving(false);
     }
@@ -204,11 +198,11 @@ export default function AgentPage() {
       );
       configDirtyRef.current = false;
       setConfig(normalizeAIConfig(saved));
-      setSuccess("Configuration saved successfully");
+      setSuccess(t("configSaved"));
       syncDashboardAction("config");
       setTimeout(() => setSuccess(""), 3000);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Could not save configuration");
+      setError(e instanceof Error ? e.message : t("configSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -239,10 +233,10 @@ export default function AgentPage() {
   if (!config && !loading) {
     return (
       <DashboardPage
-        title="AI Agent"
-        description="Configure your realtime voice receptionist"
+        title={title}
+        description={t("descriptionLoading")}
         maxWidth="xl"
-        error={error || "Failed to load AI configuration"}
+        error={error || t("loadFailed")}
       >
         <div className="dashboard-panel-padded text-center space-y-4">
           <IconBox icon={Bot} variant="muted" size="xl" className="mx-auto" />
@@ -259,7 +253,7 @@ export default function AgentPage() {
               void loadConfig();
             }}
           >
-            Retry
+            {t("retry")}
           </button>
         </div>
       </DashboardPage>
@@ -268,15 +262,15 @@ export default function AgentPage() {
 
   return (
     <DashboardPage
-      title="AI Agent"
-      description="Realtime voice for live calls — language, greeting, booking, transfers, and CRM hooks"
+      title={title}
+      description={description}
       maxWidth="xl"
       loading={loading && !config}
       error={error || undefined}
       actions={
         config ? (
           <button type="button" onClick={saveConfig} disabled={saving} className="btn-primary w-full sm:w-auto shrink-0 justify-center">
-            <Save className="size-4" strokeWidth={ICON_STROKE} /> {saving ? "Saving…" : "Save changes"}
+            <Save className="size-4" strokeWidth={ICON_STROKE} /> {saving ? tCommon("saving") : t("saveChanges")}
           </button>
         ) : undefined
       }
@@ -295,35 +289,35 @@ export default function AgentPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-6">
           {/* Agent Name */}
           <div className="dashboard-panel-padded">
-            <SectionHeader icon={Bot} title="Identity" iconVariant="accent" className="mb-4" />
+            <SectionHeader icon={Bot} title={t("identity")} iconVariant="accent" className="mb-4" />
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-foreground-secondary mb-1.5 block" htmlFor="agent-name">Agent Name</label>
+                <label className="text-xs text-foreground-secondary mb-1.5 block" htmlFor="agent-name">{t("agentName")}</label>
                 <input
                   id="agent-name"
                   type="text"
                   value={config.agentName}
                   onChange={(e) => patchConfig((c) => ({ ...c, agentName: e.target.value }))}
-                  placeholder="Sarah"
+                  placeholder={t("defaultAgentName")}
                   className="input"
                 />
               </div>
               <div>
-                <label className="text-xs text-foreground-secondary mb-1.5 block" htmlFor="agent-greeting">Phone Greeting</label>
+                <label className="text-xs text-foreground-secondary mb-1.5 block" htmlFor="agent-greeting">{t("phoneGreeting")}</label>
                 <textarea
                   id="agent-greeting"
                   value={config.greetingMessage || ""}
                   onChange={(e) => patchConfig((c) => ({ ...c, greetingMessage: e.target.value }))}
-                  placeholder={`Thanks for calling. This is ${config.agentName || "Sarah"}. How can I help you today?`}
+                  placeholder={t("greetingPlaceholder", { name: config.agentName || t("defaultAgentName") })}
                   rows={3}
                   className="input resize-none text-sm"
                 />
                 <p className="text-[10px] text-foreground-tertiary mt-1">
-                  Used on the next incoming call after you save. Leave blank for the default greeting.
+                  {t("greetingHint")}
                 </p>
               </div>
               <div>
-                <label className="text-xs text-foreground-secondary mb-1.5 block" htmlFor="agent-transfer-number">Emergency / transfer number</label>
+                <label className="text-xs text-foreground-secondary mb-1.5 block" htmlFor="agent-transfer-number">{t("emergencyTransfer")}</label>
                 <input
                   id="agent-transfer-number"
                   type="tel"
@@ -333,7 +327,7 @@ export default function AgentPage() {
                   className="input"
                 />
                 <p className="text-[10px] text-foreground-tertiary mt-1">
-                  Required for call transfers. Use E.164 format (e.g. +19175551234).
+                  {t("transferHint")}
                 </p>
               </div>
             </div>
@@ -341,7 +335,7 @@ export default function AgentPage() {
 
           {/* Voice */}
           <div className="dashboard-panel-padded">
-            <SectionHeader icon={Mic} title="Voice" iconVariant="violet" className="mb-4" />
+            <SectionHeader icon={Mic} title={t("voice")} iconVariant="violet" className="mb-4" />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {VOICES.map((voice) => (
                 <button
@@ -361,7 +355,7 @@ export default function AgentPage() {
                     <Mic className={cn("size-4", config.voice === voice.id ? "text-accent" : "text-muted-foreground")} strokeWidth={ICON_STROKE} />
                     <div>
                       <p className="text-sm font-medium text-foreground">{voice.name}</p>
-                      <p className="text-[10px] text-foreground-secondary">{voice.gender}</p>
+                      <p className="text-[10px] text-foreground-secondary">{t(`voices.${voice.id}`)}</p>
                     </div>
                   </div>
                 </button>
@@ -373,16 +367,14 @@ export default function AgentPage() {
           <div className="dashboard-panel-padded">
             <SectionHeader
               icon={Globe}
-              title="Language"
+              title={t("language")}
               iconVariant="neutral"
-              description="Live calls use this language end-to-end (Realtime). Essential: English & Spanish; Professional+ adds French, Russian, Mandarin, Hindi."
+              description={t("languageDesc")}
               className="mb-4"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {AGENT_LANGUAGES.map((lang) => {
-                const allowed =
-                  !config.allowedLanguages?.length ||
-                  config.allowedLanguages.includes(lang.id);
+                const allowed = isAgentLanguageAllowed(config.allowedLanguages, lang.id);
                 return (
                   <button
                     key={lang.id}
@@ -403,10 +395,9 @@ export default function AgentPage() {
                     style={{ transition: "border-color 160ms ease-out, background-color 160ms ease-out" }}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{lang.flag}</span>
-                      <span className="text-sm text-foreground-secondary">{lang.name}</span>
+                      <span className="text-sm font-medium text-foreground-secondary">{lang.name}</span>
                       {!allowed && (
-                        <span className="text-[10px] text-amber-700 ml-auto">Pro+</span>
+                        <span className="text-[10px] text-amber-700 ml-auto">{t("proPlus")}</span>
                       )}
                     </div>
                   </button>
@@ -420,23 +411,23 @@ export default function AgentPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-6">
           {/* Tone */}
           <div className="dashboard-panel-padded">
-            <SectionHeader icon={Sparkles} title="Tone" iconVariant="accent" className="mb-4" />
+            <SectionHeader icon={Sparkles} title={t("tone")} iconVariant="accent" className="mb-4" />
             <div className="flex flex-wrap gap-2">
-              {TONES.map((tone) => (
+              {TONE_KEYS.map((tone) => (
                 <button
                   key={tone}
                   type="button"
-                  aria-pressed={config.tone === tone.toLowerCase()}
-                  onClick={() => patchConfig((c) => ({ ...c, tone: tone.toLowerCase() }))}
+                  aria-pressed={config.tone === tone}
+                  onClick={() => patchConfig((c) => ({ ...c, tone }))}
                   className={cn(
                     "px-4 py-2 rounded-xl text-sm font-medium",
-                    config.tone === tone.toLowerCase()
+                    config.tone === tone
                       ? "bg-accent-light text-accent-dark border border-accent/30"
                       : "bg-background-hover text-foreground-secondary border border-border hover:text-foreground-secondary"
                   )}
                   style={{ transition: "background-color 160ms ease-out, border-color 160ms ease-out, color 160ms ease-out" }}
                 >
-                  {tone}
+                  {t(`tones.${tone}`)}
                 </button>
               ))}
             </div>
@@ -444,13 +435,13 @@ export default function AgentPage() {
 
           {/* Custom Instructions */}
           <div className="dashboard-panel-padded">
-            <SectionHeader title="Custom instructions" iconVariant="muted" className="mb-4" />
-            <label htmlFor="agent-custom-instructions" className="sr-only">Custom instructions</label>
+            <SectionHeader title={t("customInstructions")} iconVariant="muted" className="mb-4" />
+            <label htmlFor="agent-custom-instructions" className="sr-only">{t("customInstructions")}</label>
             <textarea
               id="agent-custom-instructions"
               value={config.customInstructions}
               onChange={(e) => patchConfig((c) => ({ ...c, customInstructions: e.target.value }))}
-              placeholder="Add specific instructions for your AI agent..."
+              placeholder={t("customInstructionsPlaceholder")}
               rows={4}
               className="input resize-none"
             />
@@ -458,16 +449,16 @@ export default function AgentPage() {
 
           {/* Do/Don't Rules */}
           <div className="dashboard-panel-padded">
-            <SectionHeader icon={ListChecks} title="Behavior rules" iconVariant="warning" className="mb-4" />
+            <SectionHeader icon={ListChecks} title={t("behaviorRules")} iconVariant="warning" className="mb-4" />
             <div className="space-y-4">
               {/* Do Rules */}
               <div>
-                <label className="text-xs text-emerald-600 mb-2 block font-medium">✓ Do</label>
+                <label className="text-xs text-emerald-600 mb-2 block font-medium">{t("do")}</label>
                 <div className="space-y-1.5 mb-2">
                   {(config.doRules || []).map((rule, i) => (
                     <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/[0.05] border border-emerald-500/10">
                       <span className="text-xs text-foreground-secondary flex-1">{rule}</span>
-                      <button type="button" onClick={() => removeDoRule(i)} aria-label={`Remove do-rule: ${rule}`} className="text-foreground-tertiary hover:text-red-600">
+                      <button type="button" onClick={() => removeDoRule(i)} aria-label={t("removeDoRule", { rule })} className="text-foreground-tertiary hover:text-red-600">
                         <X className="size-3" strokeWidth={ICON_STROKE} />
                       </button>
                     </div>
@@ -479,8 +470,8 @@ export default function AgentPage() {
                     value={newDoRule}
                     onChange={(e) => setNewDoRule(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addDoRule()}
-                    placeholder="Add a rule..."
-                    aria-label="Add a Do rule"
+                    placeholder={t("addRule")}
+                    aria-label={t("addDoRule")}
                     className="input flex-1"
                   />
                   <button type="button" onClick={addDoRule} className="btn-ghost px-3">
@@ -491,12 +482,12 @@ export default function AgentPage() {
 
               {/* Don't Rules */}
               <div>
-                <label className="text-xs text-red-600 mb-2 block font-medium">✗ Don&apos;t</label>
+                <label className="text-xs text-red-600 mb-2 block font-medium">{t("dont")}</label>
                 <div className="space-y-1.5 mb-2">
                   {(config.dontRules || []).map((rule, i) => (
                     <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-red-500/[0.05] border border-red-500/10">
                       <span className="text-xs text-foreground-secondary flex-1">{rule}</span>
-                      <button type="button" onClick={() => removeDontRule(i)} aria-label={`Remove don't-rule: ${rule}`} className="text-foreground-tertiary hover:text-red-600">
+                      <button type="button" onClick={() => removeDontRule(i)} aria-label={t("removeDontRule", { rule })} className="text-foreground-tertiary hover:text-red-600">
                         <X className="size-3" strokeWidth={ICON_STROKE} />
                       </button>
                     </div>
@@ -508,8 +499,8 @@ export default function AgentPage() {
                     value={newDontRule}
                     onChange={(e) => setNewDontRule(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addDontRule()}
-                    placeholder="Add a rule..."
-                    aria-label="Add a Don't rule"
+                    placeholder={t("addRule")}
+                    aria-label={t("addDontRule")}
                     className="input flex-1"
                   />
                   <button type="button" onClick={addDontRule} className="btn-ghost px-3">
@@ -522,13 +513,13 @@ export default function AgentPage() {
 
           {/* Capabilities */}
           <div className="dashboard-panel-padded">
-            <SectionHeader icon={CheckCircle} title="Capabilities" iconVariant="success" className="mb-4" />
+            <SectionHeader icon={CheckCircle} title={t("capabilities")} iconVariant="success" className="mb-4" />
             <div className="space-y-3">
               {[
-                { key: "bookAppointments", label: "Book Appointments", desc: "Schedule meetings on calendar" },
-                { key: "transferCalls", label: "Transfer Calls", desc: "Route to human agents" },
-                { key: "collectPayments", label: "Collect Payments", desc: "Process payment info", comingSoon: true },
-                { key: "accessKnowledge", label: "Access Knowledge Base", desc: "Use uploaded documents" },
+                { key: "bookAppointments", label: t("bookAppointments"), desc: t("bookAppointmentsDesc") },
+                { key: "transferCalls", label: t("transferCalls"), desc: t("transferCallsDesc") },
+                { key: "collectPayments", label: t("collectPayments"), desc: t("collectPaymentsDesc"), comingSoon: true },
+                { key: "accessKnowledge", label: t("accessKnowledge"), desc: t("accessKnowledgeDesc") },
               ].map((cap) => (
                 <div key={cap.key} className="flex items-center justify-between p-3 rounded-xl bg-muted border border-border">
                   <div className="flex items-center gap-2 min-w-0">
@@ -537,7 +528,7 @@ export default function AgentPage() {
                       <p className="text-xs text-foreground-tertiary">{cap.desc}</p>
                     </div>
                     {cap.comingSoon && (
-                      <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-muted-foreground/15 text-muted-foreground">Soon</span>
+                      <span className="shrink-0 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-muted-foreground/15 text-muted-foreground">{t("soon")}</span>
                     )}
                   </div>
                   <button
@@ -583,9 +574,9 @@ export default function AgentPage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="dashboard-panel-padded space-y-6">
           <SectionHeader
             icon={Phone}
-            title="Voice & routing"
+            title={t("voiceRouting")}
             iconVariant="violet"
-            description="Language, timezone, tone, and transfer number for live calls."
+            description={t("voiceRoutingDesc")}
           />
           {voiceRoutingError && (
             <div className="dashboard-alert dashboard-alert-error" role="alert">
@@ -604,7 +595,7 @@ export default function AgentPage() {
                 <div>
                   <label htmlFor="vr-language" className="dashboard-field-label flex items-center gap-2">
                     <Globe className="w-4 h-4 text-foreground-tertiary" />
-                    Language
+                    {t("language")}
                   </label>
                   <select
                     id="vr-language"
@@ -620,7 +611,7 @@ export default function AgentPage() {
                 <div>
                   <label htmlFor="vr-timezone" className="dashboard-field-label flex items-center gap-2">
                     <Clock className="w-4 h-4 text-foreground-tertiary" />
-                    Timezone
+                    {t("timezone")}
                   </label>
                   <select
                     id="vr-timezone"
@@ -628,24 +619,24 @@ export default function AgentPage() {
                     onChange={(e) => patchVoiceRouting((s) => ({ ...s, timezone: e.target.value }))}
                     className="input"
                   >
-                    {TIMEZONES.map((tz) => (
-                      <option key={tz} value={tz}>{tz.replace(/_/g, " ")}</option>
+                    {DASHBOARD_TIMEZONES.map((tz) => (
+                      <option key={tz.value} value={tz.value}>{tz.label}</option>
                     ))}
                   </select>
                 </div>
               </div>
               <div>
-                <span id="vr-tone-label" className="dashboard-field-label">Tone</span>
+                <span id="vr-tone-label" className="dashboard-field-label">{t("tone")}</span>
                 <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="vr-tone-label">
-                  {TONES.map((tone) => (
+                  {TONE_KEYS.map((tone) => (
                     <button
                       key={tone}
                       type="button"
-                      onClick={() => patchVoiceRouting((s) => ({ ...s, tone: tone.toLowerCase() }))}
-                      aria-pressed={voiceRouting.tone === tone.toLowerCase()}
-                      className={cn("seg-pill capitalize", voiceRouting.tone === tone.toLowerCase() && "is-active")}
+                      onClick={() => patchVoiceRouting((s) => ({ ...s, tone }))}
+                      aria-pressed={voiceRouting.tone === tone}
+                      className={cn("seg-pill capitalize", voiceRouting.tone === tone && "is-active")}
                     >
-                      {tone}
+                      {t(`tones.${tone}`)}
                     </button>
                   ))}
                 </div>
@@ -653,7 +644,7 @@ export default function AgentPage() {
               <div>
                 <label htmlFor="vr-transfer-number" className="dashboard-field-label flex items-center gap-2">
                   <Phone className="w-4 h-4 text-foreground-tertiary" />
-                  Transfer number
+                  {t("transferNumber")}
                 </label>
                 <input
                   id="vr-transfer-number"
@@ -664,12 +655,12 @@ export default function AgentPage() {
                   className="input"
                 />
                 <p className="dashboard-field-hint">
-                  For live transfers and emergencies. Also editable above under Identity.
+                  {t("transferRoutingHint")}
                 </p>
               </div>
               <div className="flex justify-end">
                 <button type="button" onClick={() => void saveVoiceRouting()} disabled={voiceRoutingSaving} className="btn-primary">
-                  <Save className="size-4" strokeWidth={ICON_STROKE} /> {voiceRoutingSaving ? "Saving…" : "Save voice & routing"}
+                  <Save className="size-4" strokeWidth={ICON_STROKE} /> {voiceRoutingSaving ? tCommon("saving") : t("saveVoiceRouting")}
                 </button>
               </div>
             </>
@@ -679,7 +670,7 @@ export default function AgentPage() {
 
       <section id="voice-preview" className="mt-10 scroll-mt-24">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <SectionHeader icon={Headphones} title="Voice preview" iconVariant="accent" className="mb-4" />
+          <SectionHeader icon={Headphones} title={t("voicePreview")} iconVariant="accent" className="mb-4" />
           <VoicePreviewPanel config={config} />
         </motion.div>
       </section>
@@ -688,9 +679,9 @@ export default function AgentPage() {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <SectionHeader
             icon={Users}
-            title="Per-number agents"
+            title={t("perNumberAgents")}
             iconVariant="violet"
-            description="Professional+"
+            description={t("perNumberAgentsDesc")}
             className="mb-4"
           />
           <AdditionalAgentsPanel />

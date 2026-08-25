@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Save, Shield } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Save, Shield, ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
@@ -20,6 +20,8 @@ interface SpamSettings {
 }
 
 export default function SpamSettingsPage() {
+  const t = useTranslations("pages.spam");
+  const tCommon = useTranslations("common");
   const [spamSettings, setSpamSettings] = useState<SpamSettings | null>(null);
   const [blocklistText, setBlocklistText] = useState("");
   const [allowlistText, setAllowlistText] = useState("");
@@ -64,11 +66,11 @@ export default function SpamSettingsPage() {
           .filter(Boolean),
       });
       setSpamSettings(updated);
-      showDashboardToast({ type: "success", title: "Spam settings saved" });
+      showDashboardToast({ type: "success", title: t("saved") });
     } catch (e) {
       showDashboardToast({
         type: "error",
-        title: "Could not save spam settings",
+        title: t("saveFailed"),
         message: e instanceof Error ? e.message : "Request failed",
       });
     } finally {
@@ -78,19 +80,19 @@ export default function SpamSettingsPage() {
 
   return (
     <DashboardPage
-      title="Spam Protection"
-      description="Block robocalls and unwanted callers before they reach your AI."
+      title={t("title")}
+      description={t("description")}
       loading={loading && !spamSettings}
       error={!spamSettings && !loading ? error || "Failed to load spam settings" : undefined}
       toolbar={
         <Link href="/dashboard/settings" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="size-4" strokeWidth={ICON_STROKE} /> Back to settings
+          <ArrowLeft className="size-4" strokeWidth={ICON_STROKE} /> {t("backToSettings")}
         </Link>
       }
       actions={
         spamSettings ? (
           <button onClick={() => void save()} disabled={saving} className="btn-primary w-full sm:w-auto justify-center">
-            <Save className="size-4" strokeWidth={ICON_STROKE} /> {saving ? "Saving…" : "Save"}
+            <Save className="size-4" strokeWidth={ICON_STROKE} /> {saving ? tCommon("saving") : tCommon("save")}
           </button>
         ) : undefined
       }
@@ -101,15 +103,15 @@ export default function SpamSettingsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="dashboard-panel-padded space-y-6 max-w-2xl"
         >
-          <SectionHeader icon={Shield} title="Spam protection" iconVariant="violet" />
+          <SectionHeader icon={Shield} title={t("sectionTitle")} iconVariant="violet" />
           <div className="space-y-2">
             <label
               className="toggle-row"
               onClick={() => setSpamSettings((s) => (s ? { ...s, enabled: !s.enabled } : s))}
             >
               <div className="toggle-row-text">
-                <span className="toggle-row-label">Enable spam filtering</span>
-                <span className="toggle-row-hint">Automatically screen and block known spam callers</span>
+                <span className="toggle-row-label">{t("enableFiltering")}</span>
+                <span className="toggle-row-hint">{t("enableFilteringHint")}</span>
               </div>
               <label className="toggle" onClick={(e) => e.stopPropagation()}>
                 <input
@@ -125,8 +127,8 @@ export default function SpamSettingsPage() {
               onClick={() => setSpamSettings((s) => (s ? { ...s, blockUnknownCaller: !s.blockUnknownCaller } : s))}
             >
               <div className="toggle-row-text">
-                <span className="toggle-row-label">Block anonymous callers</span>
-                <span className="toggle-row-hint">Reject calls with no caller ID</span>
+                <span className="toggle-row-label">{t("blockAnonymous")}</span>
+                <span className="toggle-row-hint">{t("blockAnonymousHint")}</span>
               </div>
               <label className="toggle" onClick={(e) => e.stopPropagation()}>
                 <input
@@ -142,8 +144,8 @@ export default function SpamSettingsPage() {
               onClick={() => setSpamSettings((s) => (s ? { ...s, stirShakenRequired: !s.stirShakenRequired } : s))}
             >
               <div className="toggle-row-text">
-                <span className="toggle-row-label">Require STIR/SHAKEN attestation</span>
-                <span className="toggle-row-hint">Only allow calls with verified carrier attestation</span>
+                <span className="toggle-row-label">{t("stirShaken")}</span>
+                <span className="toggle-row-hint">{t("stirShakenHint")}</span>
               </div>
               <label className="toggle" onClick={(e) => e.stopPropagation()}>
                 <input
@@ -156,7 +158,7 @@ export default function SpamSettingsPage() {
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="dashboard-field-label">Blocklist (one number per line)</label>
+                <label className="dashboard-field-label">{t("blocklist")}</label>
                 <textarea
                   rows={5}
                   value={blocklistText}
@@ -166,7 +168,7 @@ export default function SpamSettingsPage() {
                 />
               </div>
               <div>
-                <label className="dashboard-field-label">Allowlist (one number per line)</label>
+                <label className="dashboard-field-label">{t("allowlist")}</label>
                 <textarea
                   rows={5}
                   value={allowlistText}
@@ -182,7 +184,7 @@ export default function SpamSettingsPage() {
               disabled={saving}
               className="btn-primary text-sm"
             >
-              {saving ? "Saving…" : "Save spam settings"}
+              {saving ? tCommon("saving") : t("saveSpam")}
             </button>
           </div>
         </motion.div>

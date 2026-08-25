@@ -79,14 +79,7 @@ import { cn } from "@/lib/utils";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 
-const TIMEZONES = [
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "America/Phoenix",
-  "Pacific/Honolulu",
-];
+import { DASHBOARD_TIMEZONES, DEFAULT_TIMEZONE } from "@/lib/timezones";
 
 export function KnowledgeBusinessTemplates() {
   const [templates, setTemplates] = useState<KnowledgeTemplates>(defaultTemplates());
@@ -247,9 +240,9 @@ export function KnowledgeBusinessTemplates() {
             onChange={(e) => setTemplates((p) => ({ ...p, timezone: e.target.value }))}
             className="input py-2 text-sm sm:max-w-xs"
           >
-            {TIMEZONES.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz.replace(/_/g, " ")}
+            {DASHBOARD_TIMEZONES.map((tz) => (
+              <option key={tz.value} value={tz.value}>
+                {tz.label}
               </option>
             ))}
           </select>

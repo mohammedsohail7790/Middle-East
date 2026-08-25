@@ -1578,7 +1578,13 @@ body:has(.auth-shell) {
     height: 2.5rem;
     overflow: hidden;
     border-radius: 0.625rem;
-    background: var(--black);
+    background: var(--white);
+    border: 1px solid var(--gold-border);
+  }
+
+  .dark .dashboard-sidebar-icon {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(16, 185, 129, 0.35);
   }
 
   .sidebar-nav-inactive:hover {

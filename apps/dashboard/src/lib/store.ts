@@ -17,31 +17,41 @@ export function normalizePlanId(plan: string | undefined | null): string {
 
 export function getPlan(): string {
   if (typeof window === "undefined") return "trial";
-  return normalizePlanId(localStorage.getItem("calliq_plan"));
+  return normalizePlanId(
+    localStorage.getItem("halla_plan") ?? localStorage.getItem("calliq_plan")
+  );
 }
 
 export function setPlan(plan: string) {
   if (typeof window === "undefined") return;
-  localStorage.setItem("calliq_plan", normalizePlanId(plan));
+  const normalized = normalizePlanId(plan);
+  localStorage.setItem("halla_plan", normalized);
+  localStorage.setItem("calliq_plan", normalized);
+  window.dispatchEvent(new Event("halla-plan-updated"));
   window.dispatchEvent(new Event("calliq-plan-updated"));
 }
 
 export function setTenantId(id: string) {
   if (typeof window === "undefined") return;
+  localStorage.setItem("halla_tenant_id", id);
   localStorage.setItem("calliq_tenant_id", id);
+  document.cookie = `halla_tenant_id=${encodeURIComponent(id)}; path=/; max-age=2592000; samesite=lax`;
   document.cookie = `calliq_tenant_id=${encodeURIComponent(id)}; path=/; max-age=2592000; samesite=lax`;
+  window.dispatchEvent(new CustomEvent("halla-tenant-ready", { detail: { tenantId: id } }));
   window.dispatchEvent(new CustomEvent("calliq-tenant-ready", { detail: { tenantId: id } }));
 }
 
 export function getTenantId(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("calliq_tenant_id");
+  return localStorage.getItem("halla_tenant_id") ?? localStorage.getItem("calliq_tenant_id");
 }
 
 /** Clear workspace scope on sign-out or failed tenant resolution */
 export function clearTenantId() {
   if (typeof window === "undefined") return;
+  localStorage.removeItem("halla_tenant_id");
   localStorage.removeItem("calliq_tenant_id");
+  document.cookie = "halla_tenant_id=; path=/; max-age=0; samesite=lax";
   document.cookie = "calliq_tenant_id=; path=/; max-age=0; samesite=lax";
 }
 
@@ -54,7 +64,7 @@ export function hasAccess(requiredPlan?: string): boolean {
 /** Sidebar gate: lock paid nav only when trial is exhausted (not during active trial). */
 export function isNavItemLocked(requiredPlan?: string): boolean {
   if (!requiredPlan) return false;
-  if (typeof window !== "undefined" && localStorage.getItem("calliq_trial_locked") === "1") {
+  if (typeof window !== "undefined" && (localStorage.getItem("halla_trial_locked") === "1" || localStorage.getItem("calliq_trial_locked") === "1")) {
     return true;
   }
   return !hasAccess(requiredPlan);
@@ -65,8 +75,12 @@ export function isNavItemLocked(requiredPlan?: string): boolean {
 export function subscribePlanUpdates(listener: () => void): () => void {
   if (typeof window === "undefined") return () => {};
   const handler = () => listener();
+  window.addEventListener("halla-plan-updated", handler);
   window.addEventListener("calliq-plan-updated", handler);
-  return () => window.removeEventListener("calliq-plan-updated", handler);
+  return () => {
+    window.removeEventListener("halla-plan-updated", handler);
+    window.removeEventListener("calliq-plan-updated", handler);
+  };
 }
 
 export function syncPlanFromAccount(input: {
@@ -76,18 +90,21 @@ export function syncPlanFromAccount(input: {
   trialLocked?: boolean;
 }): void {
   if (typeof window === "undefined") return;
-  if (input.subscriptionStatus) {
-    localStorage.setItem("calliq_subscription_status", input.subscriptionStatus);
+  const status = input.subscriptionStatus;
+  if (status) {
+    localStorage.setItem("halla_subscription_status", status);
+    localStorage.setItem("calliq_subscription_status", status);
   }
   if (input.trialLocked) {
+    localStorage.setItem("halla_trial_locked", "1");
     localStorage.setItem("calliq_trial_locked", "1");
     setPlan("trial");
     return;
   }
+  localStorage.removeItem("halla_trial_locked");
   localStorage.removeItem("calliq_trial_locked");
   if (input.isTrialing) {
     setPlan("professional");
-    window.dispatchEvent(new Event("calliq-plan-updated"));
     return;
   }
   if (input.subscriptionPlan) {
@@ -102,8 +119,10 @@ export function syncPlanFromAccount(input: {
 /** Active paid subscription (not free trial). */
 export function isPayingCustomer(): boolean {
   if (typeof window === "undefined") return false;
-  if (localStorage.getItem("calliq_trial_locked") === "1") return false;
-  const status = localStorage.getItem("calliq_subscription_status");
+  if (localStorage.getItem("halla_trial_locked") === "1" || localStorage.getItem("calliq_trial_locked") === "1") return false;
+  const status =
+    localStorage.getItem("halla_subscription_status") ??
+    localStorage.getItem("calliq_subscription_status");
   if (status === "active" || status === "past_due") return true;
   const plan = getPlan();
   return plan === "essential" || plan === "professional";

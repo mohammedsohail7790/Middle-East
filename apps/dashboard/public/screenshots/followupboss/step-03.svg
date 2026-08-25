@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Create API key. Click Create API Key — name it Call IQ">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Create API key. Click Create API Key — name it Halla AI">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#f1f5f9"/>
@@ -18,8 +18,8 @@
   <text x="320" y="162" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="17" font-weight="700" fill="#0f172a">Create API key</text>
   <rect x="170" y="188" width="300" height="44" rx="10" fill="#0ea5e9"/>
   <text x="320" y="216" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff">Click this button</text>
-  <text x="320" y="252" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="12" font-weight="500" fill="#64748b">Click Create API Key — name it Call IQ</text>
+  <text x="320" y="252" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="12" font-weight="500" fill="#64748b">Click Create API Key — name it Halla AI</text>
   
   <rect x="24" y="300" width="592" height="48" fill="#0f172a" rx="8"/>
-  <text x="320" y="326" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="13" font-weight="500" fill="#f8fafc">Click Create API Key — name it Call IQ</text>
+  <text x="320" y="326" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="13" font-weight="500" fill="#f8fafc">Click Create API Key — name it Halla AI</text>
 </svg>

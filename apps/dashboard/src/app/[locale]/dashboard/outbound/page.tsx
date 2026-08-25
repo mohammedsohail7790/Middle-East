@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   PhoneOutgoing, Plus, X, Play, Megaphone, Bell, RotateCcw, Phone,
@@ -14,6 +15,8 @@ import { DASHBOARD_POLL_MS } from "@/lib/dashboard-sync";
 import { useRealtimeQuery } from "@/lib/use-realtime-query";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { DashboardPageSection } from "@/components/ui-kit/DashboardPageSection";
+import { PlanFeatureGate } from "@/components/billing/PlanFeatureGate";
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
 type CampaignPurpose = "campaign" | "reminder" | "follow_up";
 type CampaignStatus = "draft" | "scheduled" | "running" | "paused" | "completed" | "cancelled";
@@ -32,12 +35,6 @@ interface Campaign {
   purpose: CampaignPurpose | null;
 }
 
-const PURPOSE_META: Record<CampaignPurpose, { label: string; icon: typeof Megaphone; variant: IconBoxVariant }> = {
-  campaign: { label: "Sales campaign", icon: Megaphone, variant: "accent" },
-  reminder: { label: "Appointment reminders", icon: Bell, variant: "warning" },
-  follow_up: { label: "Lead follow-up", icon: RotateCcw, variant: "violet" },
-};
-
 const STATUS_BADGE: Record<CampaignStatus, string> = {
   draft: "bg-muted text-foreground-secondary",
   scheduled: "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
@@ -48,6 +45,26 @@ const STATUS_BADGE: Record<CampaignStatus, string> = {
 };
 
 export default function OutboundPage() {
+  return (
+    <PlanFeatureGate feature="outbound">
+      <OutboundPageContent />
+    </PlanFeatureGate>
+  );
+}
+
+function OutboundPageContent() {
+  const t = useTranslations("pages.outbound");
+  const tCommon = useTranslations("common");
+  const { title, description } = useDashboardPageLabels("/dashboard/outbound");
+
+  const PURPOSE_META = useMemo(
+    (): Record<CampaignPurpose, { label: string; icon: typeof Megaphone; variant: IconBoxVariant }> => ({
+      campaign: { label: t("purposeSalesShort"), icon: Megaphone, variant: "accent" },
+      reminder: { label: t("purposeReminderShort"), icon: Bell, variant: "warning" },
+      follow_up: { label: t("purposeFollowUpShort"), icon: RotateCcw, variant: "violet" },
+    }),
+    [t]
+  );
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -89,7 +106,7 @@ export default function OutboundPage() {
         reason: "click_to_call",
         openingContext: callContext.trim() || undefined,
       });
-      setCallResult(`Calling now — ${res.callSid}`);
+      setCallResult(t("callingNow", { callSid: res.callSid }));
       setCallNumber("");
       setCallContext("");
     } catch (e: unknown) {
@@ -144,40 +161,40 @@ export default function OutboundPage() {
 
   return (
     <DashboardPage
-      title="Outbound"
-      description="Click-to-call, sales campaigns, appointment reminders, and lead follow-up"
+      title={title}
+      description={description}
       loading={loading && campaigns.length === 0}
       error={error || undefined}
       actions={
         <div className="flex gap-2 w-full sm:w-auto">
           <button onClick={() => setShowCallModal(true)} className="btn-ghost flex-1 sm:flex-none justify-center">
-            <Phone className="size-4" strokeWidth={ICON_STROKE} /> Call now
+            <Phone className="size-4" strokeWidth={ICON_STROKE} /> {t("callNow")}
           </button>
           <button onClick={() => setShowCampaignModal(true)} className="btn-primary flex-1 sm:flex-none justify-center">
-            <Plus className="size-4" strokeWidth={ICON_STROKE} /> New campaign
+            <Plus className="size-4" strokeWidth={ICON_STROKE} /> {t("newCampaign")}
           </button>
         </div>
       }
     >
       <div className="dashboard-stat-grid">
-        <StatCard label="Campaigns" value={totalCampaigns} icon={Megaphone} iconVariant="accent" index={0} />
-        <StatCard label="Running" value={running} icon={Play} iconVariant="success" index={1} />
-        <StatCard label="Total targets" value={totalCalls} icon={PhoneOutgoing} iconVariant="violet" index={2} />
-        <StatCard label="Dialed" value={totalCompleted} icon={Phone} iconVariant="warning" index={3} />
+        <StatCard label={t("campaigns")} value={totalCampaigns} icon={Megaphone} iconVariant="accent" index={0} />
+        <StatCard label={t("running")} value={running} icon={Play} iconVariant="success" index={1} />
+        <StatCard label={t("totalTargets")} value={totalCalls} icon={PhoneOutgoing} iconVariant="violet" index={2} />
+        <StatCard label={t("dialed")} value={totalCompleted} icon={Phone} iconVariant="warning" index={3} />
       </div>
 
       <DashboardPageSection
-        step="Outbound"
-        title="Campaigns"
-        description="Sales lists, appointment reminders, and follow-up sequences dialed by your AI agent."
+        step={t("stepOutbound")}
+        title={t("campaigns")}
+        description={t("sectionDesc")}
         icon={PhoneOutgoing}
         iconVariant="accent"
       >
         {campaigns.length === 0 ? (
           <EmptyState
             icon={PhoneOutgoing}
-            title="No outbound campaigns yet"
-            description="Create a campaign to have your AI agent call a list of leads, send reminders, or follow up automatically."
+            title={t("noCampaigns")}
+            description={t("noCampaignsDesc")}
           />
         ) : (
           <div className="space-y-2">
@@ -194,7 +211,12 @@ export default function OutboundPage() {
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {c.completed_count}/{c.total_targets} dialed · {c.success_count} success · {c.failed_count} failed
+                      {t("progress", {
+                        completed: c.completed_count,
+                        total: c.total_targets,
+                        success: c.success_count,
+                        failed: c.failed_count,
+                      })}
                     </p>
                   </div>
                   {(c.status === "draft" || c.status === "paused") && (
@@ -204,9 +226,9 @@ export default function OutboundPage() {
                       disabled={startingId === c.id}
                       className="btn-ghost !py-1.5 !px-3 text-sm"
                     >
-                      {startingId === c.id ? "Starting…" : (
+                      {startingId === c.id ? t("starting") : (
                         <>
-                          <Play className="size-3.5" strokeWidth={ICON_STROKE} /> Start
+                          <Play className="size-3.5" strokeWidth={ICON_STROKE} /> {t("start")}
                         </>
                       )}
                     </button>
@@ -238,15 +260,15 @@ export default function OutboundPage() {
               <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6 border-b border-border">
                 <div className="flex items-center gap-3 min-w-0">
                   <IconBox icon={Phone} variant="accent" size="sm" />
-                  <h2 className="text-lg font-semibold text-foreground truncate">Call now</h2>
+                  <h2 className="text-lg font-semibold text-foreground truncate">{t("callNow")}</h2>
                 </div>
-                <button type="button" onClick={() => setShowCallModal(false)} className="dashboard-icon-btn !size-8" aria-label="Close">
+                <button type="button" onClick={() => setShowCallModal(false)} className="dashboard-icon-btn !size-8" aria-label={t("close")}>
                   <X className="size-4" strokeWidth={ICON_STROKE} />
                 </button>
               </div>
               <div className="space-y-4 p-5 sm:p-6">
                 <div>
-                  <label className="dashboard-field-label" htmlFor="call-number">Phone number *</label>
+                  <label className="dashboard-field-label" htmlFor="call-number">{t("phoneNumber")}</label>
                   <input
                     id="call-number"
                     type="tel"
@@ -257,7 +279,7 @@ export default function OutboundPage() {
                   />
                 </div>
                 <div>
-                  <label className="dashboard-field-label" htmlFor="call-context">Why you&apos;re calling (optional)</label>
+                  <label className="dashboard-field-label" htmlFor="call-context">{t("callContext")}</label>
                   <textarea
                     id="call-context"
                     value={callContext}
@@ -265,13 +287,13 @@ export default function OutboundPage() {
                     placeholder="e.g. Following up on the quote we sent Jane last week"
                     className="input min-h-[80px]"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">Your AI agent uses this to open the call naturally.</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("callContextHint")}</p>
                 </div>
                 {callResult && <p className="text-sm text-muted-foreground">{callResult}</p>}
                 <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
-                  <button type="button" onClick={() => setShowCallModal(false)} className="btn-ghost flex-1">Cancel</button>
+                  <button type="button" onClick={() => setShowCallModal(false)} className="btn-ghost flex-1">{tCommon("cancel")}</button>
                   <button type="button" onClick={placeCall} disabled={!callNumber.trim() || callSubmitting} className="btn-primary flex-1">
-                    {callSubmitting ? "Calling…" : "Call now"}
+                    {callSubmitting ? t("calling") : t("callNow")}
                   </button>
                 </div>
               </div>
@@ -300,15 +322,15 @@ export default function OutboundPage() {
               <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6 border-b border-border">
                 <div className="flex items-center gap-3 min-w-0">
                   <IconBox icon={Megaphone} variant="accent" size="sm" />
-                  <h2 className="text-lg font-semibold text-foreground truncate">New campaign</h2>
+                  <h2 className="text-lg font-semibold text-foreground truncate">{t("newCampaign")}</h2>
                 </div>
-                <button type="button" onClick={() => setShowCampaignModal(false)} className="dashboard-icon-btn !size-8" aria-label="Close">
+                <button type="button" onClick={() => setShowCampaignModal(false)} className="dashboard-icon-btn !size-8" aria-label={t("close")}>
                   <X className="size-4" strokeWidth={ICON_STROKE} />
                 </button>
               </div>
               <div className="space-y-4 p-5 sm:p-6">
                 <div>
-                  <label className="dashboard-field-label" htmlFor="campaign-name">Campaign name *</label>
+                  <label className="dashboard-field-label" htmlFor="campaign-name">{t("campaignName")}</label>
                   <input
                     id="campaign-name"
                     type="text"
@@ -319,20 +341,20 @@ export default function OutboundPage() {
                   />
                 </div>
                 <div>
-                  <label className="dashboard-field-label" htmlFor="campaign-purpose">Purpose</label>
+                  <label className="dashboard-field-label" htmlFor="campaign-purpose">{t("purpose")}</label>
                   <select
                     id="campaign-purpose"
                     value={campaignPurpose}
                     onChange={(e) => setCampaignPurpose(e.target.value as CampaignPurpose)}
                     className="input"
                   >
-                    <option value="campaign">Sales / cold campaign</option>
-                    <option value="reminder">Appointment reminders</option>
-                    <option value="follow_up">Lead follow-up</option>
+                    <option value="campaign">{t("purposeSales")}</option>
+                    <option value="reminder">{t("purposeReminder")}</option>
+                    <option value="follow_up">{t("purposeFollowUp")}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="dashboard-field-label" htmlFor="campaign-targets">Phone numbers *</label>
+                  <label className="dashboard-field-label" htmlFor="campaign-targets">{t("phoneNumbers")}</label>
                   <textarea
                     id="campaign-targets"
                     value={campaignTargets}
@@ -340,17 +362,17 @@ export default function OutboundPage() {
                     placeholder={"+15550001111\n+15550002222"}
                     className="input min-h-[120px] font-mono text-sm"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">One number per line (or comma-separated).</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t("phoneNumbersHint")}</p>
                 </div>
                 <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
-                  <button type="button" onClick={() => setShowCampaignModal(false)} className="btn-ghost flex-1">Cancel</button>
+                  <button type="button" onClick={() => setShowCampaignModal(false)} className="btn-ghost flex-1">{tCommon("cancel")}</button>
                   <button
                     type="button"
                     onClick={createCampaign}
                     disabled={!campaignName.trim() || !campaignTargets.trim() || campaignSubmitting}
                     className="btn-primary flex-1"
                   >
-                    {campaignSubmitting ? "Creating…" : "Create campaign"}
+                    {campaignSubmitting ? t("creating") : t("createCampaign")}
                   </button>
                 </div>
               </div>

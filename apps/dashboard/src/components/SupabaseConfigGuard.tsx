@@ -14,8 +14,8 @@ export function SupabaseConfigGuard({ children }: { children: React.ReactNode })
           <h1 className="text-lg font-semibold">Configuration required</h1>
           <p className="text-sm text-muted-foreground">
             Set <code className="text-xs">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-            <code className="text-xs">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> in Vercel, then
-            redeploy the dashboard.
+            <code className="text-xs">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> in your deployment
+            environment, then redeploy the dashboard.
           </p>
         </div>
       </div>

@@ -41,7 +41,7 @@ export function HallaAiLogo({
       alt="Halla AI"
       width={s.icon}
       height={s.icon}
-      className="object-contain mx-auto"
+      className="object-contain mx-auto size-full max-h-10 max-w-10"
       priority
     />
   ) : (
@@ -64,7 +64,6 @@ export function HallaAiLogo({
         style={{ "--logo-h": `${s.height}px` } as React.CSSProperties}
         priority
       />
-      {/* Dark-mode variant: same mark with a white wordmark so "Halla" stays legible on the navy sidebar/background. */}
       <Image
         src="/logo-dark.png"
         alt="Halla AI — Smart, Seamless, Always"

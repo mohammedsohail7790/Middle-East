@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -24,7 +25,8 @@ import { DashboardPageSection } from "@/components/ui-kit/DashboardPageSection";
 import { StatCard } from "@/components/ui-kit/StatCard";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import type { IconBoxVariant } from "@/components/ui-kit/IconBox";
-import { subscribePlanUpdates, getPlan, hasAccess } from "@/lib/store";
+import { subscribePlanUpdates } from "@/lib/store";
+import { canUseFeature } from "@/lib/plan-features";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
@@ -139,6 +141,8 @@ function sortIntegrationsForList(
 }
 
 export default function IntegrationsPage() {
+  const t = useTranslations("pages.integrations");
+  const tNav = useTranslations("nav");
   const [, setPlanTick] = useState(0);
   const initialCatalog = readApiGetCache<CatalogResponse>("/integrations/catalog");
   const [connections, setConnections] = useState<Record<string, IntegrationConnectionInfo>>(
@@ -151,8 +155,7 @@ export default function IntegrationsPage() {
   const [activeTab, setActiveTab] = useState<IntegrationTabId>("all");
   const wizardRef = useRef<HTMLDivElement>(null);
 
-  const plan = getPlan();
-  const onEssentialPlan = plan === "essential";
+  const crmIntegrationsLocked = !canUseFeature("integrationsProfessional");
 
   const reloadCatalog = useCallback((opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
@@ -288,7 +291,7 @@ export default function IntegrationsPage() {
       label: string;
       icon?: LucideIcon;
       count: number;
-    }[] = [{ id: "all", label: "All apps", count: counts.all }];
+    }[] = [{ id: "all", label: t("allApps"), count: counts.all }];
     for (const cat of CATEGORY_ORDER) {
       if ((counts[cat] ?? 0) > 0) {
         tabs.push({
@@ -300,7 +303,7 @@ export default function IntegrationsPage() {
       }
     }
     return tabs;
-  }, [displayableIntegrations]);
+  }, [displayableIntegrations, t]);
 
   const visibleIntegrations = useMemo(() => {
     const q = searchQuery.trim();
@@ -349,8 +352,8 @@ export default function IntegrationsPage() {
 
   return (
     <DashboardPage
-      title="Integrations"
-      description="Connect apps directly with one click."
+      title={tNav("integrations")}
+      description={tNav("integrationsSubtitle")}
       loading={loading && Object.keys(connections).length === 0}
       actions={
         <button
@@ -359,21 +362,21 @@ export default function IntegrationsPage() {
           className="btn-ghost text-sm inline-flex items-center gap-1.5"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          Sync all
+          {t("syncAll")}
         </button>
       }
     >
       <div className="dashboard-stat-grid dashboard-stat-grid--three">
         <StatCard
-          label="Active connections"
+          label={t("activeConnections")}
           value={connectedCount}
           icon={CheckCircle}
           iconVariant="success"
           index={0}
         />
-        <StatCard label="CRMs" value={crmConnected} icon={Users} iconVariant="violet" index={1} />
+        <StatCard label={t("crms")} value={crmConnected} icon={Users} iconVariant="violet" index={1} />
         <StatCard
-          label="Calendars"
+          label={t("calendars")}
           value={calendarConnected}
           icon={Calendar}
           iconVariant="accent"
@@ -381,17 +384,16 @@ export default function IntegrationsPage() {
         />
       </div>
 
-      {onEssentialPlan && (
+      {crmIntegrationsLocked && (
         <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 dark:bg-amber-950/20 dark:border-amber-900/50 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-start gap-2.5 min-w-0">
             <Sparkles className="size-4 text-amber-700 shrink-0 mt-0.5" />
             <p className="text-sm text-amber-900 dark:text-amber-200">
-              <span className="font-medium">Essential plan:</span> Zapier + Google Calendar + Slack.
-              Upgrade to Professional for direct CRM connections.
+              <span className="font-medium">{t("essentialBanner")}</span> {t("essentialBannerBody")}
             </p>
           </div>
           <Link href="/dashboard/billing" className="btn-primary text-xs shrink-0 self-start sm:self-center">
-            Upgrade
+            {t("upgrade")}
           </Link>
         </div>
       )}
@@ -407,9 +409,9 @@ export default function IntegrationsPage() {
 
       <div id="zapier-connect">
         <DashboardPageSection
-          step="Advanced automation"
-          title="Zapier"
-          description="Connect 5,000+ apps with a Catch Hook webhook — no API keys required."
+          step={t("zapierStep")}
+          title={t("zapierTitle")}
+          description={t("zapierDesc")}
           icon={Zap}
           iconVariant="neutral"
         >
@@ -421,9 +423,9 @@ export default function IntegrationsPage() {
       </div>
 
       <DashboardPageSection
-        step="Direct connect"
-        title="App directory"
-        description="Apps enabled on your workspace. Select one to connect or manage."
+        step={t("directoryStep")}
+        title={t("directoryTitle")}
+        description={t("directoryDesc")}
         icon={Plug}
         iconVariant="violet"
       >
@@ -442,9 +444,9 @@ export default function IntegrationsPage() {
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search integrations…"
+              placeholder={t("searchPlaceholder")}
               className="flex-1 min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              aria-label="Search integrations"
+              aria-label={t("searchPlaceholder")}
             />
           </div>
 
@@ -460,7 +462,7 @@ export default function IntegrationsPage() {
               >
                 <div className="px-4 sm:px-5 py-2">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Setup — {selected.name}
+                    {t("setup", { name: selected.name })}
                   </p>
                 </div>
                 <IntegrationConnectWizard
@@ -493,11 +495,11 @@ export default function IntegrationsPage() {
             <EmptyState
               icon={Plug}
               iconVariant="muted"
-              title={searchActive ? "No matching integrations" : "No direct apps enabled"}
+              title={searchActive ? t("noMatch") : t("noApps")}
               description={
                 searchActive
-                  ? "Try a different search term."
-                  : "Your workspace has no direct apps configured yet. Ask an admin to enable one of the apps above."
+                  ? t("noMatchDesc")
+                  : t("noAppsDesc")
               }
             />
           )}

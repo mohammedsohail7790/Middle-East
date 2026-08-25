@@ -2,14 +2,14 @@
  * Analytics Controller — Plan-Gated
  *
  * Basic metrics (all plans): /metrics, /call-volume, /peak-hours
- * Advanced analytics (Enterprise only): /conversion-funnel, /export
+ * Advanced analytics (Professional+): /conversion-funnel, /export
  */
 
 import { analyticsService } from './analytics.service.js';
 import { billingService } from '../billing/billing.service.js';
 import { requireVoiceApiAccess } from '../voice/security.js';
 import { getTenantId } from '../auth/tenant-context.js';
-import { Router } from 'express';
+import { Router, type Response } from 'express';
 import { clientErrorMessage } from '../../security/safe-error.js';
 
 async function requireAdvancedAnalytics(tenantId: string, res: Response): Promise<boolean> {
@@ -17,23 +17,19 @@ async function requireAdvancedAnalytics(tenantId: string, res: Response): Promis
   if (!sub) {
     res.status(403).json({
       success: false,
-      error: 'Active subscription required for analytics export',
+      error: 'Active subscription required for analytics',
       currentPlan: 'none',
     });
     return false;
   }
-  if (
-    sub.status === 'trialing' ||
-    sub.plan === 'trial' ||
-    sub.plan === 'professional'
-  ) {
-    return true;
-  }
+  if (sub.status === 'trialing') return true;
+  const rank = await billingService.getPlanRank(sub.plan);
+  if (rank >= 2) return true;
   const allowed = await billingService.canUseFeature(tenantId, 'advancedAnalytics');
   if (!allowed) {
     res.status(403).json({
       success: false,
-      error: 'Advanced analytics requires a Professional plan or higher',
+      error: 'Analytics requires a Professional plan or higher',
       currentPlan: sub.plan,
     });
     return false;
@@ -165,7 +161,7 @@ router.get('/export', async (req: any, res: any) => {
     if (format === 'pdf') {
       const pdf = await analyticsService.exportToPDF(tenantId, start, end);
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'attachment; filename=calliq-analytics.pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=halla-analytics.pdf');
       res.send(pdf);
       return;
     }

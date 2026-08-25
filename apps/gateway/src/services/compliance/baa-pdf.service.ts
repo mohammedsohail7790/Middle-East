@@ -189,7 +189,7 @@ export async function generateBaaPdf(input: BaaSigningInput): Promise<Buffer> {
     doc.rect(0, 0, doc.page.width, 90).fill(ACCENT);
     doc.fillColor('#ffffff')
        .fontSize(20).font('Helvetica-Bold')
-       .text('CALL IQ', doc.page.margins.left, 28, { align: 'left' });
+       .text('Halla AI', doc.page.margins.left, 28, { align: 'left' });
     doc.fontSize(10).font('Helvetica')
        .text('BUSINESS ASSOCIATE AGREEMENT', doc.page.margins.left, 54, { align: 'left' });
     doc.fontSize(9)
@@ -306,7 +306,7 @@ export async function generateBaaPdf(input: BaaSigningInput): Promise<Buffer> {
       ['Legal name:', 'Halla AI Labs, Inc.'],
       ['Signed by:', 'Authorized Officer'],
       ['Title:', 'Chief Executive Officer'],
-      ['Email:', 'legal@calliqlabs.ai'],
+      ['Email:', 'hello@hallaai.com'],
       ['Date:', new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })],
       ['Version:', input.version],
     ];

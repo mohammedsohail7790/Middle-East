@@ -2,6 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import {
   LayoutDashboard,
   Phone,
@@ -21,7 +22,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
-import { navPageTitle, navPageSubtitle } from "@/lib/dashboard-nav";
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { ThemeToggle } from "@/components/ui-kit/ThemeToggle";
 import { NotificationsCenter } from "@/components/dashboard/NotificationsCenter";
@@ -31,11 +32,10 @@ import type { WorkspaceProfile } from "@/lib/ensure-tenant";
 
 function usePageMeta() {
   const pathname = usePathname();
-  const title = navPageTitle(pathname || "/dashboard");
-  const subtitle = navPageSubtitle(pathname || "/dashboard");
+  const { title, description } = useDashboardPageLabels(pathname || "/dashboard");
   const key = (pathname || "/dashboard").split("/").filter(Boolean)[1] ?? "dashboard";
   const icon = ROUTE_ICONS[key] ?? LayoutDashboard;
-  return { title, subtitle, icon };
+  return { title, subtitle: description, icon };
 }
 
 const ROUTE_ICONS: Record<string, LucideIcon> = {
@@ -64,13 +64,14 @@ function workspaceInitials(workspace: WorkspaceProfile | null): string {
 }
 
 function LiveStatusPill() {
+  const t = useTranslations("shell");
   const { connected, lastError } = useDashboardLive();
 
   if (lastError && !connected) {
     return (
       <span className="dashboard-live-pill dashboard-live-pill--warn" title={lastError} role="status" aria-live="polite">
         <span className="dashboard-live-dot dashboard-live-dot--warn" />
-        Reconnecting
+        {t("reconnecting")}
       </span>
     );
   }
@@ -80,7 +81,7 @@ function LiveStatusPill() {
       <span className="dashboard-live-pill dashboard-live-pill--live" role="status" aria-live="polite">
         <span className="dashboard-live-dot dashboard-live-dot--live" />
         <Radio className="size-3 opacity-80" strokeWidth={ICON_STROKE} />
-        Live
+        {t("live")}
       </span>
     );
   }
@@ -88,7 +89,7 @@ function LiveStatusPill() {
   return (
     <span className="dashboard-live-pill dashboard-live-pill--idle" role="status" aria-live="polite">
       <span className="dashboard-live-dot dashboard-live-dot--idle" />
-      Synced
+      {t("synced")}
     </span>
   );
 }
@@ -100,12 +101,13 @@ type Props = {
 };
 
 export function DashboardTopbar({ workspace, onOpenMenu, planTick }: Props) {
+  const t = useTranslations("shell");
   const { title, subtitle, icon: PageIcon } = usePageMeta();
   void planTick;
 
   const initials = workspaceInitials(workspace);
-  const company = workspace?.companyName?.trim() || "Your workspace";
-  const email = workspace?.email || "Signed in";
+  const company = workspace?.companyName?.trim() || t("yourWorkspace");
+  const email = workspace?.email || t("signedIn");
 
   return (
     <header className="dashboard-header">
@@ -114,7 +116,7 @@ export function DashboardTopbar({ workspace, onOpenMenu, planTick }: Props) {
           type="button"
           className="dashboard-icon-btn lg:hidden"
           onClick={onOpenMenu}
-          aria-label="Open menu"
+          aria-label={t("openMenu")}
         >
           <Menu className="size-5" />
         </button>
@@ -131,7 +133,7 @@ export function DashboardTopbar({ workspace, onOpenMenu, planTick }: Props) {
           </div>
           <div className="min-w-0">
             <nav className="dashboard-topbar-breadcrumb" aria-label="Breadcrumb">
-              <span className="dashboard-topbar-breadcrumb-root">Workspace</span>
+              <span className="dashboard-topbar-breadcrumb-root">{t("workspace")}</span>
               <ChevronRight className="size-3 opacity-50 shrink-0" strokeWidth={ICON_STROKE} />
               <span className="dashboard-topbar-breadcrumb-current truncate">{title}</span>
             </nav>

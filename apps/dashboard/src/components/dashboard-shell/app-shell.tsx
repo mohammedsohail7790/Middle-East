@@ -18,7 +18,6 @@ import {
   type DashboardNavItem,
 } from "@/lib/dashboard-nav";
 import { HallaAiLogo } from "@/components/brand/HallaAiLogo";
-import Image from "next/image";
 import { MobileBottomNav } from "@/components/dashboard-shell/MobileBottomNav";
 import { DashboardTopbar } from "@/components/dashboard/DashboardTopbar";
 import { useDashboardSync } from "@/lib/dashboard-sync";
@@ -33,7 +32,7 @@ const NAV_ICONS: Record<string, LucideIcon> = {
   "/dashboard/agent": Bot,
   "/dashboard/analytics": BarChart3,
   "/dashboard/quality": Star,
-  "/dashboard/knowledge": BookOpen,
+  "/dashboard/business-profile": BookOpen,
   "/dashboard/phone-numbers": Hash,
   "/dashboard/compliance": Lock,
   "/dashboard/settings/spam": Shield,
@@ -56,6 +55,7 @@ function NavLink({
   const t = useTranslations();
   const Icon = NAV_ICONS[item.href] ?? LayoutDashboard;
   const label = t(item.labelKey);
+  const tShell = useTranslations("shell");
   const title = navLockedTitle(item, locked, label);
 
   return (
@@ -69,7 +69,7 @@ function NavLink({
         collapsed && "justify-center px-2",
       )}
       title={title}
-      aria-label={locked ? `${label} (upgrade required)` : label}
+                aria-label={locked ? `${label} (${tShell("upgradeRequired")})` : label}
     >
       <span className="nav-icon-well">
         <Icon className="size-4" strokeWidth={ICON_STROKE} />
@@ -140,7 +140,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="dashboard-app h-[100dvh] max-h-[100dvh] flex w-full min-w-0 overflow-hidden">
       <a href="#main-content" className="dashboard-skip-link">
-        Skip to main content
+        {t("skipToContent")}
       </a>
       <aside
         className={cn(
@@ -158,14 +158,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         >
           {collapsed ? (
             <Link href="/dashboard" className="dashboard-sidebar-icon shrink-0" aria-label="Halla AI">
-              <Image
-                src="/logo-icon.png"
-                alt=""
-                width={40}
-                height={40}
-                className="h-10 w-10 object-contain"
-                priority
-              />
+              <HallaAiLogo href={undefined} iconOnly size="sm" />
             </Link>
           ) : (
             <div className="dashboard-sidebar-logo flex justify-center pr-8">
@@ -242,13 +235,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 "dashboard-nav-link w-full border-0 bg-transparent cursor-pointer",
                 collapsed && "justify-center px-2",
               )}
-              title={collapsed ? "Sign out" : undefined}
-              aria-label="Sign out"
+              title={collapsed ? t("signOut") : undefined}
+              aria-label={t("signOut")}
             >
               <span className="nav-icon-well">
                 <LogOut className="size-4" strokeWidth={ICON_STROKE} />
               </span>
-              {!collapsed && <span>Sign out</span>}
+              {!collapsed && <span>{t("signOut")}</span>}
             </button>
             {!collapsed && (
               <p className="px-2 pt-2 text-[10px] leading-snug text-muted-foreground/60">

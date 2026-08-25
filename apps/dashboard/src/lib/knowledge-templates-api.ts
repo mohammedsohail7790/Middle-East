@@ -12,6 +12,7 @@ import {
   normalizeTemplates,
   type KnowledgeTemplates,
 } from "./knowledge-templates";
+import { DEFAULT_TIMEZONE } from "@/lib/timezones";
 
 interface BusinessHourApiRow {
   dayOfWeek?: number;
@@ -75,7 +76,7 @@ async function loadTemplatesLegacy(): Promise<KnowledgeTemplates> {
     : [];
 
   const timezone = String(
-    tenant.timezone ?? hoursRows[0]?.timezone ?? "America/New_York"
+    tenant.timezone ?? hoursRows[0]?.timezone ?? DEFAULT_TIMEZONE
   );
 
   return normalizeTemplates({
@@ -88,7 +89,7 @@ async function loadTemplatesLegacy(): Promise<KnowledgeTemplates> {
 
 async function saveTemplatesLegacy(payload: KnowledgeTemplates): Promise<KnowledgeTemplates> {
   const tenantId = await resolveTenantId();
-  const timezone = payload.timezone || "America/New_York";
+  const timezone = payload.timezone || DEFAULT_TIMEZONE;
 
   await Promise.all(
     payload.officeHours.map((day) =>

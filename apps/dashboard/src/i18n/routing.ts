@@ -1,7 +1,7 @@
 import { defineRouting } from "next-intl/routing";
 
 export const routing = defineRouting({
-  locales: ["en", "ar", "hi", "ru"],
+  locales: ["en", "ar"],
   defaultLocale: "en",
   // "always": the custom auth middleware (src/middleware.ts) doesn't run
   // next-intl's own middleware, so there's nothing to invisibly rewrite a

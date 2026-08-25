@@ -11,7 +11,7 @@ const PUBLIC_API_PREFIXES = ["/api/auth/callback"];
 // (e.g. /en/dashboard) — "/onboarding" is not locale-prefixed — so the
 // auth check must strip a locale segment before matching, otherwise it
 // never fires for the real dashboard routes.
-const LOCALES = ["en", "ar", "hi", "ru"];
+const LOCALES = ["en", "ar"];
 
 function stripLocale(path: string): string {
   const [, first, ...rest] = path.split("/");
@@ -86,7 +86,7 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/onboarding",
-    "/(en|ar|hi|ru)/dashboard/:path*",
+    "/(en|ar)/dashboard/:path*",
     "/api/:path*",
   ],
 };

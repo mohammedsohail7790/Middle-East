@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
-  TrendingUp, Phone, Users, Clock, Download, Calendar, Lock, Filter
+  TrendingUp, Phone, Users, Clock, Download, Calendar, Filter
 } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -19,6 +20,8 @@ import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { cn } from "@/lib/utils";
 import { DASHBOARD_POLL_MS } from "@/lib/dashboard-sync";
 import { useRealtimeQuery } from "@/lib/use-realtime-query";
+import { PlanFeatureGate } from "@/components/billing/PlanFeatureGate";
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
 interface Metrics {
   totalCalls: number;
@@ -43,12 +46,21 @@ interface FunnelStep {
 }
 
 export default function AnalyticsPage() {
+  return (
+    <PlanFeatureGate feature="analytics">
+      <AnalyticsPageContent />
+    </PlanFeatureGate>
+  );
+}
+
+function AnalyticsPageContent() {
+  const t = useTranslations("pages.analytics");
+  const { title, description } = useDashboardPageLabels("/dashboard/analytics");
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [callVolume, setCallVolume] = useState<CallVolume[]>([]);
   const [funnel, setFunnel] = useState<FunnelStep[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [planGated, setPlanGated] = useState(false);
   const [startDate, setStartDate] = useState(() => {
     const d = new Date();
     d.setDate(d.getDate() - 30);
@@ -59,7 +71,7 @@ export default function AnalyticsPage() {
 
   const fetchData = useCallback((opts?: { withSpinner?: boolean }) => {
     if (opts?.withSpinner !== false) setLoading(true);
-    setPlanGated(false);
+    setError("");
     const params = `?startDate=${startDate}&endDate=${endDate}`;
     return Promise.allSettled([
       api.get<Metrics>(`/analytics/metrics${params}`).catch((e) => {
@@ -83,9 +95,9 @@ export default function AnalyticsPage() {
           const convRate = d.conversionRate ?? 0;
           const converted = calls > 0 ? Math.round(calls * convRate) : 0;
           return [
-            { name: "Calls", value: calls, percentage: 100 },
-            { name: "Leads", value: leads, percentage: calls > 0 ? Math.round((leads / calls) * 100) : 0 },
-            { name: "Converted", value: converted, percentage: calls > 0 ? Math.round((converted / calls) * 100) : 0 },
+            { name: t("funnelCalls"), value: calls, percentage: 100 },
+            { name: t("funnelLeads"), value: leads, percentage: calls > 0 ? Math.round((leads / calls) * 100) : 0 },
+            { name: t("funnelConverted"), value: converted, percentage: calls > 0 ? Math.round((converted / calls) * 100) : 0 },
           ];
         });
       }),
@@ -114,15 +126,10 @@ export default function AnalyticsPage() {
       })
       .catch((e) => {
         const msg = e instanceof Error ? e.message : String(e);
-        const isForbidden = e?.status === 403 || /403|forbidden|plan.*required|upgrade/i.test(msg);
-        if (isForbidden) {
-          setPlanGated(true);
-        } else {
-          setError(msg);
-        }
+        setError(msg);
       })
       .finally(() => setLoading(false));
-  }, [startDate, endDate]);
+  }, [startDate, endDate, t]);
 
   useRealtimeQuery(
     ["calls", "leads", "metrics", "analytics"],
@@ -164,7 +171,7 @@ export default function AnalyticsPage() {
       await fetchData({ withSpinner: false });
       await api.downloadBlob(
         `/analytics/export?startDate=${startDate}&endDate=${endDate}&format=pdf`,
-        `calliq-analytics_${startDate}_${endDate}.pdf`
+        `halla-analytics_${startDate}_${endDate}.pdf`
       );
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "PDF export failed");
@@ -203,7 +210,7 @@ export default function AnalyticsPage() {
         <Calendar className="w-4 h-4 text-gray-400" />
         <input
           type="date"
-          aria-label="Start date"
+          aria-label={t("startDate")}
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
           className="bg-transparent text-sm text-foreground outline-none min-w-0 flex-1 sm:flex-initial max-w-full"
@@ -211,13 +218,13 @@ export default function AnalyticsPage() {
         <span className="text-gray-400">—</span>
         <input
           type="date"
-          aria-label="End date"
+          aria-label={t("endDate")}
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
           className="bg-transparent text-sm text-foreground outline-none min-w-0 flex-1 sm:flex-initial max-w-full"
         />
       </div>
-      <button type="button" onClick={exportCSV} className="btn-ghost shrink-0 justify-center" title="Download CSV">
+      <button type="button" onClick={exportCSV} className="btn-ghost shrink-0 justify-center" title={t("downloadCsv")}>
         <Download className="w-4 h-4" /> CSV
       </button>
       <button
@@ -225,62 +232,36 @@ export default function AnalyticsPage() {
         onClick={exportPDF}
         disabled={exportingPdf}
         className="btn-blue btn-sm shrink-0 justify-center"
-        title="Download PDF report"
+        title={t("downloadPdf")}
       >
-        <Download className="w-4 h-4" /> {exportingPdf ? "…" : "PDF"}
+        <Download className="w-4 h-4" /> {exportingPdf ? t("exporting") : "PDF"}
       </button>
     </div>
   );
 
-  if (planGated) {
-    return (
-      <DashboardPage
-        title="Analytics"
-        description="Performance insights and conversion metrics"
-        actions={dateControls}
-      >
-        <div className="dashboard-panel p-8 flex flex-col items-center justify-center text-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center">
-            <Lock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">Analytics unavailable</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-md">
-              We couldn&apos;t load analytics for your account right now. Contact support if this
-              persists.
-            </p>
-          </div>
-          <Link href="/dashboard/support" className="btn-primary text-sm">
-            Contact Support
-          </Link>
-        </div>
-      </DashboardPage>
-    );
-  }
-
   return (
     <DashboardPage
-      title="Analytics"
-      description="Performance insights and conversion metrics"
+      title={title}
+      description={description}
       actions={dateControls}
       error={error}
       loading={loading && !metrics}
     >
       <div className="dashboard-stat-grid">
-        <StatCard label="Total Calls" value={metrics?.totalCalls ?? 0} icon={Phone} iconVariant="accent" index={0} />
-        <StatCard label="Total Leads" value={metrics?.totalLeads ?? 0} icon={Users} iconVariant="violet" index={1} />
-        <StatCard label="Conversion Rate" value={`${metrics?.conversionRate ?? 0}%`} icon={TrendingUp} iconVariant="success" index={2} />
-        <StatCard label="Avg Duration" value={`${metrics?.avgDuration ?? 0}s`} icon={Clock} iconVariant="neutral" index={3} />
+        <StatCard label={t("totalCalls")} value={metrics?.totalCalls ?? 0} icon={Phone} iconVariant="accent" index={0} />
+        <StatCard label={t("totalLeads")} value={metrics?.totalLeads ?? 0} icon={Users} iconVariant="violet" index={1} />
+        <StatCard label={t("conversionRate")} value={`${metrics?.conversionRate ?? 0}%`} icon={TrendingUp} iconVariant="success" index={2} />
+        <StatCard label={t("avgDuration")} value={`${metrics?.avgDuration ?? 0}s`} icon={Clock} iconVariant="neutral" index={3} />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="dashboard-panel-padded mb-6">
-        <SectionHeader icon={TrendingUp} title="Call Volume Over Time" size="sm" className="mb-4" />
+        <SectionHeader icon={TrendingUp} title={t("callVolumeOverTime")} size="sm" className="mb-4" />
         {callVolume.length === 0 ? (
           <div className="min-h-64 flex items-center justify-center">
             <EmptyState
               icon={TrendingUp}
-              title="No data for selected period"
-              description="Adjust the date range or wait for calls to accumulate."
+              title={t("noDataPeriod")}
+              description={t("noDataPeriodDesc")}
               iconVariant="muted"
             />
           </div>
@@ -333,24 +314,24 @@ export default function AnalyticsPage() {
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-accent" />
-            <span className="text-xs text-foreground-secondary">Calls</span>
+            <span className="text-xs text-foreground-secondary">{t("funnelCalls")}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-accent-mid" />
-            <span className="text-xs text-foreground-secondary">Leads</span>
+            <span className="text-xs text-foreground-secondary">{t("funnelLeads")}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-success" />
-            <span className="text-xs text-foreground-secondary">Conversions</span>
+            <span className="text-xs text-foreground-secondary">{t("chartConversions")}</span>
           </div>
         </div>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="dashboard-panel-padded">
-        <SectionHeader icon={Filter} title="Conversion Funnel" size="sm" className="mb-6" />
+        <SectionHeader icon={Filter} title={t("conversionFunnel")} size="sm" className="mb-6" />
         {funnel.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-foreground-tertiary text-sm">No funnel data available</p>
+            <p className="text-foreground-tertiary text-sm">{t("noFunnelData")}</p>
           </div>
         ) : (
           <div className="space-y-4">

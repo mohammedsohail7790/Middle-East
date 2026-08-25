@@ -2,51 +2,40 @@
 
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { HelpCircle, MessageSquare, Mail, ExternalLink, ChevronDown, ChevronUp, Send } from "lucide-react";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { DashboardPageSection } from "@/components/ui-kit/DashboardPageSection";
 import { IconBox, ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { showDashboardToast } from "@/lib/dashboard-toast";
 import { SUPPORT_EMAIL, HELP_SETUP_HREF } from "@/lib/integration-support";
-const FAQS = [
-  {
-    q: "How do I connect my phone number?",
-    a: "Go to Phone Numbers in the sidebar and click 'Add Number'. Search by area code and purchase — it activates instantly.",
-  },
-  {
-    q: "Do I need a Middle East number, or can I keep my existing local number?",
-    a: "Keep your existing local number — no need to switch. In Phone Numbers, click 'Add Number' and choose 'Forward my number'. Etisalat, du, STC, Ooredoo, Zain, and other Middle East carriers all support call forwarding: dial *61* followed by your Halla AI number and # to forward calls you miss. Your customers keep calling the number they already know.",
-  },
-  {
-    q: "How do I connect my CRM (HubSpot, Salesforce, etc.)?",
-    a: "Go to Integrations. For HubSpot and Salesforce use the Direct OAuth section. For Pipedrive, Zoho, and others use the Zapier webhook — it works with 5,000+ apps.",
-  },
-  {
-    q: "Why isn't my AI agent answering calls?",
-    a: "Check Phone Numbers to make sure a number is purchased and active. Check AI Agent settings to confirm the greeting and services are configured. The gateway logs any errors in Ops.",
-  },
-  {
-    q: "How do I change what the AI says?",
-    a: "Go to AI Agent and update the greeting, services, tone, and custom instructions. Changes apply to the next call — no restart needed.",
-  },
-  {
-    q: "Can I transfer calls to a human?",
-    a: "Yes. Set a Transfer Number in Settings or AI Agent. The AI will transfer when the caller requests a human or the call handling mode is set to 'transfer'.",
-  },
-  {
-    q: "How do I add my team?",
-    a: "Go to Team and click Invite Member. Enter their email and role — they'll receive an invite link.",
-  },
-];
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
+
+const FAQ_KEYS = [
+  "phoneNumber",
+  "localNumber",
+  "crm",
+  "notAnswering",
+  "changeAi",
+  "transfer",
+  "team",
+] as const;
 
 export default function SupportPage() {
+  const t = useTranslations("support");
+  const tShell = useTranslations("shell");
+  const { title, description } = useDashboardPageLabels("/dashboard/support");
+  const faqs = FAQ_KEYS.map((key) => ({
+    q: t(`faqs.${key}.q`),
+    a: t(`faqs.${key}.a`),
+  }));
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [ticket, setTicket] = useState({ subject: "", message: "", email: "" });
   const [sent, setSent] = useState(false);
 
   const submitTicket = () => {
     if (!ticket.subject.trim() || !ticket.message.trim() || !ticket.email.trim()) {
-      showDashboardToast({ type: "error", title: "Missing fields", message: "Subject, email and message are required." });
+      showDashboardToast({ type: "error", title: tShell("couldNotLoad"), message: t("missingFields") });
       return;
     }
     const replyEmail = ticket.email;
@@ -57,16 +46,16 @@ export default function SupportPage() {
     setTicket({ subject: "", message: "", email: replyEmail });
     showDashboardToast({
       type: "success",
-      title: "Email client opened",
-      message: "Send the pre-filled email to reach our support team. We reply within 24 hours.",
+      title: t("emailOpened"),
+      message: t("emailOpenedDesc"),
       durationMs: 6000,
     });
   };
 
   return (
     <DashboardPage
-      title="Support"
-      description="Get help, browse FAQs, or submit a support ticket."
+      title={title}
+      description={description}
     >
       {/* Quick links */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -76,12 +65,12 @@ export default function SupportPage() {
         >
           <IconBox icon={Mail} variant="accent" size="md" />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground">Email support</p>
+            <p className="text-sm font-semibold text-foreground">{t("emailSupport")}</p>
             <p className="text-xs text-muted-foreground mt-0.5 truncate">{SUPPORT_EMAIL}</p>
           </div>
         </a>
         <a
-          href={`mailto:${SUPPORT_EMAIL}?subject=Call%20IQ%20Support`}
+          href={`mailto:${SUPPORT_EMAIL}?subject=Halla%20AI%20Support`}
           className="wb-panel-padded card-hover flex items-center gap-4"
         >
           <IconBox icon={MessageSquare} variant="violet" size="md" />
@@ -104,12 +93,12 @@ export default function SupportPage() {
 
       {/* FAQs */}
       <DashboardPageSection
-        title="Frequently Asked Questions"
+        title={t("faqTitle")}
         icon={HelpCircle}
         iconVariant="accent"
       >
         <div className="divide-y divide-border">
-          {FAQS.map((faq, i) => (
+          {faqs.map((faq, i) => (
             <div key={i} className="py-3">
               <button
                 type="button"
@@ -133,7 +122,7 @@ export default function SupportPage() {
       {/* Support ticket */}
       {!sent ? (
         <DashboardPageSection
-          title="Email Support"
+          title={t("ticketTitle")}
           icon={Mail}
           iconVariant="violet"
           description="This opens your email client to send a message to our support team."

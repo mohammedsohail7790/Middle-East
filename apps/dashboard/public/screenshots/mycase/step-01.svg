@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Sign in to MyCase. Use the button above in Call IQ">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="Sign in to MyCase. Use the button above in Halla AI">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#f1f5f9"/>
@@ -19,7 +19,7 @@
   <text x="320" y="176" text-anchor="middle" font-size="28">🔐</text>
   <text x="320" y="218" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="18" font-weight="700" fill="#0f172a">Sign in to MyCase</text>
   <rect x="120" y="238" width="400" height="32" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"/>
-  <text x="320" y="258" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="12" font-weight="600" fill="#1d4ed8">Use the button above in Call IQ</text>
+  <text x="320" y="258" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="12" font-weight="600" fill="#1d4ed8">Use the button above in Halla AI</text>
   
   <rect x="24" y="300" width="592" height="48" fill="#0f172a" rx="8"/>
   <text x="320" y="326" text-anchor="middle" font-family="system-ui,-apple-system,Segoe UI,sans-serif" font-size="13" font-weight="500" fill="#f8fafc">Sign in to MyCase</text>

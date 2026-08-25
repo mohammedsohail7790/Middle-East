@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { PageSkeleton } from "@/components/ui-kit/PageSkeleton";
 
@@ -40,6 +41,9 @@ export function DashboardPage({
   className,
   contentClassName,
 }: DashboardPageProps) {
+  const tShell = useTranslations("shell");
+  const tCommon = useTranslations("common");
+
   return (
     <div className={cn("dashboard-page flex flex-col gap-6 sm:gap-7 pb-24", MAX_WIDTH[maxWidth], className)}>
       <motion.div
@@ -79,7 +83,7 @@ export function DashboardPage({
         <div className="dashboard-alert dashboard-alert-error" role="alert">
           <AlertCircle className="size-5 shrink-0" strokeWidth={1.75} />
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-sm">Could not load data</p>
+            <p className="font-semibold text-sm">{tShell("couldNotLoad")}</p>
             <p className="text-sm mt-0.5 opacity-90 break-words">{error}</p>
             {onRetry && (
               <button
@@ -87,7 +91,7 @@ export function DashboardPage({
                 onClick={onRetry}
                 className="mt-2 text-sm font-medium underline underline-offset-2 hover:opacity-80"
               >
-                Try again
+                {tCommon("tryAgain")}
               </button>
             )}
           </div>

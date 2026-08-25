@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -19,6 +20,21 @@ import { useRealtimeQuery } from "@/lib/use-realtime-query";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { DashboardPageSection } from "@/components/ui-kit/DashboardPageSection";
+import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
+
+const COLUMN_DEFS: {
+  id: string;
+  labelKey: "new" | "contacted" | "qualified" | "appointment_set" | "won" | "lost";
+  icon: typeof UserPlus;
+  iconVariant: IconBoxVariant;
+}[] = [
+  { id: "new", labelKey: "new", icon: UserPlus, iconVariant: "accent" },
+  { id: "contacted", labelKey: "contacted", icon: Phone, iconVariant: "muted" },
+  { id: "qualified", labelKey: "qualified", icon: Star, iconVariant: "violet" },
+  { id: "appointment_set", labelKey: "appointment_set", icon: Calendar, iconVariant: "warning" },
+  { id: "won", labelKey: "won", icon: Trophy, iconVariant: "success" },
+  { id: "lost", labelKey: "lost", icon: XCircle, iconVariant: "error" },
+];
 
 interface Lead {
   id: string;
@@ -31,20 +47,6 @@ interface Lead {
   created_at: string;
   metadata?: Record<string, unknown>;
 }
-
-const COLUMNS: {
-  id: string;
-  label: string;
-  icon: typeof UserPlus;
-  iconVariant: IconBoxVariant;
-}[] = [
-  { id: "new", label: "New", icon: UserPlus, iconVariant: "accent" },
-  { id: "contacted", label: "Contacted", icon: Phone, iconVariant: "muted" },
-  { id: "qualified", label: "Qualified", icon: Star, iconVariant: "violet" },
-  { id: "appointment_set", label: "Appointment Set", icon: Calendar, iconVariant: "warning" },
-  { id: "won", label: "Won", icon: Trophy, iconVariant: "success" },
-  { id: "lost", label: "Lost", icon: XCircle, iconVariant: "error" },
-];
 
 function initialLeads(): Lead[] {
   const cached = readApiGetCache<Lead[] | { items?: Lead[] }>("/leads?limit=500&offset=0");
@@ -60,6 +62,17 @@ function initialLeads(): Lead[] {
 }
 
 export default function LeadsPage() {
+  const t = useTranslations("pages.leads");
+  const tCommon = useTranslations("common");
+  const { title } = useDashboardPageLabels("/dashboard/leads");
+  const columns = useMemo(
+    () =>
+      COLUMN_DEFS.map((col) => ({
+        ...col,
+        label: t(`columns.${col.labelKey}`),
+      })),
+    [t]
+  );
   const pathname = usePathname();
   const [leads, setLeads] = useState<Lead[]>(() => initialLeads());
   const [loading, setLoading] = useState(() => initialLeads().length === 0);
@@ -73,7 +86,7 @@ export default function LeadsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [leadSearch, setLeadSearch] = useState("");
   const [detailSaving, setDetailSaving] = useState(false);
-  const [mobileColumn, setMobileColumn] = useState(COLUMNS[0].id);
+  const [mobileColumn, setMobileColumn] = useState(COLUMN_DEFS[0].id);
 
   const loadLeads = useCallback((opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
@@ -234,13 +247,13 @@ export default function LeadsPage() {
 
   return (
     <DashboardPage
-      title="Leads"
-      description="Pipeline from calls, SMS, and manual entry"
+      title={title}
+      description={t("description")}
       loading={loading && leads.length === 0}
       error={error || undefined}
       actions={
         <button onClick={() => setShowNewModal(true)} className="btn-primary w-full sm:w-auto shrink-0 justify-center">
-          <Plus className="size-4" strokeWidth={ICON_STROKE} /> New Lead
+          <Plus className="size-4" strokeWidth={ICON_STROKE} /> {t("newLead")}
         </button>
       }
       toolbar={
@@ -250,7 +263,7 @@ export default function LeadsPage() {
             type="search"
             value={leadSearch}
             onChange={(e) => setLeadSearch(e.target.value)}
-            placeholder="Search leads by name or phone…"
+            placeholder={t("searchPlaceholder")}
             className="input w-full pl-10"
             aria-label="Search leads"
           />
@@ -258,11 +271,11 @@ export default function LeadsPage() {
       }
     >
       <div className="dashboard-stat-grid">
-        <StatCard label="Total leads" value={totalLeads} icon={Users} iconVariant="accent" index={0} />
-        <StatCard label="Conversion" value={`${conversionRate}%`} icon={Target} iconVariant="success" index={1} />
-        <StatCard label="Won" value={wonLeads} icon={Trophy} iconVariant="success" index={2} />
+        <StatCard label={t("totalLeads")} value={totalLeads} icon={Users} iconVariant="accent" index={0} />
+        <StatCard label={t("conversion")} value={`${conversionRate}%`} icon={Target} iconVariant="success" index={1} />
+        <StatCard label={t("won")} value={wonLeads} icon={Trophy} iconVariant="success" index={2} />
         <StatCard
-          label="Active"
+          label={t("active")}
           value={leads.filter((l) => !["won", "lost"].includes(l.status)).length}
           icon={Activity}
           iconVariant="violet"
@@ -272,8 +285,8 @@ export default function LeadsPage() {
 
       <DashboardPageSection
         step="Pipeline"
-        title="Lead stages"
-        description="Drag cards between columns on desktop, or switch stages on mobile."
+        title={t("stagesTitle")}
+        description={t("stagesDesc")}
         icon={Users}
         iconVariant="accent"
       >
@@ -285,7 +298,7 @@ export default function LeadsPage() {
       >
         {loading ? (
           <div className="dashboard-kanban-track">
-            {COLUMNS.map((col) => (
+            {columns.map((col) => (
               <div key={col.id} className="dashboard-kanban-column dashboard-panel p-3 sm:p-4">
                 <div className="h-10 w-full bg-muted animate-pulse rounded-xl mb-4" />
                 <div className="space-y-3">
@@ -299,14 +312,14 @@ export default function LeadsPage() {
         ) : totalLeads === 0 ? (
           <EmptyState
             icon={Users}
-            title="No leads yet"
+            title={t("noLeads")}
             description="New leads from calls, SMS, and manual entry will appear in your pipeline."
           />
         ) : (
           <>
           <div className="lg:hidden space-y-3 sm:space-y-4">
             <div className="dashboard-pipeline-tabs" role="tablist" aria-label="Pipeline stage">
-              {COLUMNS.map((col) => {
+              {columns.map((col) => {
                 const count = leads.filter((l) => l.status === col.id).length;
                 const active = mobileColumn === col.id;
                 return (
@@ -355,14 +368,14 @@ export default function LeadsPage() {
                   </button>
                 ))}
               {leads.filter((l) => l.status === mobileColumn).length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-8">No leads in this stage</p>
+                <p className="text-sm text-muted-foreground text-center py-8">{t("noLeadsStage")}</p>
               )}
             </div>
           </div>
 
           <div className="hidden lg:block dashboard-kanban-shell">
           <div className="dashboard-kanban-track">
-            {COLUMNS.map((col) => {
+            {columns.map((col) => {
               const columnLeads = leads.filter((l) => l.status === col.id);
               return (
                 <div
@@ -612,7 +625,7 @@ export default function LeadsPage() {
                     onChange={(e) => void updateDetailStatus(e.target.value)}
                     className="input w-full text-sm"
                   >
-                    {COLUMNS.map((col) => (
+                    {columns.map((col) => (
                       <option key={col.id} value={col.id}>
                         {col.label}
                       </option>

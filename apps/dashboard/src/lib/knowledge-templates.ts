@@ -1,4 +1,6 @@
-/** Types for Knowledge Base structured templates (gateway /knowledge/templates). */
+/** Types for Business Profile structured templates (gateway /knowledge/templates). */
+
+import { DEFAULT_TIMEZONE } from "@/lib/timezones";
 
 export interface DayHoursRow {
   dayOfWeek: number;
@@ -35,7 +37,7 @@ export const WEEKDAYS: { dayOfWeek: number; label: string; short: string }[] = [
 
 export function defaultTemplates(): KnowledgeTemplates {
   return {
-    timezone: "America/New_York",
+    timezone: DEFAULT_TIMEZONE,
     officeHours: WEEKDAYS.map((d) => ({
       dayOfWeek: d.dayOfWeek,
       isOpen: d.dayOfWeek >= 1 && d.dayOfWeek <= 5,

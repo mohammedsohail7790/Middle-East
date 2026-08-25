@@ -1790,7 +1790,7 @@
           </p>
           <h3 style="margin-bottom: 18px;">Key Capabilities</h3>
           <div style="display: grid; gap: 10px;">
-            <div class="pricing-feature">7 languages on all plans</div>
+            <div class="pricing-feature">Arabic &amp; English on Starter; 4 languages on Professional</div>
             <div class="pricing-feature">Auto language detection — no menu required</div>
             <div class="pricing-feature">Full feature support in all languages</div>
             <div class="pricing-feature">No extra charge for multilingual support</div>
@@ -4702,7 +4702,7 @@
           <div class="card">
             <div class="feat-icon feat-icon-blue"><i class="ti ti-language"></i></div>
             <h4>Bilingual Intake</h4>
-            <p style="font-size: 0.85rem; color: var(--gray-500);">Handles buyer and seller calls in 7 languages on every plan.</p>
+            <p style="font-size: 0.85rem; color: var(--gray-500);">Handles buyer and seller calls in Arabic, English, Hindi, and Russian.</p>
           </div>
           <div class="card">
             <div class="feat-icon feat-icon-blue"><i class="ti ti-plug"></i></div>
@@ -8995,7 +8995,7 @@
 </div>
 
 
-<!-- ====== CALL IQ VS SMITH.AI PAGE ====== -->
+<!-- ====== HALLA AI VS SMITH.AI PAGE ====== -->
 <div id="page-vs-smith" class="page">
   <div class="page-hero">
     <div class="container text-center">
@@ -9231,7 +9231,7 @@
 
 
 
-<!-- ====== CALL IQ VS RUBY PAGE ====== -->
+<!-- ====== HALLA AI VS RUBY PAGE ====== -->
 <div id="page-vs-ruby" class="page">
   <div class="page-hero">
     <div class="container text-center">
@@ -9302,7 +9302,7 @@
                 <td class="no"><i class="ti ti-x" style="color:var(--red)"></i> No</td>
               </tr>
               <tr>
-                <td><strong>Multilingual (7 languages)</strong></td>
+                <td><strong>Multilingual (4 languages)</strong></td>
                 <td class="yes"><i class="ti ti-check" style="color:var(--green)"></i> Included</td>
                 <td class="yes"><i class="ti ti-check" style="color:var(--green)"></i> Included</td>
                 <td class="no"><i class="ti ti-x" style="color:var(--red)"></i> Extra cost</td>
@@ -9342,9 +9342,9 @@
             <div class="card" style="margin-bottom: 16px;">
               <div style="display: flex; justify-content: space-between; align-items: baseline;">
                 <span><strong>Halla AI Professional</strong> (best match)</span>
-                <span style="font-size: 1.4rem; font-weight: 800;" id="ruby-calliq-cost">$386.50</span>
+                <span style="font-size: 1.4rem; font-weight: 800;" id="ruby-halla-cost">$386.50</span>
               </div>
-              <div style="font-size: 0.8rem; color: var(--gray-400);">per month · <span id="ruby-calliq-annual">$4,638</span>/year</div>
+              <div style="font-size: 0.8rem; color: var(--gray-400);">per month · <span id="ruby-halla-annual">$4,638</span>/year</div>
             </div>
             <div class="card">
               <div style="display: flex; justify-content: space-between; align-items: baseline;">
@@ -9491,7 +9491,7 @@
             </thead>
             <tbody>
               <tr><td>24/7 coverage (no extra cost)</td><td class="yes"><i class="ti ti-check" style="color:var(--green)"></i> Included</td><td class="no"><i class="ti ti-x" style="color:var(--red)"></i> Extra cost</td></tr>
-              <tr><td>Multilingual (7 languages)</td><td class="yes"><i class="ti ti-check" style="color:var(--green)"></i> Included</td><td class="no"><i class="ti ti-x" style="color:var(--red)"></i> Extra cost</td></tr>
+              <tr><td>Multilingual (4 languages)</td><td class="yes"><i class="ti ti-check" style="color:var(--green)"></i> Included</td><td class="no"><i class="ti ti-x" style="color:var(--red)"></i> Extra cost</td></tr>
               <tr><td>Live chat support</td><td class="yes"><i class="ti ti-check" style="color:var(--green)"></i> Yes (7am–3pm ET)</td><td class="no"><i class="ti ti-x" style="color:var(--red)"></i> No</td></tr>
               <tr><td>Free trial — no credit card</td><td class="yes"><i class="ti ti-check" style="color:var(--green)"></i> 14 days</td><td class="no"><i class="ti ti-x" style="color:var(--red)"></i> CC required</td></tr>
               <tr><td>Transparent per-minute overage</td><td class="yes"><i class="ti ti-check" style="color:var(--green)"></i> $0.15/min</td><td class="no"><i class="ti ti-x" style="color:var(--red)"></i> $0.50+/min</td></tr>
@@ -9537,8 +9537,8 @@
     (function() {
       const slider = document.getElementById('ruby-minutes-slider');
       const display = document.getElementById('ruby-minutes-display');
-      const calliqCostSpan = document.getElementById('ruby-calliq-cost');
-      const calliqAnnualSpan = document.getElementById('ruby-calliq-annual');
+      const hallaCostSpan = document.getElementById('ruby-halla-cost');
+      const hallaAnnualSpan = document.getElementById('ruby-halla-annual');
       const rubyCostSpan = document.getElementById('ruby-ruby-cost');
       const rubyAnnualSpan = document.getElementById('ruby-ruby-annual');
       const savingsSpan = document.getElementById('ruby-savings');
@@ -9549,12 +9549,12 @@
         display.textContent = minutes;
         
         // Halla AI Professional calculation
-        let calliqMonthly;
+        let hallaMonthly;
         if (minutes <= 750) {
-          calliqMonthly = 149;
+          hallaMonthly = 149;
         } else {
           let overage = (minutes - 750) * 0.15;
-          calliqMonthly = 149 + overage;
+          hallaMonthly = 149 + overage;
         }
         
         // Ruby calculation (estimate: $140 base + $0.50/min overage after ~200 min)
@@ -9566,12 +9566,12 @@
           rubyMonthly = 140 + overage;
         }
         
-        calliqCostSpan.textContent = '$' + calliqMonthly.toFixed(2);
-        calliqAnnualSpan.textContent = '$' + (calliqMonthly * 12).toFixed(0);
+        hallaCostSpan.textContent = '$' + hallaMonthly.toFixed(2);
+        hallaAnnualSpan.textContent = '$' + (hallaMonthly * 12).toFixed(0);
         rubyCostSpan.textContent = '$' + rubyMonthly.toFixed(0);
         rubyAnnualSpan.textContent = '$' + (rubyMonthly * 12).toFixed(0);
         
-        let annualSavings = (rubyMonthly * 12) - (calliqMonthly * 12);
+        let annualSavings = (rubyMonthly * 12) - (hallaMonthly * 12);
         savingsSpan.textContent = 'You save $' + annualSavings.toFixed(0) + '/year with Halla AI';
       }
       

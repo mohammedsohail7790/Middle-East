@@ -42,7 +42,7 @@ export const FEATURES = [
 export const HOW_IT_WORKS = [
   { n: "1", title: "Sign Up & Choose Your Plan", desc: "Start your 14-day free trial — no credit card. Pick your plan based on call volume. Upgrade anytime." },
   { n: "2", title: "Configure Your AI Receptionist", desc: "Set your greeting, business hours, qualification questions, and escalation rules during onboarding. No coding required." },
-  { n: "3", title: "Add Your Knowledge Base", desc: "Give the AI your services, hours, and pricing so it answers questions the way your team would — in Arabic or English." },
+  { n: "3", title: "Set Up Your Business Profile", desc: "Give the AI your services, hours, and pricing so it answers questions the way your team would — in Arabic or English." },
   { n: "4", title: "Forward Your Phone Number", desc: "Forward calls from any carrier in 5–15 minutes, or get a new UAE number provisioned for you." },
   { n: "5", title: "Go Live — Never Miss a Call", desc: "Test with a few calls, then you're live. Every call answered, every lead captured, every appointment booked — automatically." },
 ];

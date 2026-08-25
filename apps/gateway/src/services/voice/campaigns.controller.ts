@@ -2,6 +2,7 @@ import express from 'express';
 import { voiceDb } from './tenant-scope.js';
 import { requireVoiceApiAccess, voiceRateLimit } from './security.js';
 import { clientErrorMessage } from '../../security/safe-error.js';
+import { requireCallMinutes, requireEssentialOrHigher } from '../../middleware/plan-gating.js';
 import { logger } from '../logger.js';
 
 function getTenantScope(req: any): string {
@@ -27,6 +28,7 @@ export function createCampaignsRouter(): express.Router {
     router.use(express.json());
     router.use(requireVoiceApiAccess);
     router.use(voiceRateLimit);
+    router.use(requireEssentialOrHigher());
 
     router.get('/', async (req: any, res: any) => {
         try {
@@ -81,20 +83,26 @@ export function createCampaignsRouter(): express.Router {
     });
 
     /** Dials every pending target in the campaign now, staggered to avoid hammering Twilio. */
-    router.post('/:id/start', async (req: any, res: any) => {
+    router.post('/:id/start', requireCallMinutes(), async (req: any, res: any) => {
         try {
             const tenantId = getTenantScope(req);
             const campaignId = req.params.id;
+            const fromNumberInput = typeof req.body?.fromNumber === 'string' ? req.body.fromNumber.trim() : undefined;
+            const phoneNumberId = typeof req.body?.phoneNumberId === 'string' ? req.body.phoneNumberId.trim() : undefined;
 
-            const tenantRow = await voiceDb.query(
-                `select phone_number, ai_agent_id from public.voice_tenants where id = $1`,
-                [tenantId]
-            );
-            const fromNumber = tenantRow.rows[0]?.phone_number;
-            if (!fromNumber) {
-                return res.status(400).json({ success: false, error: 'Tenant has no phone number configured' });
+            const { resolveOutboundCallerId } = await import('./resolve-outbound-caller-id.js');
+            const caller = await resolveOutboundCallerId(tenantId, {
+                fromNumber: fromNumberInput,
+                phoneNumberId,
+            });
+            if (!caller) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'No authorized outbound phone number configured for this workspace',
+                });
             }
-            const agentId = tenantRow.rows[0]?.ai_agent_id || null;
+            const fromNumber = caller.fromNumber;
+            const agentId = caller.agentId;
 
             const campaign = await voiceDb.query(
                 `select id from public.campaigns where id = $1 and tenant_id = $2`,

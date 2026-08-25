@@ -11,6 +11,7 @@ import { listIndustries, buildIndustryConfig } from '../industry/index.js';
 import express from 'express';
 import { getGatewayPublicHttpsBase, getTwilioStreamWssBase } from '../env.js';
 import { clientErrorMessage } from '../../security/safe-error.js';
+import { requireEssentialOrHigher, requireCallMinutes } from '../../middleware/plan-gating.js';
 
 function fallbackRequestHost(): string {
     const base = getGatewayPublicHttpsBase();
@@ -1071,32 +1072,37 @@ export function createCallsRouter(): express.Router {
     router.use(voiceRateLimit);
 
     /** Click-to-call / single outbound dial (reminders, follow-ups, ad-hoc agent-triggered calls). */
-    router.post('/outbound', async (req: any, res: any) => {
+    router.post('/outbound', requireEssentialOrHigher(), requireCallMinutes(), async (req: any, res: any) => {
         try {
             const tenantId = getTenantScope(req);
             const toNumber = String(req.body?.toNumber || '').trim();
             const reason = String(req.body?.reason || 'click_to_call').trim();
             const openingContext = typeof req.body?.openingContext === 'string' ? req.body.openingContext.trim() : undefined;
+            const fromNumberInput = typeof req.body?.fromNumber === 'string' ? req.body.fromNumber.trim() : undefined;
+            const phoneNumberId = typeof req.body?.phoneNumberId === 'string' ? req.body.phoneNumberId.trim() : undefined;
 
             if (!toNumber) {
                 return res.status(400).json({ success: false, error: 'toNumber is required' });
             }
 
-            const tenantRow = await voiceDb.query(
-                `select phone_number, ai_agent_id from public.voice_tenants where id = $1`,
-                [tenantId]
-            );
-            const fromNumber = tenantRow.rows[0]?.phone_number;
-            if (!fromNumber) {
-                return res.status(400).json({ success: false, error: 'Tenant has no phone number configured' });
+            const { resolveOutboundCallerId } = await import('./resolve-outbound-caller-id.js');
+            const caller = await resolveOutboundCallerId(tenantId, {
+                fromNumber: fromNumberInput,
+                phoneNumberId,
+            });
+            if (!caller) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'No authorized outbound phone number configured for this workspace',
+                });
             }
 
             const { initiateOutboundCall } = await import('./outbound.service.js');
             const { callSid } = await initiateOutboundCall({
                 tenantId,
                 toNumber,
-                fromNumber,
-                agentId: tenantRow.rows[0]?.ai_agent_id || null,
+                fromNumber: caller.fromNumber,
+                agentId: caller.agentId,
                 reason,
                 openingContext,
             });

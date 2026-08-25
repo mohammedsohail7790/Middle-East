@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { DashboardBootScreen } from "@/components/dashboard/DashboardBootScreen";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { supabase } from "@/lib/supabase";
 import { AppShell } from "@/components/dashboard-shell/app-shell";
@@ -189,22 +190,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   if (!ready) {
-    return (
-      <div className="dashboard-boot-screen">
-        <div className="dashboard-boot-glow dashboard-boot-glow--tl" aria-hidden />
-        <div className="dashboard-boot-glow dashboard-boot-glow--br" aria-hidden />
-        <div className="dashboard-boot-card">
-          <Image src="/logo.png" alt="Halla AI" width={200} height={72} className="h-16 w-auto max-w-[180px] object-contain dark:hidden" priority />
-          <Image src="/logo-dark.png" alt="Halla AI" width={200} height={72} className="hidden h-16 w-auto max-w-[180px] object-contain dark:block" priority />
-          <div className="dashboard-boot-dots" role="status" aria-label="Loading">
-            <span className="dashboard-boot-dot" style={{ animationDelay: "0ms" }} />
-            <span className="dashboard-boot-dot" style={{ animationDelay: "150ms" }} />
-            <span className="dashboard-boot-dot" style={{ animationDelay: "300ms" }} />
-          </div>
-          <p className="dashboard-boot-label">Loading your workspace…</p>
-        </div>
-      </div>
-    );
+    return <DashboardBootScreen />;
   }
 
   const billingAllowed =
@@ -221,7 +207,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <DashboardBillingSync onAccount={setAccount} />
       {initError && (
         <div className="dashboard-alert dashboard-alert-error mb-4" role="alert">
-          <p className="font-semibold text-sm">API connection issue</p>
+          <p className="font-semibold text-sm"><InitErrorTitle /></p>
           <p className="text-sm mt-0.5">{initError}</p>
         </div>
       )}
@@ -236,4 +222,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </DashboardRealtimeProvider>
     </AppShell>
   );
+}
+
+function InitErrorTitle() {
+  const t = useTranslations("shell");
+  return <>{t("apiConnectionIssue")}</>;
 }
