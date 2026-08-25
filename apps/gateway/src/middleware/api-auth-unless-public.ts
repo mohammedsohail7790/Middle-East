@@ -22,6 +22,8 @@ const PUBLIC_POST_ROUTES = new Set([
   '/voice/stream-status',
   '/voice/recording-status',
   '/voice/test-outbound-twiml',
+  '/voice/outbound-answer',
+  '/voice/call-status',
   // Twilio webhook fired when a caller presses a digit at the compliance
   // consent gate — no Authorization header available; protected instead
   // by twilioWebhookGuard's signature check on the route itself.

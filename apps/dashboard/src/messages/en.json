@@ -199,7 +199,13 @@
       "purposeFollowUp": "Lead follow-up",
       "purposeSalesShort": "Sales campaign",
       "purposeReminderShort": "Appointment reminders",
-      "purposeFollowUpShort": "Lead follow-up"
+      "purposeFollowUpShort": "Lead follow-up",
+      "editCampaign": "Edit campaign",
+      "saveCampaign": "Save changes",
+      "savingCampaign": "Saving…",
+      "fromNumber": "Call from",
+      "fromNumberAuto": "Default workspace number",
+      "fromNumberHint": "Choose which number appears on the recipient's caller ID."
     },
     "integrations": {
       "syncAll": "Sync all",

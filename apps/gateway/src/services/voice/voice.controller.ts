@@ -570,7 +570,7 @@ export function createVoiceRouter(): express.Router {
     const testOutboundTwiml = (_req: any, res: any) => {
         const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Joanna">This is your Call I Q test call. Your line is working. Goodbye.</Say>
+  <Say voice="Polly.Joanna">This is your Halla AI test call. Your line is working. Goodbye.</Say>
   <Hangup/>
 </Response>`;
         return res.type('text/xml').send(twiml);
@@ -950,6 +950,22 @@ export function createVoiceRouter(): express.Router {
             timestamp: body.Timestamp,
             error: body.Error,
         });
+        return res.status(200).send('OK');
+    });
+
+    /** Twilio call lifecycle (initiated / ringing / answered / completed) for outbound dials. */
+    router.post('/call-status', twilioWebhookGuard, async (req: any, res: any) => {
+        const body = req.body || {};
+        try {
+            const { handleTwilioCallStatus } = await import('./outbound.service.js');
+            await handleTwilioCallStatus({
+                callSid: String(body.CallSid || ''),
+                callStatus: String(body.CallStatus || ''),
+                callDuration: body.CallDuration != null ? String(body.CallDuration) : undefined,
+            });
+        } catch (error) {
+            logger.error('TWILIO_CALL_STATUS_ERROR', { error: String(error), callSid: body.CallSid });
+        }
         return res.status(200).send('OK');
     });
 

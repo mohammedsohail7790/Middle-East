@@ -31,7 +31,7 @@ function isLlmHeavyRoute(path: string, method: string): boolean {
 function isPublicWebhook(path: string, method: string): boolean {
   return (
     method === 'POST' &&
-    (/^\/voice\/(incoming-call|stream-status|recording-status|test-outbound-twiml)/.test(path) ||
+    (/^\/voice\/(incoming-call|outbound-answer|call-status|stream-status|recording-status|test-outbound-twiml|consent-response)/.test(path) ||
       /\/webhook(\/|$)/.test(path))
   );
 }

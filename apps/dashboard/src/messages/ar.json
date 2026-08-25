@@ -199,7 +199,13 @@
       "purposeFollowUp": "متابعة العملاء المحتملين",
       "purposeSalesShort": "حملة مبيعات",
       "purposeReminderShort": "تذكيرات المواعيد",
-      "purposeFollowUpShort": "متابعة العملاء"
+      "purposeFollowUpShort": "متابعة العملاء",
+      "editCampaign": "تعديل الحملة",
+      "saveCampaign": "حفظ التغييرات",
+      "savingCampaign": "جارٍ الحفظ…",
+      "fromNumber": "الاتصال من",
+      "fromNumberAuto": "رقم مساحة العمل الافتراضي",
+      "fromNumberHint": "اختر الرقم الذي يظهر على هوية المتصل لدى المستلم."
     },
     "integrations": {
       "syncAll": "مزامنة الكل",

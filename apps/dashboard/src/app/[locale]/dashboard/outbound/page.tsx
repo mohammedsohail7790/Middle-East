@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  PhoneOutgoing, Plus, X, Play, Megaphone, Bell, RotateCcw, Phone,
+  PhoneOutgoing, Plus, X, Play, Megaphone, Bell, RotateCcw, Phone, Pencil,
 } from "lucide-react";
 import { IconBox, ICON_STROKE, type IconBoxVariant } from "@/components/ui-kit/IconBox";
 import { StatCard } from "@/components/ui-kit/StatCard";
@@ -33,6 +33,16 @@ interface Campaign {
   failed_count: number;
   created_at: string;
   purpose: CampaignPurpose | null;
+}
+
+interface WorkspacePhoneNumber {
+  id: string;
+  phone_number: string;
+  friendly_name?: string | null;
+}
+
+interface CampaignDetail extends Campaign {
+  targets: Array<{ phoneNumber: string; context?: string }>;
 }
 
 const STATUS_BADGE: Record<CampaignStatus, string> = {
@@ -81,6 +91,62 @@ function OutboundPageContent() {
   const [campaignTargets, setCampaignTargets] = useState("");
   const [campaignSubmitting, setCampaignSubmitting] = useState(false);
   const [startingId, setStartingId] = useState<string | null>(null);
+  const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null);
+  const [phoneNumbers, setPhoneNumbers] = useState<WorkspacePhoneNumber[]>([]);
+  const [selectedPhoneNumberId, setSelectedPhoneNumberId] = useState("");
+
+  const loadPhoneNumbers = useCallback(() => {
+    api
+      .get<{ numbers?: WorkspacePhoneNumber[] } | WorkspacePhoneNumber[]>("/phone-numbers")
+      .then((data) => {
+        const raw =
+          data && typeof data === "object" && "numbers" in data
+            ? (data as { numbers?: unknown }).numbers ?? data
+            : data;
+        const numbers = asArray<Record<string, unknown>>(raw).map((row) => ({
+          id: String(row.id ?? ""),
+          phone_number: String(row.phone_number ?? row.phoneNumber ?? ""),
+          friendly_name: (row.friendly_name ?? row.friendlyName ?? null) as string | null,
+        })).filter((n) => n.id && n.phone_number);
+        setPhoneNumbers(numbers);
+        if (numbers.length === 1) setSelectedPhoneNumberId(numbers[0].id);
+      })
+      .catch(() => setPhoneNumbers([]));
+  }, []);
+
+  useEffect(() => {
+    if (showCallModal || showCampaignModal) loadPhoneNumbers();
+  }, [showCallModal, showCampaignModal, loadPhoneNumbers]);
+
+  const resetCampaignModal = () => {
+    setShowCampaignModal(false);
+    setEditingCampaignId(null);
+    setCampaignName("");
+    setCampaignTargets("");
+    setCampaignPurpose("campaign");
+  };
+
+  const openCreateCampaign = () => {
+    setEditingCampaignId(null);
+    setCampaignName("");
+    setCampaignTargets("");
+    setCampaignPurpose("campaign");
+    setShowCampaignModal(true);
+  };
+
+  const openEditCampaign = async (id: string) => {
+    setError("");
+    try {
+      const detail = await api.get<CampaignDetail>(`/campaigns/${id}`);
+      setEditingCampaignId(id);
+      setCampaignName(detail.name);
+      setCampaignPurpose(detail.purpose ?? "campaign");
+      setCampaignTargets((detail.targets ?? []).map((t) => t.phoneNumber).join("\n"));
+      setShowCampaignModal(true);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Failed to load campaign");
+    }
+  };
 
   const loadCampaigns = useCallback((opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
@@ -96,6 +162,8 @@ function OutboundPageContent() {
     pollOnlyWhenDisconnected: true,
   });
 
+  const dialFromBody = selectedPhoneNumberId ? { phoneNumberId: selectedPhoneNumberId } : {};
+
   const placeCall = async () => {
     if (!callNumber.trim()) return;
     setCallSubmitting(true);
@@ -105,6 +173,7 @@ function OutboundPageContent() {
         toNumber: callNumber.trim(),
         reason: "click_to_call",
         openingContext: callContext.trim() || undefined,
+        ...dialFromBody,
       });
       setCallResult(t("callingNow", { callSid: res.callSid }));
       setCallNumber("");
@@ -116,7 +185,7 @@ function OutboundPageContent() {
     }
   };
 
-  const createCampaign = async () => {
+  const saveCampaign = async () => {
     const numbers = campaignTargets
       .split(/[\n,]/)
       .map((n) => n.trim())
@@ -125,18 +194,20 @@ function OutboundPageContent() {
     setCampaignSubmitting(true);
     setError("");
     try {
-      await api.post("/campaigns", {
+      const payload = {
         name: campaignName.trim(),
         purpose: campaignPurpose,
         targets: numbers.map((phoneNumber) => ({ phoneNumber })),
-      });
-      setShowCampaignModal(false);
-      setCampaignName("");
-      setCampaignTargets("");
-      setCampaignPurpose("campaign");
+      };
+      if (editingCampaignId) {
+        await api.patch(`/campaigns/${editingCampaignId}`, payload);
+      } else {
+        await api.post("/campaigns", payload);
+      }
+      resetCampaignModal();
       loadCampaigns({ silent: true });
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to create campaign");
+      setError(e instanceof Error ? e.message : "Failed to save campaign");
     } finally {
       setCampaignSubmitting(false);
     }
@@ -145,7 +216,7 @@ function OutboundPageContent() {
   const startCampaign = async (id: string) => {
     setStartingId(id);
     try {
-      await api.post(`/campaigns/${id}/start`, {});
+      await api.post(`/campaigns/${id}/start`, dialFromBody);
       loadCampaigns({ silent: true });
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to start campaign");
@@ -159,6 +230,30 @@ function OutboundPageContent() {
   const totalCalls = campaigns.reduce((sum, c) => sum + (c.total_targets || 0), 0);
   const totalCompleted = campaigns.reduce((sum, c) => sum + (c.completed_count || 0), 0);
 
+  const fromNumberField =
+    phoneNumbers.length > 1 ? (
+      <div>
+        <label className="dashboard-field-label" htmlFor="outbound-from-number">
+          {t("fromNumber")}
+        </label>
+        <select
+          id="outbound-from-number"
+          value={selectedPhoneNumberId}
+          onChange={(e) => setSelectedPhoneNumberId(e.target.value)}
+          className="input"
+        >
+          <option value="">{t("fromNumberAuto")}</option>
+          {phoneNumbers.map((n) => (
+            <option key={n.id} value={n.id}>
+              {n.friendly_name ? `${n.friendly_name} · ` : ""}
+              {n.phone_number}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-muted-foreground mt-1">{t("fromNumberHint")}</p>
+      </div>
+    ) : null;
+
   return (
     <DashboardPage
       title={title}
@@ -170,7 +265,7 @@ function OutboundPageContent() {
           <button onClick={() => setShowCallModal(true)} className="btn-ghost flex-1 sm:flex-none justify-center">
             <Phone className="size-4" strokeWidth={ICON_STROKE} /> {t("callNow")}
           </button>
-          <button onClick={() => setShowCampaignModal(true)} className="btn-primary flex-1 sm:flex-none justify-center">
+          <button onClick={openCreateCampaign} className="btn-primary flex-1 sm:flex-none justify-center">
             <Plus className="size-4" strokeWidth={ICON_STROKE} /> {t("newCampaign")}
           </button>
         </div>
@@ -220,18 +315,29 @@ function OutboundPageContent() {
                     </p>
                   </div>
                   {(c.status === "draft" || c.status === "paused") && (
-                    <button
-                      type="button"
-                      onClick={() => startCampaign(c.id)}
-                      disabled={startingId === c.id}
-                      className="btn-ghost !py-1.5 !px-3 text-sm"
-                    >
-                      {startingId === c.id ? t("starting") : (
-                        <>
-                          <Play className="size-3.5" strokeWidth={ICON_STROKE} /> {t("start")}
-                        </>
+                    <>
+                      {c.status === "draft" && (
+                        <button
+                          type="button"
+                          onClick={() => void openEditCampaign(c.id)}
+                          className="btn-ghost !py-1.5 !px-3 text-sm"
+                        >
+                          <Pencil className="size-3.5" strokeWidth={ICON_STROKE} /> {tCommon("edit")}
+                        </button>
                       )}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => startCampaign(c.id)}
+                        disabled={startingId === c.id}
+                        className="btn-ghost !py-1.5 !px-3 text-sm"
+                      >
+                        {startingId === c.id ? t("starting") : (
+                          <>
+                            <Play className="size-3.5" strokeWidth={ICON_STROKE} /> {t("start")}
+                          </>
+                        )}
+                      </button>
+                    </>
                   )}
                 </div>
               );
@@ -267,6 +373,7 @@ function OutboundPageContent() {
                 </button>
               </div>
               <div className="space-y-4 p-5 sm:p-6">
+                {fromNumberField}
                 <div>
                   <label className="dashboard-field-label" htmlFor="call-number">{t("phoneNumber")}</label>
                   <input
@@ -310,7 +417,7 @@ function OutboundPageContent() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="dashboard-modal-overlay"
-            onClick={() => setShowCampaignModal(false)}
+            onClick={resetCampaignModal}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
@@ -322,13 +429,16 @@ function OutboundPageContent() {
               <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6 border-b border-border">
                 <div className="flex items-center gap-3 min-w-0">
                   <IconBox icon={Megaphone} variant="accent" size="sm" />
-                  <h2 className="text-lg font-semibold text-foreground truncate">{t("newCampaign")}</h2>
+                  <h2 className="text-lg font-semibold text-foreground truncate">
+                    {editingCampaignId ? t("editCampaign") : t("newCampaign")}
+                  </h2>
                 </div>
-                <button type="button" onClick={() => setShowCampaignModal(false)} className="dashboard-icon-btn !size-8" aria-label={t("close")}>
+                <button type="button" onClick={resetCampaignModal} className="dashboard-icon-btn !size-8" aria-label={t("close")}>
                   <X className="size-4" strokeWidth={ICON_STROKE} />
                 </button>
               </div>
               <div className="space-y-4 p-5 sm:p-6">
+                {fromNumberField}
                 <div>
                   <label className="dashboard-field-label" htmlFor="campaign-name">{t("campaignName")}</label>
                   <input
@@ -365,14 +475,20 @@ function OutboundPageContent() {
                   <p className="text-xs text-muted-foreground mt-1">{t("phoneNumbersHint")}</p>
                 </div>
                 <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
-                  <button type="button" onClick={() => setShowCampaignModal(false)} className="btn-ghost flex-1">{tCommon("cancel")}</button>
+                  <button type="button" onClick={resetCampaignModal} className="btn-ghost flex-1">{tCommon("cancel")}</button>
                   <button
                     type="button"
-                    onClick={createCampaign}
+                    onClick={saveCampaign}
                     disabled={!campaignName.trim() || !campaignTargets.trim() || campaignSubmitting}
                     className="btn-primary flex-1"
                   >
-                    {campaignSubmitting ? t("creating") : t("createCampaign")}
+                    {campaignSubmitting
+                      ? editingCampaignId
+                        ? t("savingCampaign")
+                        : t("creating")
+                      : editingCampaignId
+                        ? t("saveCampaign")
+                        : t("createCampaign")}
                   </button>
                 </div>
               </div>

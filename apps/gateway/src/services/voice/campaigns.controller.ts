@@ -72,13 +72,137 @@ export function createCampaignsRouter(): express.Router {
                 await voiceDb.query(
                     `insert into public.campaign_calls (campaign_id, phone_number, status, purpose, context, lead_id, customer_id)
                      values ($1, $2, 'pending', $3, $4, $5, $6)`,
-                    [campaignId, t.phoneNumber, purpose, t.context ? JSON.stringify({ openingContext: t.context }) : null, t.leadId ?? null, t.customerId ?? null]
+                    [
+                        campaignId,
+                        t.phoneNumber,
+                        purpose,
+                        t.context ? { openingContext: t.context } : null,
+                        t.leadId ?? null,
+                        t.customerId ?? null,
+                    ]
                 );
             }
 
             res.json({ success: true, campaignId });
         } catch (error) {
             res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to create campaign') });
+        }
+    });
+
+    router.get('/:id', async (req: any, res: any) => {
+        try {
+            const tenantId = getTenantScope(req);
+            const campaignId = req.params.id;
+            const campaign = await voiceDb.query(
+                `select id, name, description, status, total_targets, completed_count, success_count, failed_count, created_at
+                 from public.campaigns where id = $1 and tenant_id = $2`,
+                [campaignId, tenantId]
+            );
+            if (campaign.rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Campaign not found' });
+            }
+            const targets = await voiceDb.query(
+                `select phone_number, context, purpose
+                 from public.campaign_calls
+                 where campaign_id = $1
+                 order by created_at asc`,
+                [campaignId]
+            );
+            const { parseCampaignCallContext } = await import('./outbound.service.js');
+            res.json({
+                success: true,
+                data: {
+                    ...campaign.rows[0],
+                    purpose: targets.rows[0]?.purpose ?? 'campaign',
+                    targets: targets.rows.map((row) => ({
+                        phoneNumber: row.phone_number,
+                        context: parseCampaignCallContext(row.context),
+                    })),
+                },
+            });
+        } catch (error) {
+            res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to load campaign') });
+        }
+    });
+
+    router.patch('/:id', async (req: any, res: any) => {
+        try {
+            const tenantId = getTenantScope(req);
+            const campaignId = req.params.id;
+            const campaign = await voiceDb.query(
+                `select id, status from public.campaigns where id = $1 and tenant_id = $2`,
+                [campaignId, tenantId]
+            );
+            if (campaign.rows.length === 0) {
+                return res.status(404).json({ success: false, error: 'Campaign not found' });
+            }
+            if (campaign.rows[0].status !== 'draft') {
+                return res.status(400).json({ success: false, error: 'Only draft campaigns can be edited' });
+            }
+
+            const name = typeof req.body?.name === 'string' ? req.body.name.trim() : undefined;
+            const description =
+                typeof req.body?.description === 'string' ? req.body.description.trim() : undefined;
+            const purpose = typeof req.body?.purpose === 'string' ? req.body.purpose : undefined;
+            const targets: CampaignTarget[] = Array.isArray(req.body?.targets) ? req.body.targets : [];
+
+            if (purpose && !['campaign', 'reminder', 'follow_up'].includes(purpose)) {
+                return res.status(400).json({ success: false, error: 'invalid purpose' });
+            }
+
+            if (name) {
+                await voiceDb.query(
+                    `update public.campaigns set name = $2, updated_at = now() where id = $1`,
+                    [campaignId, name]
+                );
+            }
+            if (description !== undefined) {
+                await voiceDb.query(
+                    `update public.campaigns set description = $2, updated_at = now() where id = $1`,
+                    [campaignId, description || null]
+                );
+            }
+
+            if (targets.length > 0) {
+                await voiceDb.query(
+                    `delete from public.campaign_calls
+                     where campaign_id = $1 and status = 'pending'`,
+                    [campaignId]
+                );
+                const dialPurpose = purpose || 'campaign';
+                for (const t of targets) {
+                    if (!t.phoneNumber) continue;
+                    await voiceDb.query(
+                        `insert into public.campaign_calls (campaign_id, phone_number, status, purpose, context, lead_id, customer_id)
+                         values ($1, $2, 'pending', $3, $4, $5, $6)`,
+                        [
+                            campaignId,
+                            t.phoneNumber,
+                            dialPurpose,
+                            t.context ? { openingContext: t.context } : null,
+                            t.leadId ?? null,
+                            t.customerId ?? null,
+                        ]
+                    );
+                }
+                const count = await voiceDb.query(
+                    `select count(*)::int as total from public.campaign_calls where campaign_id = $1`,
+                    [campaignId]
+                );
+                await voiceDb.query(
+                    `update public.campaigns set total_targets = $2, updated_at = now() where id = $1`,
+                    [campaignId, count.rows[0]?.total ?? targets.length]
+                );
+            } else if (purpose) {
+                await voiceDb.query(
+                    `update public.campaign_calls set purpose = $2 where campaign_id = $1 and status = 'pending'`,
+                    [campaignId, purpose]
+                );
+            }
+
+            res.json({ success: true });
+        } catch (error) {
+            res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to update campaign') });
         }
     });
 
@@ -121,13 +245,13 @@ export function createCampaignsRouter(): express.Router {
 
             await voiceDb.query(`update public.campaigns set status = 'running', updated_at = now() where id = $1`, [campaignId]);
 
-            const { initiateOutboundCall } = await import('./outbound.service.js');
+            const { initiateOutboundCall, parseCampaignCallContext } = await import('./outbound.service.js');
             const DIAL_STAGGER_MS = 2000;
             let queued = 0;
             for (const row of pending.rows) {
                 const delay = queued * DIAL_STAGGER_MS;
                 queued += 1;
-                const context = row.context?.openingContext as string | undefined;
+                const context = parseCampaignCallContext(row.context);
                 setTimeout(() => {
                     initiateOutboundCall({
                         tenantId,
@@ -142,7 +266,13 @@ export function createCampaignsRouter(): express.Router {
                     }).catch((err) => {
                         logger.error('CAMPAIGN_DIAL_FAILED', { campaignId, campaignCallId: row.id, error: String(err) });
                         voiceDb
-                            .query(`update public.campaign_calls set status = 'failed' where id = $1`, [row.id])
+                            .query(
+                                `update public.campaign_calls cc
+                                 set status = 'failed'
+                                 from public.campaigns c
+                                 where cc.id = $1 and cc.campaign_id = c.id and c.tenant_id = $2`,
+                                [row.id, tenantId]
+                            )
                             .catch(() => {});
                     });
                 }, delay);
