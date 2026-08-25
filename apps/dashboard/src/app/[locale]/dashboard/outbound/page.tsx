@@ -4,17 +4,17 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  PhoneOutgoing, Plus, X, Play, Megaphone, Bell, RotateCcw, Phone, Pencil,
+  PhoneOutgoing, Plus, X, Play, Megaphone, Bell, RotateCcw, Phone,
 } from "lucide-react";
 import { IconBox, ICON_STROKE, type IconBoxVariant } from "@/components/ui-kit/IconBox";
 import { StatCard } from "@/components/ui-kit/StatCard";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { api, asArray } from "@/lib/api";
-import { cn } from "@/lib/utils";
 import { DASHBOARD_POLL_MS } from "@/lib/dashboard-sync";
 import { useRealtimeQuery } from "@/lib/use-realtime-query";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { DashboardPageSection } from "@/components/ui-kit/DashboardPageSection";
+import { OutboundCampaignRow } from "@/components/outbound/OutboundCampaignRow";
 import { PlanFeatureGate } from "@/components/billing/PlanFeatureGate";
 import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
@@ -44,15 +44,6 @@ interface WorkspacePhoneNumber {
 interface CampaignDetail extends Campaign {
   targets: Array<{ phoneNumber: string; context?: string }>;
 }
-
-const STATUS_BADGE: Record<CampaignStatus, string> = {
-  draft: "bg-muted text-foreground-secondary",
-  scheduled: "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
-  running: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
-  paused: "bg-muted text-foreground-secondary",
-  completed: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300",
-  cancelled: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300",
-};
 
 export default function OutboundPage() {
   return (
@@ -296,50 +287,29 @@ function OutboundPageContent() {
             {campaigns.map((c) => {
               const meta = PURPOSE_META[c.purpose ?? "campaign"];
               return (
-                <div key={c.id} className="rounded-xl border border-border bg-card p-4 flex items-center gap-3 flex-wrap">
-                  <IconBox icon={meta.icon} variant={meta.variant} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-medium text-foreground truncate">{c.name}</p>
-                      <span className={cn("px-2 py-0.5 text-[10px] rounded-full font-medium capitalize", STATUS_BADGE[c.status])}>
-                        {c.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {t("progress", {
-                        completed: c.completed_count,
-                        total: c.total_targets,
-                        success: c.success_count,
-                        failed: c.failed_count,
-                      })}
-                    </p>
-                  </div>
-                  {(c.status === "draft" || c.status === "paused") && (
-                    <>
-                      {c.status === "draft" && (
-                        <button
-                          type="button"
-                          onClick={() => void openEditCampaign(c.id)}
-                          className="btn-ghost !py-1.5 !px-3 text-sm"
-                        >
-                          <Pencil className="size-3.5" strokeWidth={ICON_STROKE} /> {tCommon("edit")}
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => startCampaign(c.id)}
-                        disabled={startingId === c.id}
-                        className="btn-ghost !py-1.5 !px-3 text-sm"
-                      >
-                        {startingId === c.id ? t("starting") : (
-                          <>
-                            <Play className="size-3.5" strokeWidth={ICON_STROKE} /> {t("start")}
-                          </>
-                        )}
-                      </button>
-                    </>
-                  )}
-                </div>
+                <OutboundCampaignRow
+                  key={c.id}
+                  name={c.name}
+                  status={c.status}
+                  progressLabel={t("progress", {
+                    completed: c.completed_count,
+                    total: c.total_targets,
+                    success: c.success_count,
+                    failed: c.failed_count,
+                  })}
+                  icon={meta.icon}
+                  iconVariant={meta.variant}
+                  onEdit={c.status === "draft" ? () => void openEditCampaign(c.id) : undefined}
+                  onStart={
+                    c.status === "draft" || c.status === "paused"
+                      ? () => startCampaign(c.id)
+                      : undefined
+                  }
+                  starting={startingId === c.id}
+                  editLabel={tCommon("edit")}
+                  startLabel={t("start")}
+                  startingLabel={t("starting")}
+                />
               );
             })}
           </div>

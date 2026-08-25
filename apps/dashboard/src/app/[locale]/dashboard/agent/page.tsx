@@ -24,7 +24,9 @@ import {
 } from "@/lib/gateway-adapters";
 import { subscribeAIConfigUpdates } from "@/lib/realtime";
 import { AdditionalAgentsPanel } from "@/components/agent/AdditionalAgentsPanel";
+import { AgentHeroBanner } from "@/components/agent/AgentHeroBanner";
 import { VoicePreviewPanel } from "@/components/agent/VoicePreviewPanel";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { cn } from "@/lib/utils";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
@@ -284,6 +286,13 @@ export default function AgentPage() {
 
       {config && (
       <>
+      <AgentHeroBanner
+        agentName={config.agentName || t("defaultAgentName")}
+        voiceLabel={VOICES.find((v) => v.id === config.voice)?.name ?? config.voice}
+        toneLabel={t(`tones.${config.tone}` as "tones.professional")}
+        liveLabel="Live on calls"
+      />
+
       <section id="receptionist-config" className="scroll-mt-24">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-6">
@@ -671,7 +680,11 @@ export default function AgentPage() {
       <section id="voice-preview" className="mt-10 scroll-mt-24">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <SectionHeader icon={Headphones} title={t("voicePreview")} iconVariant="accent" className="mb-4" />
-          <VoicePreviewPanel config={config} />
+          <VibePanel beam className="rounded-2xl border border-border/70 bg-card shadow-card">
+            <div className="p-4 sm:p-5">
+              <VoicePreviewPanel config={config} />
+            </div>
+          </VibePanel>
         </motion.div>
       </section>
 

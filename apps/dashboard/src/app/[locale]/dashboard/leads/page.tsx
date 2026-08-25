@@ -346,7 +346,7 @@ export default function LeadsPage() {
                     key={lead.id}
                     type="button"
                     onClick={() => setDetailLeadId(lead.id)}
-                    className="dashboard-mobile-card w-full text-left"
+                    className="dashboard-mobile-card vibe-kanban-card w-full text-left"
                   >
                     <div className="flex items-start gap-3">
                       <IconBox icon={User} variant="violet" size="sm" />
@@ -384,8 +384,8 @@ export default function LeadsPage() {
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, col.id)}
                   className={cn(
-                    "dashboard-kanban-column dashboard-panel flex flex-col p-3 sm:p-4",
-                    dragOverColumn === col.id && "ring-2 ring-accent/30 bg-accent/[0.02]"
+                    "dashboard-kanban-column dashboard-panel flex flex-col p-3 sm:p-4 vibe-kanban-column",
+                    dragOverColumn === col.id && "is-drop-target ring-2 ring-accent/30 bg-accent/[0.02]"
                   )}
                   style={{ transition: "box-shadow 160ms ease-out, background-color 160ms ease-out" }}
                 >
@@ -410,7 +410,7 @@ export default function LeadsPage() {
                             setDetailLeadId(lead.id);
                           }
                         }}
-                        className="rounded-xl border border-border bg-card p-3 cursor-grab active:cursor-grabbing card-hover group"
+                        className="vibe-kanban-card rounded-xl border border-border bg-card p-3 cursor-grab active:cursor-grabbing card-hover group"
                       >
                         <div className="flex items-start gap-2.5">
                           <IconBox icon={User} variant="violet" size="sm" />

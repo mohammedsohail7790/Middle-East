@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { DASHBOARD_POLL_MS } from "@/lib/dashboard-sync";
 import { useRealtimeQuery } from "@/lib/use-realtime-query";
 import { PlanFeatureGate } from "@/components/billing/PlanFeatureGate";
+import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
 interface Metrics {
@@ -254,8 +255,9 @@ function AnalyticsPageContent() {
         <StatCard label={t("avgDuration")} value={`${metrics?.avgDuration ?? 0}s`} icon={Clock} iconVariant="neutral" index={3} />
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="dashboard-panel-padded mb-6">
-        <SectionHeader icon={TrendingUp} title={t("callVolumeOverTime")} size="sm" className="mb-4" />
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+        <VibePanel beam className="dashboard-panel-padded rounded-2xl border border-border/70 bg-card shadow-card">
+          <SectionHeader icon={TrendingUp} title={t("callVolumeOverTime")} size="sm" className="mb-4" />
         {callVolume.length === 0 ? (
           <div className="min-h-64 flex items-center justify-center">
             <EmptyState
@@ -271,16 +273,16 @@ function AnalyticsPageContent() {
               <AreaChart data={callVolume} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
                 <defs>
                   <linearGradient id="callsGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#C9A24B" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#C9A24B" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.28} />
+                    <stop offset="95%" stopColor="var(--accent)" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="leadsGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#E4C878" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#E4C878" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--accent-mid)" stopOpacity={0.28} />
+                    <stop offset="95%" stopColor="var(--accent-mid)" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="convGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--success)" stopOpacity={0.28} />
+                    <stop offset="95%" stopColor="var(--success)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -304,9 +306,9 @@ function AnalyticsPageContent() {
                     color: "var(--foreground)",
                   }}
                 />
-                <Area type="monotone" dataKey="calls" stroke="#C9A24B" strokeWidth={2} fill="url(#callsGrad)" />
-                <Area type="monotone" dataKey="leads" stroke="#E4C878" strokeWidth={2} fill="url(#leadsGrad)" />
-                <Area type="monotone" dataKey="conversions" stroke="#10B981" strokeWidth={2} fill="url(#convGrad)" />
+                <Area type="monotone" dataKey="calls" stroke="var(--accent)" strokeWidth={2} fill="url(#callsGrad)" />
+                <Area type="monotone" dataKey="leads" stroke="var(--accent-mid)" strokeWidth={2} fill="url(#leadsGrad)" />
+                <Area type="monotone" dataKey="conversions" stroke="var(--success)" strokeWidth={2} fill="url(#convGrad)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -325,6 +327,7 @@ function AnalyticsPageContent() {
             <span className="text-xs text-foreground-secondary">{t("chartConversions")}</span>
           </div>
         </div>
+        </VibePanel>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="dashboard-panel-padded">
@@ -350,7 +353,9 @@ function AnalyticsPageContent() {
                     animate={{ width: `${step.percentage}%` }}
                     transition={{ duration: 1, delay: 0.6 + i * 0.1 }}
                     className="h-full rounded-xl"
-                    style={{ background: "linear-gradient(90deg, #C9A24B, #E4C878)" }}
+                    style={{
+                      background: "linear-gradient(90deg, var(--accent), var(--accent-mid))",
+                    }}
                   />
                   <div className="absolute inset-0 flex items-center px-4">
                     <span className="text-sm font-medium text-foreground">{step.value}</span>
