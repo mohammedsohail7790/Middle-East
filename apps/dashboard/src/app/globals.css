@@ -21,14 +21,14 @@
   --navy: #0b1220;
   --navy-elevated: #131c2e;
   --navy-light: #1c2740;
-  /* Emerald green — brand accent, matches the Halla AI logo gradient */
-  --gold: #10b981;
-  --gold-dark: #059669;
-  --gold-text: #065f46;
-  --gold-light: #6ee7b7;
-  --gold-glow: rgba(16, 185, 129, 0.25);
-  --gold-muted: rgba(16, 185, 129, 0.12);
-  --gold-border: rgba(16, 185, 129, 0.35);
+  /* Teal — unified brand accent (marketing + dashboard) */
+  --gold: #0d9488;
+  --gold-dark: #0f766e;
+  --gold-text: #0f766e;
+  --gold-light: #2dd4bf;
+  --gold-glow: rgba(13, 148, 136, 0.28);
+  --gold-muted: rgba(13, 148, 136, 0.12);
+  --gold-border: rgba(13, 148, 136, 0.35);
   /* Legacy alias — kept so existing var(--cyan*) references still resolve to brand emerald */
   --cyan: var(--gold);
   --cyan-dark: var(--gold-dark);
@@ -903,6 +903,18 @@ body:has(.auth-shell) {
   .dashboard-stat-card {
     @apply dashboard-panel p-4 sm:p-5 card-hover min-w-0 relative overflow-hidden;
     background: linear-gradient(160deg, var(--card) 0%, color-mix(in srgb, var(--card) 92%, var(--background-elevated)) 100%);
+    transition:
+      border-color 0.22s ease,
+      box-shadow 0.22s ease,
+      transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .dashboard-stat-card:hover {
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+    box-shadow:
+      var(--shadow-card),
+      0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent);
+    transform: translateY(-2px);
   }
 
   .dark .dashboard-stat-card {
@@ -1858,10 +1870,13 @@ body:has(.auth-shell) {
 
   .dashboard-canvas {
     @apply flex-1 overflow-y-auto overflow-x-clip min-w-0;
-    background: var(--color-paper-2);
-    background-image: radial-gradient(circle, color-mix(in srgb, var(--border) 50%, transparent) 1px, transparent 1px);
-    background-size: 24px 24px;
-    background-attachment: local;
+    background-color: var(--color-paper-2);
+    background-image:
+      radial-gradient(ellipse 70% 45% at 95% 0%, color-mix(in srgb, var(--accent) 7%, transparent) 0%, transparent 52%),
+      radial-gradient(ellipse 55% 40% at 0% 100%, color-mix(in srgb, var(--accent) 5%, transparent) 0%, transparent 50%),
+      radial-gradient(circle, color-mix(in srgb, var(--border) 50%, transparent) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 24px 24px;
+    background-attachment: local, local, local;
   }
 
   .dashboard-canvas-inner {
@@ -4604,9 +4619,9 @@ body:has(.auth-shell) {
 body:has(.dashboard-app) {
   background: #f8f9fc !important;
   background-image:
-    radial-gradient(ellipse 70% 45% at 95% 0%, rgba(16, 185, 129,0.07) 0%, transparent 52%),
-    radial-gradient(ellipse 55% 40% at 0% 100%, rgba(16, 185, 129,0.05) 0%, transparent 50%),
-    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(16, 185, 129,0.03) 0%, transparent 60%) !important;
+    radial-gradient(ellipse 70% 45% at 95% 0%, color-mix(in srgb, var(--accent) 9%, transparent) 0%, transparent 52%),
+    radial-gradient(ellipse 55% 40% at 0% 100%, color-mix(in srgb, var(--accent) 7%, transparent) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, color-mix(in srgb, var(--accent) 4%, transparent) 0%, transparent 60%) !important;
   background-attachment: fixed !important;
 }
 
@@ -4871,7 +4886,7 @@ body:has(.dashboard-app) {
 }
 
 .dark .dashboard-table tbody tr:hover td {
-  background: rgba(16, 185, 129,0.05) !important;
+  background: color-mix(in srgb, var(--accent) 6%, transparent) !important;
 }
 
 /* ── Light: page header premium ── */
@@ -4896,9 +4911,9 @@ body:has(.dashboard-app) {
 
 /* ── Icon boxes: dark ── */
 .dark .icon-box-accent {
-  background: linear-gradient(145deg, rgba(16, 185, 129,0.18) 0%, rgba(16, 185, 129,0.1) 100%) !important;
-  border-color: rgba(16, 185, 129,0.28) !important;
-  box-shadow: 0 2px 8px rgba(16, 185, 129,0.15) !important;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 22%, transparent) 0%, color-mix(in srgb, var(--accent) 12%, transparent) 100%) !important;
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent) !important;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 22%, transparent) !important;
 }
 
 /* ── Badge polish: light ── */
@@ -4994,4 +5009,46 @@ body:has(.dashboard-app) {
 
 [lang="hi"] {
   font-family: var(--font-devanagari), var(--font-sans), sans-serif;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   AUTH + MARKETING SHELL (Magic UI polish)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.auth-marketing-shell {
+  font-family: "Hanken Grotesk", var(--font-sans), system-ui, sans-serif;
+  background: var(--gray-50);
+  color: var(--foreground);
+}
+
+.auth-marketing-shell .auth-btn-social {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-marketing-shell .auth-btn-social:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 12%, transparent);
+  transform: translateY(-1px);
+}
+
+.auth-marketing-shell .auth-btn-primary {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--accent) 32%, transparent);
+}
+
+.auth-marketing-shell .auth-btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transform: translateX(-120%);
+  transition: transform 0.55s ease;
+}
+
+.auth-marketing-shell .auth-btn-primary:hover:not(:disabled)::after {
+  transform: translateX(120%);
 }
