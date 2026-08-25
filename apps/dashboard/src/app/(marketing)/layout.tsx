@@ -57,6 +57,21 @@ export default function MarketingRootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+        {/* Marketing SPA styles — body HTML strips <head>; SSR link required for first paint. */}
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link id="halla-styles" rel="stylesheet" href="/halla_styles.css" />
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link
+          id="tabler-icons"
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css"
+        />
+        {/* eslint-disable-next-line @next/next/no-css-tags, @next/next/no-page-custom-font */}
+        <link
+          id="halla-fonts"
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=Cairo:wght@300;400;500;600;700;800;900&display=swap"
+        />
       </head>
       <body suppressHydrationWarning>
         <Providers>{children}</Providers>

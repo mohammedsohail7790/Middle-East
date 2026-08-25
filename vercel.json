@@ -29,6 +29,21 @@
       "permanent": true
     },
     {
+      "source": "/hallaai_styles.css",
+      "destination": "/halla_styles.css",
+      "permanent": true
+    },
+    {
+      "source": "/hallaai-marketing.css",
+      "destination": "/halla_styles.css",
+      "permanent": true
+    },
+    {
+      "source": "/hallaai_main.js",
+      "destination": "/halla_main.js",
+      "permanent": true
+    },
+    {
       "source": "/app",
       "destination": "/dashboard",
       "permanent": false
@@ -61,7 +76,7 @@
       ]
     },
     {
-      "source": "/hallaai_main.js",
+      "source": "/halla_main.js",
       "headers": [
         {
           "key": "Cache-Control",
@@ -70,16 +85,7 @@
       ]
     },
     {
-      "source": "/hallaai_styles.css",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/hallaai-marketing.css",
+      "source": "/halla_styles.css",
       "headers": [
         {
           "key": "Cache-Control",

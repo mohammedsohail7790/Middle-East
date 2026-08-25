@@ -71,6 +71,9 @@ const nextConfig = {
 
     async redirects() {
         return [
+            { source: '/hallaai_styles.css', destination: '/halla_styles.css', permanent: true },
+            { source: '/hallaai-marketing.css', destination: '/halla_styles.css', permanent: true },
+            { source: '/hallaai_main.js', destination: '/halla_main.js', permanent: true },
             { source: '/roi-calculator', destination: '/roi', permanent: true },
             { source: '/:locale/dashboard/knowledge', destination: '/:locale/dashboard/business-profile', permanent: true },
             { source: '/:locale/dashboard/crm/contacts', destination: '/:locale/dashboard/leads', permanent: true },

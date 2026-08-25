@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { readFileSync } from "fs";
 import { join } from "path";
 import MarketingSPA from "@/components/marketing/MarketingSPA";
+import { resolveMarketingPage } from "@/lib/marketing-routes";
 
 export const metadata: Metadata = {
   title: "Halla AI – Smart • Seamless • Always",
@@ -24,7 +25,13 @@ function getMarketingBodyHtml(): string {
 }
 
 /** Catch-all for marketing SPA routes (/pricing, /faq, /industries/…, etc.). */
-export default function MarketingCatchAllPage() {
+export default async function MarketingCatchAllPage({
+  params,
+}: {
+  params: Promise<{ slug?: string[] }>;
+}) {
+  const { slug } = await params;
+  const path = slug?.length ? `/${slug.join("/")}` : "/";
   const bodyHtml = getMarketingBodyHtml();
-  return <MarketingSPA bodyHtml={bodyHtml} />;
+  return <MarketingSPA bodyHtml={bodyHtml} initialPage={resolveMarketingPage(path)} />;
 }

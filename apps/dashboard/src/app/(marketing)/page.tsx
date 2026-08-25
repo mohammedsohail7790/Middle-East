@@ -39,5 +39,5 @@ function getMarketingBodyHtml(): string {
 
 export default function HomePage() {
   const bodyHtml = getMarketingBodyHtml();
-  return <MarketingSPA bodyHtml={bodyHtml} />;
+  return <MarketingSPA bodyHtml={bodyHtml} initialPage="home" />;
 }
