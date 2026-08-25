@@ -88,15 +88,14 @@ export default function LoginPage() {
     };
   }, []);
 
-  async function handleOAuth(provider: "google" | "azure") {
+  async function handleGoogleOAuth() {
     setError(null);
     setLoading(true);
     try {
       const { error: err } = await supabase.auth.signInWithOAuth({
-        provider,
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-          scopes: provider === "azure" ? "email profile openid" : undefined,
         },
       });
       if (err) {
@@ -124,7 +123,7 @@ export default function LoginPage() {
         <div className="mt-6 space-y-3">
           <button
             type="button"
-            onClick={() => void handleOAuth("google")}
+            onClick={() => void handleGoogleOAuth()}
             disabled={loading}
             className="auth-btn-social"
             data-loading={loading}
@@ -140,26 +139,6 @@ export default function LoginPage() {
                 </svg>
               )}
             Continue with Google
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleOAuth("azure")}
-            disabled={loading}
-            className="auth-btn-social"
-            data-loading={loading}
-          >
-            {loading
-              ? <span className="auth-spinner auth-spinner--sm" aria-hidden />
-              : (
-                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 23 23">
-                  <path fill="#f3f3f3" d="M0 0h23v23H0z" />
-                  <path fill="#f35325" d="M1 1h10v10H1z" />
-                  <path fill="#81bc06" d="M12 1h10v10H12z" />
-                  <path fill="#05a6f0" d="M1 12h10v10H1z" />
-                  <path fill="#ffba08" d="M12 12h10v10H12z" />
-                </svg>
-              )}
-            Continue with Microsoft
           </button>
         </div>
 
