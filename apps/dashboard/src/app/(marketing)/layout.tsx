@@ -61,6 +61,8 @@ export default function MarketingRootLayout({
         {/* eslint-disable-next-line @next/next/no-css-tags */}
         <link id="halla-styles" rel="stylesheet" href="/halla_styles.css" />
         {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link id="marketing-premium" rel="stylesheet" href="/marketing-premium.css" />
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
         <link
           id="tabler-icons"
           rel="stylesheet"
