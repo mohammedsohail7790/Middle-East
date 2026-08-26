@@ -1119,3 +1119,392 @@
     radial-gradient(ellipse 50% 45% at 0% 100%, rgba(45, 212, 191, 0.08), transparent 55%),
     radial-gradient(ellipse 40% 35% at 100% 0%, rgba(13, 148, 136, 0.1), transparent 50%);
 }
+
+/* ─── Dashboard 3D panels (replaces screenshot images) ─── */
+.dash3d-mount {
+  min-height: 320px;
+  background: #0b1220;
+}
+
+.browser-frame .dash3d-mount {
+  background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+}
+
+.dash3d-scene {
+  position: relative;
+  perspective: 1200px;
+  padding: 28px 24px 32px;
+  min-height: 300px;
+  overflow: hidden;
+}
+
+.dash3d-scene--summary {
+  background: linear-gradient(160deg, #f8fafc 0%, #eef2f7 100%);
+  min-height: 280px;
+}
+
+.dash3d-ambient {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle at 30% 20%, rgba(45, 212, 191, 0.18), transparent 45%);
+  pointer-events: none;
+}
+
+.dash3d-orbit-ring {
+  position: absolute;
+  top: 12%;
+  right: 8%;
+  width: 120px;
+  height: 120px;
+  border: 1px dashed rgba(45, 212, 191, 0.25);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: dash3d-orbit-spin 18s linear infinite;
+}
+
+@keyframes dash3d-orbit-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.dash3d-panel {
+  position: relative;
+  z-index: 2;
+  border-radius: 14px;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out;
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.dash3d-panel--tilt {
+  transform: rotateX(6deg) rotateY(-4deg);
+}
+
+.dash3d-scene--summary .dash3d-panel--tilt {
+  transform: rotateX(4deg) rotateY(5deg);
+}
+
+.dash3d-float {
+  position: absolute;
+  z-index: 3;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid rgba(13, 148, 136, 0.2);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  animation: dash3d-float 5s ease-in-out infinite;
+}
+
+.dash3d-float--live {
+  top: 16px;
+  right: 20px;
+  color: var(--accent-dark);
+}
+
+.dash3d-float--sent {
+  bottom: 20px;
+  right: 24px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-mid));
+  color: #fff;
+  border: none;
+}
+
+@keyframes dash3d-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.dash3d-ui--dark {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  background: #0f172a;
+  border-radius: 14px;
+  overflow: hidden;
+  min-height: 260px;
+}
+
+.dash3d-sidebar {
+  padding: 16px 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dash3d-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-mid));
+  color: #fff;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+}
+
+.dash3d-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dash3d-nav-item {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.45);
+  padding: 8px 6px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.dash3d-nav-item--active {
+  background: rgba(45, 212, 191, 0.12);
+  color: #2dd4bf;
+}
+
+.dash3d-main {
+  padding: 18px 20px;
+  color: #f8fafc;
+}
+
+.dash3d-main-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dash3d-main-head h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.dash3d-chip {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(45, 212, 191, 0.12);
+  color: #2dd4bf;
+}
+
+.dash3d-field {
+  margin-bottom: 12px;
+}
+
+.dash3d-field label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.5);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dash3d-input,
+.dash3d-textarea {
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.8rem;
+  color: #f8fafc;
+  line-height: 1.45;
+}
+
+.dash3d-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dash3d-pills span {
+  font-size: 0.72rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(248, 250, 252, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dash3d-pill-active {
+  background: rgba(13, 148, 136, 0.25);
+  color: #2dd4bf;
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+.dash3d-preview-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.dash3d-mini-stat {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dash3d-mini-stat strong {
+  display: block;
+  font-size: 1rem;
+  color: #2dd4bf;
+}
+
+.dash3d-mini-stat span {
+  font-size: 0.68rem;
+  color: rgba(248, 250, 252, 0.5);
+}
+
+.dash3d-summary-wrap {
+  position: relative;
+  padding: 8px 0;
+}
+
+.dash3d-email-card {
+  border-radius: 14px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.dash3d-email-card--primary {
+  position: relative;
+  z-index: 2;
+}
+
+.dash3d-email-card--ghost {
+  position: absolute;
+  top: 24px;
+  left: 12px;
+  right: 12px;
+  opacity: 0.45;
+  transform: translateY(12px) scale(0.96);
+  z-index: 1;
+}
+
+.dash3d-email-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.dash3d-email-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(13, 148, 136, 0.1);
+  color: var(--accent-dark);
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.dash3d-email-head strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #0f172a;
+}
+
+.dash3d-email-head span {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: var(--gray-500);
+}
+
+.dash3d-email-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash3d-email-list li {
+  font-size: 0.78rem;
+  color: var(--gray-700);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--gray-50);
+}
+
+.dash3d-email-list li span {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gray-400);
+  margin-bottom: 2px;
+}
+
+.dash3d-email-footer {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dash3d-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.dash3d-badge--success {
+  background: rgba(13, 148, 136, 0.12);
+  color: var(--accent-dark);
+}
+
+@media (max-width: 960px) {
+  .dash3d-ui--dark {
+    grid-template-columns: 1fr;
+  }
+
+  .dash3d-sidebar {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 16px;
+  }
+
+  .dash3d-nav {
+    flex-direction: row;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .dash3d-float {
+    font-size: 0.68rem;
+    padding: 8px 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash3d-orbit-ring,
+  .dash3d-float {
+    animation: none;
+  }
+
+  .dash3d-panel--tilt {
+    transform: none;
+  }
+}
