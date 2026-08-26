@@ -422,6 +422,9 @@ function hallaInit() {
   initPhone3D();
   initBrowserFrameTilt();
   initConsultForm();
+  if (window.HallaNeural && typeof HallaNeural.init === 'function') {
+    HallaNeural.init();
+  }
 }
 
 if (document.readyState === 'loading') {

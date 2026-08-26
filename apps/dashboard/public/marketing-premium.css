@@ -868,6 +868,186 @@
   50% { transform: scale(1.06); opacity: 1; }
 }
 
+/* Outcome compare (unified before/after + scenarios) */
+.premium-outcome-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 28px 0 24px;
+}
+
+.premium-outcome-tab {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-200);
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.premium-outcome-tab.is-active,
+.premium-outcome-tab:hover {
+  border-color: var(--accent);
+  color: var(--accent-dark);
+  background: rgba(13, 148, 136, 0.06);
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.1);
+}
+
+.premium-outcome-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 20px;
+  align-items: stretch;
+  margin-top: 8px;
+}
+
+.premium-outcome-scenario-title {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gray-500);
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.premium-outcome-col {
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.premium-outcome-col--without {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.premium-outcome-col--with {
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.08), rgba(45, 212, 191, 0.06));
+  border: 1px solid rgba(13, 148, 136, 0.25);
+}
+
+.premium-outcome-col h3 {
+  font-size: 1rem;
+  margin-bottom: 16px;
+}
+
+.premium-outcome-col--with h3 { color: var(--accent-dark); }
+
+.premium-outcome-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.premium-outcome-steps li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.premium-outcome-step-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--gray-500);
+}
+
+.premium-outcome-col--with .premium-outcome-step-num {
+  background: rgba(13, 148, 136, 0.15);
+  color: var(--accent-dark);
+}
+
+.premium-outcome-divider {
+  display: grid;
+  place-items: center;
+  padding: 0 4px;
+}
+
+.premium-outcome-divider span {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--gray-400);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+}
+
+/* See Halla AI in action — featured live demo */
+.premium-action-feature {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) 1fr;
+  gap: 32px;
+  align-items: center;
+  margin: 36px 0 40px;
+  padding: 28px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.premium-action-phone {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 300px;
+}
+
+.premium-action-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.premium-section--dark .premium-call-stage {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(248, 250, 252, 0.7);
+}
+
+.premium-section--dark .premium-call-stage.is-active {
+  background: rgba(13, 148, 136, 0.18);
+  border-color: rgba(45, 212, 191, 0.35);
+  color: #f8fafc;
+}
+
+.premium-action-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 8px 0 28px;
+  color: rgba(248, 250, 252, 0.45);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.premium-action-divider::before,
+.premium-action-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .hp3d-phone,
@@ -890,7 +1070,22 @@
   .premium-call-demo,
   .premium-features-hub,
   .premium-scenario-grid,
-  .premium-compare { grid-template-columns: 1fr; }
+  .premium-compare,
+  .premium-outcome-grid { grid-template-columns: 1fr; }
+
+  .premium-outcome-divider {
+    padding: 8px 0;
+  }
+
+  .premium-outcome-divider span {
+    width: 36px;
+    height: 36px;
+  }
+
+  .premium-action-feature {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
 
   .hero.hero--premium { text-align: center; padding: 64px 0 48px; }
   .hero.hero--premium .hero-sub { margin: 0 auto 36px; }

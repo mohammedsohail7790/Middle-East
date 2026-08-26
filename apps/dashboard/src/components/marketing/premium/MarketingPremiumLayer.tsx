@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { HeroPhone3D } from "./HeroPhone3D";
-import { ProblemSolutionSection } from "./ProblemSolutionSection";
-import { InteractiveCallDemo } from "./InteractiveCallDemo";
+import { OutcomeCompareSection } from "./OutcomeCompareSection";
 import { WorkflowSection } from "./WorkflowSection";
 import { VideoDemoSection } from "./VideoDemoSection";
 import { FeaturesHubSection } from "./FeaturesHubSection";
-import { BeforeAfterSection } from "./BeforeAfterSection";
 import { DashboardShowcaseSection } from "./DashboardShowcaseSection";
 import { IndustryStripSection } from "./IndustryStripSection";
 
@@ -61,7 +59,6 @@ function enhanceHero() {
 function PremiumHomeSections() {
   const [tickerAnchor, setTickerAnchor] = useState<HTMLElement | null>(null);
   const [heroVisual, setHeroVisual] = useState<HTMLElement | null>(null);
-  const [sectionsReady, setSectionsReady] = useState(false);
 
   useEffect(() => {
     enhanceHero();
@@ -75,34 +72,19 @@ function PremiumHomeSections() {
     ticker.insertAdjacentElement("afterend", host);
     setTickerAnchor(host);
 
-    const markReady = () => setSectionsReady(true);
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(markReady, { timeout: 2500 });
-      return () => {
-        window.cancelIdleCallback(id);
-        host.remove();
-      };
-    }
-    const t = window.setTimeout(markReady, 400);
-    return () => {
-      window.clearTimeout(t);
-      host.remove();
-    };
+    return () => host.remove();
   }, []);
 
   return (
     <>
       {heroVisual && createPortal(<HeroPhone3D />, heroVisual)}
-      {sectionsReady &&
-        tickerAnchor &&
+      {tickerAnchor &&
         createPortal(
           <>
-            <ProblemSolutionSection />
-            <InteractiveCallDemo />
+            <OutcomeCompareSection />
             <WorkflowSection />
             <VideoDemoSection />
             <FeaturesHubSection />
-            <BeforeAfterSection />
             <DashboardShowcaseSection />
             <IndustryStripSection />
           </>,

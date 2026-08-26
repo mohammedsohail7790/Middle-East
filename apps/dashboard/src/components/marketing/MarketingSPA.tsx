@@ -1,9 +1,10 @@
 "use client";
 
 import Script from "next/script";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MarketingVibeLayer } from "@/components/marketing/MarketingVibeLayer";
 import { MarketingPremiumLayer } from "@/components/marketing/premium/MarketingPremiumLayer";
+import { MarketingConsultancyLayer } from "@/components/marketing/premium/MarketingConsultancyLayer";
 import { Dashboard3DMounts } from "@/components/marketing/premium/Dashboard3DMounts";
 import { MarketingAtmosphere } from "@/components/marketing/effects/MarketingAtmosphere";
 
@@ -21,6 +22,7 @@ type HallaWindow = Window & {
   go?: (page: string) => void;
   setLang?: (lang: string) => void;
   HALLA_EMBEDDED?: boolean;
+  HallaNeural?: { init: () => void };
 };
 
 function getHallaWindow(): HallaWindow {
@@ -31,11 +33,12 @@ function getHallaWindow(): HallaWindow {
  * Renders the static Halla AI marketing SPA inside the Next.js app.
  *
  * Styles/fonts load from (marketing)/layout.tsx in SSR <head>.
- * Vendor + halla_neural.js must load before halla_main.js.
+ * Vendor scripts are chained so Three.js loads before halla_neural.js.
  */
 export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: Props) {
   const safeInitialPage = initialPage.replace(/[^a-z0-9-]/gi, "") || "consultancy";
   const bridgeInstalled = useRef(false);
+  const [scriptStep, setScriptStep] = useState(0);
 
   const installBridge = useCallback(() => {
     if (bridgeInstalled.current) return;
@@ -88,14 +91,15 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
   }, []);
 
   useEffect(() => {
-    installBridge();
-  }, [installBridge]);
+    if (scriptStep >= 4) installBridge();
+  }, [scriptStep, installBridge]);
 
   return (
     <>
       <MarketingAtmosphere variant="marketing" />
       <MarketingVibeLayer />
       <MarketingPremiumLayer />
+      <MarketingConsultancyLayer />
       <div
         id="marketing-spa-root"
         // eslint-disable-next-line react/no-danger
@@ -106,22 +110,40 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
       <Script
         src="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.min.js"
         strategy="afterInteractive"
+        onLoad={() => setScriptStep(1)}
       />
-      <Script
-        src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"
-        strategy="afterInteractive"
-      />
-      <Script
-        src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"
-        strategy="afterInteractive"
-      />
-      <Script src="/halla_neural.js" strategy="afterInteractive" />
-      <Script
-        src="/halla_main.js"
-        strategy="afterInteractive"
-        onLoad={installBridge}
-        onReady={installBridge}
-      />
+      {scriptStep >= 1 && (
+        <Script
+          src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"
+          strategy="afterInteractive"
+          onLoad={() => setScriptStep(2)}
+        />
+      )}
+      {scriptStep >= 2 && (
+        <Script
+          src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"
+          strategy="afterInteractive"
+          onLoad={() => setScriptStep(3)}
+        />
+      )}
+      {scriptStep >= 3 && (
+        <Script
+          src="/halla_neural.js"
+          strategy="afterInteractive"
+          onLoad={() => {
+            getHallaWindow().HallaNeural?.init();
+            setScriptStep(4);
+          }}
+        />
+      )}
+      {scriptStep >= 4 && (
+        <Script
+          src="/halla_main.js"
+          strategy="afterInteractive"
+          onLoad={installBridge}
+          onReady={installBridge}
+        />
+      )}
     </>
   );
 }

@@ -64,7 +64,12 @@
 
       this.scene = new THREE.Scene();
       this.camera = new THREE.PerspectiveCamera(48, w / h, 0.1, 200);
-      this.camera.position.set(0, 0, isMobile() ? 28 : 22);
+      const isNeuron = this.opts.mode === 'neuron';
+      this.camera.position.set(
+        isNeuron ? 3.5 : 0,
+        isNeuron ? 0.5 : 0,
+        isMobile() ? (isNeuron ? 24 : 28) : (isNeuron ? 17 : 22)
+      );
 
       const ambient = new THREE.AmbientLight(0xffffff, 0.55);
       const key = new THREE.PointLight(this.opts.glow, 1.2, 80);
@@ -87,36 +92,41 @@
     }
 
     _somaMaterial() {
+      const isNeuron = this.opts.mode === 'neuron';
       return new THREE.MeshPhysicalMaterial({
         color: this.opts.accent,
         emissive: this.opts.glow,
-        emissiveIntensity: 0.35,
-        metalness: 0.15,
-        roughness: 0.35,
+        emissiveIntensity: isNeuron ? 0.62 : 0.4,
+        metalness: 0.2,
+        roughness: 0.28,
         transparent: true,
-        opacity: 0.92,
+        opacity: 0.95,
       });
     }
 
     _branchMaterial() {
+      const isNeuron = this.opts.mode === 'neuron';
       return new THREE.MeshBasicMaterial({
-        color: this.opts.accent,
+        color: isNeuron ? this.opts.glow : this.opts.accent,
         transparent: true,
-        opacity: 0.22,
+        opacity: isNeuron ? 0.38 : 0.18,
       });
     }
 
     _buildNeuronTree() {
-      const depth = isMobile() ? 2 : 3;
-      const branchesPerLevel = isMobile() ? [5, 4, 3] : [6, 5, 4, 3];
+      const depth = isMobile() ? 3 : 4;
+      const branchesPerLevel = isMobile() ? [6, 5, 4, 3] : [7, 6, 5, 4, 3];
       const soma = new THREE.Mesh(
-        new THREE.SphereGeometry(isMobile() ? 0.55 : 0.72, 24, 24),
+        new THREE.SphereGeometry(isMobile() ? 0.65 : 0.88, 28, 28),
         this._somaMaterial()
       );
+      soma.position.set(2.2, -0.4, 0);
       this.root.add(soma);
-      this._addBranches(soma.position, new THREE.Vector3(0, 1, 0), 0, depth, branchesPerLevel, 4.2);
-      this.root.rotation.x = -0.25;
-      this.root.rotation.z = 0.15;
+      this._addBranches(soma.position, new THREE.Vector3(0.2, 1, 0), 0, depth, branchesPerLevel, 4.8);
+      this._addBranches(soma.position, new THREE.Vector3(-0.3, -0.8, 0.2), 0, depth - 1, branchesPerLevel, 3.6);
+      this.root.rotation.x = -0.18;
+      this.root.rotation.z = 0.08;
+      this.root.position.x = 1.2;
     }
 
     _addBranches(origin, direction, level, maxLevel, counts, length) {
@@ -206,7 +216,8 @@
         transparent: true,
         opacity: 0.95,
       });
-      const max = isMobile() ? 6 : 12;
+      const isNeuron = this.opts.mode === 'neuron';
+      const max = isNeuron ? (isMobile() ? 10 : 20) : (isMobile() ? 6 : 12);
       for (let i = 0; i < max; i++) {
         const mesh = new THREE.Mesh(impulseGeo, impulseMat.clone());
         mesh.visible = false;
@@ -307,24 +318,49 @@
     }
   }
 
-  function init() {
-    if (prefersReducedMotion()) return;
+  function initScenes() {
+    if (prefersReducedMotion() || typeof THREE === 'undefined') return false;
 
     const heroMount = document.getElementById('heroNeuralMount');
-    if (heroMount) {
+    if (heroMount && !scenes.get('hero')) {
       scenes.set('hero', new NeuralPathScene('heroNeuralMount', { mode: 'network' }));
     }
     const consultMount = document.getElementById('consultNeuralMount');
-    if (consultMount) {
+    if (consultMount && !scenes.get('consult')) {
       scenes.set('consult', new NeuralPathScene('consultNeuralMount', { mode: 'neuron' }));
     }
+    return scenes.size > 0;
+  }
+
+  let retryTimer = null;
+
+  function init() {
+    if (initScenes()) return;
+    if (prefersReducedMotion()) return;
+    if (retryTimer) return;
+
+    let attempts = 0;
+    retryTimer = setInterval(function () {
+      attempts += 1;
+      if (initScenes() || attempts >= 60) {
+        clearInterval(retryTimer);
+        retryTimer = null;
+      }
+    }, 100);
   }
 
   window.HallaNeural = {
     init,
     refreshForPage(page) {
+      init();
       scenes.forEach((scene) => {
-        if (scene && scene._onResize) scene._onResize();
+        if (!scene || !scene.mount) return;
+        scene._onResize();
+        const pageEl = scene.mount.closest('.page');
+        if (pageEl && pageEl.classList.contains('active')) {
+          scene.visible = true;
+          if (!document.hidden) scene._start();
+        }
       });
     },
   };
