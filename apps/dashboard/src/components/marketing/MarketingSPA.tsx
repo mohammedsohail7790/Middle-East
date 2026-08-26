@@ -4,6 +4,7 @@ import Script from "next/script";
 import { useCallback, useEffect, useRef } from "react";
 import { MarketingVibeLayer } from "@/components/marketing/MarketingVibeLayer";
 import { MarketingPremiumLayer } from "@/components/marketing/premium/MarketingPremiumLayer";
+import { MarketingAtmosphere } from "@/components/marketing/effects/MarketingAtmosphere";
 
 interface Props {
   bodyHtml: string;
@@ -86,6 +87,7 @@ export default function MarketingSPA({ bodyHtml, initialPage = "home" }: Props) 
 
   return (
     <>
+      <MarketingAtmosphere variant="marketing" />
       <MarketingVibeLayer />
       <MarketingPremiumLayer />
       <div

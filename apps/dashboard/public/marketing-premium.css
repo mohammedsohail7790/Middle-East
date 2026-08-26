@@ -44,6 +44,13 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.hp3d-screen-glow {
+  position: absolute;
+  inset: -40% -20%;
+  background: radial-gradient(circle at 50% 0%, rgba(45, 212, 191, 0.22), transparent 58%);
+  pointer-events: none;
+}
+
 .hp3d-call-header {
   padding: 16px 14px 10px;
   text-align: center;
@@ -761,6 +768,33 @@
   position: absolute;
   inset: 8% 6% 6%;
   z-index: 2;
+  transform-style: preserve-3d;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hp3d-device-wrap--tilt {
+  will-change: transform;
+}
+
+.hp3d-depth-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px dashed rgba(45, 212, 191, 0.22);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hp3d-depth-ring--a {
+  inset: 6%;
+  transform: rotateX(72deg) scale(0.92);
+  opacity: 0.55;
+}
+
+.hp3d-depth-ring--b {
+  inset: 22%;
+  transform: rotateX(72deg) scale(0.78);
+  opacity: 0.35;
+  border-color: rgba(13, 148, 136, 0.3);
 }
 
 .hp3d-r3f-layer {
@@ -811,7 +845,9 @@
   .hp3d-float-card,
   .hp3d-wave span,
   .hp3d-orbit,
+  .mkt-atmosphere__orb,
   .premium-demo-ui .premium-demo-wave span { animation: none !important; }
+  .hp3d-device-wrap--tilt { transition: none !important; }
   .premium-voice-orb-css { animation: none !important; }
   .premium-scenario-card:hover,
   .premium-workflow-step:hover,
@@ -842,4 +878,215 @@
 
   .hp3d-float-card--lead { right: 0; }
   .hp3d-float-card--appt { left: 0; }
+}
+
+/* ─── Marketing atmosphere (CSS 3D depth) ─── */
+.mkt-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.mkt-atmosphere--auth {
+  opacity: 0.9;
+}
+
+.mkt-atmosphere--marketing {
+  opacity: 0.55;
+}
+
+.mkt-atmosphere__grid {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  bottom: -30%;
+  height: 55%;
+  transform: perspective(900px) rotateX(68deg);
+  transform-origin: center top;
+  background-image:
+    linear-gradient(rgba(13, 148, 136, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(13, 148, 136, 0.14) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to top, black 15%, transparent 85%);
+}
+
+.mkt-atmosphere__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: mkt-orb-drift 18s ease-in-out infinite;
+}
+
+.mkt-atmosphere__orb--1 {
+  width: 420px;
+  height: 420px;
+  top: -12%;
+  right: -8%;
+  background: rgba(45, 212, 191, 0.22);
+}
+
+.mkt-atmosphere__orb--2 {
+  width: 320px;
+  height: 320px;
+  bottom: 8%;
+  left: -10%;
+  background: rgba(13, 148, 136, 0.16);
+  animation-delay: -6s;
+}
+
+.mkt-atmosphere__orb--3 {
+  width: 240px;
+  height: 240px;
+  top: 38%;
+  left: 42%;
+  background: rgba(15, 118, 110, 0.12);
+  animation-delay: -12s;
+}
+
+.mkt-atmosphere__particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.35;
+}
+
+@keyframes mkt-orb-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(12px, -18px, 0) scale(1.06); }
+}
+
+/* ─── Auth split layout + showcase ─── */
+.auth-layout-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  align-items: center;
+}
+
+.auth-layout-form {
+  display: flex;
+  justify-content: center;
+}
+
+.auth-showcase {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .auth-layout-split {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 420px);
+    gap: 48px;
+  }
+
+  .auth-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding-right: 12px;
+  }
+
+  .auth-showcase__eyebrow {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-dark);
+  }
+
+  .auth-showcase__title {
+    margin: 10px 0 0;
+    font-size: clamp(1.75rem, 2.4vw, 2.35rem);
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--foreground);
+  }
+
+  .auth-showcase__title-accent {
+    display: block;
+    background: linear-gradient(135deg, #0d9488 0%, #2dd4bf 55%, #0f766e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .auth-showcase__lead {
+    margin: 14px 0 0;
+    max-width: 420px;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--gray-600);
+  }
+
+  .auth-showcase__visual {
+    display: flex;
+    justify-content: center;
+    transform: scale(0.92);
+    transform-origin: center top;
+  }
+
+  .auth-showcase__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 420px;
+  }
+
+  .auth-showcase__stat {
+    padding: 14px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(13, 148, 136, 0.18);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(8px);
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(13, 148, 136, 0.08);
+    transform: translateZ(0);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .auth-showcase__stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(13, 148, 136, 0.14);
+  }
+
+  .auth-showcase__stat strong {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--accent-dark);
+  }
+
+  .auth-showcase__stat span {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+  }
+}
+
+/* Premium section depth accents */
+.premium-section--muted::before,
+.premium-section:not(.premium-section--dark)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 60% 40% at 100% 0%, rgba(13, 148, 136, 0.06), transparent 55%);
+}
+
+.premium-section--dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 45% at 0% 100%, rgba(45, 212, 191, 0.08), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 100% 0%, rgba(13, 148, 136, 0.1), transparent 50%);
 }

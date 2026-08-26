@@ -10,12 +10,15 @@ import { AnimatedGradientText } from "@/components/magic-ui/animated-gradient-te
 import { BorderBeam } from "@/components/magic-ui/border-beam";
 import { DotPattern } from "@/components/magic-ui/dot-pattern";
 import { ShimmerButton } from "@/components/magic-ui/shimmer-button";
+import { MarketingAtmosphere } from "@/components/marketing/effects/MarketingAtmosphere";
+import { AuthShowcasePanel } from "@/components/auth/AuthShowcasePanel";
 
 /* ─── Shell ──────────────────────────────────────────────────────────────── */
 
 export function AuthPageShell({ children }: { children: ReactNode }) {
   return (
     <div className="auth-marketing-shell relative grid min-h-dvh grid-rows-[auto_1fr_auto] overflow-x-hidden antialiased">
+      <MarketingAtmosphere variant="auth" />
       <DotPattern
         className="absolute inset-0 z-0 text-accent/25 [mask-image:radial-gradient(ellipse_at_center,white,transparent_75%)]"
         width={20}
@@ -68,7 +71,10 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="relative z-10 flex items-center justify-center px-4 py-12 sm:py-16">
-        {children}
+        <div className="auth-layout-split w-full max-w-[1120px]">
+          <AuthShowcasePanel />
+          <div className="auth-layout-form">{children}</div>
+        </div>
       </main>
 
       <footer className="relative z-10 border-t border-border/70 bg-white/80 backdrop-blur-md">

@@ -1,11 +1,13 @@
 "use client";
 
 import { HeroParticleCanvas } from "./HeroParticleCanvas";
+import { useParallaxTilt } from "@/components/marketing/effects/useParallaxTilt";
 
 function CssPhoneFallback() {
   return (
     <div className="hp3d-phone">
       <div className="hp3d-screen">
+        <div className="hp3d-screen-glow" aria-hidden />
         <div className="hp3d-call-header">
           <p>Incoming call</p>
           <strong>+971 50 XXX XXXX</strong>
@@ -23,16 +25,24 @@ function CssPhoneFallback() {
   );
 }
 
-/** CSS-only hero phone — avoids react-three-fiber crashes on marketing SSR/clients. */
+/** CSS 3D hero phone — polished depth without react-three-fiber. */
 export function HeroPhone3D() {
+  const { ref, transform } = useParallaxTilt(14);
+
   return (
     <div className="hp3d-scene hp3d-scene--enhanced" aria-hidden>
       <HeroParticleCanvas />
       <div className="hp3d-orbit hp3d-orbit--outer" />
       <div className="hp3d-orbit hp3d-orbit--inner" />
+      <div className="hp3d-depth-ring hp3d-depth-ring--a" />
+      <div className="hp3d-depth-ring hp3d-depth-ring--b" />
       <div className="hp3d-float-card hp3d-float-card--lead">Lead captured ✓</div>
       <div className="hp3d-float-card hp3d-float-card--appt">Appointment booked</div>
-      <div className="hp3d-device-wrap">
+      <div
+        ref={ref}
+        className="hp3d-device-wrap hp3d-device-wrap--tilt"
+        style={transform ? { transform } : undefined}
+      >
         <CssPhoneFallback />
       </div>
     </div>

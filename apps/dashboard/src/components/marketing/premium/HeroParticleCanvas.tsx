@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-export function HeroParticleCanvas() {
+export function HeroParticleCanvas({ className }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -79,5 +79,5 @@ export function HeroParticleCanvas() {
     }
   }, []);
 
-  return <canvas ref={ref} className="hp3d-particles" aria-hidden />;
+  return <canvas ref={ref} className={className ?? "hp3d-particles"} aria-hidden />;
 }
