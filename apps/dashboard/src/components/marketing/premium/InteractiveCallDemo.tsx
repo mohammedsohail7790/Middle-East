@@ -1,12 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
-
-const VoiceOrb3D = dynamic(
-  () => import("./VoiceOrb3D").then((m) => m.VoiceOrb3D),
-  { ssr: false },
-);
 
 const STAGES = [
   { id: "ring", label: "Incoming call" },
@@ -41,7 +35,7 @@ export function InteractiveCallDemo() {
         <div className="premium-call-demo">
           <div className="premium-call-phone premium-call-phone--3d">
             <div className="premium-call-orb">
-              <VoiceOrb3D className="premium-voice-orb-canvas" />
+              <div className="premium-voice-orb-css" aria-hidden />
             </div>
             <div className="hp3d-call-header">
               <p>Incoming call</p>
