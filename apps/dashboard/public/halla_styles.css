@@ -89,18 +89,8 @@ p { color: var(--gray-500); line-height: 1.72; }
 .btn-primary:hover { background: var(--gray-800); transform: translateY(-1px); box-shadow: var(--shadow-md); }
 .btn-outline { background: transparent; color: var(--black); border: 1.5px solid var(--gray-200); }
 .btn-outline:hover { border-color: var(--gray-400); background: var(--gray-50); }
-.btn-blue { background: var(--accent); color: var(--white); position: relative; overflow: hidden; }
-.btn-blue:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(13,148,136,0.32); }
-.btn-blue::after {
-  content: "";
-  position: absolute;
-  top: 0; left: -100%;
-  width: 55%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent);
-  transform: skewX(-18deg);
-  transition: left 0.55s ease;
-}
-.btn-blue:hover::after { left: 140%; }
+.btn-blue { background: var(--accent); color: var(--white); }
+.btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(13,148,136,0.3); }
 .btn-lg { padding: 16px 34px; font-size: 1rem; }
 .btn-sm { padding: 9px 18px; font-size: 0.85rem; }
 
@@ -180,17 +170,6 @@ nav {
   background: var(--white);
   position: relative; overflow: hidden;
 }
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 80% 55% at 50% -15%, rgba(13,148,136,0.14) 0%, transparent 58%),
-    radial-gradient(ellipse 45% 40% at 100% 60%, rgba(45,212,191,0.08) 0%, transparent 52%);
-  z-index: 0;
-}
-.hero > * { position: relative; z-index: 1; }
 .hero-eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
   background: var(--gray-100); border-radius: var(--radius-full);
@@ -232,14 +211,9 @@ nav {
 .card {
   background: var(--white); border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg); padding: 28px;
-  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease, border-color 0.25s ease;
-  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; box-shadow: var(--shadow-sm);
 }
-.card:hover {
-  border-color: color-mix(in srgb, var(--accent) 28%, var(--gray-300));
-  box-shadow: 0 16px 40px -12px rgba(13,148,136,0.16), var(--shadow-md);
-  transform: translateY(-4px);
-}
+.card:hover { border-color: var(--gray-300); box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .card-blue { border-color: #BAE6FD; background: var(--accent-light); }
 .card-dark { background: var(--black); border-color: var(--black); color: var(--white); }
 .card-dark h4 { color: var(--white); }
@@ -261,14 +235,9 @@ nav {
 .pricing-card {
   background: var(--white); border: 1.5px solid var(--gray-200);
   border-radius: var(--radius-xl); padding: 36px 32px; position: relative;
-  transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease, border-color 0.25s ease;
-  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s; box-shadow: var(--shadow-sm);
 }
-.pricing-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 48px -14px rgba(13,148,136,0.18), var(--shadow-md);
-  border-color: color-mix(in srgb, var(--accent) 22%, var(--gray-200));
-}
+.pricing-card:hover { box-shadow: var(--shadow-md); }
 .pricing-card.popular { border-color: var(--black); background: var(--black); }
 .pricing-card.popular h3, .pricing-card.popular h4, .pricing-card.popular .pricing-price { color: var(--white); }
 .pricing-card.popular p, .pricing-card.popular .pricing-mins { color: rgba(255,255,255,0.55); }

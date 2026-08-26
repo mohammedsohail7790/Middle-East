@@ -29,34 +29,28 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
     },
     ref,
   ) => {
-    const Comp = asChild ? Slot : "button";
+    const style = {
+      "--spread": "90deg",
+      "--shimmer-color": shimmerColor,
+      "--radius": borderRadius,
+      "--speed": shimmerDuration,
+      "--cut": shimmerSize,
+      "--bg": background,
+    } as CSSProperties;
 
-    return (
-      <Comp
-        ref={ref}
-        style={
-          {
-            "--spread": "90deg",
-            "--shimmer-color": shimmerColor,
-            "--radius": borderRadius,
-            "--speed": shimmerDuration,
-            "--cut": shimmerSize,
-            "--bg": background,
-          } as CSSProperties
-        }
-        className={cn(
-          "group relative z-0 inline-flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap border border-white/10 px-6 py-2.5 text-sm font-semibold text-white [background:var(--bg)] [border-radius:var(--radius)]",
-          "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
-          className,
-        )}
-        {...props}
-      >
+    const buttonClassName = cn(
+      "group relative z-0 inline-flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap border border-white/10 px-6 py-2.5 text-sm font-semibold text-white no-underline [background:var(--bg)] [border-radius:var(--radius)]",
+      "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
+      className,
+    );
+
+    const shimmerLayers = (
+      <>
         <div className="absolute inset-0 -z-30 overflow-visible blur-[2px]">
           <div className="animate-shimmer-slide absolute inset-0 aspect-square h-full rounded-none [mask:none]">
             <div className="animate-spin-around absolute -inset-full w-auto rotate-0 [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
           </div>
         </div>
-        <span className="relative z-10">{children}</span>
         <div
           className={cn(
             "pointer-events-none absolute inset-0 size-full rounded-[inherit]",
@@ -67,7 +61,25 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
           )}
         />
         <div className="absolute inset-[var(--cut)] -z-20 rounded-[var(--radius)] [background:var(--bg)]" />
-      </Comp>
+      </>
+    );
+
+    if (asChild) {
+      return (
+        <div style={style} className="group relative inline-flex">
+          {shimmerLayers}
+          <Slot ref={ref} style={style} className={buttonClassName} {...props}>
+            {children}
+          </Slot>
+        </div>
+      );
+    }
+
+    return (
+      <button ref={ref} style={style} className={buttonClassName} {...props}>
+        {shimmerLayers}
+        <span className="relative z-10">{children}</span>
+      </button>
     );
   },
 );
