@@ -90,13 +90,13 @@ export default function MarketingSPA({ bodyHtml, initialPage = "home" }: Props) 
     <>
       <MarketingAtmosphere variant="marketing" />
       <MarketingVibeLayer />
-      <Dashboard3DMounts />
       <MarketingPremiumLayer />
       <div
         id="marketing-spa-root"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: bodyHtml }}
       />
+      <Dashboard3DMounts />
 
       <Script
         src="/halla_main.js"
