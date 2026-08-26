@@ -6,10 +6,24 @@
 ================================================ */
 
 // ============ ROUTING ============
+/** Next.js auth routes — no SPA page-* target; redirect instead of blanking all pages. */
+const NEXT_AUTH_ROUTES = { login: '/login', signup: '/signup' };
+
 function go(page) {
+  const authHref = NEXT_AUTH_ROUTES[page];
+  if (authHref) {
+    window.location.href = authHref;
+    return;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = document.getElementById('page-' + page);
-  if (el) { el.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
+  if (el) {
+    el.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    const home = document.getElementById('page-home');
+    if (home) home.classList.add('active');
+  }
   closeMob();
   closeAllDropdowns();
 }

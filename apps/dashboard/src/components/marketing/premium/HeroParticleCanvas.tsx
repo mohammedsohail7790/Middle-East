@@ -25,7 +25,9 @@ export function HeroParticleCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    const count = 42;
+    const narrow = window.matchMedia("(max-width: 768px)").matches;
+    const lowPower = narrow || (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4);
+    const count = lowPower ? 18 : 42;
     const pts = Array.from({ length: count }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,

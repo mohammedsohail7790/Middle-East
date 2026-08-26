@@ -35,8 +35,16 @@ export function HeroPhone3D() {
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const narrow = window.matchMedia("(max-width: 768px)").matches;
-    setMode(reduced || narrow ? "css" : "r3f");
+    const narrow = window.matchMedia("(max-width: 1024px)").matches;
+    if (reduced || narrow) return;
+
+    const enableR3f = () => setMode("r3f");
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(enableR3f, { timeout: 5000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const t = window.setTimeout(enableR3f, 1500);
+    return () => window.clearTimeout(t);
   }, []);
 
   return (

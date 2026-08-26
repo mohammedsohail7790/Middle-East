@@ -61,6 +61,7 @@ function enhanceHero() {
 function PremiumHomeSections() {
   const [tickerAnchor, setTickerAnchor] = useState<HTMLElement | null>(null);
   const [heroVisual, setHeroVisual] = useState<HTMLElement | null>(null);
+  const [sectionsReady, setSectionsReady] = useState(false);
 
   useEffect(() => {
     enhanceHero();
@@ -74,13 +75,26 @@ function PremiumHomeSections() {
     ticker.insertAdjacentElement("afterend", host);
     setTickerAnchor(host);
 
-    return () => host.remove();
+    const markReady = () => setSectionsReady(true);
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(markReady, { timeout: 2500 });
+      return () => {
+        window.cancelIdleCallback(id);
+        host.remove();
+      };
+    }
+    const t = window.setTimeout(markReady, 400);
+    return () => {
+      window.clearTimeout(t);
+      host.remove();
+    };
   }, []);
 
   return (
     <>
       {heroVisual && createPortal(<HeroPhone3D />, heroVisual)}
-      {tickerAnchor &&
+      {sectionsReady &&
+        tickerAnchor &&
         createPortal(
           <>
             <ProblemSolutionSection />

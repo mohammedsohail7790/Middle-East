@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Providers } from "@/components/providers";
+import { MarketingProviders } from "@/components/marketing/MarketingProviders";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -76,7 +76,7 @@ export default function MarketingRootLayout({
         />
       </head>
       <body suppressHydrationWarning>
-        <Providers>{children}</Providers>
+        <MarketingProviders>{children}</MarketingProviders>
       </body>
     </html>
   );
