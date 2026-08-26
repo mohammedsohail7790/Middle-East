@@ -20,6 +20,15 @@ export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
   "/industries": "industries-all",
 };
 
+/** True for public marketing SPA paths (no /en prefix). */
+export function isMarketingHref(href: string): boolean {
+  const path = href.split(/[?#]/)[0] || "/";
+  if (MARKETING_PATH_TO_PAGE[path]) return true;
+  if (/^\/industries\//.test(path)) return true;
+  if (/^\/solutions\//.test(path)) return true;
+  return false;
+}
+
 export function resolveMarketingPage(pathname: string): string {
   const path = pathname.replace(/\/$/, "") || "/";
   if (MARKETING_PATH_TO_PAGE[path]) return MARKETING_PATH_TO_PAGE[path];

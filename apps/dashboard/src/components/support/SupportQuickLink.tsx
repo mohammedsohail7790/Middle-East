@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { IconBox, type IconBoxVariant } from "@/components/ui-kit/IconBox";
 import { VibePanel } from "@/components/magic-ui/vibe-panel";
+import { isMarketingHref } from "@/lib/marketing-routes";
 
 type SupportQuickLinkProps = {
   href: string;
@@ -34,7 +35,9 @@ export function SupportQuickLink({
     </VibePanel>
   );
 
-  if (external) {
+  // Marketing pages live at unprefixed routes (/how-it-works). i18n Link would
+  // navigate to /en/how-it-works, which 404s — same for mailto/tel (external).
+  if (external || isMarketingHref(href)) {
     return (
       <a href={href} className="block no-underline">
         {inner}
