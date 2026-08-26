@@ -28,3 +28,13 @@ try {
   // No output produced — genuine build failure
   process.exit(1);
 }
+
+// Ship optional boot-time knowledge seed for voice RAG (repo root data/).
+const repoDataFile = path.join(__dirname, '..', '..', 'data', 'knowledge_base.txt');
+const distDataDir = path.join(__dirname, 'dist', 'data');
+const distDataFile = path.join(distDataDir, 'knowledge_base.txt');
+if (fs.existsSync(repoDataFile)) {
+  fs.mkdirSync(distDataDir, { recursive: true });
+  fs.copyFileSync(repoDataFile, distDataFile);
+  console.log('Copied knowledge_base.txt → dist/data/');
+}

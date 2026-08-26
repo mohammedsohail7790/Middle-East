@@ -141,7 +141,32 @@ export class KnowledgeService {
     }
 
     async ingestFromFileOnce(): Promise<void> {
-        const filePath = path.resolve(fileURLToPath(import.meta.url), '..', '..', '..', '..', '..', '..', 'data', 'knowledge_base.txt');
+        const here = path.dirname(fileURLToPath(import.meta.url));
+        const candidates = [
+            process.env.KNOWLEDGE_BASE_FILE_PATH,
+            path.join(here, '..', '..', '..', '..', '..', '..', 'data', 'knowledge_base.txt'),
+            path.join(here, '..', '..', '..', '..', '..', '..', '..', '..', 'data', 'knowledge_base.txt'),
+            path.join(here, '..', '..', '..', '..', 'data', 'knowledge_base.txt'),
+        ].filter((p): p is string => Boolean(p));
+
+        let filePath: string | null = null;
+        for (const candidate of candidates) {
+            try {
+                await fs.access(candidate);
+                filePath = candidate;
+                break;
+            } catch {
+                /* try next */
+            }
+        }
+
+        if (!filePath) {
+            logger.info('Knowledge ingestion skipped — knowledge_base.txt not found', {
+                searched: candidates,
+            });
+            return;
+        }
+
         const raw = await fs.readFile(filePath, 'utf8');
         const contentHash = hashContent(raw);
 
