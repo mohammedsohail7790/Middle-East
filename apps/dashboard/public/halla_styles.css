@@ -1,4 +1,4 @@
-﻿/* ================================================
+/* ================================================
    Halla AI — Stylesheet
    Design: SkipCalls/SideShift inspired
    Font: Hanken Grotesk | Primary: #0A0A0A | Accent: #0D9488
@@ -106,6 +106,45 @@ nav {
 .halla-wordmark { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; color: var(--black); }
 .halla-wordmark .halla-ai { color: var(--accent); }
 
+.section-switch {
+  display: flex; align-items: center; gap: 2px;
+  background: var(--gray-100); border-radius: var(--radius-full);
+  padding: 3px; margin-right: 18px; flex-shrink: 0;
+}
+.section-switch-btn {
+  border: none; background: transparent; cursor: pointer;
+  font-family: var(--font); font-size: 0.82rem; font-weight: 600;
+  color: var(--gray-500); padding: 7px 15px; border-radius: var(--radius-full);
+  transition: background-color 0.18s, color 0.18s, box-shadow 0.18s; white-space: nowrap;
+}
+.section-switch-btn:hover { color: var(--black); }
+.section-switch-btn.active {
+  background: var(--white); color: var(--accent-dark); box-shadow: var(--shadow-sm);
+}
+.mob-section-switch { display: none; margin: 6px 14px 10px; }
+@media (max-width: 768px) { .section-switch { display: none; } .mob-section-switch { display: flex; } }
+
+/* ============ SECTION MODE (Consultancy vs AI Receptionist) ============ */
+/* Default (before JS runs, or if data-section is absent): Consultancy shows, Receptionist hides. */
+.nav-links.nav-group[data-section="receptionist"] { display: none; }
+.nav-links.nav-group[data-section="consultancy"] { display: flex; }
+body[data-section="receptionist"] .nav-links.nav-group[data-section="receptionist"] { display: flex; }
+body[data-section="receptionist"] .nav-links.nav-group[data-section="consultancy"] { display: none; }
+
+.mob-nav .nav-group[data-section="receptionist"] { display: none; }
+.mob-nav .nav-group[data-section="consultancy"] { display: block; }
+body[data-section="receptionist"] .mob-nav .nav-group[data-section="receptionist"] { display: block; }
+body[data-section="receptionist"] .mob-nav .nav-group[data-section="consultancy"] { display: none; }
+
+.footer-group[data-section="receptionist"] { display: none; }
+.footer-group[data-section="consultancy"] { display: contents; }
+body[data-section="receptionist"] .footer-group[data-section="receptionist"] { display: contents; }
+body[data-section="receptionist"] .footer-group[data-section="consultancy"] { display: none; }
+.footer-brand p.footer-group[data-section="receptionist"] { display: none; }
+.footer-brand p.footer-group[data-section="consultancy"] { display: block; }
+body[data-section="receptionist"] .footer-brand p.footer-group[data-section="receptionist"] { display: block; }
+body[data-section="receptionist"] .footer-brand p.footer-group[data-section="consultancy"] { display: none; }
+
 .nav-links { display: flex; align-items: center; gap: 1px; flex: 1; }
 .nav-item { position: relative; }
 .nav-link {
@@ -179,6 +218,14 @@ nav {
 .hero-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
+.hero-neural-canvas {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none; overflow: hidden;
+}
+.hero-neural-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
+.hero .container { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) { .hero-neural-canvas, .consult-neural-canvas { display: none; } }
+
 .hero h1 { margin-bottom: 22px; }
 .hero h1 em { font-style: normal; color: var(--accent); }
 .hero-sub { font-size: 1.15rem; color: var(--gray-500); max-width: 560px; margin: 0 auto 36px; line-height: 1.7; }
@@ -227,6 +274,7 @@ nav {
 .feat-icon-blue { background: var(--accent-light); color: var(--accent-dark); }
 .feat-icon-green { background: var(--green-light); color: var(--green); }
 .feat-icon-orange { background: #FEF3C7; color: var(--orange); }
+.feat-icon-red { background: rgba(239,68,68,0.10); color: var(--red); }
 
 /* ============ SECTION DIVIDERS ============ */
 .divider-line { border: none; border-top: 1px solid var(--gray-100); }
@@ -403,6 +451,36 @@ nav {
 .mock-badge-2 { bottom: 40px; left: -30px; }
 .mock-badge-green { color: var(--green); }
 
+/* ============ 3D PHONE (drag to rotate) ============ */
+.phone-3d-stage {
+  position: relative; perspective: 1400px; width: 280px; margin: 0 auto;
+  cursor: grab; touch-action: pan-y;
+}
+.phone-3d-stage.dragging { cursor: grabbing; }
+.phone-3d-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.08s linear;
+  will-change: transform;
+}
+.phone-3d-stage.dragging .phone-3d-inner { transition: none; }
+.phone-3d-face {
+  transform: translateZ(18px);
+  box-shadow: 0 40px 90px rgba(0,0,0,0.20), 0 10px 30px rgba(0,0,0,0.12);
+}
+.phone-3d-hint {
+  position: absolute; bottom: -34px; left: 50%; transform: translateX(-50%);
+  font-size: 0.72rem; color: var(--gray-400); display: flex; align-items: center; gap: 6px;
+  white-space: nowrap; transition: opacity 0.3s; pointer-events: none;
+}
+@media (max-width: 640px) { .phone-3d-hint { display: none; } }
+
+/* ============ BROWSER FRAME 3D TILT ============ */
+.browser-frame.tilt-3d {
+  transition: transform 0.25s cubic-bezier(0.2,0.7,0.3,1);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
 /* ============ ALERT ============ */
 .alert { padding: 14px 18px; border-radius: var(--radius); display: flex; gap: 12px; align-items: flex-start; margin: 16px 0; }
 .alert-warn { background: #FFF7ED; border: 1px solid #FED7AA; }
@@ -576,6 +654,186 @@ html[dir="rtl"] .stats-bar { flex-direction: row-reverse; }
 html[dir="rtl"] .grid-2, html[dir="rtl"] .grid-3, html[dir="rtl"] .grid-4 { direction: rtl; }
 html[dir="rtl"] .pills-wrap { flex-direction: row-reverse; flex-wrap: wrap; }
 html[dir="rtl"] .browser-bar { flex-direction: row-reverse; }
+.lang-ar { display: none; }
+html[dir="rtl"] .lang-en { display: none; }
+html[dir="rtl"] .lang-ar { display: inline; }
+html[dir="rtl"] .lang-ar.lang-block { display: block; }
+
+/* ============ CONSULTANCY — PREMIUM LAYOUT ============ */
+.consult-hero {
+  position: relative; overflow: hidden;
+  padding: 140px 0 88px;
+  background: linear-gradient(165deg, #0a0f0e 0%, #0d1a18 42%, #0a1211 100%);
+  color: var(--white);
+}
+.consult-neural-canvas {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.55;
+}
+.consult-neural-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
+.consult-hero-glow {
+  position: absolute; top: -20%; right: -10%; width: 55%; height: 70%;
+  background: radial-gradient(circle, rgba(13,148,136,0.22) 0%, transparent 68%);
+  pointer-events: none; z-index: 0;
+}
+.consult-hero-grid {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 56px; align-items: center;
+}
+.consult-hero-copy h1 { color: var(--white); font-size: clamp(2.4rem, 5vw, 3.8rem); margin-bottom: 18px; }
+.consult-gradient-text {
+  background: linear-gradient(135deg, var(--accent-mid) 0%, #5eead4 50%, var(--accent) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.consult-hero-sub { font-size: 1.08rem; color: rgba(255,255,255,0.62); max-width: 520px; line-height: 1.75; }
+.consult-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+.consult-hero-outline {
+  color: rgba(255,255,255,0.85) !important; border-color: rgba(255,255,255,0.22) !important;
+  background: rgba(255,255,255,0.04) !important;
+}
+.consult-hero-outline:hover { background: rgba(255,255,255,0.08) !important; border-color: rgba(255,255,255,0.35) !important; }
+.consult-label-glow { background: rgba(13,148,136,0.18); color: var(--accent-mid); }
+.consult-trust-row {
+  display: flex; flex-wrap: wrap; gap: 18px; margin-top: 28px;
+  font-size: 0.82rem; color: rgba(255,255,255,0.45);
+}
+.consult-trust-row i { color: var(--accent-mid); margin-right: 6px; }
+
+.consult-hero-bento {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+.consult-bento-card {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-lg); padding: 22px 20px;
+  backdrop-filter: blur(12px); transition: border-color 0.25s, transform 0.25s;
+}
+.consult-bento-card:hover { border-color: rgba(45,212,191,0.35); transform: translateY(-2px); }
+.consult-bento-main { grid-row: span 2; display: flex; flex-direction: column; justify-content: center; }
+.consult-bento-wide { grid-column: span 2; }
+.consult-bento-icon { font-size: 1.6rem; color: var(--accent-mid); margin-bottom: 12px; }
+.consult-bento-num { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; color: var(--white); line-height: 1; }
+.consult-bento-num.sm { font-size: 1.8rem; }
+.consult-bento-num.accent { color: var(--accent-mid); }
+.consult-bento-label { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 8px; line-height: 1.45; }
+.consult-stack-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.consult-stack-pills span {
+  font-size: 0.72rem; font-weight: 600; padding: 5px 10px; border-radius: 999px;
+  background: rgba(13,148,136,0.15); color: var(--accent-mid); border: 1px solid rgba(45,212,191,0.2);
+}
+
+.consult-marquee {
+  overflow: hidden; border-block: 1px solid var(--gray-100);
+  background: var(--gray-50); padding: 14px 0;
+}
+.consult-marquee-track {
+  display: flex; gap: 48px; width: max-content; white-space: nowrap;
+  animation: consult-marquee 32s linear infinite;
+}
+.consult-marquee-track span {
+  font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--gray-400);
+}
+@keyframes consult-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+.consult-section-dark { background: var(--gray-50); }
+.consult-split {
+  display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 48px; align-items: start;
+}
+.consult-split p { font-size: 1.05rem; color: var(--gray-600); margin-top: 8px; }
+.consult-section-head { margin-bottom: 48px; max-width: 640px; }
+.consult-section-head.center, .text-center.consult-section-head { margin-left: auto; margin-right: auto; }
+.consult-section-head p { margin-top: 12px; color: var(--gray-500); }
+
+.consult-service-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+}
+.consult-service-card {
+  position: relative; overflow: hidden;
+  background: var(--white); border: 1px solid var(--gray-200);
+  border-radius: var(--radius-xl); padding: 30px 26px;
+  box-shadow: var(--shadow-sm); transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+.consult-service-card:hover {
+  transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: rgba(13,148,136,0.25);
+}
+.consult-service-featured { border-color: rgba(13,148,136,0.35); background: linear-gradient(180deg, #f0fdfa 0%, var(--white) 55%); }
+.consult-service-glow {
+  position: absolute; top: -40%; right: -30%; width: 70%; height: 70%;
+  background: radial-gradient(circle, rgba(13,148,136,0.12) 0%, transparent 70%);
+  pointer-events: none; opacity: 0; transition: opacity 0.3s;
+}
+.consult-service-card:hover .consult-service-glow { opacity: 1; }
+.consult-featured-badge {
+  position: absolute; top: 18px; right: 18px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  background: var(--accent); color: var(--white); padding: 5px 10px; border-radius: 999px;
+}
+.consult-service-card h3 { font-size: 1.2rem; margin-bottom: 10px; }
+.consult-service-card p { font-size: 0.9rem; margin-bottom: 16px; }
+.consult-service-list {
+  list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px;
+}
+.consult-service-list li {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 0.82rem; color: var(--gray-500); line-height: 1.45;
+}
+.consult-service-list i { color: var(--accent); font-size: 0.9rem; margin-top: 2px; flex-shrink: 0; }
+.consult-service-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.85rem; font-weight: 700; color: var(--accent); text-decoration: none;
+}
+.consult-service-link:hover { color: var(--accent-dark); }
+
+.consult-timeline-section { background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%); }
+.consult-timeline {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; position: relative;
+}
+.consult-timeline::before {
+  content: ""; position: absolute; top: 28px; left: 8%; right: 8%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-light), transparent);
+  z-index: 0;
+}
+.consult-timeline-step {
+  position: relative; z-index: 1;
+  background: var(--white); border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg); padding: 28px 22px; box-shadow: var(--shadow-sm);
+}
+.consult-timeline-num {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--black); color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.85rem; margin-bottom: 16px;
+}
+.consult-timeline-step h4 { margin-bottom: 8px; font-size: 1rem; }
+.consult-timeline-step p { font-size: 0.85rem; }
+
+.consult-cta-block::before {
+  background: radial-gradient(circle, rgba(13,148,136,0.28) 0%, transparent 70%);
+}
+
+/* Scroll reveal (GSAP enhances; CSS fallback) */
+.reveal-up {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0s);
+}
+.reveal-up.is-visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 1024px) {
+  .consult-hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .consult-service-grid { grid-template-columns: 1fr; }
+  .consult-timeline { grid-template-columns: 1fr 1fr; }
+  .consult-timeline::before { display: none; }
+  .consult-split { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .consult-hero { padding: 120px 0 64px; }
+  .consult-hero-bento { grid-template-columns: 1fr; }
+  .consult-bento-main { grid-row: auto; }
+  .consult-bento-wide { grid-column: auto; }
+  .consult-timeline { grid-template-columns: 1fr; }
+  .consult-trust-row { flex-direction: column; gap: 8px; }
+}
+
 .lang-en, .lang-ar { display: none; }
 html[lang="en"] .lang-en,
 #marketing-spa-root[lang="en"] .lang-en,

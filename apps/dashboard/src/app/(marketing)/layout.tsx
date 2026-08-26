@@ -3,12 +3,30 @@ import { MarketingProviders } from "@/components/marketing/MarketingProviders";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: "Halla AI – Smart • Seamless • Always",
+  title: {
+    default: "Halla AI – AI Consultancy & Pure AI Receptionist",
+    template: "%s | Halla AI",
+  },
   description:
-    "Halla AI answers every call 24/7, books appointments, captures leads, and routes emergencies — automatically.",
+    "Halla AI Consultancy installs connected automation for small businesses. Plus a 24/7 AI receptionist that answers every call — starting at $39/month.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://www.hallaai.com"
   ),
+  openGraph: {
+    title: "Halla AI – AI Consultancy & Pure AI Receptionist",
+    description:
+      "We install AI systems for operations, growth, and brand — plus a receptionist that never misses a call.",
+    type: "website",
+    siteName: "Halla AI",
+    images: [{ url: "/logo.png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Halla AI – AI Consultancy & Pure AI Receptionist",
+    description:
+      "Connected AI systems for small business — and a 24/7 receptionist from $39/month.",
+    images: ["/logo.png"],
+  },
   icons: {
     icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/logo-icon.png", type: "image/png" }],
     apple: "/apple-touch-icon.png",
@@ -19,6 +37,7 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  themeColor: "#0D9488",
 };
 
 // Prevent FOUC on theme toggle
@@ -51,6 +70,7 @@ export default function MarketingRootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {/* Remap accent vars to Halla AI teal for marketing & auth pages */}
         <style dangerouslySetInnerHTML={{ __html: tealOverride }} />
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

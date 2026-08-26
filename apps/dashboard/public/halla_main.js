@@ -5,30 +5,133 @@
    © 2025 Halla AI
 ================================================ */
 
-// ============ ROUTING ============
-/** Next.js auth routes — no SPA page-* target; redirect instead of blanking all pages. */
-const NEXT_AUTH_ROUTES = { login: '/login', signup: '/signup' };
+// ============ SITE SECTION MODE (Consultancy vs AI Receptionist) ============
+// The site is split into two audience-facing sections that swap in a
+// dedicated nav + footer: 'consultancy' (Halla AI Consultancy) and
+// 'receptionist' (the AI Receptionist product: Product/Solutions/
+// Industries/Pricing/Resources). page-consultancy is the only page in the
+// consultancy section; every other page belongs to the receptionist section.
+function sectionForPage(page) {
+  const consultancyPages = ['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup'];
+  return consultancyPages.includes(page) ? 'consultancy' : 'receptionist';
+}
+function setSectionMode(section) {
+  document.body.setAttribute('data-section', section);
+  document.querySelectorAll('.section-switch-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.section === section);
+  });
+  const ctaBtn = document.getElementById('navPrimaryCta');
+  if (ctaBtn) {
+    ctaBtn.textContent = (section === 'consultancy') ? 'Book a Consultation →' : 'Get My AI Receptionist →';
+  }
+  const footerCtaBtn = document.getElementById('footerPrimaryCta');
+  if (footerCtaBtn) {
+    footerCtaBtn.textContent = (section === 'consultancy') ? 'Book a Consultation →' : 'Get My AI Receptionist →';
+  }
+}
+function switchSection(section) {
+  if (section === 'consultancy') { go('consultancy'); }
+  else { go('home'); }
+}
+function navPrimaryCtaClick() {
+  const section = document.body.getAttribute('data-section') || 'consultancy';
+  if (section === 'consultancy') { go('consult-signup'); }
+  else { go('signup'); }
+}
+function logoClick() {
+  const section = document.body.getAttribute('data-section') || 'consultancy';
+  switchSection(section);
+}
+// Scroll to an anchor within the (already active) consultancy page.
+function scrollToConsultSection(anchorId) {
+  go('consultancy');
+  setTimeout(() => {
+    const el = document.getElementById(anchorId);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 60);
+}
 
-function go(page) {
-  const authHref = NEXT_AUTH_ROUTES[page];
-  if (authHref) {
+// ============ ROUTING + DEEP LINKS ============
+const DEFAULT_PAGE = 'consultancy';
+const CONSULTANCY_PAGES = new Set(['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup']);
+
+function pageExists(page) {
+  return !!document.getElementById('page-' + page);
+}
+
+function hashForPage(page, sub) {
+  if (!page) return '';
+  if (page === 'consultancy') return '';
+  if (page === 'solutions' && sub) return '#solutions/' + sub;
+  if (page === 'industries' && sub) return '#industries/' + sub;
+  return '#' + page;
+}
+
+function parseHash() {
+  const raw = (location.hash || '').replace(/^#/, '');
+  if (!raw) return { page: DEFAULT_PAGE };
+  if (raw.startsWith('solutions/')) {
+    const sub = raw.split('/')[1];
+    return pageExists('solutions-' + sub) ? { page: 'solutions-' + sub } : { page: 'solutions', sub };
+  }
+  if (raw.startsWith('industries/')) {
+    const sub = raw.split('/')[1];
+    return { page: 'industries', sub };
+  }
+  return { page: raw };
+}
+
+function routeFromHash(opts) {
+  const { page, sub } = parseHash();
+  if (!pageExists(page)) {
+    go(DEFAULT_PAGE, Object.assign({ silent: true }, opts));
+    return;
+  }
+  go(page, Object.assign({ silent: true }, opts));
+  if (page === 'solutions' && sub && typeof loadSol === 'function') loadSol(sub);
+  if (page === 'industries' && sub && typeof loadInd === 'function') loadInd(sub);
+}
+
+function go(page, opts) {
+  const options = opts || {};
+  const authHref = { login: '/login', signup: '/signup' }[page];
+  if (authHref && !pageExists(page)) {
     window.location.href = authHref;
     return;
   }
+
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   const el = document.getElementById('page-' + page);
   if (el) {
     el.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: options.noScroll ? 'auto' : 'smooth' });
   } else {
-    const home = document.getElementById('page-home');
-    if (home) home.classList.add('active');
+    const fallback = document.getElementById('page-' + DEFAULT_PAGE);
+    if (fallback) fallback.classList.add('active');
+    page = DEFAULT_PAGE;
   }
+
+  setSectionMode(sectionForPage(page));
   closeMob();
   closeAllDropdowns();
+
+  if (!options.silent && !window.HALLA_EMBEDDED) {
+    const nextHash = hashForPage(page, options.sub);
+    if (nextHash) {
+      if (location.hash !== nextHash) history.pushState({ page }, '', nextHash);
+    } else if (location.hash) {
+      history.pushState({ page }, '', location.pathname + location.search);
+    }
+  }
+
+  onPageActivated(page);
 }
 function goSol(sub) {
-  go('solutions');
+  if (pageExists('solutions-' + sub)) {
+    go('solutions-' + sub);
+    return;
+  }
+  go('solutions', { sub });
   loadSol(sub);
 }
 function goInd(sub) {
@@ -207,13 +310,83 @@ function loadInd(key) {
 }
 
 // ============ FOOTER FIX ============
-// Ensure footer is always at bottom regardless of page content height
-// This is a subtle fix that ensures consistent footer rendering
 (function fixFooterLayout() {
-  // Any page-specific footer adjustments can go here
-  // The main fix is in the CSS above
-  console.log('Footer layout initialized');
+  /* layout handled in CSS */
 })();
+
+// ============ PAGE ACTIVATION HOOKS ============
+function onPageActivated(page) {
+  if (window.HallaNeural && HallaNeural.refreshForPage) {
+    HallaNeural.refreshForPage(page);
+  }
+  requestAnimationFrame(() => {
+    initScrollAnimations();
+    if (CONSULTANCY_PAGES.has(page)) initConsultCounters();
+  });
+}
+
+// ============ GSAP SCROLL REVEALS ============
+function initScrollAnimations() {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const targets = document.querySelectorAll('.reveal-up:not(.gsap-bound)');
+  if (!targets.length) return;
+
+  if (reduceMotion || typeof gsap === 'undefined') {
+    targets.forEach(el => el.classList.add('is-visible'));
+    return;
+  }
+
+  if (typeof ScrollTrigger !== 'undefined') gsap.registerPlugin(ScrollTrigger);
+
+  targets.forEach((el) => {
+    el.classList.add('gsap-bound');
+    const delay = parseFloat(getComputedStyle(el).getPropertyValue('--reveal-delay')) || 0;
+    const inView = el.getBoundingClientRect().top < window.innerHeight * 0.92;
+
+    if (inView) {
+      gsap.fromTo(el,
+        { opacity: 0, y: 36 },
+        { opacity: 1, y: 0, duration: 0.75, ease: 'power3.out', delay }
+      );
+      return;
+    }
+
+    gsap.fromTo(el,
+      { opacity: 0, y: 36 },
+      {
+        opacity: 1, y: 0, duration: 0.75, ease: 'power3.out', delay,
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+      }
+    );
+  });
+}
+
+// ============ CONSULTANCY STAT COUNTERS ============
+let consultCountersStarted = false;
+function initConsultCounters() {
+  if (consultCountersStarted) return;
+  const nums = document.querySelectorAll('#page-consultancy .consult-bento-num[data-count]');
+  if (!nums.length) return;
+  consultCountersStarted = true;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  nums.forEach((el) => {
+    const target = parseInt(el.dataset.count, 10);
+    if (reduceMotion || isNaN(target)) {
+      el.textContent = target;
+      return;
+    }
+    const obj = { val: 0 };
+    if (typeof gsap !== 'undefined') {
+      gsap.to(obj, {
+        val: target, duration: 1.6, ease: 'power2.out', delay: 0.3,
+        onUpdate: () => { el.textContent = Math.round(obj.val); },
+      });
+    } else {
+      el.textContent = target;
+    }
+  });
+}
 
 // ============ LANGUAGE TOGGLE ============
 function setLang(lang) {
@@ -235,9 +408,171 @@ function setLang(lang) {
 }
 
 // ============ INIT ============
-window.addEventListener('DOMContentLoaded', () => {
+function hallaInit() {
   calcROI();
   let savedLang = 'en';
   try { savedLang = localStorage.getItem('halla_lang') || 'en'; } catch (e) {}
   setLang(savedLang);
-});
+
+  if (!window.HALLA_EMBEDDED) {
+    window.addEventListener('popstate', () => routeFromHash({ noScroll: true }));
+    routeFromHash({ noScroll: true });
+  }
+
+  initPhone3D();
+  initBrowserFrameTilt();
+  initConsultForm();
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', hallaInit);
+} else {
+  hallaInit();
+}
+
+function initConsultForm() {
+  const btn = document.getElementById('consultSignupBtn');
+  const form = btn && btn.closest('.card');
+  if (!btn || !form) return;
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]');
+    let valid = true;
+    inputs.forEach((inp) => {
+      inp.style.borderColor = '';
+      if (!inp.value.trim()) {
+        inp.style.borderColor = 'var(--red)';
+        valid = false;
+      }
+    });
+    const email = form.querySelector('input[type="email"]');
+    if (email && email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+      email.style.borderColor = 'var(--red)';
+      valid = false;
+    }
+    if (!valid) return;
+    alert('Thank you! We will reach out within 1 business day to schedule your diagnostic call.');
+  });
+}
+
+// ============ HERO NEURAL — handled by halla_neural.js (Three.js) ============
+
+// ============ ROTATABLE 3D PHONE (drag to rotate) ============
+function initPhone3D() {
+  const wrap = document.querySelector('.mockup-wrap');
+  if (!wrap) return;
+  const mockup = wrap.querySelector('.mockup');
+  if (!mockup || mockup.closest('.phone-3d-inner')) return;
+
+  // Build the 3D frame around the existing mockup content
+  const stage = document.createElement('div');
+  stage.className = 'phone-3d-stage';
+  const inner = document.createElement('div');
+  inner.className = 'phone-3d-inner';
+
+  mockup.parentNode.insertBefore(stage, mockup);
+  stage.appendChild(inner);
+  inner.appendChild(mockup);
+  mockup.classList.add('phone-3d-face');
+
+  const hint = document.createElement('div');
+  hint.className = 'phone-3d-hint';
+  hint.innerHTML = '<i class="ti ti-arrows-shuffle"></i> Drag to rotate';
+  stage.appendChild(hint);
+
+  let rotY = -12, rotX = 4;
+  let isDragging = false;
+  let startX = 0, startY = 0, startRotY = 0, startRotX = 0;
+  let idleRAF = null;
+  let idleT = 0;
+
+  function apply() {
+    inner.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+  }
+
+  function idleFloat() {
+    idleT += 0.01;
+    if (!isDragging) {
+      rotY = -12 + Math.sin(idleT) * 6;
+      rotX = 4 + Math.cos(idleT * 0.8) * 2;
+      apply();
+    }
+    idleRAF = requestAnimationFrame(idleFloat);
+  }
+  apply();
+  idleRAF = requestAnimationFrame(idleFloat);
+
+  function onDown(clientX, clientY) {
+    isDragging = true;
+    startX = clientX; startY = clientY;
+    startRotY = rotY; startRotX = rotX;
+    stage.classList.add('dragging');
+    hint.style.opacity = '0';
+  }
+  function onMove(clientX, clientY) {
+    if (!isDragging) return;
+    const dx = clientX - startX;
+    const dy = clientY - startY;
+    rotY = startRotY + dx * 0.4;
+    rotX = startRotX - dy * 0.25;
+    rotX = Math.max(-25, Math.min(25, rotX));
+    apply();
+  }
+  function onUp() {
+    isDragging = false;
+    stage.classList.remove('dragging');
+  }
+
+  stage.addEventListener('mousedown', (e) => onDown(e.clientX, e.clientY));
+  window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+  window.addEventListener('mouseup', onUp);
+
+  stage.addEventListener('touchstart', (e) => {
+    const t0 = e.touches[0];
+    onDown(t0.clientX, t0.clientY);
+  }, { passive: true });
+  stage.addEventListener('touchmove', (e) => {
+    const t0 = e.touches[0];
+    onMove(t0.clientX, t0.clientY);
+  }, { passive: true });
+  stage.addEventListener('touchend', onUp);
+}
+
+// ============ BROWSER FRAME PARALLAX TILT ============
+function initBrowserFrameTilt() {
+  const frames = document.querySelectorAll('.browser-frame');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  frames.forEach((frame) => {
+    frame.classList.add('tilt-3d');
+    if (reduceMotion) return;
+
+    let rect = null;
+    function refreshRect() { rect = frame.getBoundingClientRect(); }
+    refreshRect();
+    window.addEventListener('resize', refreshRect);
+
+    frame.addEventListener('mouseenter', refreshRect);
+    frame.addEventListener('mousemove', (e) => {
+      if (!rect) refreshRect();
+      const px = (e.clientX - rect.left) / rect.width;
+      const py = (e.clientY - rect.top) / rect.height;
+      const rotY = (px - 0.5) * 10;
+      const rotX = (0.5 - py) * 8;
+      frame.style.transform = `perspective(1200px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.01,1.01,1.01)`;
+    });
+    frame.addEventListener('mouseleave', () => {
+      frame.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+    });
+
+    // subtle scroll-driven tilt too
+    window.addEventListener('scroll', () => {
+      if (!rect) refreshRect();
+      const vh = window.innerHeight;
+      const center = rect.top + rect.height / 2;
+      const progress = Math.max(-1, Math.min(1, (center - vh / 2) / (vh / 2)));
+      if (!frame.matches(':hover')) {
+        frame.style.transform = `perspective(1200px) rotateX(${progress * -4}deg) rotateY(0deg)`;
+      }
+    }, { passive: true });
+  });
+}

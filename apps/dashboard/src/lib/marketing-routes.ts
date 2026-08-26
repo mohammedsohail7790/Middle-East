@@ -1,6 +1,9 @@
 /** Map public marketing URL paths to SPA page ids (page-{id} in marketing-body.html). */
 export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
-  "/": "home",
+  "/": "consultancy",
+  "/home": "home",
+  "/consultancy": "consultancy",
+  "/consult-signup": "consult-signup",
   "/pricing": "pricing",
   "/features": "features",
   "/how-it-works": "how-it-works",
@@ -18,6 +21,9 @@ export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
   "/vs-ruby": "vs-ruby",
   "/security": "security",
   "/industries": "industries-all",
+  "/services/operations": "svc-operations",
+  "/services/acquisition": "svc-acquisition",
+  "/services/brand": "svc-brand",
 };
 
 /** True for public marketing SPA paths (no /en prefix). */
@@ -26,6 +32,7 @@ export function isMarketingHref(href: string): boolean {
   if (MARKETING_PATH_TO_PAGE[path]) return true;
   if (/^\/industries\//.test(path)) return true;
   if (/^\/solutions\//.test(path)) return true;
+  if (/^\/services\//.test(path)) return true;
   return false;
 }
 
@@ -39,5 +46,5 @@ export function resolveMarketingPage(pathname: string): string {
   const solutionsMatch = path.match(/^\/solutions\/([a-z0-9-]+)$/i);
   if (solutionsMatch) return `solutions-${solutionsMatch[1]}`;
 
-  return "home";
+  return "consultancy";
 }

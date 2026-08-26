@@ -102,6 +102,7 @@ tmp-*
 /hallaai_main.js
 /halla_styles.css
 /halla_main.js
+/halla_neural.js
 /halla_preview.html
 
 # Tool state (ruflo/claude-flow swarm memory)

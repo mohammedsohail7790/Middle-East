@@ -74,6 +74,8 @@ const nextConfig = {
             { source: '/hallaai_styles.css', destination: '/halla_styles.css', permanent: true },
             { source: '/hallaai-marketing.css', destination: '/halla_styles.css', permanent: true },
             { source: '/hallaai_main.js', destination: '/halla_main.js', permanent: true },
+            { source: '/receptionist', destination: '/home', permanent: false },
+            { source: '/ai-receptionist', destination: '/home', permanent: false },
             { source: '/roi-calculator', destination: '/roi', permanent: true },
             { source: '/:locale/dashboard/knowledge', destination: '/:locale/dashboard/business-profile', permanent: true },
             { source: '/:locale/dashboard/crm/contacts', destination: '/:locale/dashboard/leads', permanent: true },

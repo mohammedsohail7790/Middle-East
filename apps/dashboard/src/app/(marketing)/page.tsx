@@ -4,9 +4,9 @@ import { join } from "path";
 import MarketingSPA from "@/components/marketing/MarketingSPA";
 
 export const metadata: Metadata = {
-  title: "Halla AI – Pure AI Receptionist | Never Miss a Call Again",
+  title: "Halla AI – AI Consultancy & Pure AI Receptionist",
   description:
-    "Halla AI answers every call 24/7, books appointments, captures leads, and routes emergencies — automatically. Starting at $39/month.",
+    "Halla AI Consultancy installs connected automation for small businesses. Plus a 24/7 AI receptionist that answers every call — starting at $39/month.",
   openGraph: {
     title: "Halla AI – Never Miss a Call",
     description:
@@ -39,5 +39,5 @@ function getMarketingBodyHtml(): string {
 
 export default function HomePage() {
   const bodyHtml = getMarketingBodyHtml();
-  return <MarketingSPA bodyHtml={bodyHtml} initialPage="home" />;
+  return <MarketingSPA bodyHtml={bodyHtml} initialPage="consultancy" />;
 }

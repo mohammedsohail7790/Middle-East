@@ -20,6 +20,7 @@ const NEXT_ROUTES: Record<string, string> = {
 type HallaWindow = Window & {
   go?: (page: string) => void;
   setLang?: (lang: string) => void;
+  HALLA_EMBEDDED?: boolean;
 };
 
 function getHallaWindow(): HallaWindow {
@@ -30,10 +31,10 @@ function getHallaWindow(): HallaWindow {
  * Renders the static Halla AI marketing SPA inside the Next.js app.
  *
  * Styles/fonts load from (marketing)/layout.tsx in SSR <head>.
- * halla_main.js must load before we patch routing — onLoad + mount fallback.
+ * Vendor + halla_neural.js must load before halla_main.js.
  */
-export default function MarketingSPA({ bodyHtml, initialPage = "home" }: Props) {
-  const safeInitialPage = initialPage.replace(/[^a-z0-9-]/gi, "") || "home";
+export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: Props) {
+  const safeInitialPage = initialPage.replace(/[^a-z0-9-]/gi, "") || "consultancy";
   const bridgeInstalled = useRef(false);
 
   const installBridge = useCallback(() => {
@@ -83,6 +84,10 @@ export default function MarketingSPA({ bodyHtml, initialPage = "home" }: Props) 
   }, [safeInitialPage]);
 
   useEffect(() => {
+    getHallaWindow().HALLA_EMBEDDED = true;
+  }, []);
+
+  useEffect(() => {
     installBridge();
   }, [installBridge]);
 
@@ -98,6 +103,19 @@ export default function MarketingSPA({ bodyHtml, initialPage = "home" }: Props) 
       />
       <Dashboard3DMounts />
 
+      <Script
+        src="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.min.js"
+        strategy="afterInteractive"
+      />
+      <Script
+        src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"
+        strategy="afterInteractive"
+      />
+      <Script
+        src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"
+        strategy="afterInteractive"
+      />
+      <Script src="/halla_neural.js" strategy="afterInteractive" />
       <Script
         src="/halla_main.js"
         strategy="afterInteractive"
