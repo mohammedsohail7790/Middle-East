@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { DashboardHeaderOrb } from "@/components/effects/DashboardHeaderOrb";
+import { useEffect, useRef } from "react";
 
 function TealParticleCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -75,22 +74,5 @@ function TealParticleCanvas() {
 }
 
 export function DashboardAmbient3D() {
-  const [showOrb, setShowOrb] = useState(false);
-
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const narrow = window.matchMedia("(max-width: 640px)").matches;
-    setShowOrb(!reduced && !narrow);
-  }, []);
-
-  return (
-    <>
-      <TealParticleCanvas />
-      {showOrb && (
-        <div className="dashboard-header-orb-wrap" aria-hidden>
-          <DashboardHeaderOrb />
-        </div>
-      )}
-    </>
-  );
+  return <TealParticleCanvas />;
 }

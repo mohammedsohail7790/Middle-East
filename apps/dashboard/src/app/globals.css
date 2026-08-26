@@ -1293,38 +1293,6 @@ body:has(.auth-shell) {
     @apply pointer-events-none absolute inset-0 h-full w-full opacity-60;
   }
 
-  .dashboard-header-orb-wrap {
-    @apply pointer-events-none absolute -right-2 top-1/2 h-16 w-16 -translate-y-1/2 opacity-70 sm:h-20 sm:w-20;
-  }
-
-  .dashboard-header-orb-css {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: radial-gradient(circle at 32% 28%, #5eead4 0%, #0d9488 42%, #0f766e 100%);
-    box-shadow:
-      0 0 20px rgba(45, 212, 191, 0.35),
-      inset 0 -6px 14px rgba(15, 118, 110, 0.3);
-    animation: dashboard-header-orb-pulse 2.8s ease-in-out infinite;
-  }
-
-  @keyframes dashboard-header-orb-pulse {
-    0%, 100% { transform: scale(1); opacity: 0.88; }
-    50% { transform: scale(1.05); opacity: 1; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .dashboard-header-orb-css {
-      animation: none !important;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .dashboard-header-orb-wrap {
-      @apply hidden;
-    }
-  }
-
   .dashboard-title {
     @apply text-xl sm:text-2xl font-bold tracking-tight text-foreground leading-tight;
   }
