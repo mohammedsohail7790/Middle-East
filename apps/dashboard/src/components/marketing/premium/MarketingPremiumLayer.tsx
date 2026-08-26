@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { HeroPhone3D } from "./HeroPhone3D";
-import { ConsultancySection } from "./ConsultancySection";
 import { ProblemSolutionSection } from "./ProblemSolutionSection";
 import { InteractiveCallDemo } from "./InteractiveCallDemo";
 import { WorkflowSection } from "./WorkflowSection";
@@ -84,7 +83,6 @@ function PremiumHomeSections() {
       {tickerAnchor &&
         createPortal(
           <>
-            <ConsultancySection />
             <ProblemSolutionSection />
             <InteractiveCallDemo />
             <WorkflowSection />
