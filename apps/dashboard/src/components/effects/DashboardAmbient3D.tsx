@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
-
-const DashboardHeaderOrb = dynamic(
-  () => import("@/components/effects/DashboardHeaderOrb").then((m) => m.DashboardHeaderOrb),
-  { ssr: false },
-);
+import { DashboardHeaderOrb } from "@/components/effects/DashboardHeaderOrb";
 
 function TealParticleCanvas() {
   const ref = useRef<HTMLCanvasElement>(null);
