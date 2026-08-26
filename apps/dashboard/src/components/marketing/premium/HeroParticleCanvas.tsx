@@ -11,8 +11,9 @@ export function HeroParticleCanvas() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    try {
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
     let raf = 0;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -73,6 +74,9 @@ export function HeroParticleCanvas() {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
     };
+    } catch {
+      /* canvas blocked or unsupported */
+    }
   }, []);
 
   return <canvas ref={ref} className="hp3d-particles" aria-hidden />;

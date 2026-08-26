@@ -1,13 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import { HeroParticleCanvas } from "./HeroParticleCanvas";
-
-const HeroPhoneScene = dynamic(
-  () => import("./HeroPhoneScene").then((m) => m.HeroPhoneScene),
-  { ssr: false },
-);
 
 function CssPhoneFallback() {
   return (
@@ -30,23 +23,8 @@ function CssPhoneFallback() {
   );
 }
 
+/** CSS-only hero phone — avoids react-three-fiber crashes on marketing SSR/clients. */
 export function HeroPhone3D() {
-  const [mode, setMode] = useState<"r3f" | "css">("css");
-
-  useEffect(() => {
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const narrow = window.matchMedia("(max-width: 1024px)").matches;
-    if (reduced || narrow) return;
-
-    const enableR3f = () => setMode("r3f");
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(enableR3f, { timeout: 5000 });
-      return () => window.cancelIdleCallback(id);
-    }
-    const t = window.setTimeout(enableR3f, 1500);
-    return () => window.clearTimeout(t);
-  }, []);
-
   return (
     <div className="hp3d-scene hp3d-scene--enhanced" aria-hidden>
       <HeroParticleCanvas />
@@ -55,13 +33,7 @@ export function HeroPhone3D() {
       <div className="hp3d-float-card hp3d-float-card--lead">Lead captured ✓</div>
       <div className="hp3d-float-card hp3d-float-card--appt">Appointment booked</div>
       <div className="hp3d-device-wrap">
-        {mode === "r3f" ? (
-          <div className="hp3d-r3f-layer">
-            <HeroPhoneScene />
-          </div>
-        ) : (
-          <CssPhoneFallback />
-        )}
+        <CssPhoneFallback />
       </div>
     </div>
   );

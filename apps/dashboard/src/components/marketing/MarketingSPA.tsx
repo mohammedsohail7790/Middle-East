@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { MarketingVibeLayer } from "@/components/marketing/MarketingVibeLayer";
 import { MarketingPremiumLayer } from "@/components/marketing/premium/MarketingPremiumLayer";
 
@@ -28,15 +28,20 @@ function getHallaWindow(): HallaWindow {
  * Renders the static Halla AI marketing SPA inside the Next.js app.
  *
  * Styles/fonts load from (marketing)/layout.tsx in SSR <head>.
- * halla_main.js must load before we patch routing — onReady avoids race + retry loops.
+ * halla_main.js must load before we patch routing — onLoad + mount fallback.
  */
 export default function MarketingSPA({ bodyHtml, initialPage = "home" }: Props) {
   const safeInitialPage = initialPage.replace(/[^a-z0-9-]/gi, "") || "home";
+  const bridgeInstalled = useRef(false);
 
   const installBridge = useCallback(() => {
+    if (bridgeInstalled.current) return;
+
     const halla = getHallaWindow();
     const spaGo = halla.go;
     if (typeof spaGo !== "function") return;
+
+    bridgeInstalled.current = true;
 
     halla.go = function go(page: string) {
       const nextHref = NEXT_ROUTES[page];
@@ -75,6 +80,10 @@ export default function MarketingSPA({ bodyHtml, initialPage = "home" }: Props) 
     halla.go(safeInitialPage);
   }, [safeInitialPage]);
 
+  useEffect(() => {
+    installBridge();
+  }, [installBridge]);
+
   return (
     <>
       <MarketingVibeLayer />
@@ -88,6 +97,7 @@ export default function MarketingSPA({ bodyHtml, initialPage = "home" }: Props) 
       <Script
         src="/halla_main.js"
         strategy="afterInteractive"
+        onLoad={installBridge}
         onReady={installBridge}
       />
     </>

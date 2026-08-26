@@ -26,9 +26,12 @@ export function ThemeProvider({ children, defaultTheme = "light" }: { children: 
     const root = document.documentElement;
     root.classList.remove("dark", "light");
     root.classList.add(theme);
-    localStorage.setItem("halla_theme", theme);
-    // Remove legacy key if present
-    localStorage.removeItem("calliq_theme");
+    try {
+      localStorage.setItem("halla_theme", theme);
+      localStorage.removeItem("calliq_theme");
+    } catch {
+      /* private mode / restricted storage */
+    }
   }, [theme]);
 
   return (
