@@ -4,6 +4,21 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { DotPattern } from "@/components/magic-ui/dot-pattern";
 import { BorderBeam } from "@/components/magic-ui/border-beam";
+import { Marquee } from "@/components/magic-ui/marquee";
+import { ShimmerButton } from "@/components/magic-ui/shimmer-button";
+
+const CAPABILITIES = [
+  "Process Mapping",
+  "Workflow Automation",
+  "Lead Engines",
+  "CRM Integration",
+  "AI Receptionist",
+  "Brand Systems",
+  "Review Automation",
+  "Live Dashboards",
+  "n8n & Zapier",
+  "HubSpot Sync",
+];
 
 function useConsultancyPageActive() {
   const [active, setActive] = useState(false);
@@ -24,6 +39,11 @@ function useConsultancyPageActive() {
   return active;
 }
 
+function spaGo(page: string) {
+  const go = (window as Window & { go?: (p: string) => void }).go;
+  if (typeof go === "function") go(page);
+}
+
 function enhanceConsultHero() {
   const hero = document.querySelector("#page-consultancy .consult-hero");
   if (!hero || hero.querySelector(".consult-hero-fx")) return;
@@ -32,28 +52,82 @@ function enhanceConsultHero() {
   fx.className = "consult-hero-fx";
   fx.id = "consult-hero-fx-mount";
   hero.insertBefore(fx, hero.firstChild);
+
+  const gradient = hero.querySelector(".consult-gradient-text");
+  gradient?.classList.add("consult-gradient-text--animated");
 }
 
-function enhanceFeaturedService() {
-  const card = document.querySelector("#page-consultancy .consult-service-featured");
-  if (!card || card.querySelector(".consult-beam-mount")) return;
+function enhanceServiceCards(): HTMLElement[] {
+  const cards = document.querySelectorAll<HTMLElement>("#page-consultancy .consult-service-card");
+  const mounts: HTMLElement[] = [];
+  cards.forEach((card) => {
+    if (card.querySelector(".consult-beam-mount")) return;
+    const mount = document.createElement("div");
+    mount.className = "consult-beam-mount";
+    card.appendChild(mount);
+    mounts.push(mount);
+  });
+  return mounts;
+}
+
+function enhanceMarquee(): HTMLElement | null {
+  const legacy = document.querySelector<HTMLElement>("#page-consultancy .consult-marquee");
+  if (!legacy || legacy.dataset.enhanced) return null;
+  legacy.dataset.enhanced = "true";
+  legacy.classList.add("consult-marquee--legacy");
+
+  const host = document.createElement("div");
+  host.id = "consult-marquee-mount";
+  host.className = "consult-marquee-premium";
+  legacy.insertAdjacentElement("afterend", host);
+  return host;
+}
+
+function enhanceHeroCta(): HTMLElement | null {
+  const actions = document.querySelector("#page-consultancy .consult-hero-actions");
+  const primary = actions?.querySelector<HTMLElement>(".consult-magnetic");
+  if (!primary || primary.dataset.enhanced) return null;
+  primary.dataset.enhanced = "true";
+  primary.classList.add("consult-hero-cta-hidden");
 
   const mount = document.createElement("div");
-  mount.className = "consult-beam-mount";
-  card.appendChild(mount);
-  return mount as HTMLElement;
+  mount.className = "consult-hero-shimmer-mount";
+  primary.insertAdjacentElement("afterend", mount);
+  return mount;
+}
+
+function enhanceConsultCta(): HTMLElement | null {
+  const block = document.querySelector("#page-consultancy .consult-cta-block");
+  const primary = block?.querySelector<HTMLElement>(".consult-magnetic");
+  if (!primary || primary.dataset.enhanced) return null;
+  primary.dataset.enhanced = "true";
+  primary.classList.add("consult-hero-cta-hidden");
+
+  const mount = document.createElement("div");
+  mount.className = "consult-cta-shimmer-mount";
+  primary.insertAdjacentElement("afterend", mount);
+  return mount;
 }
 
 export function MarketingConsultancyLayer() {
   const active = useConsultancyPageActive();
   const [heroFx, setHeroFx] = useState<HTMLElement | null>(null);
-  const [beamMount, setBeamMount] = useState<HTMLElement | null>(null);
+  const [beamMounts, setBeamMounts] = useState<HTMLElement[]>([]);
+  const [marqueeMount, setMarqueeMount] = useState<HTMLElement | null>(null);
+  const [heroCtaMount, setHeroCtaMount] = useState<HTMLElement | null>(null);
+  const [footerCtaMount, setFooterCtaMount] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!active) return;
+    const consult = document.getElementById("page-consultancy");
+    consult?.classList.add("has-consult-premium");
+
     enhanceConsultHero();
     setHeroFx(document.getElementById("consult-hero-fx-mount"));
-    setBeamMount(enhanceFeaturedService() ?? null);
+    setBeamMounts(enhanceServiceCards());
+    setMarqueeMount(enhanceMarquee());
+    setHeroCtaMount(enhanceHeroCta());
+    setFooterCtaMount(enhanceConsultCta());
   }, [active]);
 
   if (!active) return null;
@@ -69,13 +143,57 @@ export function MarketingConsultancyLayer() {
             cx={1}
             cy={1}
             cr={1}
+            glow
           />,
           heroFx,
         )}
-      {beamMount &&
+      {beamMounts.map((mount, i) =>
         createPortal(
-          <BorderBeam size={120} duration={8} colorFrom="#0D9488" colorTo="#2DD4BF" borderWidth={2} />,
-          beamMount,
+          <BorderBeam
+            key={i}
+            size={i === 1 ? 140 : 100}
+            duration={7 + i}
+            colorFrom="#0D9488"
+            colorTo="#2DD4BF"
+            borderWidth={2}
+          />,
+          mount,
+        ),
+      )}
+      {marqueeMount &&
+        createPortal(
+          <div className="consult-marquee-inner">
+            <Marquee pauseOnHover className="[--duration:38s]">
+              {CAPABILITIES.map((item) => (
+                <span key={item} className="consult-marquee-pill">
+                  {item}
+                </span>
+              ))}
+            </Marquee>
+          </div>,
+          marqueeMount,
+        )}
+      {heroCtaMount &&
+        createPortal(
+          <ShimmerButton
+            className="btn-lg consult-shimmer-cta"
+            background="linear-gradient(135deg, #0D9488 0%, #0F766E 100%)"
+            onClick={() => spaGo("consult-signup")}
+          >
+            Book a Diagnostic Call →
+          </ShimmerButton>,
+          heroCtaMount,
+        )}
+      {footerCtaMount &&
+        createPortal(
+          <ShimmerButton
+            className="btn-lg consult-shimmer-cta"
+            background="linear-gradient(135deg, #0D9488 0%, #0F766E 100%)"
+            onClick={() => spaGo("consult-signup")}
+          >
+            Book Your Diagnostic Call →
+          </ShimmerButton>,
+          footerCtaMount,
         )}
     </>
   );

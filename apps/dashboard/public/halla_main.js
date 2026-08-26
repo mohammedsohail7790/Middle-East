@@ -407,8 +407,34 @@ function setLang(lang) {
   try { localStorage.setItem('halla_lang', safeLang); } catch (e) {}
 }
 
+// ============ SITE NEURAL BACKDROP ============
+function ensureSiteNeuralMount() {
+  if (document.getElementById('siteNeuralMount')) return;
+  const mount = document.createElement('div');
+  mount.id = 'siteNeuralMount';
+  mount.className = 'site-neural-canvas';
+  mount.setAttribute('aria-hidden', 'true');
+  document.body.insertBefore(mount, document.body.firstChild);
+}
+
+function ensureConsultPageNeuralMount() {
+  if (document.getElementById('consultPageNeuralMount')) return;
+  const mount = document.createElement('div');
+  mount.id = 'consultPageNeuralMount';
+  mount.className = 'consult-page-neural-canvas';
+  mount.setAttribute('aria-hidden', 'true');
+  const siteMount = document.getElementById('siteNeuralMount');
+  if (siteMount && siteMount.nextSibling) {
+    document.body.insertBefore(mount, siteMount.nextSibling);
+  } else {
+    document.body.insertBefore(mount, document.body.firstChild);
+  }
+}
+
 // ============ INIT ============
 function hallaInit() {
+  ensureSiteNeuralMount();
+  ensureConsultPageNeuralMount();
   calcROI();
   let savedLang = 'en';
   try { savedLang = localStorage.getItem('halla_lang') || 'en'; } catch (e) {}
@@ -424,6 +450,11 @@ function hallaInit() {
   initConsultForm();
   if (window.HallaNeural && typeof HallaNeural.init === 'function') {
     HallaNeural.init();
+    if (typeof HallaNeural.refreshForPage === 'function') {
+      const activePage = document.querySelector('.page.active');
+      const pageId = activePage && activePage.id ? activePage.id.replace(/^page-/, '') : DEFAULT_PAGE;
+      HallaNeural.refreshForPage(pageId);
+    }
   }
 }
 

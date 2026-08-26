@@ -19,9 +19,7 @@ const TRUST_LOGOS = [
 
 function TrustPill({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-gray-200 bg-white/90 px-4 py-2 text-sm font-semibold text-gray-600 shadow-sm backdrop-blur-sm">
-      {label}
-    </span>
+    <span className="marketing-vibe-pill">{label}</span>
   );
 }
 
@@ -46,10 +44,8 @@ export function MarketingVibeLayer() {
   if (!anchor) return null;
 
   return createPortal(
-    <div className="border-y border-gray-200/80 bg-gray-50/90 py-4 backdrop-blur-sm">
-      <p className="mb-3 text-center text-[0.72rem] font-bold uppercase tracking-[0.14em] text-gray-400">
-        Connects with tools you already use
-      </p>
+    <div className="marketing-vibe-trust-inner">
+      <p className="marketing-vibe-trust-label">Connects with tools you already use</p>
       <Marquee pauseOnHover className="[--duration:35s]">
         {TRUST_LOGOS.map((name) => (
           <TrustPill key={name} label={name} />

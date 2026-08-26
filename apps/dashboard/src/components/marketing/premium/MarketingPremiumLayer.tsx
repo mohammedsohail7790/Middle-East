@@ -9,6 +9,7 @@ import { VideoDemoSection } from "./VideoDemoSection";
 import { FeaturesHubSection } from "./FeaturesHubSection";
 import { DashboardShowcaseSection } from "./DashboardShowcaseSection";
 import { IndustryStripSection } from "./IndustryStripSection";
+import { HomeClosingSection } from "./HomeClosingSection";
 
 function useHomePageActive() {
   const [active, setActive] = useState(false);
@@ -18,9 +19,7 @@ function useHomePageActive() {
     const home = document.getElementById("page-home");
     if (!root || !home) return;
 
-    const check = () => {
-      setActive(home.classList.contains("active"));
-    };
+    const check = () => setActive(home.classList.contains("active"));
     check();
 
     const observer = new MutationObserver(check);
@@ -56,11 +55,18 @@ function enhanceHero() {
   container.appendChild(grid);
 }
 
+function activatePremiumHome() {
+  const home = document.getElementById("page-home");
+  if (!home) return;
+  home.classList.add("has-premium-home");
+}
+
 function PremiumHomeSections() {
   const [tickerAnchor, setTickerAnchor] = useState<HTMLElement | null>(null);
   const [heroVisual, setHeroVisual] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
+    activatePremiumHome();
     enhanceHero();
     setHeroVisual(document.getElementById("premium-hero-visual-mount"));
 
@@ -87,6 +93,7 @@ function PremiumHomeSections() {
             <FeaturesHubSection />
             <DashboardShowcaseSection />
             <IndustryStripSection />
+            <HomeClosingSection />
           </>,
           tickerAnchor,
         )}
