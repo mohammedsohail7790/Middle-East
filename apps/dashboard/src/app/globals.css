@@ -1289,6 +1289,20 @@ body:has(.auth-shell) {
     border-radius: 1rem 1rem 0 0;
   }
 
+  .dashboard-ambient-canvas {
+    @apply pointer-events-none absolute inset-0 h-full w-full opacity-60;
+  }
+
+  .dashboard-header-orb-wrap {
+    @apply pointer-events-none absolute -right-2 top-1/2 h-16 w-16 -translate-y-1/2 opacity-70 sm:h-20 sm:w-20;
+  }
+
+  @media (max-width: 640px) {
+    .dashboard-header-orb-wrap {
+      @apply hidden;
+    }
+  }
+
   .dashboard-title {
     @apply text-xl sm:text-2xl font-bold tracking-tight text-foreground leading-tight;
   }

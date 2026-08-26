@@ -419,6 +419,103 @@
 .premium-video-card-body h4 { font-size: 0.9rem; margin-bottom: 4px; }
 .premium-video-card-body p { font-size: 0.8rem; color: var(--gray-500); margin: 0; }
 
+/* Interactive call-flow demos (not recorded video) */
+.premium-video-thumb--interactive {
+  display: block;
+  padding: 16px;
+  align-content: stretch;
+}
+
+.premium-demo-ui {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.premium-demo-status {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #2dd4bf;
+}
+
+.premium-demo-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 88px;
+}
+
+.premium-demo-bubble {
+  font-size: 11px;
+  line-height: 1.45;
+  padding: 8px 10px;
+  border-radius: 10px;
+  max-width: 92%;
+}
+
+.premium-demo-bubble--caller {
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.premium-demo-bubble--ai {
+  align-self: flex-end;
+  background: rgba(13, 148, 136, 0.22);
+  color: #ccfbf1;
+  border: 1px solid rgba(45, 212, 191, 0.25);
+}
+
+.premium-demo-ui .premium-demo-badge {
+  align-self: center;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(52, 211, 153, 0.15);
+  color: #6ee7b7;
+  border: 1px solid rgba(52, 211, 153, 0.35);
+}
+
+.premium-demo-ui .premium-demo-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 22px;
+  margin-top: auto;
+}
+
+.premium-demo-ui .premium-demo-wave span {
+  width: 3px;
+  border-radius: 2px;
+  background: #2dd4bf;
+  animation: premium-demo-wave 1.1s ease-in-out infinite;
+}
+
+@keyframes premium-demo-wave {
+  0%, 100% { height: 6px; opacity: 0.45; }
+  50% { height: 18px; opacity: 1; }
+}
+
+.premium-demo-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
 /* Features hub */
 .premium-features-hub {
   display: grid;

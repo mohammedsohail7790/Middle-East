@@ -1,11 +1,17 @@
 "use client";
 
 import { ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { PageSkeleton } from "@/components/ui-kit/PageSkeleton";
+
+const DashboardAmbient3D = dynamic(
+  () => import("@/components/effects/DashboardAmbient3D").then((m) => m.DashboardAmbient3D),
+  { ssr: false },
+);
 
 type DashboardPageProps = {
   title: string;
@@ -52,6 +58,7 @@ export function DashboardPage({
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
         className="dashboard-page-header dashboard-page-header--premium relative overflow-hidden"
       >
+        <DashboardAmbient3D />
         <div
           className="pointer-events-none absolute -right-6 -top-10 size-36 rounded-full opacity-[0.12] blur-3xl dark:opacity-[0.18]"
           style={{ background: "var(--accent)" }}

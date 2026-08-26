@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+
+const VoiceOrb3D = dynamic(
+  () => import("./VoiceOrb3D").then((m) => m.VoiceOrb3D),
+  { ssr: false },
+);
 
 const STAGES = [
   { id: "ring", label: "Incoming call" },
@@ -33,7 +39,10 @@ export function InteractiveCallDemo() {
           Halla AI picks up instantly, understands what the caller needs, and captures the outcome for your team.
         </p>
         <div className="premium-call-demo">
-          <div className="premium-call-phone">
+          <div className="premium-call-phone premium-call-phone--3d">
+            <div className="premium-call-orb">
+              <VoiceOrb3D className="premium-voice-orb-canvas" />
+            </div>
             <div className="hp3d-call-header">
               <p>Incoming call</p>
               <strong>+971 50 XXX XXXX</strong>
