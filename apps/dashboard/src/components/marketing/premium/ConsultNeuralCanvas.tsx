@@ -79,7 +79,7 @@ function BrainHemisphere({ side, mobile }: { side: "left" | "right"; mobile: boo
     const mat = meshRef.current?.material as THREE.MeshPhysicalMaterial | undefined;
     if (!mat) return;
     const wave = Math.sin(state.clock.elapsedTime * 0.9 + (side === "left" ? 0 : 1.2));
-    mat.emissiveIntensity = 0.22 + wave * 0.12;
+    mat.emissiveIntensity = 0.32 + wave * 0.18;
   });
 
   return (
@@ -88,7 +88,7 @@ function BrainHemisphere({ side, mobile }: { side: "left" | "right"; mobile: boo
         <MeshDistortMaterial
           color={BRAIN_BASE}
           emissive={PURPLE_DEEP}
-          emissiveIntensity={0.28}
+          emissiveIntensity={0.42}
           metalness={0.55}
           roughness={0.42}
           distort={mobile ? 0.22 : 0.3}

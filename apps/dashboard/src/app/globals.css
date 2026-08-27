@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Halla AI brand — deep charcoal + emerald green: #0B1220 · #10B981 · white */
+/* Halla AI brand — black + purple/red: #0A0A0A · #7C3AED · #EF4444 */
 
 :root {
   --black: #0a0a0a;
@@ -21,15 +21,17 @@
   --navy: #0b1220;
   --navy-elevated: #131c2e;
   --navy-light: #1c2740;
-  /* Teal — unified brand accent (marketing + dashboard) */
-  --gold: #0d9488;
-  --gold-dark: #0f766e;
-  --gold-text: #0f766e;
-  --gold-light: #2dd4bf;
-  --gold-glow: rgba(13, 148, 136, 0.28);
-  --gold-muted: rgba(13, 148, 136, 0.12);
-  --gold-border: rgba(13, 148, 136, 0.35);
-  /* Legacy alias — kept so existing var(--cyan*) references still resolve to brand emerald */
+  /* Brand accent — purple primary, red secondary */
+  --gold: #7c3aed;
+  --gold-dark: #6d28d9;
+  --gold-text: #5b21b6;
+  --gold-light: #c084fc;
+  --gold-glow: rgba(124, 58, 237, 0.3);
+  --gold-muted: rgba(124, 58, 237, 0.12);
+  --gold-border: rgba(124, 58, 237, 0.35);
+  --brand-red: #ef4444;
+  --brand-red-dark: #dc2626;
+  /* Legacy alias — kept so existing var(--cyan*) references still resolve to brand purple */
   --cyan: var(--gold);
   --cyan-dark: var(--gold-dark);
   --cyan-light: var(--gold-light);
@@ -38,7 +40,7 @@
   --cyan-border: var(--gold-border);
   --accent: var(--gold);
   --accent-dark: var(--gold-dark);
-  --accent-light: #d1fae5;
+  --accent-light: #f3e8ff;
   --accent-mid: var(--gold-light);
   --green: #10b981;
   --green-light: #d1fae5;
@@ -115,7 +117,7 @@
   --color-accent-muted: var(--accent-light);
   --color-ink-2: var(--gray-600);
   --color-rule: var(--gray-200);
-  --gradient-brand: linear-gradient(135deg, var(--cyan) 0%, var(--cyan-light) 100%);
+  --gradient-brand: linear-gradient(135deg, var(--cyan) 0%, var(--brand-red) 100%);
   --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
 }

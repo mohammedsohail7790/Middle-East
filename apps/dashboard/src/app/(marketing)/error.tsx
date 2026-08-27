@@ -39,7 +39,7 @@ export default function MarketingError({
             padding: "0.625rem 1rem",
             borderRadius: "0.5rem",
             border: "none",
-            background: "#0D9488",
+            background: "#7C3AED",
             color: "white",
             fontWeight: 600,
             cursor: "pointer",

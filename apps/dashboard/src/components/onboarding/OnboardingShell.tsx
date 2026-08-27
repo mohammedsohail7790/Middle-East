@@ -71,7 +71,7 @@ export function OnboardingShell({
           )}
 
           <div className="onboarding-card relative overflow-hidden">
-            <BorderBeam size={70} duration={12} colorFrom="#0D9488" colorTo="#2DD4BF" borderWidth={1.5} />
+            <BorderBeam size={70} duration={12} colorFrom="#7C3AED" colorTo="#EF4444" borderWidth={1.5} />
             {children}
           </div>
 

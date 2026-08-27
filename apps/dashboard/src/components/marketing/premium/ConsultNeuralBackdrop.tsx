@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Component, type ErrorInfo, type ReactNode, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 const ConsultNeuralCanvas = dynamic(
   () => import("./ConsultNeuralCanvas").then((m) => ({ default: m.ConsultNeuralCanvas })),
@@ -42,7 +43,12 @@ function useConsultancyActive() {
     const root = document.getElementById("marketing-spa-root");
     const observer = new MutationObserver(sync);
     if (root) {
-      observer.observe(root, { subtree: true, attributes: true, attributeFilter: ["class"] });
+      observer.observe(root, {
+        subtree: true,
+        attributes: true,
+        childList: true,
+        attributeFilter: ["class"],
+      });
     }
     observer.observe(document.body, { attributes: true, attributeFilter: ["data-section"] });
     return () => observer.disconnect();
@@ -51,8 +57,42 @@ function useConsultancyActive() {
   return active;
 }
 
+function useHeroNeuralMount(active: boolean) {
+  const [mount, setMount] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!active) {
+      setMount(null);
+      return;
+    }
+
+    const resolve = () => {
+      const el = document.getElementById("consultNeuralMount");
+      if (el) setMount(el);
+    };
+
+    resolve();
+    const root = document.getElementById("marketing-spa-root");
+    const observer = new MutationObserver(resolve);
+    if (root) {
+      observer.observe(root, { childList: true, subtree: true });
+    }
+    const interval = window.setInterval(resolve, 150);
+    const stop = window.setTimeout(() => window.clearInterval(interval), 6000);
+
+    return () => {
+      observer.disconnect();
+      window.clearInterval(interval);
+      window.clearTimeout(stop);
+    };
+  }, [active]);
+
+  return mount;
+}
+
 export function ConsultNeuralBackdrop() {
   const active = useConsultancyActive();
+  const mount = useHeroNeuralMount(active);
   const [reduced, setReduced] = useState(false);
   const [ready, setReady] = useState(false);
 
@@ -62,17 +102,12 @@ export function ConsultNeuralBackdrop() {
     return () => window.cancelAnimationFrame(id);
   }, []);
 
-  if (!active || reduced || !ready) return null;
+  if (!active || reduced || !ready || !mount) return null;
 
-  return (
+  return createPortal(
     <NeuralErrorBoundary>
-      <div
-        id="consultPageNeuralMount"
-        className="consult-neural-react-backdrop consult-page-neural-canvas"
-        aria-hidden
-      >
-        <ConsultNeuralCanvas />
-      </div>
-    </NeuralErrorBoundary>
+      <ConsultNeuralCanvas />
+    </NeuralErrorBoundary>,
+    mount,
   );
 }

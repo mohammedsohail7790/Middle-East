@@ -1,7 +1,7 @@
 /* ================================================
    Halla AI — Stylesheet
    Design: SkipCalls/SideShift inspired
-   Font: Hanken Grotesk | Primary: #0A0A0A | Accent: #0D9488
+   Font: Hanken Grotesk | Primary: #0A0A0A | Accent: #7C3AED + #EF4444
    © 2025 Halla AI
 ================================================ */
 
@@ -25,10 +25,12 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --gray-700: #374151;
   --gray-800: #1F2937;
   --gray-900: #111827;
-  --accent: #0D9488;
-  --accent-dark: #0F766E;
-  --accent-light: #CCFBF1;
-  --accent-mid: #2DD4BF;
+  --accent: #7C3AED;
+  --accent-dark: #6D28D9;
+  --accent-light: #F3E8FF;
+  --accent-mid: #A855F7;
+  --brand-red: #EF4444;
+  --brand-red-dark: #DC2626;
   --green: #10B981;
   --green-light: #D1FAE5;
   --orange: #F59E0B;
@@ -90,7 +92,7 @@ p { color: var(--gray-500); line-height: 1.72; }
 .btn-outline { background: transparent; color: var(--black); border: 1.5px solid var(--gray-200); }
 .btn-outline:hover { border-color: var(--gray-400); background: var(--gray-50); }
 .btn-blue { background: var(--accent); color: var(--white); }
-.btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(13,148,136,0.3); }
+.btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,58,237,0.35); }
 .btn-lg { padding: 16px 34px; font-size: 1rem; }
 .btn-sm { padding: 9px 18px; font-size: 0.85rem; }
 
@@ -715,10 +717,10 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 
 /* ============ CONSULTANCY — PREMIUM LAYOUT ============ */
 #page-consultancy {
-  --consult-purple: #A855F7;
-  --consult-purple-dark: #7C3AED;
-  --consult-red: #EF4444;
-  --consult-red-dark: #DC2626;
+  --consult-purple: var(--accent-mid);
+  --consult-purple-dark: var(--accent-dark);
+  --consult-red: var(--brand-red);
+  --consult-red-dark: var(--brand-red-dark);
 }
 .consult-hero {
   position: relative; overflow: hidden;
@@ -734,16 +736,25 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-neural-canvas {
   position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 1;
   min-height: 100%;
+  overflow: hidden;
 }
 .consult-neural-canvas::after {
   content: "";
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 48% 52% at 76% 36%, transparent 0%, rgba(6,10,9,0.22) 68%),
-    linear-gradient(90deg, rgba(6,10,9,0.72) 0%, rgba(6,10,9,0.18) 40%, transparent 62%);
-  pointer-events: none; z-index: 1;
+    radial-gradient(ellipse 42% 48% at 78% 40%, transparent 0%, rgba(5,5,8,0.12) 72%),
+    linear-gradient(90deg, rgba(5,5,8,0.78) 0%, rgba(5,5,8,0.22) 42%, transparent 68%);
+  pointer-events: none; z-index: 2;
 }
-.consult-neural-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
+.consult-neural-canvas > canvas,
+.consult-neural-canvas canvas {
+  position: relative;
+  z-index: 1;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 480px;
+  display: block;
+}
 .consult-hero-glow {
   position: absolute; top: -20%; right: -10%; width: 55%; height: 70%;
   background:

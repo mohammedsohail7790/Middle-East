@@ -78,7 +78,7 @@
   height: 56px;
   margin: 18px auto 10px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0d9488, #2dd4bf);
+  background: linear-gradient(135deg, #7c3aed, #c084fc);
   display: grid;
   place-items: center;
   font-size: 0.7rem;
@@ -90,7 +90,7 @@
 .hp3d-status {
   text-align: center;
   font-size: 0.75rem;
-  color: #2dd4bf;
+  color: #c084fc;
   font-weight: 600;
 }
 
@@ -117,7 +117,7 @@
 .hp3d-wave span {
   width: 3px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #2dd4bf, #0d9488);
+  background: linear-gradient(180deg, #c084fc, #7c3aed);
   animation: hp3d-wave 1.2s ease-in-out infinite;
 }
 
@@ -137,7 +137,7 @@
   box-shadow: 0 12px 32px rgba(13, 148, 136, 0.15);
   font-size: 0.72rem;
   font-weight: 600;
-  color: #0f766e;
+  color: #6d28d9;
   animation: hp3d-card-float 5s ease-in-out infinite;
 }
 
@@ -205,7 +205,7 @@
   margin-bottom: 14px;
 }
 
-.premium-section--dark .premium-label { color: #2dd4bf; }
+.premium-section--dark .premium-label { color: #c084fc; }
 
 .premium-section h2 {
   font-size: clamp(1.75rem, 3.5vw, 2.5rem);
@@ -446,7 +446,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #2dd4bf;
+  color: #c084fc;
 }
 
 .premium-demo-messages {
@@ -499,7 +499,7 @@
 .premium-demo-ui .premium-demo-wave span {
   width: 3px;
   border-radius: 2px;
-  background: #2dd4bf;
+  background: #c084fc;
   animation: premium-demo-wave 1.1s ease-in-out infinite;
 }
 
@@ -702,7 +702,7 @@
 .premium-dash-card strong {
   display: block;
   font-size: 1.5rem;
-  color: #2dd4bf;
+  color: #c084fc;
   margin-bottom: 4px;
 }
 
@@ -856,7 +856,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, #5eead4 0%, #0d9488 42%, #0f766e 100%);
+  background: radial-gradient(circle at 32% 28%, #a855f7 0%, #7c3aed 42%, #6d28d9 100%);
   box-shadow:
     0 0 24px rgba(45, 212, 191, 0.45),
     inset 0 -8px 18px rgba(15, 118, 110, 0.35);
@@ -1232,7 +1232,7 @@
 
   .auth-showcase__title-accent {
     display: block;
-    background: linear-gradient(135deg, #0d9488 0%, #2dd4bf 55%, #0f766e 100%);
+    background: linear-gradient(135deg, #7c3aed 0%, #c084fc 55%, #6d28d9 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -1461,7 +1461,7 @@
 
 .dash3d-nav-item--active {
   background: rgba(45, 212, 191, 0.12);
-  color: #2dd4bf;
+  color: #c084fc;
 }
 
 .dash3d-main {
@@ -1489,7 +1489,7 @@
   padding: 4px 10px;
   border-radius: 999px;
   background: rgba(45, 212, 191, 0.12);
-  color: #2dd4bf;
+  color: #c084fc;
 }
 
 .dash3d-field {
@@ -1534,7 +1534,7 @@
 
 .dash3d-pill-active {
   background: rgba(13, 148, 136, 0.25);
-  color: #2dd4bf;
+  color: #c084fc;
   border-color: rgba(45, 212, 191, 0.35);
 }
 
@@ -1555,7 +1555,7 @@
 .dash3d-mini-stat strong {
   display: block;
   font-size: 1rem;
-  color: #2dd4bf;
+  color: #c084fc;
 }
 
 .dash3d-mini-stat span {
