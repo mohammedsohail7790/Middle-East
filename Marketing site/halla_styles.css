@@ -742,8 +742,8 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   content: "";
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 42% 48% at 78% 40%, transparent 0%, rgba(5,5,8,0.12) 72%),
-    linear-gradient(90deg, rgba(5,5,8,0.78) 0%, rgba(5,5,8,0.22) 42%, transparent 68%);
+    radial-gradient(ellipse 50% 55% at 72% 42%, transparent 0%, rgba(5,5,9,0.08) 70%),
+    linear-gradient(90deg, rgba(5,5,9,0.82) 0%, rgba(5,5,9,0.28) 38%, transparent 62%);
   pointer-events: none; z-index: 2;
 }
 .consult-neural-canvas > canvas,
@@ -752,8 +752,13 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   z-index: 1;
   width: 100% !important;
   height: 100% !important;
-  min-height: 480px;
+  min-height: 520px;
   display: block;
+}
+.consult-hero-bento .consult-bento-card {
+  background: rgba(9,7,18,0.42);
+  border-color: rgba(168,85,247,0.16);
+  backdrop-filter: blur(18px);
 }
 .consult-hero-glow {
   position: absolute; top: -20%; right: -10%; width: 55%; height: 70%;
@@ -919,6 +924,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 
 @media (max-width: 1024px) {
   .consult-hero-grid { grid-template-columns: 1fr; gap: 40px; }
+  .consult-neural-canvas canvas { min-height: 380px; }
   .consult-service-grid { grid-template-columns: 1fr; }
   .consult-timeline { grid-template-columns: 1fr 1fr; }
   .consult-timeline::before { display: none; }
