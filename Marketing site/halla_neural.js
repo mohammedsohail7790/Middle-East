@@ -471,8 +471,25 @@
     return !!(scene && scene.ready && scene.renderer);
   }
 
+  function usesReactConsult3D() {
+    return window.HALLA_EMBEDDED === true;
+  }
+
+  function releaseConsultScene() {
+    ['consult', 'consultPage'].forEach(function (key) {
+      const scene = scenes.get(key);
+      if (!scene) return;
+      scene.destroy();
+      scenes.delete(key);
+    });
+    const consultMount = document.getElementById('consultNeuralMount');
+    if (consultMount) consultMount.dataset.react3d = 'true';
+  }
+
   function initScenes() {
     if (prefersReducedMotion() || typeof THREE === 'undefined') return false;
+
+    if (usesReactConsult3D()) releaseConsultScene();
 
     const siteMount = document.getElementById('siteNeuralMount');
     if (siteMount && !scenes.get('site')) {
@@ -490,22 +507,24 @@
       }));
     }
 
-    const consultMount = document.getElementById('consultNeuralMount');
-    if (consultMount && !scenes.get('consult')) {
-      scenes.set('consult', new NeuralPathScene('consultNeuralMount', {
-        mode: 'consult',
-        parallax: true,
-      }));
-    }
+    if (!usesReactConsult3D()) {
+      const consultMount = document.getElementById('consultNeuralMount');
+      if (consultMount && !consultMount.dataset.react3d && !scenes.get('consult')) {
+        scenes.set('consult', new NeuralPathScene('consultNeuralMount', {
+          mode: 'consult',
+          parallax: true,
+        }));
+      }
 
-    const consultPageMount = document.getElementById('consultPageNeuralMount');
-    if (consultPageMount && !scenes.get('consultPage')) {
-      scenes.set('consultPage', new NeuralPathScene('consultPageNeuralMount', {
-        mode: 'consult',
-        parallax: true,
-        fullViewport: true,
-        autoStart: false,
-      }));
+      const consultPageMount = document.getElementById('consultPageNeuralMount');
+      if (consultPageMount && !scenes.get('consultPage')) {
+        scenes.set('consultPage', new NeuralPathScene('consultPageNeuralMount', {
+          mode: 'consult',
+          parallax: true,
+          fullViewport: true,
+          autoStart: false,
+        }));
+      }
     }
 
     return Array.from(scenes.values()).some(sceneReady);
@@ -542,13 +561,31 @@
 
   window.HallaNeural = {
     init,
+    releaseConsult: releaseConsultScene,
     refreshForPage(page) {
       init();
       const consultancy = isConsultancyPage(page);
       setConsultNeuralActive(consultancy);
 
+      if (usesReactConsult3D() && consultancy) {
+        releaseConsultScene();
+      }
+
       scenes.forEach((scene, key) => {
         if (!scene || !scene.mount || !scene.ready) return;
+
+        if (key === 'site') {
+          if (consultancy) scene._stop();
+          else scene.wake();
+          return;
+        }
+
+        if (key === 'consult' || key === 'consultPage') {
+          if (usesReactConsult3D()) {
+            scene._stop();
+            return;
+          }
+        }
 
         if (key === 'consultPage') {
           if (consultancy) scene.wake();

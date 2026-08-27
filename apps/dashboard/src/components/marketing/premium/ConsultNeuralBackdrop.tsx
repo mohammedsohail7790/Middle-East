@@ -68,7 +68,12 @@ function useHeroNeuralMount(active: boolean) {
 
     const resolve = () => {
       const el = document.getElementById("consultNeuralMount");
-      if (el) setMount(el);
+      if (!el) return;
+      el.dataset.react3d = "true";
+      const halla = (window as Window & { HallaNeural?: { releaseConsult?: () => void } })
+        .HallaNeural;
+      halla?.releaseConsult?.();
+      setMount(el);
     };
 
     resolve();

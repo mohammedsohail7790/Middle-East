@@ -110,6 +110,7 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
   const bootDecor = useCallback(() => {
     if (decorStarted.current) return;
     decorStarted.current = true;
+    getHallaWindow().HALLA_EMBEDDED = true;
 
     const refreshNeural = () => {
       const neural = getHallaWindow().HallaNeural;

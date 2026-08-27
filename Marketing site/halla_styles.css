@@ -244,7 +244,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
   background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(13,148,136,0.06) 0%, transparent 70%);
   transition: opacity 0.5s ease;
 }
-body.consult-neural-active .site-neural-canvas { opacity: 0.18; }
+body.consult-neural-active .site-neural-canvas { display: none !important; opacity: 0 !important; }
 
 /* Consultancy section — full-page neuron backdrop */
 .consult-page-neural-canvas {
@@ -737,6 +737,9 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 1;
   min-height: 100%;
   overflow: hidden;
+}
+.consult-neural-canvas[data-react3d="true"] > canvas:not(:last-child) {
+  display: none !important;
 }
 .consult-neural-canvas::after {
   content: "";

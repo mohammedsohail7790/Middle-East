@@ -115,11 +115,23 @@ function prepareIndexHtml(html) {
   );
   out = out.replace(/src=["']\.?\/?halla_main\.js["']/gi, 'src="/halla_main.js"');
   out = out.replace(/src=["']\.?\/?halla_neural\.js["']/gi, 'src="/halla_neural.js"');
-  // Next.js MarketingSPA loads halla_main.js; strip dead body script from embedded HTML.
+  return out;
+}
+
+/** Next.js MarketingSPA owns routing + THREE/GSAP/neural; strip duplicate head scripts. */
+function prepareEmbeddedMarketingHtml(html) {
+  let out = html;
   out = out.replace(
     /<script[^>]*src=["'][^"']*halla_main\.js["'][^>]*>\s*<\/script>\s*/gi,
     ""
   );
+  out = out.replace(
+    /<script[^>]*src=["'][^"']*(?:three(?:\.min)?\.js|gsap(?:\.min)?\.js|ScrollTrigger(?:\.min)?\.js|halla_neural\.js)[^"']*["'][^>]*>\s*<\/script>\s*/gi,
+    ""
+  );
+  if (!/HALLA_EMBEDDED/.test(out)) {
+    out = out.replace(/<head>/i, '<head>\n<script>window.HALLA_EMBEDDED=true;</script>');
+  }
   return out;
 }
 
@@ -158,6 +170,7 @@ function syncOnce() {
   const js = prepareJs(fs.readFileSync(ROOT_FILES.js, "utf8"));
   const neuralJs = fs.readFileSync(ROOT_FILES.neuralJs, "utf8");
   const indexHtml = prepareIndexHtml(fs.readFileSync(ROOT_FILES.indexHtml, "utf8"));
+  const embeddedHtml = prepareEmbeddedMarketingHtml(indexHtml);
   const previewHtml = fs.readFileSync(ROOT_FILES.previewHtml, "utf8");
 
   writeFileAtomic(path.join(MARKETING_DIR, "index.html"), indexHtml);
@@ -166,7 +179,7 @@ function syncOnce() {
   writeFileAtomic(path.join(MARKETING_DIR, "halla_main.js"), js);
   writeFileAtomic(path.join(MARKETING_DIR, "halla_neural.js"), neuralJs);
 
-  writeFileAtomic(path.join(DASHBOARD_PUBLIC, "marketing-body.html"), indexHtml);
+  writeFileAtomic(path.join(DASHBOARD_PUBLIC, "marketing-body.html"), embeddedHtml);
   writeFileAtomic(path.join(DASHBOARD_PUBLIC, "halla_styles.css"), css);
   writeFileAtomic(path.join(DASHBOARD_PUBLIC, "halla_main.js"), js);
   writeFileAtomic(path.join(DASHBOARD_PUBLIC, "halla_neural.js"), neuralJs);
