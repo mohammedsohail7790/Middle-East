@@ -254,13 +254,13 @@ body.consult-neural-active .site-neural-canvas { opacity: 0.18; }
     radial-gradient(ellipse 45% 35% at 72% 42%, rgba(45,212,191,0.1) 0%, transparent 52%),
     radial-gradient(ellipse 50% 40% at 20% 80%, rgba(45,212,191,0.06) 0%, transparent 55%);
 }
-body.consult-neural-active .consult-page-neural-canvas { opacity: 0.85; }
+body.consult-neural-active .consult-page-neural-canvas { opacity: 0.72; }
 .consult-neural-react-backdrop.consult-page-neural-canvas {
   opacity: 1 !important;
   z-index: 1;
   background:
-    radial-gradient(ellipse 50% 48% at 76% 36%, rgba(13,148,136,0.24) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 80% 40%, rgba(94,234,212,0.12) 0%, transparent 55%);
+    radial-gradient(ellipse 46% 44% at 74% 38%, rgba(13,148,136,0.14) 0%, transparent 62%),
+    radial-gradient(ellipse 38% 28% at 78% 42%, rgba(148,212,200,0.07) 0%, transparent 58%);
 }
 .consult-neural-react-backdrop canvas {
   width: 100% !important;
@@ -270,7 +270,9 @@ body.consult-neural-active .consult-page-neural-canvas { opacity: 0.85; }
 .consult-page-neural-canvas::after {
   content: "";
   position: absolute; inset: 0; pointer-events: none; z-index: 1;
-  background: linear-gradient(180deg, rgba(6,10,9,0.35) 0%, rgba(6,10,9,0.08) 38%, rgba(6,10,9,0.42) 100%);
+  background:
+    linear-gradient(90deg, rgba(6,10,9,0.58) 0%, rgba(6,10,9,0.12) 42%, transparent 58%),
+    linear-gradient(180deg, rgba(6,10,9,0.28) 0%, rgba(6,10,9,0.04) 40%, rgba(6,10,9,0.32) 100%);
 }
 .consult-page-neural-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
 #marketing-spa-root { position: relative; z-index: 1; }
