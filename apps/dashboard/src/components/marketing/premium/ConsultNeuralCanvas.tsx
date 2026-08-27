@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { buildConsultNeuron } from "./consultNeuronGeometry";
 
-const IMPULSE_COUNT = 30;
+const IMPULSE_COUNT = 20;
 
 function ImpulseLayer({ curves }: { curves: THREE.CatmullRomCurve3[] }) {
   const meshRefs = useRef<(THREE.Mesh | null)[]>([]);
@@ -96,8 +96,8 @@ function NeuronTree({ mobile }: { mobile: boolean }) {
         <meshBasicMaterial color="#2dd4bf" transparent opacity={0.14} depthWrite={false} />
       </mesh>
       {curves.map((curve, i) => (
-        <mesh key={i}>
-          <tubeGeometry args={[curve, 18, 0.045, 8, false]} />
+        <mesh key={i} frustumCulled={false}>
+          <tubeGeometry args={[curve, 12, 0.042, 6, false]} />
           <meshBasicMaterial color="#2dd4bf" transparent opacity={0.68} />
         </mesh>
       ))}

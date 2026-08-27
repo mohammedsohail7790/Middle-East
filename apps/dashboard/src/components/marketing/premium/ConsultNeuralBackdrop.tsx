@@ -1,12 +1,29 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { Component, type ErrorInfo, type ReactNode, useEffect, useState } from "react";
 
 const ConsultNeuralCanvas = dynamic(
   () => import("./ConsultNeuralCanvas").then((m) => ({ default: m.ConsultNeuralCanvas })),
   { ssr: false },
 );
+
+class NeuralErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.warn("[consult-neural]", error, info.componentStack);
+  }
+
+  render() {
+    if (this.state.failed) return null;
+    return this.props.children;
+  }
+}
 
 function useConsultancyActive() {
   const [active, setActive] = useState(false);
@@ -37,20 +54,25 @@ function useConsultancyActive() {
 export function ConsultNeuralBackdrop() {
   const active = useConsultancyActive();
   const [reduced, setReduced] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    const id = window.requestAnimationFrame(() => setReady(true));
+    return () => window.cancelAnimationFrame(id);
   }, []);
 
-  if (!active || reduced) return null;
+  if (!active || reduced || !ready) return null;
 
   return (
-    <div
-      id="consultPageNeuralMount"
-      className="consult-neural-react-backdrop consult-page-neural-canvas"
-      aria-hidden
-    >
-      <ConsultNeuralCanvas />
-    </div>
+    <NeuralErrorBoundary>
+      <div
+        id="consultPageNeuralMount"
+        className="consult-neural-react-backdrop consult-page-neural-canvas"
+        aria-hidden
+      >
+        <ConsultNeuralCanvas />
+      </div>
+    </NeuralErrorBoundary>
   );
 }
