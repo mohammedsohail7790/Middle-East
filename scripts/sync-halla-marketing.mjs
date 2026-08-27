@@ -115,6 +115,11 @@ function prepareIndexHtml(html) {
   );
   out = out.replace(/src=["']\.?\/?halla_main\.js["']/gi, 'src="/halla_main.js"');
   out = out.replace(/src=["']\.?\/?halla_neural\.js["']/gi, 'src="/halla_neural.js"');
+  // Next.js MarketingSPA loads halla_main.js; strip dead body script from embedded HTML.
+  out = out.replace(
+    /<script[^>]*src=["'][^"']*halla_main\.js["'][^>]*>\s*<\/script>\s*/gi,
+    ""
+  );
   return out;
 }
 

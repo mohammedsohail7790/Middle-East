@@ -131,7 +131,7 @@ const nextConfig = {
         /** Marketing SPA is embedded in an iframe on `/` — must allow same-origin framing. */
         const marketingSpaCsp = [
             "default-src 'self'",
-            `script-src 'self' 'unsafe-inline' 'unsafe-eval'${tawkScriptSrc}`,
+            `script-src 'self' 'unsafe-inline' 'unsafe-eval'${tawkScriptSrc}${jsdelivrSrc}`,
             `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com${tawkStyleSrc}${jsdelivrSrc}`,
             `font-src 'self' https://fonts.gstatic.com data:${tawkFontSrc}${jsdelivrSrc}`,
             "img-src 'self' data: https:",
@@ -143,7 +143,7 @@ const nextConfig = {
 
         const appCsp = [
             "default-src 'self'",
-            `script-src 'self' 'unsafe-inline' 'unsafe-eval'${tawkScriptSrc}`,
+            `script-src 'self' 'unsafe-inline' 'unsafe-eval'${tawkScriptSrc}${jsdelivrSrc}`,
             `style-src 'self' 'unsafe-inline'${tawkStyleSrc}${jsdelivrSrc}`,
             `font-src 'self' data:${tawkFontSrc}${jsdelivrSrc}`,
             "img-src 'self' data: https:",
