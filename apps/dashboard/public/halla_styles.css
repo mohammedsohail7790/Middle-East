@@ -253,7 +253,7 @@ body.consult-neural-active .site-neural-canvas { opacity: 0.18; }
     radial-gradient(ellipse 70% 55% at 78% 35%, rgba(13,148,136,0.12) 0%, transparent 62%),
     radial-gradient(ellipse 50% 40% at 20% 80%, rgba(45,212,191,0.06) 0%, transparent 55%);
 }
-body.consult-neural-active .consult-page-neural-canvas { opacity: 0.72; }
+body.consult-neural-active .consult-page-neural-canvas { opacity: 0.85; }
 .consult-page-neural-canvas::after {
   content: "";
   position: absolute; inset: 0; pointer-events: none; z-index: 1;
@@ -711,6 +711,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-dot-pattern { color: rgba(45,212,191,0.35); }
 .consult-neural-canvas {
   position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 1;
+  min-height: 100%;
 }
 .consult-neural-canvas::after {
   content: "";

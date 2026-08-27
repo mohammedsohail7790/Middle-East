@@ -22,7 +22,8 @@ type HallaWindow = Window & {
   go?: (page: string) => void;
   setLang?: (lang: string) => void;
   HALLA_EMBEDDED?: boolean;
-  HallaNeural?: { init: () => void };
+  THREE?: typeof import("three");
+  HallaNeural?: { init: () => void; refreshForPage?: (page: string) => void };
 };
 
 function getHallaWindow(): HallaWindow {
@@ -91,6 +92,18 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    void import("three").then((THREE) => {
+      if (cancelled) return;
+      getHallaWindow().THREE = THREE;
+      setScriptStep(1);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (scriptStep >= 4) installBridge();
   }, [scriptStep, installBridge]);
 
@@ -109,11 +122,6 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
       />
       <Dashboard3DMounts />
 
-      <Script
-        src="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.min.js"
-        strategy="afterInteractive"
-        onLoad={() => setScriptStep(1)}
-      />
       {scriptStep >= 1 && (
         <Script
           src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"
@@ -133,7 +141,9 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
           src="/halla_neural.js"
           strategy="afterInteractive"
           onLoad={() => {
-            getHallaWindow().HallaNeural?.init();
+            const neural = getHallaWindow().HallaNeural;
+            neural?.init();
+            neural?.refreshForPage?.(safeInitialPage);
             setScriptStep(4);
           }}
         />

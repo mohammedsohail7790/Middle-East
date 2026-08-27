@@ -27,6 +27,7 @@
   class NeuralPathScene {
     constructor(mountId, options) {
       this.mount = document.getElementById(mountId);
+      this.ready = false;
       if (!this.mount || typeof THREE === 'undefined') return;
 
       this.opts = Object.assign({
@@ -120,6 +121,7 @@
 
       this._spawnImpulses();
       window.addEventListener('resize', this._onResize);
+      this.ready = true;
     }
 
     _somaMaterial(intensity) {
@@ -465,6 +467,10 @@
     }
   }
 
+  function sceneReady(scene) {
+    return !!(scene && scene.ready && scene.renderer);
+  }
+
   function initScenes() {
     if (prefersReducedMotion() || typeof THREE === 'undefined') return false;
 
@@ -502,7 +508,7 @@
       }));
     }
 
-    return scenes.size > 0;
+    return Array.from(scenes.values()).some(sceneReady);
   }
 
   const CONSULTANCY_PAGES = new Set([
@@ -520,14 +526,14 @@
   let retryTimer = null;
 
   function init() {
-    if (initScenes()) return;
     if (prefersReducedMotion()) return;
+    if (initScenes()) return;
     if (retryTimer) return;
 
     let attempts = 0;
     retryTimer = setInterval(function () {
       attempts += 1;
-      if (initScenes() || attempts >= 60) {
+      if (initScenes() || attempts >= 80) {
         clearInterval(retryTimer);
         retryTimer = null;
       }
@@ -542,7 +548,7 @@
       setConsultNeuralActive(consultancy);
 
       scenes.forEach((scene, key) => {
-        if (!scene || !scene.mount) return;
+        if (!scene || !scene.mount || !scene.ready) return;
 
         if (key === 'consultPage') {
           if (consultancy) scene.wake();
