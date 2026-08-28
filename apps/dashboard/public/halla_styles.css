@@ -742,6 +742,9 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   gap: 14px;
   min-height: 440px;
 }
+/* 3D scene removed by request */
+.consult-hero-visual #consultNeuralMount { display: none; }
+.consult-hero-visual { justify-content: center; }
 .consult-hero-visual .consult-neural-canvas {
   position: relative;
   inset: auto;

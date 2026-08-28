@@ -894,30 +894,7 @@
       }));
     }
 
-    if (!usesReactConsult3D()) {
-      const consultMount = document.getElementById('consultNeuralMount');
-      if (consultMount && !scenes.get('consult')) {
-        consultMount.querySelector('.consult-neural-react-stage')?.remove();
-        scenes.set('consult', new NeuralPathScene('consultNeuralMount', {
-          mode: 'consult',
-          parallax: true,
-          accent: 0x7C3AED,
-          glow: 0xA855F7,
-        }));
-      }
-
-      const consultPageMount = document.getElementById('consultPageNeuralMount');
-      if (consultPageMount && !scenes.get('consultPage')) {
-        scenes.set('consultPage', new NeuralPathScene('consultPageNeuralMount', {
-          mode: 'consult',
-          parallax: true,
-          fullViewport: true,
-          autoStart: false,
-          accent: 0x7C3AED,
-          glow: 0xA855F7,
-        }));
-      }
-    }
+    // Consultancy hero 3D scene removed by request — no longer mounted.
 
     return Array.from(scenes.values()).some(sceneReady);
   }
