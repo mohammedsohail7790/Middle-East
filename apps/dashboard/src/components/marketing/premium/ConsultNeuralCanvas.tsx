@@ -4,16 +4,20 @@ import { Canvas } from "@react-three/fiber";
 import { useEffect, useState } from "react";
 import { AIIntelligenceScene } from "./consultancy-intelligence/AIIntelligenceScene";
 
-export function ConsultNeuralCanvas() {
+type Props = {
+  reducedMotion?: boolean;
+  onReady?: () => void;
+};
+
+export function ConsultNeuralCanvas({ reducedMotion = false, onReady }: Props) {
   const [mobile, setMobile] = useState(false);
-  const [reduced, setReduced] = useState(false);
   const [visible, setVisible] = useState(true);
+  const reduced = reducedMotion;
 
   useEffect(() => {
     setMobile(
       window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches,
     );
-    setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
     const hero = document.querySelector(".consult-hero");
     if (!hero) return;
@@ -28,10 +32,11 @@ export function ConsultNeuralCanvas() {
 
   return (
     <Canvas
-      camera={{ position: [2.2, 0.12, 6.8], fov: mobile ? 42 : 36, near: 0.1, far: 100 }}
+      camera={{ position: [0, 0.05, mobile ? 7.4 : 6.4], fov: mobile ? 44 : 38, near: 0.1, far: 100 }}
       gl={{ alpha: true, antialias: !mobile, powerPreference: "high-performance" }}
       dpr={mobile ? [1, 1.2] : [1, 1.5]}
-      frameloop={visible && !reduced ? "always" : "demand"}
+      frameloop="always"
+      onCreated={() => onReady?.()}
       style={{ width: "100%", height: "100%", display: "block" }}
     >
       <AIIntelligenceScene mobile={mobile} reduced={reduced} visible={visible} />

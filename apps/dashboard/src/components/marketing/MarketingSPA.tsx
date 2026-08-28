@@ -5,7 +5,6 @@ import { useCallback, useEffect, useRef } from "react";
 import { MarketingVibeLayer } from "@/components/marketing/MarketingVibeLayer";
 import { MarketingPremiumLayer } from "@/components/marketing/premium/MarketingPremiumLayer";
 import { MarketingConsultancyLayer } from "@/components/marketing/premium/MarketingConsultancyLayer";
-import { ConsultNeuralBackdrop } from "@/components/marketing/premium/ConsultNeuralBackdrop";
 import { Dashboard3DMounts } from "@/components/marketing/premium/Dashboard3DMounts";
 import { MarketingAtmosphere } from "@/components/marketing/effects/MarketingAtmosphere";
 
@@ -60,6 +59,24 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
   const safeInitialPage = initialPage.replace(/[^a-z0-9-]/gi, "") || "consultancy";
   const bridgeInstalled = useRef(false);
   const decorStarted = useRef(false);
+  const spaRootRef = useRef<HTMLDivElement>(null);
+  const htmlInjected = useRef(false);
+
+  useEffect(() => {
+    const el = spaRootRef.current;
+    if (!el || htmlInjected.current) return;
+    el.innerHTML = bodyHtml;
+    htmlInjected.current = true;
+    window.dispatchEvent(new CustomEvent("halla-marketing-mounted"));
+  }, [bodyHtml]);
+
+  const ensureMarketingHtml = useCallback(() => {
+    const el = spaRootRef.current;
+    if (!el || htmlInjected.current) return;
+    el.innerHTML = bodyHtml;
+    htmlInjected.current = true;
+    window.dispatchEvent(new CustomEvent("halla-marketing-mounted"));
+  }, [bodyHtml]);
 
   const installBridge = useCallback(() => {
     if (bridgeInstalled.current) return;
@@ -130,9 +147,10 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
   }, [safeInitialPage]);
 
   const onMainReady = useCallback(() => {
+    ensureMarketingHtml();
     installBridge();
     bootDecor();
-  }, [installBridge, bootDecor]);
+  }, [ensureMarketingHtml, installBridge, bootDecor]);
 
   useEffect(() => {
     getHallaWindow().HALLA_EMBEDDED = true;
@@ -154,15 +172,10 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
     <>
       <MarketingAtmosphere variant="marketing" />
       <div id="siteNeuralMount" className="site-neural-canvas" aria-hidden />
-      <ConsultNeuralBackdrop />
       <MarketingVibeLayer />
       <MarketingPremiumLayer />
       <MarketingConsultancyLayer />
-      <div
-        id="marketing-spa-root"
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: bodyHtml }}
-      />
+      <div id="marketing-spa-root" ref={spaRootRef} />
       <Dashboard3DMounts />
 
       <Script

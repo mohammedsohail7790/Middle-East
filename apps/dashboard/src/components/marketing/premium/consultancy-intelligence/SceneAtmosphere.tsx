@@ -10,7 +10,8 @@ export function SceneAtmosphere({ count, animate }: { count: number; animate: bo
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      arr[i * 3] = (Math.random() - 0.5) * 7;
+      const leftBias = i % 3 === 0 ? -1.8 : 0;
+      arr[i * 3] = leftBias + (Math.random() - 0.5) * 7;
       arr[i * 3 + 1] = (Math.random() - 0.5) * 4.5;
       arr[i * 3 + 2] = (Math.random() - 0.5) * 4 - 1;
     }
@@ -42,11 +43,11 @@ export function SceneAtmosphere({ count, animate }: { count: number; animate: bo
 export function SceneLighting() {
   return (
     <>
-      <ambientLight intensity={0.22} color={PALETTE.deep} />
-      <directionalLight position={[4, 5, 6]} intensity={0.55} color={PALETTE.white} />
-      <pointLight position={[2.5, 1.5, 4]} intensity={1.1} color={PALETTE.electric} distance={14} decay={2} />
-      <pointLight position={[-2, -0.5, 3]} intensity={0.45} color={PALETTE.red} distance={10} decay={2} />
-      <pointLight position={[0, -2, 2]} intensity={0.25} color={PALETTE.violet} distance={8} decay={2} />
+      <ambientLight intensity={0.38} color={PALETTE.deep} />
+      <directionalLight position={[4, 5, 6]} intensity={0.85} color={PALETTE.white} />
+      <pointLight position={[1.8, 1.2, 4]} intensity={1.65} color={PALETTE.electric} distance={16} decay={2} />
+      <pointLight position={[-2.2, -0.4, 3]} intensity={0.85} color={PALETTE.red} distance={12} decay={2} />
+      <pointLight position={[0, -1.8, 2]} intensity={0.55} color={PALETTE.violet} distance={10} decay={2} />
     </>
   );
 }
