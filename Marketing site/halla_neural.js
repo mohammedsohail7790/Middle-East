@@ -193,12 +193,37 @@
       this.root.scale.setScalar(isConsult ? (isMobile() ? 1.05 : 1.22) : (isMobile() ? 0.92 : 1.08));
     }
 
+    _hexStringToNum(hex) {
+      if (!hex) return null;
+      hex = hex.trim();
+      if (hex.startsWith('#')) hex = hex.slice(1);
+      if (hex.length === 3) hex = hex.split('').map((c) => c + c).join('');
+      const num = parseInt(hex, 16);
+      return Number.isNaN(num) ? null : num;
+    }
+
+    _consultTheme() {
+      const styles = getComputedStyle(document.documentElement);
+      const read = (name, fallback) => {
+        const num = this._hexStringToNum(styles.getPropertyValue(name));
+        return num != null ? num : fallback;
+      };
+      return {
+        PURPLE: read('--accent', 0x7C3AED),
+        ELECTRIC: read('--accent-mid', 0xA855F7),
+        RED: read('--brand-red-dark', 0xDC2626),
+        METAL: 0x100A1C,
+        DEEP: 0x090712,
+      };
+    }
+
     _buildConsultIntelligence() {
-      const PURPLE = 0x7C3AED;
-      const ELECTRIC = 0xA855F7;
-      const RED = 0xEF2334;
-      const METAL = 0x100A1C;
-      const DEEP = 0x090712;
+      const theme = this._consultTheme();
+      const PURPLE = theme.PURPLE;
+      const ELECTRIC = theme.ELECTRIC;
+      const RED = theme.RED;
+      const METAL = theme.METAL;
+      const DEEP = theme.DEEP;
       const mobile = isMobile();
 
       this.opts.accent = PURPLE;
@@ -250,52 +275,102 @@
 
       this.root.add(pedestal);
 
+      // ===== BRAIN CORE =====
       const core = new THREE.Group();
-      core.position.y = 0.15;
+      core.position.y = 0.22;
+
+      const brainRadius = mobile ? 1.22 : 1.42;
+      const brainGeo = new THREE.IcosahedronGeometry(brainRadius, mobile ? 3 : 4);
+      const posAttr = brainGeo.attributes.position;
+      const v = new THREE.Vector3();
+      for (let i = 0; i < posAttr.count; i++) {
+        v.fromBufferAttribute(posAttr, i);
+        const n = v.clone().normalize();
+        // longitudinal groove splitting left/right hemispheres
+        const groove = Math.exp(-(v.x * v.x) / (2 * (brainRadius * 0.045))) * 0.18;
+        // layered sine "folds" (gyri/sulci) — cheap deterministic noise, kept subtle for a clean silhouette
+        const fold = (
+          Math.sin(v.x * 3.4 + v.y * 2.1) * 0.5 +
+          Math.sin(v.y * 2.6 - v.z * 3.3) * 0.32 +
+          Math.sin(v.z * 4.2 + v.x * 2.8) * 0.24 +
+          Math.sin((v.x + v.y + v.z) * 5.6) * 0.14
+        ) * 0.075;
+        const frontalLift = n.y > 0 ? 0.05 : -0.03;
+        const scaleFactor = 1 + fold - groove + frontalLift * Math.abs(n.y);
+        v.multiplyScalar(scaleFactor);
+        posAttr.setXYZ(i, v.x, v.y * 0.9, v.z * 1.05);
+      }
+      brainGeo.computeVertexNormals();
 
       const shell = new THREE.Mesh(
-        new THREE.BoxGeometry(0.92, 0.92, 0.92),
+        brainGeo,
         new THREE.MeshPhysicalMaterial({
           color: METAL,
-          metalness: 0.55,
-          roughness: 0.18,
-          transmission: 0.82,
-          thickness: 0.75,
+          metalness: 0.32,
+          roughness: 0.12,
+          transmission: 0.88,
+          thickness: 1.15,
+          ior: 1.45,
+          specularIntensity: 1,
           transparent: true,
-          opacity: 0.94,
+          opacity: 0.93,
           emissive: PURPLE,
-          emissiveIntensity: 0.14,
+          emissiveIntensity: 0.2,
+          clearcoat: 0.7,
+          clearcoatRoughness: 0.2,
         })
       );
       core.add(shell);
+      this.brainShell = shell;
+
+      const wireframe = new THREE.Mesh(
+        brainGeo.clone(),
+        new THREE.MeshBasicMaterial({
+          color: ELECTRIC,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.15,
+          depthWrite: false,
+        })
+      );
+      wireframe.scale.setScalar(1.012);
+      core.add(wireframe);
+
+      this._glowHalo(brainRadius * 1.35, core, new THREE.Vector3(0, 0, 0));
 
       const inner = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(0.42, 1),
+        new THREE.IcosahedronGeometry(brainRadius * 0.3, 1),
         new THREE.MeshPhysicalMaterial({
           color: DEEP,
           metalness: 0.65,
           roughness: 0.22,
           emissive: ELECTRIC,
-          emissiveIntensity: 0.65,
+          emissiveIntensity: 0.7,
         })
       );
       core.add(inner);
+      this.brainCore = inner;
 
-      const glow = new THREE.Mesh(
-        new THREE.SphereGeometry(0.28, 24, 24),
-        new THREE.MeshPhysicalMaterial({
-          color: 0x5B21B6,
-          emissive: 0x8B5CF6,
-          emissiveIntensity: 0.85,
-          metalness: 0.35,
-          roughness: 0.28,
-          transparent: true,
-          opacity: 0.88,
-        })
-      );
-      core.add(glow);
+      // synapse nodes scattered across the brain surface
+      const synapseCount = mobile ? 20 : 34;
+      const posArray = posAttr.array;
+      const vertCount = posAttr.count;
+      for (let i = 0; i < synapseCount; i++) {
+        const idx = Math.floor(rand(0, vertCount));
+        const color = i % 5 === 0 ? RED : ELECTRIC;
+        const synapse = new THREE.Mesh(
+          new THREE.SphereGeometry(mobile ? 0.026 : 0.032, 8, 8),
+          new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.92 })
+        );
+        synapse.position.set(posArray[idx * 3], posArray[idx * 3 + 1], posArray[idx * 3 + 2]);
+        synapse.userData.float = rand(0, Math.PI * 2);
+        core.add(synapse);
+        this.consultFloats = this.consultFloats || [];
+        this.consultFloats.push(synapse);
+      }
 
       this.root.add(core);
+      this.brainGroup = core;
 
       const ringSpecs = mobile
         ? [
@@ -651,6 +726,9 @@
         }
         if (this.consultParticles) {
           this.consultParticles.rotation.y = t * 0.015;
+        }
+        if (this.brainCore) {
+          this.brainCore.material.emissiveIntensity = 0.55 + Math.sin(t * 1.4) * 0.2;
         }
       } else {
         this.root.rotation.y += dt * 0.06;
