@@ -193,12 +193,37 @@
       this.root.scale.setScalar(isConsult ? (isMobile() ? 1.05 : 1.22) : (isMobile() ? 0.92 : 1.08));
     }
 
+    _hexStringToNum(hex) {
+      if (!hex) return null;
+      hex = hex.trim();
+      if (hex.startsWith('#')) hex = hex.slice(1);
+      if (hex.length === 3) hex = hex.split('').map((c) => c + c).join('');
+      const num = parseInt(hex, 16);
+      return Number.isNaN(num) ? null : num;
+    }
+
+    _consultTheme() {
+      const styles = getComputedStyle(document.documentElement);
+      const read = (name, fallback) => {
+        const num = this._hexStringToNum(styles.getPropertyValue(name));
+        return num != null ? num : fallback;
+      };
+      return {
+        PURPLE: read('--accent', 0x7C3AED),
+        ELECTRIC: read('--accent-mid', 0xA855F7),
+        RED: read('--brand-red-dark', 0xDC2626),
+        METAL: 0x100A1C,
+        DEEP: 0x090712,
+      };
+    }
+
     _buildConsultIntelligence() {
-      const PURPLE = 0x7C3AED;
-      const ELECTRIC = 0xA855F7;
-      const RED = 0xEF2334;
-      const METAL = 0x100A1C;
-      const DEEP = 0x090712;
+      const theme = this._consultTheme();
+      const PURPLE = theme.PURPLE;
+      const ELECTRIC = theme.ELECTRIC;
+      const RED = theme.RED;
+      const METAL = theme.METAL;
+      const DEEP = theme.DEEP;
       const mobile = isMobile();
 
       this.opts.accent = PURPLE;
@@ -250,39 +275,67 @@
 
       this.root.add(pedestal);
 
+      // ===== CRYSTALLINE CORE (glass cube, matches reference art) =====
       const core = new THREE.Group();
       core.position.y = 0.15;
+      const coreSize = mobile ? 0.86 : 1.0;
 
+      const cubeGeo = new THREE.BoxGeometry(coreSize, coreSize, coreSize, 3, 3, 3);
       const shell = new THREE.Mesh(
-        new THREE.BoxGeometry(0.92, 0.92, 0.92),
+        cubeGeo,
         new THREE.MeshPhysicalMaterial({
           color: METAL,
-          metalness: 0.55,
-          roughness: 0.18,
-          transmission: 0.82,
-          thickness: 0.75,
+          metalness: 0.4,
+          roughness: 0.08,
+          transmission: 0.92,
+          thickness: 1.1,
+          ior: 1.5,
+          specularIntensity: 1,
           transparent: true,
-          opacity: 0.94,
+          opacity: 0.9,
           emissive: PURPLE,
           emissiveIntensity: 0.14,
+          clearcoat: 0.85,
+          clearcoatRoughness: 0.12,
         })
       );
       core.add(shell);
+      this.brainShell = shell;
 
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(cubeGeo),
+        new THREE.LineBasicMaterial({ color: 0xC084FC, transparent: true, opacity: 0.55 })
+      );
+      edges.scale.setScalar(1.006);
+      core.add(edges);
+
+      this._glowHalo(coreSize * 1.35, core, new THREE.Vector3(0, 0, 0));
+
+      const innerGeo = new THREE.IcosahedronGeometry(coreSize * 0.42, 1);
       const inner = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(0.42, 1),
+        innerGeo,
         new THREE.MeshPhysicalMaterial({
           color: DEEP,
           metalness: 0.65,
           roughness: 0.22,
           emissive: ELECTRIC,
-          emissiveIntensity: 0.65,
+          emissiveIntensity: 0.6,
         })
       );
+      inner.rotation.set(0.4, 0.5, 0);
       core.add(inner);
+      this.brainCore = inner;
 
-      const glow = new THREE.Mesh(
-        new THREE.SphereGeometry(0.28, 24, 24),
+      const innerEdges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(innerGeo),
+        new THREE.LineBasicMaterial({ color: 0xD946EF, transparent: true, opacity: 0.4 })
+      );
+      innerEdges.scale.setScalar(1.01);
+      innerEdges.rotation.copy(inner.rotation);
+      core.add(innerEdges);
+
+      const kernel = new THREE.Mesh(
+        new THREE.SphereGeometry(coreSize * 0.28, 24, 24),
         new THREE.MeshPhysicalMaterial({
           color: 0x5B21B6,
           emissive: 0x8B5CF6,
@@ -290,80 +343,122 @@
           metalness: 0.35,
           roughness: 0.28,
           transparent: true,
-          opacity: 0.88,
+          opacity: 0.9,
         })
       );
-      core.add(glow);
+      core.add(kernel);
+      this.consultKernel = kernel;
 
       this.root.add(core);
+      this.brainGroup = core;
 
       const ringSpecs = mobile
         ? [
-            { r: 1.15, tube: 0.014, tilt: [Math.PI / 2.2, 0.15, 0], speed: 0.11, red: false },
-            { r: 1.38, tube: 0.011, tilt: [Math.PI / 2.6, -0.35, 0.45], speed: -0.08, red: true },
-            { r: 1.62, tube: 0.009, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
+            { r: 1.2, tube: 0.018, tilt: [Math.PI / 2.15, 0.12, 0.08], speed: 0.11, red: false },
+            { r: 1.42, tube: 0.02, tilt: [Math.PI / 3.1, -0.55, 0.7], speed: -0.08, red: true },
+            { r: 1.66, tube: 0.009, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
           ]
         : [
-            { r: 1.15, tube: 0.014, tilt: [Math.PI / 2.2, 0.15, 0], speed: 0.11, red: false },
-            { r: 1.38, tube: 0.011, tilt: [Math.PI / 2.6, -0.35, 0.45], speed: -0.08, red: true },
-            { r: 1.62, tube: 0.009, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
-            { r: 1.88, tube: 0.008, tilt: [Math.PI / 2.4, -0.2, 0.6], speed: -0.05, red: false },
+            { r: 1.2, tube: 0.02, tilt: [Math.PI / 2.15, 0.12, 0.08], speed: 0.11, red: false },
+            { r: 1.42, tube: 0.024, tilt: [Math.PI / 3.1, -0.55, 0.7], speed: -0.08, red: true },
+            { r: 1.66, tube: 0.01, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
+            { r: 1.92, tube: 0.008, tilt: [Math.PI / 2.4, -0.2, 0.6], speed: -0.05, red: false },
           ];
 
       ringSpecs.forEach(function (spec) {
         const group = new THREE.Group();
         group.rotation.set(spec.tilt[0], spec.tilt[1], spec.tilt[2]);
         const ring = new THREE.Mesh(
-          new THREE.TorusGeometry(spec.r, spec.tube, 12, 96),
+          new THREE.TorusGeometry(spec.r, spec.tube, 16, 128),
           new THREE.MeshPhysicalMaterial({
             color: METAL,
-            metalness: 0.72,
-            roughness: 0.28,
-            emissive: spec.red ? RED : PURPLE,
-            emissiveIntensity: spec.red ? 0.35 : 0.28,
+            metalness: 0.8,
+            roughness: 0.16,
+            clearcoat: 0.6,
+            emissive: spec.red ? 0xFF304F : PURPLE,
+            emissiveIntensity: spec.red ? 0.5 : 0.32,
             transparent: true,
-            opacity: 0.82,
+            opacity: 0.86,
           })
         );
         ring.userData.spin = spec.speed;
         group.add(ring);
+        const glow = new THREE.Mesh(
+          new THREE.TorusGeometry(spec.r, spec.tube * 2.6, 8, 96),
+          new THREE.MeshBasicMaterial({
+            color: spec.red ? 0xFF304F : ELECTRIC,
+            transparent: true,
+            opacity: 0.1,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+          })
+        );
+        group.add(glow);
         this.root.add(group);
         this.consultRings.push(ring);
       }, this);
 
       const floatSpecs = mobile
         ? [
-            { pos: [1.45, 0.55, 0.35], s: 0.11, red: false },
-            { pos: [-1.2, -0.35, 0.5], s: 0.09, red: false },
-            { pos: [0.95, -0.65, -0.4], s: 0.07, red: true },
-            { pos: [-1.55, 0.25, -0.25], s: 0.08, red: false },
-            { pos: [1.65, -0.15, -0.55], s: 0.06, red: false },
+            { pos: [1.45, 0.55, 0.35], s: 0.11, red: false, kind: 'orb' },
+            { pos: [-1.2, -0.35, 0.5], s: 0.09, red: false, kind: 'cube' },
+            { pos: [0.95, -0.65, -0.4], s: 0.07, red: true, kind: 'orb' },
+            { pos: [-1.55, 0.25, -0.25], s: 0.08, red: false, kind: 'cube' },
+            { pos: [1.65, -0.15, -0.55], s: 0.06, red: false, kind: 'orb' },
           ]
         : [
-            { pos: [1.45, 0.55, 0.35], s: 0.11, red: false },
-            { pos: [-1.2, -0.35, 0.5], s: 0.09, red: false },
-            { pos: [0.95, -0.65, -0.4], s: 0.07, red: true },
-            { pos: [-1.55, 0.25, -0.25], s: 0.08, red: false },
-            { pos: [1.65, -0.15, -0.55], s: 0.06, red: false },
-            { pos: [-0.85, 0.72, 0.15], s: 0.1, red: false },
-            { pos: [0.35, 0.85, -0.6], s: 0.055, red: true },
-            { pos: [-1.35, -0.7, -0.15], s: 0.075, red: false },
+            { pos: [1.45, 0.55, 0.35], s: 0.11, red: false, kind: 'orb' },
+            { pos: [-1.2, -0.35, 0.5], s: 0.09, red: false, kind: 'cube' },
+            { pos: [0.95, -0.65, -0.4], s: 0.07, red: true, kind: 'orb' },
+            { pos: [-1.55, 0.25, -0.25], s: 0.08, red: false, kind: 'cube' },
+            { pos: [1.65, -0.15, -0.55], s: 0.06, red: false, kind: 'orb' },
+            { pos: [-0.85, 0.72, 0.15], s: 0.1, red: false, kind: 'cube' },
+            { pos: [0.35, 0.85, -0.6], s: 0.055, red: true, kind: 'orb' },
+            { pos: [-1.35, -0.7, -0.15], s: 0.075, red: false, kind: 'cube' },
           ];
 
       floatSpecs.forEach(function (spec) {
         const color = spec.red ? RED : ELECTRIC;
-        const mesh = new THREE.Mesh(
-          new THREE.SphereGeometry(spec.s, 10, 10),
-          new THREE.MeshPhysicalMaterial({
-            color: DEEP,
-            metalness: 0.5,
-            roughness: 0.25,
-            emissive: color,
-            emissiveIntensity: spec.red ? 0.7 : 0.45,
-            transparent: true,
-            opacity: 0.88,
-          })
-        );
+        let mesh;
+        if (spec.kind === 'cube') {
+          const geo = new THREE.BoxGeometry(1, 1, 1);
+          mesh = new THREE.Mesh(
+            geo,
+            new THREE.MeshPhysicalMaterial({
+              color: METAL,
+              metalness: 0.5,
+              roughness: 0.1,
+              transmission: 0.75,
+              ior: 1.4,
+              transparent: true,
+              opacity: 0.35,
+              emissive: PURPLE,
+              emissiveIntensity: 0.1,
+            })
+          );
+          const cubeEdges = new THREE.LineSegments(
+            new THREE.EdgesGeometry(geo),
+            new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.65 })
+          );
+          mesh.add(cubeEdges);
+          mesh.rotation.set(0.4, 0.6, 0.2);
+        } else {
+          mesh = new THREE.Mesh(
+            new THREE.SphereGeometry(1, 20, 20),
+            new THREE.MeshPhysicalMaterial({
+              color: DEEP,
+              metalness: 0.75,
+              roughness: 0.1,
+              clearcoat: 1,
+              clearcoatRoughness: 0.08,
+              emissive: color,
+              emissiveIntensity: spec.red ? 0.75 : 0.5,
+              transparent: true,
+              opacity: 0.92,
+            })
+          );
+        }
+        mesh.scale.setScalar(spec.s);
         mesh.position.set(spec.pos[0], spec.pos[1], spec.pos[2]);
         mesh.userData.float = rand(0, Math.PI * 2);
         this.root.add(mesh);
@@ -651,6 +746,17 @@
         }
         if (this.consultParticles) {
           this.consultParticles.rotation.y = t * 0.015;
+        }
+        if (this.brainCore) {
+          this.brainCore.material.emissiveIntensity = 0.6 + Math.sin(t * 0.9) * 0.15;
+        }
+        if (this.consultKernel) {
+          this.consultKernel.material.emissiveIntensity = 0.85 + Math.sin(t * 1.6) * 0.2;
+          this.consultKernel.scale.setScalar(1 + Math.sin(t * 1.6) * 0.05);
+        }
+        if (this.brainShell) {
+          this.brainShell.rotation.y = t * 0.08;
+          this.brainShell.rotation.x = Math.sin(t * 0.15) * 0.06;
         }
       } else {
         this.root.rotation.y += dt * 0.06;

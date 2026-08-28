@@ -275,170 +275,190 @@
 
       this.root.add(pedestal);
 
-      // ===== BRAIN CORE =====
+      // ===== CRYSTALLINE CORE (glass cube, matches reference art) =====
       const core = new THREE.Group();
-      core.position.y = 0.22;
+      core.position.y = 0.15;
+      const coreSize = mobile ? 0.86 : 1.0;
 
-      const brainRadius = mobile ? 1.22 : 1.42;
-      const brainGeo = new THREE.IcosahedronGeometry(brainRadius, mobile ? 3 : 4);
-      const posAttr = brainGeo.attributes.position;
-      const v = new THREE.Vector3();
-      for (let i = 0; i < posAttr.count; i++) {
-        v.fromBufferAttribute(posAttr, i);
-        const n = v.clone().normalize();
-        // longitudinal groove splitting left/right hemispheres
-        const groove = Math.exp(-(v.x * v.x) / (2 * (brainRadius * 0.045))) * 0.18;
-        // layered sine "folds" (gyri/sulci) — cheap deterministic noise, kept subtle for a clean silhouette
-        const fold = (
-          Math.sin(v.x * 3.4 + v.y * 2.1) * 0.5 +
-          Math.sin(v.y * 2.6 - v.z * 3.3) * 0.32 +
-          Math.sin(v.z * 4.2 + v.x * 2.8) * 0.24 +
-          Math.sin((v.x + v.y + v.z) * 5.6) * 0.14
-        ) * 0.075;
-        const frontalLift = n.y > 0 ? 0.05 : -0.03;
-        const scaleFactor = 1 + fold - groove + frontalLift * Math.abs(n.y);
-        v.multiplyScalar(scaleFactor);
-        posAttr.setXYZ(i, v.x, v.y * 0.9, v.z * 1.05);
-      }
-      brainGeo.computeVertexNormals();
-
+      const cubeGeo = new THREE.BoxGeometry(coreSize, coreSize, coreSize, 3, 3, 3);
       const shell = new THREE.Mesh(
-        brainGeo,
+        cubeGeo,
         new THREE.MeshPhysicalMaterial({
           color: METAL,
-          metalness: 0.32,
-          roughness: 0.12,
-          transmission: 0.88,
-          thickness: 1.15,
-          ior: 1.45,
+          metalness: 0.4,
+          roughness: 0.08,
+          transmission: 0.92,
+          thickness: 1.1,
+          ior: 1.5,
           specularIntensity: 1,
           transparent: true,
-          opacity: 0.93,
+          opacity: 0.9,
           emissive: PURPLE,
-          emissiveIntensity: 0.2,
-          clearcoat: 0.7,
-          clearcoatRoughness: 0.2,
+          emissiveIntensity: 0.14,
+          clearcoat: 0.85,
+          clearcoatRoughness: 0.12,
         })
       );
       core.add(shell);
       this.brainShell = shell;
 
-      const wireframe = new THREE.Mesh(
-        brainGeo.clone(),
-        new THREE.MeshBasicMaterial({
-          color: ELECTRIC,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.15,
-          depthWrite: false,
-        })
+      const edges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(cubeGeo),
+        new THREE.LineBasicMaterial({ color: 0xC084FC, transparent: true, opacity: 0.55 })
       );
-      wireframe.scale.setScalar(1.012);
-      core.add(wireframe);
+      edges.scale.setScalar(1.006);
+      core.add(edges);
 
-      this._glowHalo(brainRadius * 1.35, core, new THREE.Vector3(0, 0, 0));
+      this._glowHalo(coreSize * 1.35, core, new THREE.Vector3(0, 0, 0));
 
+      const innerGeo = new THREE.IcosahedronGeometry(coreSize * 0.42, 1);
       const inner = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(brainRadius * 0.3, 1),
+        innerGeo,
         new THREE.MeshPhysicalMaterial({
           color: DEEP,
           metalness: 0.65,
           roughness: 0.22,
           emissive: ELECTRIC,
-          emissiveIntensity: 0.7,
+          emissiveIntensity: 0.6,
         })
       );
+      inner.rotation.set(0.4, 0.5, 0);
       core.add(inner);
       this.brainCore = inner;
 
-      // synapse nodes scattered across the brain surface
-      const synapseCount = mobile ? 20 : 34;
-      const posArray = posAttr.array;
-      const vertCount = posAttr.count;
-      for (let i = 0; i < synapseCount; i++) {
-        const idx = Math.floor(rand(0, vertCount));
-        const color = i % 5 === 0 ? RED : ELECTRIC;
-        const synapse = new THREE.Mesh(
-          new THREE.SphereGeometry(mobile ? 0.026 : 0.032, 8, 8),
-          new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.92 })
-        );
-        synapse.position.set(posArray[idx * 3], posArray[idx * 3 + 1], posArray[idx * 3 + 2]);
-        synapse.userData.float = rand(0, Math.PI * 2);
-        core.add(synapse);
-        this.consultFloats = this.consultFloats || [];
-        this.consultFloats.push(synapse);
-      }
+      const innerEdges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(innerGeo),
+        new THREE.LineBasicMaterial({ color: 0xD946EF, transparent: true, opacity: 0.4 })
+      );
+      innerEdges.scale.setScalar(1.01);
+      innerEdges.rotation.copy(inner.rotation);
+      core.add(innerEdges);
+
+      const kernel = new THREE.Mesh(
+        new THREE.SphereGeometry(coreSize * 0.28, 24, 24),
+        new THREE.MeshPhysicalMaterial({
+          color: 0x5B21B6,
+          emissive: 0x8B5CF6,
+          emissiveIntensity: 0.85,
+          metalness: 0.35,
+          roughness: 0.28,
+          transparent: true,
+          opacity: 0.9,
+        })
+      );
+      core.add(kernel);
+      this.consultKernel = kernel;
 
       this.root.add(core);
       this.brainGroup = core;
 
       const ringSpecs = mobile
         ? [
-            { r: 1.15, tube: 0.014, tilt: [Math.PI / 2.2, 0.15, 0], speed: 0.11, red: false },
-            { r: 1.38, tube: 0.011, tilt: [Math.PI / 2.6, -0.35, 0.45], speed: -0.08, red: true },
-            { r: 1.62, tube: 0.009, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
+            { r: 1.2, tube: 0.018, tilt: [Math.PI / 2.15, 0.12, 0.08], speed: 0.11, red: false },
+            { r: 1.42, tube: 0.02, tilt: [Math.PI / 3.1, -0.55, 0.7], speed: -0.08, red: true },
+            { r: 1.66, tube: 0.009, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
           ]
         : [
-            { r: 1.15, tube: 0.014, tilt: [Math.PI / 2.2, 0.15, 0], speed: 0.11, red: false },
-            { r: 1.38, tube: 0.011, tilt: [Math.PI / 2.6, -0.35, 0.45], speed: -0.08, red: true },
-            { r: 1.62, tube: 0.009, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
-            { r: 1.88, tube: 0.008, tilt: [Math.PI / 2.4, -0.2, 0.6], speed: -0.05, red: false },
+            { r: 1.2, tube: 0.02, tilt: [Math.PI / 2.15, 0.12, 0.08], speed: 0.11, red: false },
+            { r: 1.42, tube: 0.024, tilt: [Math.PI / 3.1, -0.55, 0.7], speed: -0.08, red: true },
+            { r: 1.66, tube: 0.01, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
+            { r: 1.92, tube: 0.008, tilt: [Math.PI / 2.4, -0.2, 0.6], speed: -0.05, red: false },
           ];
 
       ringSpecs.forEach(function (spec) {
         const group = new THREE.Group();
         group.rotation.set(spec.tilt[0], spec.tilt[1], spec.tilt[2]);
         const ring = new THREE.Mesh(
-          new THREE.TorusGeometry(spec.r, spec.tube, 12, 96),
+          new THREE.TorusGeometry(spec.r, spec.tube, 16, 128),
           new THREE.MeshPhysicalMaterial({
             color: METAL,
-            metalness: 0.72,
-            roughness: 0.28,
-            emissive: spec.red ? RED : PURPLE,
-            emissiveIntensity: spec.red ? 0.35 : 0.28,
+            metalness: 0.8,
+            roughness: 0.16,
+            clearcoat: 0.6,
+            emissive: spec.red ? 0xFF304F : PURPLE,
+            emissiveIntensity: spec.red ? 0.5 : 0.32,
             transparent: true,
-            opacity: 0.82,
+            opacity: 0.86,
           })
         );
         ring.userData.spin = spec.speed;
         group.add(ring);
+        const glow = new THREE.Mesh(
+          new THREE.TorusGeometry(spec.r, spec.tube * 2.6, 8, 96),
+          new THREE.MeshBasicMaterial({
+            color: spec.red ? 0xFF304F : ELECTRIC,
+            transparent: true,
+            opacity: 0.1,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+          })
+        );
+        group.add(glow);
         this.root.add(group);
         this.consultRings.push(ring);
       }, this);
 
       const floatSpecs = mobile
         ? [
-            { pos: [1.45, 0.55, 0.35], s: 0.11, red: false },
-            { pos: [-1.2, -0.35, 0.5], s: 0.09, red: false },
-            { pos: [0.95, -0.65, -0.4], s: 0.07, red: true },
-            { pos: [-1.55, 0.25, -0.25], s: 0.08, red: false },
-            { pos: [1.65, -0.15, -0.55], s: 0.06, red: false },
+            { pos: [1.45, 0.55, 0.35], s: 0.11, red: false, kind: 'orb' },
+            { pos: [-1.2, -0.35, 0.5], s: 0.09, red: false, kind: 'cube' },
+            { pos: [0.95, -0.65, -0.4], s: 0.07, red: true, kind: 'orb' },
+            { pos: [-1.55, 0.25, -0.25], s: 0.08, red: false, kind: 'cube' },
+            { pos: [1.65, -0.15, -0.55], s: 0.06, red: false, kind: 'orb' },
           ]
         : [
-            { pos: [1.45, 0.55, 0.35], s: 0.11, red: false },
-            { pos: [-1.2, -0.35, 0.5], s: 0.09, red: false },
-            { pos: [0.95, -0.65, -0.4], s: 0.07, red: true },
-            { pos: [-1.55, 0.25, -0.25], s: 0.08, red: false },
-            { pos: [1.65, -0.15, -0.55], s: 0.06, red: false },
-            { pos: [-0.85, 0.72, 0.15], s: 0.1, red: false },
-            { pos: [0.35, 0.85, -0.6], s: 0.055, red: true },
-            { pos: [-1.35, -0.7, -0.15], s: 0.075, red: false },
+            { pos: [1.45, 0.55, 0.35], s: 0.11, red: false, kind: 'orb' },
+            { pos: [-1.2, -0.35, 0.5], s: 0.09, red: false, kind: 'cube' },
+            { pos: [0.95, -0.65, -0.4], s: 0.07, red: true, kind: 'orb' },
+            { pos: [-1.55, 0.25, -0.25], s: 0.08, red: false, kind: 'cube' },
+            { pos: [1.65, -0.15, -0.55], s: 0.06, red: false, kind: 'orb' },
+            { pos: [-0.85, 0.72, 0.15], s: 0.1, red: false, kind: 'cube' },
+            { pos: [0.35, 0.85, -0.6], s: 0.055, red: true, kind: 'orb' },
+            { pos: [-1.35, -0.7, -0.15], s: 0.075, red: false, kind: 'cube' },
           ];
 
       floatSpecs.forEach(function (spec) {
         const color = spec.red ? RED : ELECTRIC;
-        const mesh = new THREE.Mesh(
-          new THREE.SphereGeometry(spec.s, 10, 10),
-          new THREE.MeshPhysicalMaterial({
-            color: DEEP,
-            metalness: 0.5,
-            roughness: 0.25,
-            emissive: color,
-            emissiveIntensity: spec.red ? 0.7 : 0.45,
-            transparent: true,
-            opacity: 0.88,
-          })
-        );
+        let mesh;
+        if (spec.kind === 'cube') {
+          const geo = new THREE.BoxGeometry(1, 1, 1);
+          mesh = new THREE.Mesh(
+            geo,
+            new THREE.MeshPhysicalMaterial({
+              color: METAL,
+              metalness: 0.5,
+              roughness: 0.1,
+              transmission: 0.75,
+              ior: 1.4,
+              transparent: true,
+              opacity: 0.35,
+              emissive: PURPLE,
+              emissiveIntensity: 0.1,
+            })
+          );
+          const cubeEdges = new THREE.LineSegments(
+            new THREE.EdgesGeometry(geo),
+            new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.65 })
+          );
+          mesh.add(cubeEdges);
+          mesh.rotation.set(0.4, 0.6, 0.2);
+        } else {
+          mesh = new THREE.Mesh(
+            new THREE.SphereGeometry(1, 20, 20),
+            new THREE.MeshPhysicalMaterial({
+              color: DEEP,
+              metalness: 0.75,
+              roughness: 0.1,
+              clearcoat: 1,
+              clearcoatRoughness: 0.08,
+              emissive: color,
+              emissiveIntensity: spec.red ? 0.75 : 0.5,
+              transparent: true,
+              opacity: 0.92,
+            })
+          );
+        }
+        mesh.scale.setScalar(spec.s);
         mesh.position.set(spec.pos[0], spec.pos[1], spec.pos[2]);
         mesh.userData.float = rand(0, Math.PI * 2);
         this.root.add(mesh);
@@ -728,7 +748,15 @@
           this.consultParticles.rotation.y = t * 0.015;
         }
         if (this.brainCore) {
-          this.brainCore.material.emissiveIntensity = 0.55 + Math.sin(t * 1.4) * 0.2;
+          this.brainCore.material.emissiveIntensity = 0.6 + Math.sin(t * 0.9) * 0.15;
+        }
+        if (this.consultKernel) {
+          this.consultKernel.material.emissiveIntensity = 0.85 + Math.sin(t * 1.6) * 0.2;
+          this.consultKernel.scale.setScalar(1 + Math.sin(t * 1.6) * 0.05);
+        }
+        if (this.brainShell) {
+          this.brainShell.rotation.y = t * 0.08;
+          this.brainShell.rotation.x = Math.sin(t * 0.15) * 0.06;
         }
       } else {
         this.root.rotation.y += dt * 0.06;
