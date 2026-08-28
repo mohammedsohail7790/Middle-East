@@ -285,31 +285,43 @@
         cubeGeo,
         new THREE.MeshPhysicalMaterial({
           color: METAL,
-          metalness: 0.4,
-          roughness: 0.08,
-          transmission: 0.92,
-          thickness: 1.1,
-          ior: 1.5,
+          metalness: 0.45,
+          roughness: 0.2,
+          transmission: 0.5,
+          thickness: 0.9,
+          ior: 1.45,
           specularIntensity: 1,
           transparent: true,
-          opacity: 0.9,
+          opacity: 0.82,
           emissive: PURPLE,
-          emissiveIntensity: 0.14,
-          clearcoat: 0.85,
-          clearcoatRoughness: 0.12,
+          emissiveIntensity: 0.22,
+          clearcoat: 0.7,
+          clearcoatRoughness: 0.18,
         })
       );
+      shell.rotation.set(0.42, 0.55, 0.1);
       core.add(shell);
       this.brainShell = shell;
 
+      // nested inside shell so it inherits the shell's rotation automatically
       const edges = new THREE.LineSegments(
         new THREE.EdgesGeometry(cubeGeo),
         new THREE.LineBasicMaterial({ color: 0xC084FC, transparent: true, opacity: 0.55 })
       );
       edges.scale.setScalar(1.006);
-      core.add(edges);
+      shell.add(edges);
 
-      this._glowHalo(coreSize * 1.35, core, new THREE.Vector3(0, 0, 0));
+      const coreHalo = new THREE.Mesh(
+        new THREE.SphereGeometry(coreSize * 0.85, 24, 24),
+        new THREE.MeshBasicMaterial({
+          color: ELECTRIC,
+          transparent: true,
+          opacity: 0.1,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        })
+      );
+      core.add(coreHalo);
 
       const innerGeo = new THREE.IcosahedronGeometry(coreSize * 0.42, 1);
       const inner = new THREE.Mesh(
@@ -354,15 +366,15 @@
 
       const ringSpecs = mobile
         ? [
-            { r: 1.2, tube: 0.018, tilt: [Math.PI / 2.15, 0.12, 0.08], speed: 0.11, red: false },
-            { r: 1.42, tube: 0.02, tilt: [Math.PI / 3.1, -0.55, 0.7], speed: -0.08, red: true },
-            { r: 1.66, tube: 0.009, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
+            { r: 1.15, tube: 0.016, tilt: [Math.PI / 2.2, 0.15, 0], speed: 0.11, red: false },
+            { r: 1.38, tube: 0.018, tilt: [Math.PI / 2.6, -0.35, 0.45], speed: -0.08, red: true },
+            { r: 1.62, tube: 0.009, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
           ]
         : [
-            { r: 1.2, tube: 0.02, tilt: [Math.PI / 2.15, 0.12, 0.08], speed: 0.11, red: false },
-            { r: 1.42, tube: 0.024, tilt: [Math.PI / 3.1, -0.55, 0.7], speed: -0.08, red: true },
-            { r: 1.66, tube: 0.01, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
-            { r: 1.92, tube: 0.008, tilt: [Math.PI / 2.4, -0.2, 0.6], speed: -0.05, red: false },
+            { r: 1.15, tube: 0.018, tilt: [Math.PI / 2.2, 0.15, 0], speed: 0.11, red: false },
+            { r: 1.38, tube: 0.02, tilt: [Math.PI / 2.6, -0.35, 0.45], speed: -0.08, red: true },
+            { r: 1.62, tube: 0.01, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06, red: false },
+            { r: 1.88, tube: 0.008, tilt: [Math.PI / 2.4, -0.2, 0.6], speed: -0.05, red: false },
           ];
 
       ringSpecs.forEach(function (spec) {
@@ -652,8 +664,10 @@
 
     _spawnImpulses() {
       const isNeuron = this.opts.mode !== 'network';
-      const impulseSize = isNeuron ? 0.1 : 0.06;
+      const isConsult = this.opts.mode === 'consult';
+      const impulseSize = isConsult ? 0.035 : (isNeuron ? 0.1 : 0.06);
       const impulseGeo = new THREE.SphereGeometry(impulseSize, 12, 12);
+      const impulseColor = isConsult ? this.opts.glow : ACCENT_BRIGHT;
       const max = isNeuron
         ? (this.opts.mode === 'ambient'
           ? (isMobile() ? 14 : 24)
@@ -666,7 +680,7 @@
         const mesh = new THREE.Mesh(
           impulseGeo,
           new THREE.MeshBasicMaterial({
-            color: ACCENT_BRIGHT,
+            color: impulseColor,
             transparent: true,
             opacity: 0.95,
           })
@@ -755,8 +769,8 @@
           this.consultKernel.scale.setScalar(1 + Math.sin(t * 1.6) * 0.05);
         }
         if (this.brainShell) {
-          this.brainShell.rotation.y = t * 0.08;
-          this.brainShell.rotation.x = Math.sin(t * 0.15) * 0.06;
+          this.brainShell.rotation.y = 0.55 + t * 0.08;
+          this.brainShell.rotation.x = 0.42 + Math.sin(t * 0.15) * 0.06;
         }
       } else {
         this.root.rotation.y += dt * 0.06;
