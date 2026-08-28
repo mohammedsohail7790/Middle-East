@@ -31,15 +31,27 @@ function OrbitRing({
   return (
     <group rotation={tilt}>
       <mesh ref={ref}>
-        <torusGeometry args={[radius, tube, 12, 96]} />
+        <torusGeometry args={[radius, tube, 16, 128]} />
         <meshPhysicalMaterial
           color={PALETTE.metal}
-          metalness={0.72}
-          roughness={0.28}
-          emissive={redSegment ? PALETTE.red : PALETTE.purple}
-          emissiveIntensity={redSegment ? 0.35 : 0.28}
+          metalness={0.8}
+          roughness={0.16}
+          clearcoat={0.6}
+          emissive={redSegment ? PALETTE.redHot : PALETTE.purple}
+          emissiveIntensity={redSegment ? 0.5 : 0.32}
           transparent
-          opacity={0.82}
+          opacity={0.86}
+        />
+      </mesh>
+      {/* soft additive glow halo — cheap stand-in for bloom */}
+      <mesh scale={1}>
+        <torusGeometry args={[radius, tube * 2.6, 8, 96]} />
+        <meshBasicMaterial
+          color={redSegment ? PALETTE.redHot : PALETTE.electric}
+          transparent
+          opacity={0.1}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
         />
       </mesh>
     </group>

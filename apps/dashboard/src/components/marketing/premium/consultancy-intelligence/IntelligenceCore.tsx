@@ -1,5 +1,6 @@
 "use client";
 
+import { Edges, RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -46,82 +47,56 @@ function InnerParticles({ count }: { count: number }) {
   );
 }
 
-/** Deforms a subdivided icosahedron into a brain-like silhouette: a central
- * groove splitting left/right hemispheres plus layered sine "folds" (gyri/sulci). */
-function useBrainGeometry(detail: number) {
-  return useMemo(() => {
-    const geo = new THREE.IcosahedronGeometry(1, detail);
-    const pos = geo.attributes.position;
-    const v = new THREE.Vector3();
-    for (let i = 0; i < pos.count; i++) {
-      v.fromBufferAttribute(pos, i);
-      const ny = v.clone().normalize().y;
-      const groove = Math.exp(-(v.x * v.x) / (2 * 0.045)) * 0.18;
-      const fold =
-        (Math.sin(v.x * 3.4 + v.y * 2.1) * 0.5 +
-          Math.sin(v.y * 2.6 - v.z * 3.3) * 0.32 +
-          Math.sin(v.z * 4.2 + v.x * 2.8) * 0.24 +
-          Math.sin((v.x + v.y + v.z) * 5.6) * 0.14) *
-        0.075;
-      const frontalLift = ny > 0 ? 0.05 : -0.03;
-      const scale = 1 + fold - groove + frontalLift * Math.abs(ny);
-      v.multiplyScalar(scale);
-      pos.setXYZ(i, v.x, v.y * 0.9, v.z * 1.05);
-    }
-    geo.computeVertexNormals();
-    return geo;
-  }, [detail]);
-}
-
+/** Crystalline glass core, styled after the reference: a faceted cube with
+ * glowing purple/red edge lines, an inner pulsing kernel, and orbiting light. */
 export function IntelligenceCore({ mobile }: { mobile: boolean }) {
   const shell = useRef<THREE.Mesh>(null);
-  const wireframe = useRef<THREE.Mesh>(null);
   const inner = useRef<THREE.Mesh>(null);
+  const kernel = useRef<THREE.Mesh>(null);
   const particleCount = mobile ? 18 : 32;
-  const brainGeo = useBrainGeometry(mobile ? 3 : 4);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
     if (inner.current) {
       const mat = inner.current.material as THREE.MeshPhysicalMaterial;
-      mat.emissiveIntensity = 0.55 + Math.sin(t * 0.8) * 0.12;
+      mat.emissiveIntensity = 0.6 + Math.sin(t * 0.9) * 0.15;
+    }
+    if (kernel.current) {
+      const mat = kernel.current.material as THREE.MeshPhysicalMaterial;
+      mat.emissiveIntensity = 0.85 + Math.sin(t * 1.6) * 0.2;
+      kernel.current.scale.setScalar(0.28 + Math.sin(t * 1.6) * 0.015);
     }
     if (shell.current) {
       shell.current.rotation.y = t * 0.08;
       shell.current.rotation.x = Math.sin(t * 0.15) * 0.06;
     }
-    if (wireframe.current) {
-      wireframe.current.rotation.y = shell.current?.rotation.y ?? 0;
-      wireframe.current.rotation.x = shell.current?.rotation.x ?? 0;
-    }
   });
 
   return (
-    <group scale={0.62}>
-      <mesh ref={shell} geometry={brainGeo}>
+    <group>
+      <RoundedBox ref={shell} args={[0.92, 0.92, 0.92]} radius={0.1} smoothness={4}>
         <meshPhysicalMaterial
           color={PALETTE.metal}
-          metalness={0.32}
-          roughness={0.12}
-          transmission={0.88}
-          thickness={1.15}
-          ior={1.45}
+          metalness={0.4}
+          roughness={0.08}
+          transmission={0.92}
+          thickness={1.1}
+          ior={1.5}
           specularIntensity={1}
           transparent
-          opacity={0.93}
+          opacity={0.9}
           emissive={PALETTE.purple}
-          emissiveIntensity={0.2}
-          clearcoat={0.7}
-          clearcoatRoughness={0.2}
-          envMapIntensity={0.8}
+          emissiveIntensity={0.14}
+          clearcoat={0.85}
+          clearcoatRoughness={0.12}
+          envMapIntensity={1}
         />
-      </mesh>
+        <Edges scale={1.006} threshold={1}>
+          <lineBasicMaterial color={PALETTE.light} transparent opacity={0.55} />
+        </Edges>
+      </RoundedBox>
 
-      <mesh ref={wireframe} geometry={brainGeo} scale={1.012}>
-        <meshBasicMaterial color={PALETTE.electric} wireframe transparent opacity={0.15} depthWrite={false} />
-      </mesh>
-
-      <mesh ref={inner} scale={0.3}>
+      <mesh ref={inner} scale={0.42} rotation={[0.4, 0.5, 0]}>
         <icosahedronGeometry args={[1, 1]} />
         <meshPhysicalMaterial
           color={PALETTE.deep}
@@ -130,9 +105,12 @@ export function IntelligenceCore({ mobile }: { mobile: boolean }) {
           emissive={PALETTE.electric}
           emissiveIntensity={0.6}
         />
+        <Edges scale={1.01} threshold={1}>
+          <lineBasicMaterial color={PALETTE.magenta} transparent opacity={0.4} />
+        </Edges>
       </mesh>
 
-      <mesh scale={0.2}>
+      <mesh ref={kernel} scale={0.28}>
         <sphereGeometry args={[1, 24, 24]} />
         <meshPhysicalMaterial
           color={PALETTE.purpleDeep}
@@ -141,11 +119,16 @@ export function IntelligenceCore({ mobile }: { mobile: boolean }) {
           metalness={0.35}
           roughness={0.28}
           transparent
-          opacity={0.88}
+          opacity={0.9}
         />
       </mesh>
 
       <InnerParticles count={particleCount} />
+
+      <mesh scale={1.04}>
+        <boxGeometry args={[0.94, 0.94, 0.94]} />
+        <meshBasicMaterial color={PALETTE.electric} wireframe transparent opacity={0.08} depthWrite={false} />
+      </mesh>
 
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -0.72, 0]}>
         <torusGeometry args={[0.55, 0.012, 8, 64]} />

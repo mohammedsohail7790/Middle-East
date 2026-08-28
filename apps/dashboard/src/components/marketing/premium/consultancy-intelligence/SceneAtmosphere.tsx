@@ -20,7 +20,9 @@ export function SceneAtmosphere({ count, animate }: { count: number; animate: bo
 
   useFrame((state) => {
     if (!ref.current || !animate) return;
-    ref.current.rotation.y = state.clock.elapsedTime * 0.015;
+    const t = state.clock.elapsedTime;
+    ref.current.rotation.y = t * 0.015;
+    ref.current.rotation.z = Math.sin(t * 0.05) * 0.03;
   });
 
   return (
@@ -30,11 +32,12 @@ export function SceneAtmosphere({ count, animate }: { count: number; animate: bo
       </bufferGeometry>
       <pointsMaterial
         color={PALETTE.light}
-        size={0.028}
+        size={0.03}
         transparent
-        opacity={0.35}
+        opacity={0.4}
         depthWrite={false}
         sizeAttenuation
+        blending={THREE.AdditiveBlending}
       />
     </points>
   );

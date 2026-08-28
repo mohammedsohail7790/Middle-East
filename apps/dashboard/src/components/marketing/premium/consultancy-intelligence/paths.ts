@@ -59,8 +59,8 @@ export type RingSpec = {
 };
 
 export const RING_SPECS: RingSpec[] = [
-  { radius: 1.15, tube: 0.014, tilt: [Math.PI / 2.2, 0.15, 0], speed: 0.11 },
-  { radius: 1.38, tube: 0.011, tilt: [Math.PI / 2.6, -0.35, 0.45], speed: -0.08, redSegment: true },
-  { radius: 1.62, tube: 0.009, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06 },
-  { radius: 1.88, tube: 0.008, tilt: [Math.PI / 2.4, -0.2, 0.6], speed: -0.05 },
+  { radius: 1.2, tube: 0.02, tilt: [Math.PI / 2.15, 0.12, 0.08], speed: 0.11 },
+  { radius: 1.42, tube: 0.024, tilt: [Math.PI / 3.1, -0.55, 0.7], speed: -0.08, redSegment: true },
+  { radius: 1.66, tube: 0.01, tilt: [Math.PI / 2.1, 0.55, -0.25], speed: 0.06 },
+  { radius: 1.92, tube: 0.008, tilt: [Math.PI / 2.4, -0.2, 0.6], speed: -0.05 },
 ];

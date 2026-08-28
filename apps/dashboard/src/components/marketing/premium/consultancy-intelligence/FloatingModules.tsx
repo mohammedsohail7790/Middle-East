@@ -1,5 +1,6 @@
 "use client";
 
+import { Edges } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -52,15 +53,17 @@ function Module({ spec, index, animate }: { spec: FloatingSpec; index: number; a
     return (
       <group ref={ref} position={spec.position} scale={spec.scale}>
         <mesh>
-          <sphereGeometry args={[1, 10, 10]} />
+          <sphereGeometry args={[1, 20, 20]} />
           <meshPhysicalMaterial
             color={PALETTE.deep}
-            metalness={0.5}
-            roughness={0.25}
+            metalness={0.75}
+            roughness={0.1}
+            clearcoat={1}
+            clearcoatRoughness={0.08}
             emissive={color}
-            emissiveIntensity={spec.redAccent ? 0.7 : 0.45}
+            emissiveIntensity={spec.redAccent ? 0.75 : 0.5}
             transparent
-            opacity={0.88}
+            opacity={0.92}
           />
         </mesh>
       </group>
@@ -73,14 +76,18 @@ function Module({ spec, index, animate }: { spec: FloatingSpec; index: number; a
         <boxGeometry args={[1, 1, 1]} />
         <meshPhysicalMaterial
           color={PALETTE.metal}
-          metalness={0.55}
-          roughness={0.2}
-          transmission={0.55}
+          metalness={0.5}
+          roughness={0.1}
+          transmission={0.75}
+          ior={1.4}
           transparent
-          opacity={0.5}
+          opacity={0.4}
           emissive={PALETTE.purple}
           emissiveIntensity={0.1}
         />
+        <Edges scale={1.01} threshold={1}>
+          <lineBasicMaterial color={color} transparent opacity={0.65} />
+        </Edges>
       </mesh>
     </group>
   );
