@@ -325,8 +325,24 @@ function onPageActivated(page) {
   });
 }
 
+// ============ SITEWIDE AUTO-REVEAL ============
+// Tags common repeating elements on the active page with .reveal-up so every
+// page (not just the ones with hand-authored reveal markup) gets the same
+// scroll-in motion, without touching each page's HTML.
+function autoTagReveals() {
+  const activePage = document.querySelector('.page.active');
+  if (!activePage) return;
+  const nodes = activePage.querySelectorAll('.card, .pricing-card, .faq-item, .cta-block, .step-row');
+  nodes.forEach((el, i) => {
+    if (el.classList.contains('reveal-up')) return;
+    el.classList.add('reveal-up');
+    el.style.setProperty('--reveal-delay', `${(i % 6) * 0.05}s`);
+  });
+}
+
 // ============ GSAP SCROLL REVEALS ============
 function initScrollAnimations() {
+  autoTagReveals();
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const targets = document.querySelectorAll('.reveal-up:not(.gsap-bound)');
   if (!targets.length) return;
