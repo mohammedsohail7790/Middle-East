@@ -1,4 +1,6 @@
-export type IndustryFaq = { question: string; answer: string };
+import type { Faq } from "@/components/marketing/FaqAccordion";
+
+export type IndustryFaq = Faq;
 
 export type Industry = {
   slug: string;
