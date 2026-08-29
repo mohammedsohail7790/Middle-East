@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Component, type ErrorInfo, type ReactNode, Suspense, useEffect, useState } from "react";
+import { Component, type ErrorInfo, type ReactNode, Suspense, useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 const ConsultNeuralCanvas = dynamic(
@@ -120,11 +120,14 @@ function markReactConsultReady() {
   releaseVanillaConsultScene();
 }
 
-function clearReactConsultMark() {
+// Clears the "react owns this mount" flag and wakes the vanilla fallback
+// scene. Deliberately does NOT touch the portal's DOM node directly —
+// React still owns it (via createPortal) until the component itself
+// re-renders and stops rendering it; manually removing it here caused a
+// "removeChild" crash the next time React tried to unmount that node.
+function clearReactConsultFlag() {
   const stage = document.getElementById("consultNeuralMount");
-  if (!stage) return;
-  delete stage.dataset.react3d;
-  stage.querySelector(".consult-neural-react-stage")?.remove();
+  if (stage) delete stage.dataset.react3d;
   const halla = (window as Window & { HallaNeural?: { init?: () => void; refreshForPage?: (p: string) => void } })
     .HallaNeural;
   halla?.init?.();
@@ -136,6 +139,7 @@ export function ConsultNeuralBackdrop() {
   const mount = useConsultMount(active);
   const [reduced, setReduced] = useState(false);
   const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -143,22 +147,32 @@ export function ConsultNeuralBackdrop() {
     return () => window.cancelAnimationFrame(id);
   }, []);
 
+  // Reset once we re-enter the consultancy page (a fresh mount lookup).
   useEffect(() => {
-    if (!active || !mount) return;
+    setFailed(false);
+  }, [mount]);
+
+  const handleFailure = useCallback(() => {
+    setFailed(true);
+    clearReactConsultFlag();
+  }, []);
+
+  useEffect(() => {
+    if (!active || !mount || failed) return;
 
     const fallbackTimer = window.setTimeout(() => {
       const hasCanvas = mount.querySelector("canvas");
-      if (!hasCanvas) clearReactConsultMark();
+      if (!hasCanvas) handleFailure();
     }, 8000);
 
     return () => window.clearTimeout(fallbackTimer);
-  }, [active, mount]);
+  }, [active, mount, failed, handleFailure]);
 
-  if (!active || !ready || !mount) return null;
+  if (!active || !ready || !mount || failed) return null;
 
   return createPortal(
     <div className="consult-neural-react-stage" aria-hidden>
-      <NeuralErrorBoundary onError={clearReactConsultMark}>
+      <NeuralErrorBoundary onError={handleFailure}>
         <Suspense fallback={null}>
           <ConsultNeuralCanvas reducedMotion={reduced} onReady={markReactConsultReady} />
         </Suspense>
