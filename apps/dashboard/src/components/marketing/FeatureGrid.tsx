@@ -11,6 +11,12 @@ const ICONS = {
   sparkles: Sparkles,
 } as const;
 
+const EXPLORE_LABEL: Record<string, string> = {
+  "/services/operations": "Operations",
+  "/services/acquisition": "Acquisition",
+  "/services/brand": "Brand",
+};
+
 export function FeatureGrid({ items }: { items: ServiceItem[] }) {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -50,7 +56,7 @@ export function FeatureGrid({ items }: { items: ServiceItem[] }) {
                 href={item.href}
                 className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
               >
-                Explore {item.title.split(" ")[0]} <ArrowRight className="size-4" />
+                Explore {EXPLORE_LABEL[item.href] ?? item.title.split(" ")[0]} <ArrowRight className="size-4" />
               </Link>
             </CardContent>
           </Card>
