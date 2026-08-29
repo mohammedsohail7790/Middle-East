@@ -62,7 +62,7 @@ function getStripe(): Stripe | null {
   if (stripeClient) return stripeClient;
   const key = process.env.STRIPE_SECRET_KEY?.trim();
   if (!key || key === 'sk_test_placeholder') return null;
-  stripeClient = new Stripe(key, { apiVersion: '2026-07-29.dahlia' });
+  stripeClient = new Stripe(key, { apiVersion: '2026-08-26.dahlia' });
   return stripeClient;
 }
 
