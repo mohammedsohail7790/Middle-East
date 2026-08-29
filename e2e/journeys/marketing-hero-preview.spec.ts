@@ -4,7 +4,7 @@ test.describe('marketing hero design previews', () => {
   test('consultancy hero renders with no console errors and no canvas', async ({ page, consoleErrors }) => {
     await page.goto('/design-preview/consultancy', { waitUntil: 'load' });
     await expect(page.getByRole('heading', { name: /^We Don't Sell AI\. We Install It\.$/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Book a Diagnostic Call' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Book a Diagnostic Call' }).first()).toBeVisible();
     await expect(page.locator('canvas')).toHaveCount(0);
     expect(consoleErrors).toEqual([]);
   });
