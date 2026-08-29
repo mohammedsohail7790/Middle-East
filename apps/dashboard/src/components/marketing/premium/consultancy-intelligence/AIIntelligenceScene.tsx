@@ -3,11 +3,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { FloatingModules } from "./FloatingModules";
-import { IntelligenceCore } from "./IntelligenceCore";
-import { NeuralStreams } from "./NeuralStreams";
-import { OrbitalSystem } from "./OrbitalSystem";
-import { ReflectivePedestal } from "./ReflectivePedestal";
+import { IntelligenceNetwork } from "./network/IntelligenceNetwork";
 import { SceneAtmosphere, SceneLighting } from "./SceneAtmosphere";
 import { useConsultSceneMotion } from "./useConsultSceneMotion";
 
@@ -69,11 +65,7 @@ export function AIIntelligenceScene({ mobile, reduced, visible }: Props) {
     <group ref={root} position={[0, 0.2, 0]}>
       <SceneLighting />
       <SceneAtmosphere count={particleCount} animate={animate} />
-      <ReflectivePedestal animate={animate} />
-      <OrbitalSystem mobile={mobile} animate={animate} />
-      <NeuralStreams mobile={mobile} animate={animate} />
-      <FloatingModules mobile={mobile} animate={animate} />
-      <IntelligenceCore mobile={mobile} />
+      <IntelligenceNetwork mobile={mobile} animate={animate} />
     </group>
   );
 }

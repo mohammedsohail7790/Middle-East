@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { MarketingVibeLayer } from "@/components/marketing/MarketingVibeLayer";
 import { MarketingPremiumLayer } from "@/components/marketing/premium/MarketingPremiumLayer";
 import { MarketingConsultancyLayer } from "@/components/marketing/premium/MarketingConsultancyLayer";
+import { ConsultNeuralBackdrop } from "@/components/marketing/premium/ConsultNeuralBackdrop";
 import { Dashboard3DMounts } from "@/components/marketing/premium/Dashboard3DMounts";
 import { MarketingAtmosphere } from "@/components/marketing/effects/MarketingAtmosphere";
 
@@ -175,6 +176,7 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
       <MarketingVibeLayer />
       <MarketingPremiumLayer />
       <MarketingConsultancyLayer />
+      <ConsultNeuralBackdrop />
       <div id="marketing-spa-root" ref={spaRootRef} />
       <Dashboard3DMounts />
 
