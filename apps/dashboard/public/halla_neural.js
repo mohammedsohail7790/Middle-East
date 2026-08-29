@@ -115,6 +115,8 @@
         this._buildNeuronTree();
       } else if (this.opts.mode === 'consult') {
         this._buildConsultIntelligence();
+      } else if (this.opts.mode === 'voice') {
+        this._buildVoiceWave();
       } else if (this.opts.mode === 'ambient') {
         this._buildAmbientField();
       } else {
@@ -229,9 +231,10 @@
     }
 
     /**
-     * Procedural "AI Intelligence Network": an asymmetric, organically-clustered
-     * node graph (dense core + looser satellite clusters) with data-flow
-     * particles riding a subset of connections — no literal brain/sphere.
+     * Procedural "AI Intelligence Network": a semi-spherical node graph with
+     * a bright concentrated core, a handful of radial pathways extending
+     * outward, and a restrained black/purple/red hierarchy (mostly dim,
+     * purple as primary illumination, red as a rare accent only).
      */
     _buildConsultIntelligence() {
       const theme = this._consultTheme();
@@ -241,65 +244,84 @@
       const mobile = isMobile();
       const rng = this._consultSeededRandom(1337);
       const scale = mobile ? 0.72 : 1;
+      const sphereRadius = 1.7 * scale;
 
       this.opts.accent = PURPLE;
       this.opts.glow = ELECTRIC;
 
-      this.camera.position.set(0, 0.08, mobile ? 7.4 : 6.4);
-      this.camera.fov = mobile ? 44 : 38;
+      this.camera.position.set(0, 0.08, mobile ? 7.6 : 6.6);
+      this.camera.fov = mobile ? 44 : 36;
       this.camera.lookAt(0, 0, 0);
       this.camera.updateProjectionMatrix();
 
       const TIER_COLORS = {
-        dim: 0x5B21B6,
+        dim: 0x3B2166,
         purple: PURPLE,
         magenta: 0xD946EF,
         red: RED,
         highlight: 0xF8FAFC,
       };
 
+      // ~80% dim, ~13% purple/magenta, ~5% red, ~2% highlight — purple stays
+      // the dominant illumination; red only ever appears as a rare accent.
       function pickTier(importance) {
         const roll = rng();
-        if (importance > 0.85) {
-          if (roll < 0.06) return 'highlight';
-          if (roll < 0.22) return 'red';
-          return 'magenta';
-        }
-        if (importance > 0.55) {
-          if (roll < 0.12) return 'red';
-          if (roll < 0.4) return 'magenta';
+        if (importance > 0.82) {
+          if (roll < 0.05) return 'highlight';
+          if (roll < 0.24) return 'red';
+          if (roll < 0.6) return 'magenta';
           return 'purple';
         }
-        if (roll < 0.08) return 'magenta';
+        if (importance > 0.5) {
+          if (roll < 0.05) return 'red';
+          if (roll < 0.22) return 'magenta';
+          if (roll < 0.42) return 'purple';
+          return 'dim';
+        }
+        if (roll < 0.03) return 'red';
+        if (roll < 0.1) return 'purple';
         return 'dim';
       }
-
-      const clusters = [
-        { center: new THREE.Vector3(0, 0, 0), radius: 1.4 * scale, count: mobile ? 46 : 100, density: 1 },
-        { center: new THREE.Vector3(1.9 * scale, 0.6 * scale, -0.4 * scale), radius: 0.85 * scale, count: mobile ? 18 : 36, density: 0.7 },
-        { center: new THREE.Vector3(-2.1 * scale, -0.5 * scale, 0.3 * scale), radius: 0.95 * scale, count: mobile ? 16 : 32, density: 0.65 },
-        { center: new THREE.Vector3(0.6 * scale, -1.5 * scale, 0.6 * scale), radius: 0.7 * scale, count: mobile ? 12 : 24, density: 0.55 },
-        { center: new THREE.Vector3(-0.9 * scale, 1.5 * scale, -0.5 * scale), radius: 0.65 * scale, count: mobile ? 10 : 20, density: 0.5 },
-      ];
 
       const nodePositions = [];
       const nodeTiers = [];
       const clusterOf = [];
 
-      clusters.forEach(function (cluster, ci) {
-        for (let i = 0; i < cluster.count; i++) {
-          const r = cluster.radius * Math.pow(rng(), 1.6);
-          const theta = rng() * Math.PI * 2;
-          const phi = Math.acos(2 * rng() - 1);
-          const pos = new THREE.Vector3(
-            cluster.center.x + r * Math.sin(phi) * Math.cos(theta),
-            cluster.center.y + r * Math.sin(phi) * Math.sin(theta) * 0.75,
-            cluster.center.z + r * Math.cos(phi) * 0.85
-          );
-          const importance = Math.max(0, Math.min(1, 1 - pos.length() / 3.2)) * cluster.density;
-          nodePositions.push(pos);
-          nodeTiers.push(pickTier(importance));
-          clusterOf.push(ci);
+      // Main body: volume-filled sphere, denser toward the center.
+      const bodyCount = mobile ? 130 : 260;
+      for (let i = 0; i < bodyCount; i++) {
+        const r = sphereRadius * Math.pow(rng(), 1.8);
+        const theta = rng() * Math.PI * 2;
+        const phi = Math.acos(2 * rng() - 1);
+        const pos = new THREE.Vector3(
+          r * Math.sin(phi) * Math.cos(theta),
+          r * Math.sin(phi) * Math.sin(theta),
+          r * Math.cos(phi) * 0.92
+        );
+        const importance = Math.max(0, 1 - r / sphereRadius);
+        nodePositions.push(pos);
+        nodeTiers.push(pickTier(importance));
+        clusterOf.push(0);
+      }
+
+      // A few larger pathways radiating outward from the core, per the
+      // "data -> intelligence -> automation" concept, without any labels.
+      const pathwayDirs = [
+        new THREE.Vector3(1, 0.35, 0.2),
+        new THREE.Vector3(-0.9, -0.3, 0.4),
+        new THREE.Vector3(0.3, -0.8, -0.5),
+        new THREE.Vector3(-0.4, 0.85, -0.3),
+      ];
+      const pathwayNodeCount = mobile ? 5 : 8;
+      pathwayDirs.forEach(function (dir, pi) {
+        const d = dir.clone().normalize();
+        for (let i = 1; i <= pathwayNodeCount; i++) {
+          const t = i / pathwayNodeCount;
+          const r = sphereRadius * (1 + t * 0.9);
+          const jitter = new THREE.Vector3(rng() - 0.5, rng() - 0.5, rng() - 0.5).multiplyScalar(0.12);
+          nodePositions.push(d.clone().multiplyScalar(r).add(jitter));
+          nodeTiers.push(t > 0.7 ? 'dim' : rng() < 0.3 ? 'magenta' : 'purple');
+          clusterOf.push(1 + pi);
         }
       });
 
@@ -328,16 +350,18 @@
       this.root.add(nodesMesh);
       this.consultNodes = { mesh: nodesMesh, positions: nodePositions, sizes: nodeSizes, tiers: nodeTiers };
 
-      // Connections: intra-cluster nearest-neighbor links + a few long bridges.
+      // Connections: nearest-neighbor links within the sphere body, sequential
+      // links along each outward pathway, and one bridge tying each pathway
+      // back into its nearest body node.
       const edges = [];
-      const maxNeighborDist = mobile ? 0.55 : 0.62;
+      const maxNeighborDist = mobile ? 0.5 : 0.56;
       const seen = {};
-      for (let i = 0; i < nodePositions.length; i++) {
+      const bodyCount2 = bodyCount;
+      for (let i = 0; i < bodyCount2; i++) {
         let linked = 0;
-        for (let j = i + 1; j < nodePositions.length && linked < 5; j++) {
-          if (clusterOf[i] !== clusterOf[j]) continue;
+        for (let j = i + 1; j < bodyCount2 && linked < 4; j++) {
           const dist = nodePositions[i].distanceTo(nodePositions[j]);
-          if (dist < maxNeighborDist && rng() < 0.5) {
+          if (dist < maxNeighborDist && rng() < 0.45) {
             const key = i + '-' + j;
             if (seen[key]) continue;
             seen[key] = true;
@@ -346,22 +370,26 @@
           }
         }
       }
-      const bridgeCount = mobile ? 4 : 9;
-      for (let k = 0; k < bridgeCount; k++) {
-        const ci = Math.floor(rng() * clusters.length);
-        let cj = Math.floor(rng() * clusters.length);
-        if (cj === ci) cj = (cj + 1) % clusters.length;
-        const candidatesA = [];
-        const candidatesB = [];
+      for (let ci = 1; ci <= pathwayDirs.length; ci++) {
+        const idxs = [];
         for (let idx = 0; idx < clusterOf.length; idx++) {
-          if (clusterOf[idx] === ci) candidatesA.push(idx);
-          if (clusterOf[idx] === cj) candidatesB.push(idx);
+          if (clusterOf[idx] === ci) idxs.push(idx);
         }
-        if (!candidatesA.length || !candidatesB.length) continue;
-        edges.push({
-          a: candidatesA[Math.floor(rng() * candidatesA.length)],
-          b: candidatesB[Math.floor(rng() * candidatesB.length)],
-        });
+        for (let k = 0; k < idxs.length - 1; k++) {
+          edges.push({ a: idxs[k], b: idxs[k + 1] });
+        }
+        if (idxs.length) {
+          let nearest = -1;
+          let nearestDist = Infinity;
+          for (let bi = 0; bi < bodyCount2; bi++) {
+            const dist = nodePositions[bi].distanceTo(nodePositions[idxs[0]]);
+            if (dist < nearestDist) {
+              nearestDist = dist;
+              nearest = bi;
+            }
+          }
+          if (nearest >= 0) edges.push({ a: nearest, b: idxs[0] });
+        }
       }
 
       const linePositions = new Float32Array(edges.length * 6);
@@ -383,10 +411,11 @@
       this.root.add(lines);
       this.consultLines = lines;
 
-      // Feed a subset of edges into the existing impulse system as data-flow paths.
-      const bridgeStart = edges.length - bridgeCount;
+      // Feed a small, restrained subset of edges into the existing impulse
+      // system as data-flow paths (occasional pulses, not a screensaver).
       edges.forEach(function (edge, i) {
-        if (i < bridgeStart && rng() > 0.14) return;
+        const isPathwayEdge = edge.a >= bodyCount2 || edge.b >= bodyCount2;
+        if (!isPathwayEdge && rng() > 0.1) return;
         const a = nodePositions[edge.a];
         const b = nodePositions[edge.b];
         const mid = a.clone().lerp(b, 0.5);
@@ -394,10 +423,86 @@
         this.branches.push({ curve, mesh: lines });
       }, this);
 
+      // Concentrated central intelligence core — the one clearly brightest point.
+      const core = new THREE.Mesh(
+        new THREE.SphereGeometry(0.09 * scale, 20, 20),
+        new THREE.MeshBasicMaterial({ color: 0xF8FAFC, transparent: true, opacity: 0.95 })
+      );
+      this.root.add(core);
+      const coreHalo = new THREE.Mesh(
+        new THREE.SphereGeometry(0.22 * scale, 16, 16),
+        new THREE.MeshBasicMaterial({ color: ELECTRIC, transparent: true, opacity: 0.16, depthWrite: false })
+      );
+      this.root.add(coreHalo);
+      this.consultCore = core;
+
+      // Subtle orbital rings — thin, low-opacity, barely-there depth cues.
+      this.consultRings = [];
+      const ringSpecs = mobile
+        ? [{ r: sphereRadius * 1.12, tilt: [1.35, 0.2, 0], speed: 0.02 }]
+        : [
+            { r: sphereRadius * 1.1, tilt: [1.35, 0.2, 0], speed: 0.018 },
+            { r: sphereRadius * 1.32, tilt: [1.0, -0.5, 0.3], speed: -0.013 },
+          ];
+      ringSpecs.forEach(function (spec) {
+        const ring = new THREE.Mesh(
+          new THREE.TorusGeometry(spec.r, 0.003, 6, 96),
+          new THREE.MeshBasicMaterial({ color: PURPLE, transparent: true, opacity: 0.18, depthWrite: false })
+        );
+        ring.rotation.set(spec.tilt[0], spec.tilt[1], spec.tilt[2]);
+        ring.userData.spin = spec.speed;
+        this.root.add(ring);
+        this.consultRings.push(ring);
+      }, this);
+
       this.root.rotation.x = -0.04;
       this.root.position.x = 0;
       this.root.position.y = 0.2;
       this.root.scale.setScalar(mobile ? 0.92 : 1.08);
+    }
+
+    /**
+     * Conversational signal for the AI Receptionist hero: a caller's voice
+     * waveform that steadies and flows toward a simple phone glyph —
+     * "caller -> understood -> action" without any literal text or robot.
+     */
+    _buildVoiceWave() {
+      const mobile = isMobile();
+      this.camera.position.set(0, 0, mobile ? 7.5 : 6.5);
+      this.camera.lookAt(0, 0, 0);
+      this.camera.updateProjectionMatrix();
+      const barCount = mobile ? 22 : 34;
+      const spread = mobile ? 3.2 : 4.6;
+      this.voiceBars = [];
+      const barMat = new THREE.MeshBasicMaterial({ color: this.opts.accent, transparent: true, opacity: 0.5 });
+      for (let i = 0; i < barCount; i++) {
+        const t = i / (barCount - 1);
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1, 0.05), barMat.clone());
+        bar.position.x = (t - 0.5) * spread;
+        bar.userData.phase = rand(0, Math.PI * 2);
+        bar.userData.settle = t; // bars settle into a steady pulse near the phone end (t -> 1)
+        this.root.add(bar);
+        this.voiceBars.push(bar);
+      }
+
+      const phoneGroup = new THREE.Group();
+      phoneGroup.position.x = spread / 2 + 0.55;
+      const body = new THREE.Mesh(
+        new THREE.BoxGeometry(0.62, 1.05, 0.08),
+        new THREE.MeshBasicMaterial({ color: this.opts.accent, transparent: true, opacity: 0.16 })
+      );
+      phoneGroup.add(body);
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(0.34, 0.37, 32),
+        new THREE.MeshBasicMaterial({ color: this.opts.glow, transparent: true, opacity: 0.55, side: THREE.DoubleSide })
+      );
+      phoneGroup.add(ring);
+      this.root.add(phoneGroup);
+      this.voicePhone = phoneGroup;
+      this.voicePhoneRing = ring;
+
+      this.root.position.y = -0.1;
+      this.root.scale.setScalar(mobile ? 0.85 : 1);
     }
 
     _buildAmbientField() {
@@ -607,10 +712,10 @@
         this.root.rotation.y = t * 0.04;
         this.root.rotation.x = -0.08 + Math.sin(t * 0.1) * 0.04;
       } else if (this.opts.mode === 'consult') {
-        this.root.rotation.y += dt * 0.035;
-        const baseX = -0.04 + this.parallaxY * 0.14;
+        this.root.rotation.y += dt * 0.022;
+        const baseX = -0.04 + this.parallaxY * 0.1;
         this.root.rotation.x = baseX;
-        this.root.rotation.y += this.parallaxX * dt * 0.12;
+        this.root.rotation.y += this.parallaxX * dt * 0.08;
         if (this.consultNodes) {
           const nodes = this.consultNodes;
           const dummy = this._consultDummy || (this._consultDummy = new THREE.Object3D());
@@ -626,6 +731,32 @@
         if (this.consultLines) {
           this.consultLines.material.opacity = 0.5 + Math.sin(t * 0.4) * 0.08;
         }
+        if (this.consultCore) {
+          const pulse = 1 + Math.sin(t * 1.1) * 0.08;
+          this.consultCore.scale.setScalar(pulse);
+          this.consultCore.material.opacity = 0.85 + Math.sin(t * 1.1) * 0.1;
+        }
+        if (this.consultRings) {
+          this.consultRings.forEach(function (ring) {
+            ring.rotation.z += dt * (ring.userData.spin || 0.015);
+          });
+        }
+      } else if (this.opts.mode === 'voice') {
+        if (this.voiceBars) {
+          this.voiceBars.forEach(function (bar) {
+            const raw = Math.sin(t * 2.2 + bar.userData.phase) * 0.5 + Math.sin(t * 4.1 + bar.userData.phase * 1.7) * 0.2;
+            const settle = bar.userData.settle;
+            const amplitude = 0.35 + raw * (0.9 - settle * 0.6);
+            const height = 0.15 + Math.abs(amplitude);
+            bar.scale.y = height;
+            bar.material.opacity = 0.25 + settle * 0.35 + Math.abs(raw) * 0.15;
+          });
+        }
+        if (this.voicePhoneRing) {
+          this.voicePhoneRing.scale.setScalar(1 + Math.sin(t * 1.4) * 0.06);
+          this.voicePhoneRing.material.opacity = 0.4 + Math.sin(t * 1.4) * 0.15;
+        }
+        this.root.rotation.y = this.parallaxX * 0.15;
       } else {
         this.root.rotation.y += dt * 0.06;
         const baseX = -0.16 + Math.sin(t * 0.15) * 0.05;
@@ -743,7 +874,7 @@
     const heroMount = document.getElementById('heroNeuralMount');
     if (heroMount && !scenes.get('hero')) {
       scenes.set('hero', new NeuralPathScene('heroNeuralMount', {
-        mode: 'neuron',
+        mode: 'voice',
         parallax: true,
       }));
     }
