@@ -8,17 +8,19 @@ export function generateStaticParams() {
   return INDUSTRIES.map((industry) => ({ industry: industry.slug }));
 }
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
-  params: { industry: string };
-}): Metadata {
-  const industry = INDUSTRIES.find((i) => i.slug === params.industry);
+  params: Promise<{ industry: string }>;
+}): Promise<Metadata> {
+  const { industry: industrySlug } = await params;
+  const industry = INDUSTRIES.find((i) => i.slug === industrySlug);
   return { title: industry ? `Halla AI for ${industry.name}` : "Industry Not Found" };
 }
 
-export default function IndustryDetailPage({ params }: { params: { industry: string } }) {
-  const industry = INDUSTRIES.find((i) => i.slug === params.industry);
+export default async function IndustryDetailPage({ params }: { params: Promise<{ industry: string }> }) {
+  const { industry: industrySlug } = await params;
+  const industry = INDUSTRIES.find((i) => i.slug === industrySlug);
   if (!industry) {
     notFound();
   }
