@@ -625,7 +625,11 @@ footer { background: var(--gray-900); padding: 72px 0 40px; }
   .grid-4 { grid-template-columns: repeat(2,1fr); }
 }
 @media (max-width: 768px) {
-  .nav-links { display: none; }
+  /* !important needed: .nav-links.nav-group[data-section=...] rules above
+     (for switching between Consultancy/Receptionist nav) are more specific
+     than a bare .nav-links selector, so without this the desktop nav never
+     actually hides on mobile even though .hamburger shows too. */
+  .nav-links { display: none !important; }
   .hamburger { display: block; }
   .grid-2 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr; }
@@ -934,6 +938,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-marquee {
   overflow: hidden; border-block: 1px solid var(--gray-100);
   background: var(--gray-50); padding: 14px 0;
+  max-width: 100%; min-width: 0;
 }
 .consult-marquee-track {
   display: flex; gap: 48px; width: max-content; white-space: nowrap;
