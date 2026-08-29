@@ -1,125 +1,106 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { fetchPublicPlans } from "@/lib/public-api";
 
-const FALLBACK_PLANS = [
-  { key: "essential", price: 39, label: "Essential — $39/mo" },
-  { key: "professional", price: 149, label: "Professional — $149/mo" },
-];
+import { Button } from "@/components/ui/button";
+import { ROI_PLAN_OPTIONS } from "@/content/pricing";
+
+function formatCurrency(value: number): string {
+  return "$" + Math.round(value).toLocaleString("en-US");
+}
 
 export function RoiCalculator() {
-  const [planOptions, setPlanOptions] = useState(FALLBACK_PLANS);
-  const [missed, setMissed] = useState(20);
-  const [value, setValue] = useState(500);
-  const [conv, setConv] = useState(30);
+  const [missedCalls, setMissedCalls] = useState(20);
+  const [jobValue, setJobValue] = useState(500);
+  const [conversionRate, setConversionRate] = useState(30);
   const [plan, setPlan] = useState(149);
 
-  useEffect(() => {
-    fetchPublicPlans()
-      .then((data) => {
-        const order = ["essential", "professional"] as const;
-        const next = order
-          .filter((k) => data[k])
-          .map((k) => ({
-            key: k,
-            price: data[k].price,
-            label: `${data[k].name} — $${data[k].price}/mo`,
-          }));
-        if (next.length) {
-          setPlanOptions(next);
-          const pro = next.find((p) => p.key === "professional");
-          setPlan(pro?.price ?? next[0].price);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  const { monthly, annual, cost, net, mult } = useMemo(() => {
-    const monthlyRecovered = missed * (conv / 100) * value;
-    const annualRecovered = monthlyRecovered * 12;
-    const annualCost = plan * 12;
-    const netRoi = annualRecovered - annualCost;
-    const multiplier = annualCost > 0 ? Math.round(annualRecovered / annualCost) : 0;
-    return {
-      monthly: monthlyRecovered,
-      annual: annualRecovered,
-      cost: annualCost,
-      net: netRoi,
-      mult: multiplier,
-    };
-  }, [missed, value, conv, plan]);
-
-  const fmt = (n: number) =>
-    n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  const monthly = Math.round(missedCalls * (conversionRate / 100) * jobValue);
+  const annual = monthly * 12;
+  const cost = plan * 12;
+  const net = Math.max(0, annual - cost);
+  const multiplier = cost > 0 ? (annual / cost).toFixed(1) : "∞";
 
   return (
-    <div className="grid-2" style={{ gap: 48, maxWidth: 880, margin: "0 auto", alignItems: "start" }}>
-      <div className="roi-wrap">
-        <h3 style={{ marginBottom: 24 }}>Your Business</h3>
-        <div className="roi-group">
-          <label className="roi-label">Monthly Calls You Currently Miss</label>
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="flex flex-col gap-4">
+        <h3 className="text-lg font-semibold text-foreground">Your Business</h3>
+
+        <label className="flex flex-col gap-1.5 text-sm text-foreground-secondary">
+          Monthly Calls You Currently Miss
           <input
-            className="roi-input"
             type="number"
-            value={missed}
-            onChange={(e) => setMissed(Number(e.target.value) || 0)}
+            aria-label="Monthly Calls You Currently Miss"
+            value={missedCalls}
+            onChange={(e) => setMissedCalls(Number(e.target.value) || 0)}
+            className="rounded-lg border border-border bg-card px-3 py-2 text-foreground"
           />
-        </div>
-        <div className="roi-group">
-          <label className="roi-label">Average Job / Sale Value ($)</label>
+        </label>
+
+        <label className="flex flex-col gap-1.5 text-sm text-foreground-secondary">
+          Average Job / Sale Value ($)
           <input
-            className="roi-input"
             type="number"
-            value={value}
-            onChange={(e) => setValue(Number(e.target.value) || 0)}
+            aria-label="Average Job / Sale Value ($)"
+            value={jobValue}
+            onChange={(e) => setJobValue(Number(e.target.value) || 0)}
+            className="rounded-lg border border-border bg-card px-3 py-2 text-foreground"
           />
-        </div>
-        <div className="roi-group">
-          <label className="roi-label">% of Answered Calls That Convert</label>
+        </label>
+
+        <label className="flex flex-col gap-1.5 text-sm text-foreground-secondary">
+          % of Answered Calls That Convert
           <input
-            className="roi-input"
             type="number"
             min={1}
             max={100}
-            value={conv}
-            onChange={(e) => setConv(Number(e.target.value) || 0)}
+            aria-label="% of Answered Calls That Convert"
+            value={conversionRate}
+            onChange={(e) => setConversionRate(Number(e.target.value) || 0)}
+            className="rounded-lg border border-border bg-card px-3 py-2 text-foreground"
           />
-        </div>
-        <div className="roi-group">
-          <label className="roi-label">Plan</label>
-          <select className="roi-select" value={plan} onChange={(e) => setPlan(Number(e.target.value))}>
-            {planOptions.map((p) => (
-              <option key={p.key} value={p.price}>
-                {p.label}
+        </label>
+
+        <label className="flex flex-col gap-1.5 text-sm text-foreground-secondary">
+          Plan
+          <select
+            aria-label="Plan"
+            value={plan}
+            onChange={(e) => setPlan(Number(e.target.value))}
+            className="rounded-lg border border-border bg-card px-3 py-2 text-foreground"
+          >
+            {ROI_PLAN_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
-        </div>
+        </label>
       </div>
-      <div>
-        <div className="roi-result highlight">
-          <div className="roi-result-num">{fmt(monthly)}</div>
-          <div className="roi-result-label">Monthly Revenue Recovered</div>
+
+      <div className="flex flex-col gap-3">
+        <div className="rounded-xl border border-primary bg-primary/10 p-5">
+          <p className="text-2xl font-bold text-foreground">{formatCurrency(monthly)}</p>
+          <p className="text-sm text-foreground-secondary">Monthly Revenue Recovered</p>
         </div>
-        <div className="roi-result" style={{ marginTop: 12 }}>
-          <div className="roi-result-num">{fmt(annual)}</div>
-          <div className="roi-result-label">Annual Revenue Recovered</div>
+        <div className="rounded-xl border border-border bg-card p-5">
+          <p className="text-2xl font-bold text-foreground">{formatCurrency(annual)}</p>
+          <p className="text-sm text-foreground-secondary">Annual Revenue Recovered</p>
         </div>
-        <div className="roi-result" style={{ marginTop: 12 }}>
-          <div className="roi-result-num" style={{ color: "var(--gray-500)" }}>
-            {fmt(cost)}
-          </div>
-          <div className="roi-result-label">Annual Halla AI Cost</div>
+        <div className="rounded-xl border border-border bg-card p-5">
+          <p className="text-2xl font-bold text-foreground-secondary">{formatCurrency(cost)}</p>
+          <p className="text-sm text-foreground-secondary">Annual Halla AI Cost</p>
         </div>
-        <div className="roi-result highlight" style={{ marginTop: 12 }}>
-          <div className="roi-result-num">{fmt(net)}</div>
-          <div className="roi-result-label">Net Annual ROI — {mult}x your investment</div>
+        <div className="rounded-xl border border-primary bg-primary/10 p-5">
+          <p className="text-2xl font-bold text-foreground">{formatCurrency(net)}</p>
+          <p className="text-sm text-foreground-secondary">
+            Net Annual ROI — {multiplier}x your investment
+          </p>
         </div>
-        <Link href="/signup" className="btn btn-primary btn-lg" style={{ width: "100%", marginTop: 20, display: "flex" }}>
-          Start Free Trial — Capture This Revenue →
-        </Link>
+        <Button asChild size="lg" className="mt-2 w-full">
+          <Link href="/signup">Start Free Trial — Capture This Revenue</Link>
+        </Button>
       </div>
     </div>
   );
