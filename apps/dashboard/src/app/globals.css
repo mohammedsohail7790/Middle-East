@@ -5245,3 +5245,32 @@ body:has(.dashboard-app) {
 .vibe-billing-row:hover {
   background: color-mix(in srgb, var(--accent) 4%, var(--muted));
 }
+
+/* ============ Marketing brand themes ============ */
+/* Scoped via [data-brand] so both brands can coexist on the same app
+   without affecting the dashboard's own --background/--primary tokens. */
+[data-brand="consultancy"] {
+  --background: #0a0708;
+  --foreground: #f8fafc;
+  --foreground-secondary: rgba(248, 250, 252, 0.7);
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --accent: #ef4444;
+  --accent-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.12);
+  --card: #120f14;
+  --card-foreground: #f8fafc;
+}
+
+[data-brand="receptionist"] {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --foreground-secondary: rgba(10, 10, 10, 0.65);
+  --primary: #0d9488;
+  --primary-foreground: #ffffff;
+  --accent: #0d9488;
+  --accent-foreground: #ffffff;
+  --border: rgba(10, 10, 10, 0.1);
+  --card: #f8fafc;
+  --card-foreground: #0a0a0a;
+}
