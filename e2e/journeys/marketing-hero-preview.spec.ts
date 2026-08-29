@@ -47,4 +47,28 @@ test.describe('marketing hero design previews', () => {
     const scrollWidth = await page.evaluate(() => document.scrollingElement?.scrollWidth ?? 0);
     expect(scrollWidth).toBeLessThanOrEqual(390);
   });
+
+  test('industries index page lists all 6 industries with no console errors and no canvas', async ({ page, consoleErrors }) => {
+    await page.goto('/design-preview/receptionist/industries', { waitUntil: 'load' });
+    await expect(page.getByRole('heading', { name: 'Industries We Serve' })).toBeVisible();
+    for (const name of ['HVAC', 'Plumbing', 'Electrical', 'Landscaping', 'Home Cleaning', 'Legal Firms']) {
+      await expect(page.getByRole('link', { name: new RegExp(name) }).first()).toBeVisible();
+    }
+    await expect(page.getByText('Property Management')).toBeVisible();
+    await expect(page.locator('canvas')).toHaveCount(0);
+    expect(consoleErrors).toEqual([]);
+  });
+
+  test('HVAC industry detail page renders content and FAQ with no console errors', async ({ page, consoleErrors }) => {
+    await page.goto('/design-preview/receptionist/industries/hvac', { waitUntil: 'load' });
+    await expect(page.getByRole('heading', { name: 'Halla AI for HVAC' })).toBeVisible();
+    await expect(page.getByText('Keep Your Schedule Hot. Not Your Customers.')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Start Free Trial' })).toHaveAttribute('href', '/signup');
+    const firstFaq = page.getByText('How does Halla AI handle seasonal demand spikes?');
+    await expect(firstFaq).toBeVisible();
+    await firstFaq.click();
+    await expect(page.getByText(/The AI scales automatically/)).toBeVisible();
+    await expect(page.locator('canvas')).toHaveCount(0);
+    expect(consoleErrors).toEqual([]);
+  });
 });
