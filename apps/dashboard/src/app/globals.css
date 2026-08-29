@@ -5249,7 +5249,7 @@ body:has(.dashboard-app) {
 /* ============ Marketing brand themes ============ */
 /* Scoped via [data-brand] so both brands can coexist on the same app
    without affecting the dashboard's own --background/--primary tokens. */
-[data-brand="consultancy"] {
+[data-brand="consultancy"][data-brand] {
   --background: #0a0708;
   --foreground: #f8fafc;
   --foreground-secondary: rgba(248, 250, 252, 0.7);
@@ -5260,9 +5260,14 @@ body:has(.dashboard-app) {
   --border: rgba(255, 255, 255, 0.12);
   --card: #120f14;
   --card-foreground: #f8fafc;
+  --muted: rgba(255, 255, 255, 0.08);
+  --muted-foreground: rgba(248, 250, 252, 0.7);
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #f8fafc;
+  --ring: #7c3aed;
 }
 
-[data-brand="receptionist"] {
+[data-brand="receptionist"][data-brand] {
   --background: #ffffff;
   --foreground: #0a0a0a;
   --foreground-secondary: rgba(10, 10, 10, 0.65);
@@ -5273,4 +5278,9 @@ body:has(.dashboard-app) {
   --border: rgba(10, 10, 10, 0.1);
   --card: #f8fafc;
   --card-foreground: #0a0a0a;
+  --muted: #f1f5f9;
+  --muted-foreground: rgba(10, 10, 10, 0.65);
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0a0a0a;
+  --ring: #0d9488;
 }
