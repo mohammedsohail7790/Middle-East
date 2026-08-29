@@ -71,4 +71,25 @@ test.describe('marketing hero design previews', () => {
     await expect(page.locator('canvas')).toHaveCount(0);
     expect(consoleErrors).toEqual([]);
   });
+
+  test('pricing page renders all 3 plans and the feature table with no console errors', async ({ page, consoleErrors }) => {
+    await page.goto('/design-preview/receptionist/pricing', { waitUntil: 'load' });
+    await expect(page.getByRole('heading', { name: 'Simple, Honest Pricing' })).toBeVisible();
+    await expect(page.getByText('Essential').first()).toBeVisible();
+    await expect(page.getByText('Professional').first()).toBeVisible();
+    await expect(page.getByText('Enterprise').first()).toBeVisible();
+    await expect(page.getByText('Most Popular')).toBeVisible();
+    await expect(page.getByText('Full Feature Comparison')).toBeVisible();
+    await expect(page.locator('canvas')).toHaveCount(0);
+    expect(consoleErrors).toEqual([]);
+  });
+
+  test('ROI calculator recomputes when inputs change', async ({ page, consoleErrors }) => {
+    await page.goto('/design-preview/receptionist/pricing', { waitUntil: 'load' });
+    await expect(page.getByText('$3,000')).toBeVisible();
+    await page.getByLabel('Monthly Calls You Currently Miss').fill('40');
+    await expect(page.getByText('$6,000')).toBeVisible();
+    await expect(page.locator('canvas')).toHaveCount(0);
+    expect(consoleErrors).toEqual([]);
+  });
 });
