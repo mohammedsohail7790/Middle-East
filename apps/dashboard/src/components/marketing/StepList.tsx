@@ -1,4 +1,4 @@
-import type { TimelineStep } from "@/content/consultancy";
+import type { TimelineStep } from "@/content/types";
 
 export function StepList({ steps }: { steps: TimelineStep[] }) {
   return (

@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { FeatureGrid } from "./FeatureGrid";
-import type { ServiceItem } from "@/content/consultancy";
+import type { ServiceItem } from "@/content/types";
 
 const items: ServiceItem[] = [
   {
@@ -11,6 +11,7 @@ const items: ServiceItem[] = [
     description: "Test description.",
     bullets: ["Bullet one", "Bullet two"],
     href: "/services/operations",
+    exploreLabel: "Operations",
   },
   {
     label: "Revenue",
@@ -19,6 +20,7 @@ const items: ServiceItem[] = [
     description: "Another description.",
     bullets: ["Bullet three"],
     href: "/services/acquisition",
+    exploreLabel: "Acquisition",
     featured: true,
     featuredBadge: "Most requested",
   },

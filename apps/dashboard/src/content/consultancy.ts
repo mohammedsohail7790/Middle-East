@@ -1,4 +1,4 @@
-export type Capability = string;
+import type { Capability, ServiceItem, TimelineStep, ComparisonRow } from "./types";
 
 export const CAPABILITIES: Capability[] = [
   "Process Mapping",
@@ -10,17 +10,6 @@ export const CAPABILITIES: Capability[] = [
   "Review Automation",
   "Live Dashboards",
 ];
-
-export type ServiceItem = {
-  label: string;
-  icon: "settings" | "trending-up" | "sparkles";
-  title: string;
-  description: string;
-  bullets: string[];
-  href: string;
-  featured?: boolean;
-  featuredBadge?: string;
-};
 
 export const SERVICES: ServiceItem[] = [
   {
@@ -36,6 +25,7 @@ export const SERVICES: ServiceItem[] = [
       "Internal reporting & dashboards",
     ],
     href: "/services/operations",
+    exploreLabel: "Operations",
   },
   {
     label: "Revenue",
@@ -50,6 +40,7 @@ export const SERVICES: ServiceItem[] = [
       "CRM & pipeline integration",
     ],
     href: "/services/acquisition",
+    exploreLabel: "Acquisition",
     featured: true,
     featuredBadge: "Most requested",
   },
@@ -66,10 +57,9 @@ export const SERVICES: ServiceItem[] = [
       "On-brand messaging at scale",
     ],
     href: "/services/brand",
+    exploreLabel: "Brand",
   },
 ];
-
-export type TimelineStep = { number: string; title: string; description: string };
 
 export const HOW_WE_WORK_STEPS: TimelineStep[] = [
   {
@@ -97,14 +87,6 @@ export const HOW_WE_WORK_STEPS: TimelineStep[] = [
       "Success is hours saved, leads generated, and revenue booked. If a system isn't delivering, we fix it or kill it.",
   },
 ];
-
-export type ComparisonRow = {
-  need: string;
-  hallaAi: string;
-  diy: string;
-  agency: string;
-  agencyNegative?: boolean;
-};
 
 export const COMPARISON_ROWS: ComparisonRow[] = [
   {

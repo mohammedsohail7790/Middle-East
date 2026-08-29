@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import type { ComparisonRow } from "@/content/consultancy";
+import type { ComparisonRow } from "@/content/types";
 
 export function ComparisonTable({
   rows,

@@ -3,19 +3,13 @@ import { ArrowRight, Settings, Sparkles, TrendingUp } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { ServiceItem } from "@/content/consultancy";
+import type { ServiceItem } from "@/content/types";
 
 const ICONS = {
   settings: Settings,
   "trending-up": TrendingUp,
   sparkles: Sparkles,
 } as const;
-
-const EXPLORE_LABEL: Record<string, string> = {
-  "/services/operations": "Operations",
-  "/services/acquisition": "Acquisition",
-  "/services/brand": "Brand",
-};
 
 export function FeatureGrid({ items }: { items: ServiceItem[] }) {
   return (
@@ -56,7 +50,7 @@ export function FeatureGrid({ items }: { items: ServiceItem[] }) {
                 href={item.href}
                 className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
               >
-                Explore {EXPLORE_LABEL[item.href] ?? item.title.split(" ")[0]} <ArrowRight className="size-4" />
+                Explore {item.exploreLabel} <ArrowRight className="size-4" />
               </Link>
             </CardContent>
           </Card>
