@@ -138,10 +138,6 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
     void import("three")
       .then((THREE) => {
         getHallaWindow().THREE = THREE;
-        // halla_plexus.js (the consultancy graph backdrop) is WebGL-based
-        // and needs window.THREE set before it runs, so it only starts
-        // loading once the three import above has resolved.
-        void loadScript("/halla_plexus.js");
         return loadScript("/halla_neural.js");
       })
       .then(refreshNeural)

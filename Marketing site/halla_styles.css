@@ -315,7 +315,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 }
 .hero-neural-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
 .hero .container { position: relative; z-index: 1; }
-@media (prefers-reduced-motion: reduce) { .hero-neural-canvas, .consult-cosmic-canvas { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-neural-canvas { display: none; } }
 
 .hero h1 { margin-bottom: 22px; }
 .hero h1 em { font-style: normal; color: var(--accent); }
@@ -819,16 +819,6 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 #page-consult-signup input::placeholder, #page-consult-signup textarea::placeholder { color: var(--consult-text-faint); }
 #page-consult-signup .roi-input:focus, #page-consult-signup .roi-select:focus { border-color: var(--consult-accent); }
-
-/* Graph backdrop — one fixed canvas (starfield + an Obsidian-style 3D node
-   graph with glow-stroke edges and the odd traveling signal pulse) behind
-   the entire consultancy page, not just the hero. It's a direct child of
-   #page-consultancy so it inherits that page's display:none / .active
-   toggling from the SPA router for free. */
-.consult-cosmic-canvas {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-}
-.consult-cosmic-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
 
 .consult-hero {
   position: relative; overflow: hidden;
