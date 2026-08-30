@@ -8,6 +8,7 @@ import { ComparisonTable } from "@/components/marketing/ComparisonTable";
 import { CtaBanner } from "@/components/marketing/CtaBanner";
 import { SiteFooter } from "@/components/marketing/layout/SiteFooter";
 import { Marquee } from "@/components/magic-ui/marquee";
+import { ConsultancyHeroScene } from "@/components/marketing/premium/consultancy-intelligence/ConsultancyHeroScene";
 import { CAPABILITIES, SERVICES, HOW_WE_WORK_STEPS, COMPARISON_ROWS } from "@/content/consultancy";
 
 export const metadata: Metadata = {
@@ -37,6 +38,7 @@ export default function ConsultancyDesignPreviewPage() {
           { label: "Book a Diagnostic Call", href: "/consult-signup" },
           { label: "See the AI Receptionist", href: "/design-preview/receptionist", variant: "outline" },
         ]}
+        background={<ConsultancyHeroScene />}
       >
         <div className="mt-4 w-full max-w-xl">
           <StatBar stats={STATS} />

@@ -17,6 +17,10 @@ export type HeroSectionProps = {
   ctas: HeroCta[];
   align?: "left" | "center";
   children?: React.ReactNode;
+  /** Optional decorative layer (e.g. a 3D scene) rendered behind the hero
+   * content, absolutely positioned and filling the section. When provided,
+   * the section itself goes transparent so the layer shows through. */
+  background?: React.ReactNode;
 };
 
 export function HeroSection({
@@ -26,15 +30,23 @@ export function HeroSection({
   ctas,
   align = "left",
   children,
+  background,
 }: HeroSectionProps) {
   return (
     <section
       className={cn(
-        "bg-background px-6 py-24 text-foreground sm:px-10 lg:px-16",
+        "relative overflow-hidden px-6 py-24 text-foreground sm:px-10 lg:px-16",
+        background ? "bg-transparent" : "bg-background",
         align === "center" && "text-center",
       )}
     >
-      <div className={cn("mx-auto flex max-w-3xl flex-col gap-6", align === "center" && "items-center")}>
+      {background && <div className="pointer-events-none absolute inset-0">{background}</div>}
+      <div
+        className={cn(
+          "relative z-10 mx-auto flex max-w-3xl flex-col gap-6",
+          align === "center" && "items-center",
+        )}
+      >
         <span className="inline-flex w-fit items-center rounded-full bg-primary/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
           {eyebrow}
         </span>
