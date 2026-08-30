@@ -112,9 +112,29 @@ p { color: var(--gray-500); line-height: 1.72; }
 .btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(13,148,136,0.3); }
 /* Primary CTA buttons ("Book a Diagnostic Call", etc.) use the shared
    .btn-blue class, which is teal everywhere else on the site — swap it
-   for the consultancy accent while any page in that section is active. */
-body[data-section="consultancy"] .btn-blue { background: var(--consult-accent); color: var(--consult-ink); }
-body[data-section="consultancy"] .btn-blue:hover { background: var(--consult-accent-soft); box-shadow: 0 8px 24px var(--consult-accent-dim); }
+   for the consultancy accent while any page in that section is active.
+   Scoped both by body[data-section] (covers the nav/footer, which are
+   shared chrome outside any #page-* container) AND directly by the
+   static #page-* ids (covers content inside those pages immediately,
+   with no dependency on the JS that sets data-section having run yet —
+   that JS runs on mount, so relying on it alone leaves a window where
+   these buttons show the receptionist product's teal by default). */
+body[data-section="consultancy"] .btn-blue,
+#page-consultancy .btn-blue,
+#page-svc-operations .btn-blue,
+#page-svc-acquisition .btn-blue,
+#page-svc-brand .btn-blue,
+#page-consult-signup .btn-blue {
+  background: var(--consult-accent); color: var(--consult-ink);
+}
+body[data-section="consultancy"] .btn-blue:hover,
+#page-consultancy .btn-blue:hover,
+#page-svc-operations .btn-blue:hover,
+#page-svc-acquisition .btn-blue:hover,
+#page-svc-brand .btn-blue:hover,
+#page-consult-signup .btn-blue:hover {
+  background: var(--consult-accent-soft); box-shadow: 0 8px 24px var(--consult-accent-dim);
+}
 .btn-lg { padding: 16px 34px; font-size: 1rem; }
 .btn-sm { padding: 9px 18px; font-size: 0.85rem; }
 
@@ -923,10 +943,26 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 /* The "Ready When You Are" CTA block is repeated (with a plain .cta-block,
    no consult-cta-block modifier) at the bottom of every consultancy-family
    page — svc-operations, svc-acquisition, svc-brand — not just the main
-   consultancy landing page, so these override by data-section rather than
-   by #consult-cta id to actually reach all of them. */
-body[data-section="consultancy"] .cta-block .label[style*="background"] { background: var(--consult-accent-dim) !important; color: var(--consult-accent-soft) !important; }
-body[data-section="consultancy"] .cta-block .btn-outline[style*="color"] { color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important; }
+   consultancy landing page. Scoped both by body[data-section] and directly
+   by the static #page-* ids, same reasoning as the .btn-blue rule above:
+   the id-based selectors apply immediately from the raw markup, with no
+   dependency on the JS that sets data-section having run yet. */
+body[data-section="consultancy"] .cta-block .label[style*="background"],
+#page-consultancy .cta-block .label[style*="background"],
+#page-svc-operations .cta-block .label[style*="background"],
+#page-svc-acquisition .cta-block .label[style*="background"],
+#page-svc-brand .cta-block .label[style*="background"],
+#page-consult-signup .cta-block .label[style*="background"] {
+  background: var(--consult-accent-dim) !important; color: var(--consult-accent-soft) !important;
+}
+body[data-section="consultancy"] .cta-block .btn-outline[style*="color"],
+#page-consultancy .cta-block .btn-outline[style*="color"],
+#page-svc-operations .cta-block .btn-outline[style*="color"],
+#page-svc-acquisition .cta-block .btn-outline[style*="color"],
+#page-svc-brand .cta-block .btn-outline[style*="color"],
+#page-consult-signup .cta-block .btn-outline[style*="color"] {
+  color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important;
+}
 
 /* Scroll reveal (GSAP enhances; CSS fallback) */
 .reveal-up {
