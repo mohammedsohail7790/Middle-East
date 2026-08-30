@@ -111,7 +111,7 @@ export async function GET(request: Request) {
   } else if (type === "invite" || sessionUser?.user_metadata?.invited_to_call_iq) {
     destination = tenantId ? "/dashboard" : "/onboarding";
   }
-  if (!tenantId && (destination === "/dashboard" || destination === "/")) {
+  if (!tenantId && (destination.startsWith("/dashboard") || destination === "/")) {
     destination = "/onboarding";
   }
   if (tenantId && destination === "/onboarding") {
