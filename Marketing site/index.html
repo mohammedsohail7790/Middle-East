@@ -11,13 +11,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="/halla_styles.css">
 <script src="https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 <script src="/halla_neural.js" defer></script>
+<script src="halla_plexus.js" defer></script>
 </head>
 <body>
 
@@ -9692,6 +9692,7 @@
 
 <!-- ====== CONSULTANCY ====== -->
 <div id="page-consultancy" class="page active">
+  <div id="consultCosmicMount" class="consult-cosmic-canvas" aria-hidden="true"></div>
 
   <!-- CONSULTANCY HERO -->
   <section class="consult-hero">
@@ -9882,52 +9883,6 @@
             </tr>
           </tbody>
         </table>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="consult-faq">
-    <div class="container-sm">
-      <div class="text-center consult-section-head reveal-up">
-        <div class="label"><span class="lang-en">Questions</span><span class="lang-ar">الأسئلة الشائعة</span></div>
-        <h2><span class="lang-en">Before you book a call</span><span class="lang-ar">قبل حجز مكالمتك</span></h2>
-      </div>
-      <div class="consult-faq-list reveal-up">
-        <div class="consult-faq-item">
-          <button class="consult-faq-q" type="button">
-            <span><span class="lang-en">How is this different from hiring a freelancer or agency?</span><span class="lang-ar">ما الفرق بين هذا وبين توظيف مستقل أو وكالة؟</span></span>
-            <i class="ti ti-chevron-down"></i>
-          </button>
-          <div class="consult-faq-a"><p><span class="lang-en">A freelancer builds what you ask for; an agency scopes a project and hands it off. We map your actual workflow first, then build and maintain the systems ourselves — one point of contact, backed by an engineering team, for as long as the systems are running.</span><span class="lang-ar">المستقل ينفذ ما تطلبه، والوكالة تحدد نطاق مشروع ثم تسلمه وتنسحب. نحن نرسم أولاً سير عملك الفعلي، ثم نبني الأنظمة وندعمها بأنفسنا — جهة اتصال واحدة، مدعومة بفريق هندسي، طوال فترة تشغيل الأنظمة.</span></p></div>
-        </div>
-        <div class="consult-faq-item">
-          <button class="consult-faq-q" type="button">
-            <span><span class="lang-en">What do you actually need from us to get started?</span><span class="lang-ar">ما الذي تحتاجونه فعلاً منا للبدء؟</span></span>
-            <i class="ti ti-chevron-down"></i>
-          </button>
-          <div class="consult-faq-a"><p><span class="lang-en">Mainly access and time: logins to the tools you already use (CRM, calendar, phone system, socials) and 30-45 minutes on the diagnostic call to walk through how work actually moves through your business today.</span><span class="lang-ar">في الأساس، صلاحيات الوصول والوقت: بيانات الدخول للأدوات التي تستخدمونها بالفعل (نظام إدارة العملاء، التقويم، نظام الهاتف، حسابات التواصل)، و30-45 دقيقة في المكالمة التشخيصية لاستعراض كيفية سير العمل فعلياً في نشاطكم اليوم.</span></p></div>
-        </div>
-        <div class="consult-faq-item">
-          <button class="consult-faq-q" type="button">
-            <span><span class="lang-en">How long before a system is actually running?</span><span class="lang-ar">كم يستغرق الأمر حتى يعمل النظام فعلياً؟</span></span>
-            <i class="ti ti-chevron-down"></i>
-          </button>
-          <div class="consult-faq-a"><p><span class="lang-en">It depends on scope, but most first systems go live in production within a few weeks of the diagnostic call — not months of discovery decks. We'd rather ship something narrow and working than something broad and theoretical.</span><span class="lang-ar">يعتمد ذلك على النطاق، لكن معظم الأنظمة الأولى تدخل الإنتاج الفعلي خلال أسابيع قليلة من المكالمة التشخيصية — وليس بعد أشهر من عروض الاستكشاف. نفضّل تسليم نظام محدود النطاق ويعمل فعلياً على نظام واسع وغير مطبق.</span></p></div>
-        </div>
-        <div class="consult-faq-item">
-          <button class="consult-faq-q" type="button">
-            <span><span class="lang-en">What happens if a system you build isn't working out?</span><span class="lang-ar">ماذا يحدث إن لم ينجح نظام قمتم ببنائه؟</span></span>
-            <i class="ti ti-chevron-down"></i>
-          </button>
-          <div class="consult-faq-a"><p><span class="lang-en">We measure success in hours saved, leads generated, and revenue booked — not activity. If a system isn't delivering against that, we fix it or shut it off. We don't keep charging for something that isn't working.</span><span class="lang-ar">نقيس النجاح بالساعات الموفرة، والعملاء المحتملين الذين تم توليدهم، والإيرادات المحجوزة — وليس بمجرد النشاط. إن لم يحقق النظام ذلك، نقوم بإصلاحه أو إيقافه. نحن لا نستمر في احتساب رسوم مقابل شيء لا يعمل.</span></p></div>
-        </div>
-        <div class="consult-faq-item">
-          <button class="consult-faq-q" type="button">
-            <span><span class="lang-en">Do we need our own developer or IT team?</span><span class="lang-ar">هل نحتاج إلى مطور أو فريق تقني خاص بنا؟</span></span>
-            <i class="ti ti-chevron-down"></i>
-          </button>
-          <div class="consult-faq-a"><p><span class="lang-en">No. We build, deploy, and maintain everything ourselves. If you already have technical staff, we're happy to work alongside them instead of around them.</span><span class="lang-ar">لا. نحن نقوم بالبناء والنشر والصيانة بأنفسنا بالكامل. وإن كان لديكم بالفعل فريق تقني، يسعدنا العمل معه بدلاً من العمل بمعزل عنه.</span></p></div>
-        </div>
       </div>
     </div>
   </section>

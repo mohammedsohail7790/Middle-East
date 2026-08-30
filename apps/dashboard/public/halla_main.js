@@ -419,58 +419,6 @@ function hallaInit() {
   initPhone3D();
   initBrowserFrameTilt();
   initConsultForm();
-  initConsultMagnetic();
-  initConsultFaq();
-}
-
-// ============ CONSULTANCY — MAGNETIC BUTTONS ============
-// .consult-magnetic marks the primary CTA buttons; on pointer-capable
-// devices they ease toward the cursor within a small radius and snap back
-// on leave — a deliberate, restrained micro-interaction (not a hover color
-// swap) fitting the "we build precise systems" positioning.
-function initConsultMagnetic() {
-  if (window.matchMedia('(pointer: coarse)').matches) return;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const els = document.querySelectorAll('.consult-magnetic');
-  if (!els.length) return;
-  const hasGsap = typeof gsap !== 'undefined';
-
-  els.forEach((el) => {
-    const strength = 0.3;
-    const move = hasGsap
-      ? gsap.quickTo(el, 'x', { duration: 0.3, ease: 'power3.out' })
-      : null;
-    const moveY = hasGsap
-      ? gsap.quickTo(el, 'y', { duration: 0.3, ease: 'power3.out' })
-      : null;
-
-    el.addEventListener('mousemove', (e) => {
-      const rect = el.getBoundingClientRect();
-      const dx = (e.clientX - rect.left - rect.width / 2) * strength;
-      const dy = (e.clientY - rect.top - rect.height / 2) * strength;
-      if (move) { move(dx); moveY(dy); }
-      else { el.style.transform = `translate(${dx}px, ${dy}px)`; }
-    });
-    el.addEventListener('mouseleave', () => {
-      if (move) { move(0); moveY(0); }
-      else { el.style.transform = ''; }
-    });
-  });
-}
-
-// ============ CONSULTANCY — FAQ ACCORDION ============
-function initConsultFaq() {
-  const items = document.querySelectorAll('.consult-faq-item');
-  if (!items.length) return;
-  items.forEach((item) => {
-    const question = item.querySelector('.consult-faq-q');
-    if (!question) return;
-    question.addEventListener('click', () => {
-      const wasOpen = item.classList.contains('open');
-      items.forEach((other) => other.classList.remove('open'));
-      if (!wasOpen) item.classList.add('open');
-    });
-  });
 }
 
 if (document.readyState === 'loading') {

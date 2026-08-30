@@ -97,17 +97,6 @@ export default function MarketingRootLayout({
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=Cairo:wght@300;400;500;600;700;800;900&display=swap"
         />
-        {/* Serif display face for the consultancy pages (--consult-face-display
-            in halla_styles.css) — kept separate from halla-fonts above since
-            marketing-body.html's own <head> font links get stripped when
-            embedded here (see prepareEmbeddedMarketingHtml), so this is the
-            only place that actually loads it for the live Next.js site. */}
-        {/* eslint-disable-next-line @next/next/no-css-tags, @next/next/no-page-custom-font */}
-        <link
-          id="halla-fonts-consult"
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap"
-        />
       </head>
       <body suppressHydrationWarning>
         <MarketingProviders>{children}</MarketingProviders>

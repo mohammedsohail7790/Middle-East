@@ -11,7 +11,7 @@ export function ComparisonTable({
   competitorLabel: string;
 }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+    <div className="overflow-x-auto rounded-2xl border border-border">
       <table className="w-full min-w-[640px] border-collapse text-left text-sm">
         <thead>
           <tr className="border-b border-border">

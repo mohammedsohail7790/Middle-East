@@ -44,31 +44,24 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  /* Consultancy page — true black/graphite system (scoped to
-     #page-consultancy, deliberately distinct from the teal --accent used
-     by the receptionist product). A genuinely neutral near-black
-     background (not navy-tinted), one muted slate-blue accent used only
-     for links/CTAs, flat borders instead of glassy blur, no gradients on
-     text/badges, no glow effects — a restrained enterprise-consultancy
-     look, not a dark-SaaS "vibe-coded" one. */
-  --consult-ink: #0a0a0a;
-  --consult-ink-soft: #131313;
-  --consult-surface: rgba(255,255,255,0.05);
-  --consult-surface-strong: rgba(255,255,255,0.09);
-  --consult-hairline: rgba(255,255,255,0.12);
-  --consult-hairline-strong: rgba(255,255,255,0.2);
-  --consult-accent: #4f6f93;
-  --consult-accent-soft: #8fa8c4;
-  --consult-accent-dim: rgba(79,111,147,0.16);
-  --consult-text: #f2f2f2;
-  --consult-text-muted: rgba(242,242,242,0.62);
-  --consult-text-faint: rgba(242,242,242,0.4);
+  /* Consultancy page — graphite/near-black system with a single restrained
+     signal color (scoped to #page-consultancy, deliberately distinct from
+     the teal --accent used by the receptionist product). One accent, real
+     neutral grays, no gradient-soup — this is the "professional, not
+     vibe-coded" palette. */
+  --consult-ink: #0a0a0c;
+  --consult-ink-soft: #0e0e11;
+  --consult-surface: rgba(255,255,255,0.035);
+  --consult-surface-strong: rgba(255,255,255,0.06);
+  --consult-hairline: rgba(255,255,255,0.09);
+  --consult-hairline-strong: rgba(255,255,255,0.16);
+  --consult-accent: #6e7bfa;
+  --consult-accent-soft: #a7b0fc;
+  --consult-accent-dim: rgba(110,123,250,0.14);
+  --consult-text: #f4f4f5;
+  --consult-text-muted: rgba(244,244,245,0.6);
+  --consult-text-faint: rgba(244,244,245,0.38);
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  /* A serif display face, distinct from the receptionist product's all-sans
-     Hanken Grotesk, gives the consultancy pages their own editorial,
-     enterprise-advisory register (think Bain/McKinsey-adjacent authority)
-     rather than reading as the same startup product with different colors. */
-  --consult-face-display: 'Fraunces', Georgia, 'Times New Roman', serif;
 }
 
 body { font-family: var(--font); background: var(--white); color: var(--black); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
@@ -316,7 +309,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 }
 .hero-neural-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
 .hero .container { position: relative; z-index: 1; }
-@media (prefers-reduced-motion: reduce) { .hero-neural-canvas { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-neural-canvas, .consult-cosmic-canvas { display: none; } }
 
 .hero h1 { margin-bottom: 22px; }
 .hero h1 em { font-style: normal; color: var(--accent); }
@@ -762,86 +755,48 @@ html[dir="rtl"] .lang-ar { display: inline; }
 html[dir="rtl"] .lang-ar.lang-block { display: block; }
 
 /* ============ CONSULTANCY — PREMIUM LAYOUT ============ */
-/* The consultancy family is the landing page plus its three service
-   detail pages and the signup page — every page reachable without ever
-   leaving the "Halla AI Consultancy" product. All five get the same dark
-   ink theme and serif display type; only the landing page additionally
-   carries the bespoke hero/service-grid/timeline components below. */
-#page-consultancy, #page-svc-operations, #page-svc-acquisition, #page-svc-brand, #page-consult-signup {
-  position: relative; background: var(--consult-ink); color: var(--consult-text);
-}
-#page-consultancy h1, #page-consultancy h2, #page-consultancy h3, #page-consultancy h4,
-#page-svc-operations h1, #page-svc-operations h2, #page-svc-operations h3, #page-svc-operations h4,
-#page-svc-acquisition h1, #page-svc-acquisition h2, #page-svc-acquisition h3, #page-svc-acquisition h4,
-#page-svc-brand h1, #page-svc-brand h2, #page-svc-brand h3, #page-svc-brand h4,
-#page-consult-signup h1, #page-consult-signup h2, #page-consult-signup h3, #page-consult-signup h4 {
-  color: var(--consult-text); font-family: var(--consult-face-display); font-weight: 600; letter-spacing: -0.01em;
-}
-#page-consultancy p, #page-svc-operations p, #page-svc-acquisition p, #page-svc-brand p, #page-consult-signup p {
-  color: var(--consult-text-muted);
-}
-#page-consultancy .label, #page-svc-operations .label, #page-svc-acquisition .label, #page-svc-brand .label, #page-consult-signup .label {
-  color: var(--consult-accent-soft); background: var(--consult-accent-dim); font-family: var(--consult-mono); font-weight: 500;
-}
+#page-consultancy { position: relative; background: var(--consult-ink); color: var(--consult-text); }
+#page-consultancy h1, #page-consultancy h2, #page-consultancy h3, #page-consultancy h4 { color: var(--consult-text); }
+#page-consultancy p { color: var(--consult-text-muted); }
+#page-consultancy .label { color: var(--consult-accent-soft); background: var(--consult-accent-dim); }
 
-/* The 3 service detail pages and signup page reuse the site's generic
-   .page-hero / .card / .divider-line / .feat-icon-* components rather than
-   the landing page's bespoke ones — reskin those generic components for
-   the dark theme instead of duplicating new component CSS. */
-#page-svc-operations .page-hero, #page-svc-acquisition .page-hero, #page-svc-brand .page-hero, #page-consult-signup .page-hero {
-  background: transparent; border-bottom: 1px solid var(--consult-hairline);
+/* Graph backdrop — one fixed canvas (starfield + an Obsidian-style 3D node
+   graph with glow-stroke edges and the odd traveling signal pulse) behind
+   the entire consultancy page, not just the hero. It's a direct child of
+   #page-consultancy so it inherits that page's display:none / .active
+   toggling from the SPA router for free. */
+.consult-cosmic-canvas {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
 }
-#page-svc-operations .card, #page-svc-acquisition .card, #page-svc-brand .card, #page-consult-signup .card {
-  background: rgba(255,255,255,0.045); border-color: var(--consult-hairline); box-shadow: none;
-}
-#page-svc-operations .card:hover, #page-svc-acquisition .card:hover, #page-svc-brand .card:hover, #page-consult-signup .card:hover {
-  border-color: var(--consult-accent); box-shadow: 0 12px 28px rgba(0,0,0,0.35);
-}
-#page-svc-operations .card h4, #page-svc-acquisition .card h4, #page-svc-brand .card h4, #page-consult-signup .card h4 { color: var(--consult-text); }
-#page-svc-operations .card p, #page-svc-acquisition .card p, #page-svc-brand .card p, #page-consult-signup .card p { color: var(--consult-text-muted); }
-#page-svc-operations .divider-line, #page-svc-acquisition .divider-line, #page-svc-brand .divider-line, #page-consult-signup .divider-line {
-  border-top-color: var(--consult-hairline);
-}
-#page-svc-operations .feat-icon-blue, #page-svc-operations .feat-icon-green, #page-svc-operations .feat-icon-orange, #page-svc-operations .feat-icon-red,
-#page-svc-acquisition .feat-icon-blue, #page-svc-acquisition .feat-icon-green, #page-svc-acquisition .feat-icon-orange, #page-svc-acquisition .feat-icon-red,
-#page-svc-brand .feat-icon-blue, #page-svc-brand .feat-icon-green, #page-svc-brand .feat-icon-orange, #page-svc-brand .feat-icon-red,
-#page-consult-signup .feat-icon-blue, #page-consult-signup .feat-icon-green, #page-consult-signup .feat-icon-orange, #page-consult-signup .feat-icon-red {
-  background: var(--consult-surface-strong); color: var(--consult-accent-soft);
-}
-#page-svc-operations .btn-outline, #page-svc-acquisition .btn-outline, #page-svc-brand .btn-outline, #page-consult-signup .btn-outline {
-  color: var(--consult-text-muted); border-color: var(--consult-hairline); background: transparent;
-}
-#page-svc-operations .btn-outline:hover, #page-svc-acquisition .btn-outline:hover, #page-svc-brand .btn-outline:hover, #page-consult-signup .btn-outline:hover {
-  border-color: var(--consult-hairline-strong); background: var(--consult-surface);
-}
-/* consult-signup's own form inputs (name/email/phone) */
-#page-consult-signup input[type="text"], #page-consult-signup input[type="email"], #page-consult-signup input[type="tel"], #page-consult-signup select, #page-consult-signup textarea {
-  background: var(--consult-surface); border: 1px solid var(--consult-hairline); color: var(--consult-text);
-}
-#page-consult-signup input::placeholder, #page-consult-signup textarea::placeholder { color: var(--consult-text-faint); }
-#page-consult-signup .roi-input:focus, #page-consult-signup .roi-select:focus { border-color: var(--consult-accent); }
+.consult-cosmic-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
 
 .consult-hero {
   position: relative; overflow: hidden;
   padding: 140px 0 88px;
+  background: radial-gradient(120% 100% at 15% 0%, rgba(0,0,0,0.5) 0%, transparent 55%);
 }
-/* No radial glow blob — flat ink background lets the graph canvas read
-   through on its own. */
-.consult-hero-glow { display: none; }
+.consult-hero-glow {
+  position: absolute; top: -20%; right: -10%; width: 55%; height: 70%;
+  background: radial-gradient(circle, var(--consult-accent-dim) 0%, transparent 68%);
+  pointer-events: none; z-index: 0;
+}
 .consult-hero-grid {
   position: relative; z-index: 1;
   display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 56px; align-items: center;
 }
-/* A flat translucent scrim keeps text contrast solid over the graph —
-   no backdrop-filter blur, just a plain tinted overlay. */
+/* The copy sits directly over the densest part of the graph — a soft blurred
+   scrim keeps text contrast solid regardless of what's animating behind it. */
 .consult-hero-copy {
   position: relative; padding: 8px 12px; margin: -8px -12px;
-  background: rgba(10,10,10,0.82);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  background: linear-gradient(100deg, rgba(10,10,12,0.6) 0%, rgba(10,10,12,0.22) 65%, transparent 100%);
   border-radius: var(--radius-lg);
 }
 .consult-hero-copy h1 { color: var(--consult-text); font-size: clamp(2.4rem, 5vw, 3.8rem); margin-bottom: 18px; }
-/* Flat accent color, not a gradient text-clip effect. */
-.consult-gradient-text { color: var(--consult-accent-soft); }
+.consult-gradient-text {
+  background: linear-gradient(120deg, var(--consult-text) 0%, var(--consult-accent-soft) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
 .consult-hero-sub { font-size: 1.08rem; color: var(--consult-text-muted); max-width: 520px; line-height: 1.75; }
 .consult-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
 .consult-hero-outline {
@@ -861,8 +816,9 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
 }
 .consult-bento-card {
-  background: rgba(255,255,255,0.045); border: 1px solid var(--consult-hairline);
+  background: var(--consult-surface); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-lg); padding: 22px 20px;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   transition: border-color 0.25s, transform 0.25s;
 }
 .consult-bento-card:hover { border-color: var(--consult-hairline-strong); transform: translateY(-2px); }
@@ -914,17 +870,21 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 .consult-service-card {
   position: relative; overflow: hidden;
-  background: rgba(255,255,255,0.045); border: 1px solid var(--consult-hairline);
+  background: var(--consult-surface); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-xl); padding: 30px 26px;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
 .consult-service-card:hover {
-  transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.35); border-color: var(--consult-accent);
+  transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: var(--consult-hairline-strong);
 }
-/* A flat accent-colored top border marks the featured card — no gradient
-   wash, no glow blob on hover. */
-.consult-service-featured { border-color: var(--consult-accent); border-top: 2px solid var(--consult-accent); }
-.consult-service-glow { display: none; }
+.consult-service-featured { border-color: rgba(110,123,250,0.35); background: linear-gradient(180deg, var(--consult-accent-dim) 0%, var(--consult-surface) 55%); }
+.consult-service-glow {
+  position: absolute; top: -40%; right: -30%; width: 70%; height: 70%;
+  background: radial-gradient(circle, var(--consult-accent-dim) 0%, transparent 70%);
+  pointer-events: none; opacity: 0; transition: opacity 0.3s;
+}
+.consult-service-card:hover .consult-service-glow { opacity: 1; }
 .consult-featured-badge {
   position: absolute; top: 18px; right: 18px;
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
@@ -960,8 +920,9 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 .consult-timeline-step {
   position: relative; z-index: 1;
-  background: rgba(255,255,255,0.045); border: 1px solid var(--consult-hairline);
+  background: var(--consult-surface); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-lg); padding: 28px 22px;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
 }
 .consult-timeline-num {
   width: 42px; height: 42px; border-radius: 50%;
@@ -973,7 +934,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-timeline-step h4 { margin-bottom: 8px; font-size: 1rem; color: var(--consult-text); }
 .consult-timeline-step p { font-size: 0.85rem; color: var(--consult-text-muted); }
 
-#consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: rgba(255,255,255,0.045); }
+#consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: var(--consult-surface); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 #consult-compare .comp-table th { background: rgba(255,255,255,0.025); color: var(--consult-text); border-bottom: 1px solid var(--consult-hairline); }
 #consult-compare .comp-table td { color: var(--consult-text-muted); border-bottom: 1px solid var(--consult-hairline); }
 #consult-compare .comp-table tr:hover td { background: rgba(255,255,255,0.025); }
@@ -981,34 +942,9 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 #consult-compare .comp-table .no { color: var(--consult-text-faint); }
 #consult-compare .comp-table th[style*="color"] { color: var(--consult-accent-soft) !important; }
 
-/* FAQ accordion — one question open at a time, plain button/details
-   semantics (keyboard- and screen-reader-friendly) rather than a
-   JS-only div soup. */
-.consult-faq-list { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
-.consult-faq-item { border-bottom: 1px solid var(--consult-hairline); }
-.consult-faq-q {
-  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  background: none; border: none; cursor: pointer; text-align: left;
-  padding: 22px 4px; font-family: var(--consult-face-display); font-size: 1.05rem; font-weight: 500;
-  color: var(--consult-text);
+.consult-cta-block::before {
+  background: radial-gradient(circle, var(--consult-accent-dim) 0%, transparent 70%);
 }
-html[dir="rtl"] .consult-faq-q { text-align: right; }
-.consult-faq-q i { flex-shrink: 0; color: var(--consult-text-faint); transition: transform 0.25s ease; }
-.consult-faq-item.open .consult-faq-q i { transform: rotate(180deg); color: var(--consult-accent-soft); }
-.consult-faq-a {
-  max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
-}
-.consult-faq-item.open .consult-faq-a { max-height: 220px; }
-.consult-faq-a p { padding: 0 4px 22px; margin: 0; color: var(--consult-text-muted); font-size: 0.92rem; line-height: 1.7; max-width: 62ch; }
-
-/* Magnetic CTA buttons (initConsultMagnetic in halla_main.js) ease toward
-   the cursor within a small radius — the transform is applied via inline
-   style/GSAP, this just establishes a smooth idle transition for browsers
-   without GSAP and keeps the button's own hover transform from fighting it. */
-.consult-magnetic { will-change: transform; }
-
-/* No radial glow blob behind the CTA — flat background only. */
-.consult-cta-block::before { display: none; }
 /* The "Ready When You Are" CTA block is repeated (with a plain .cta-block,
    no consult-cta-block modifier) at the bottom of every consultancy-family
    page — svc-operations, svc-acquisition, svc-brand — not just the main
@@ -1031,27 +967,6 @@ body[data-section="consultancy"] .cta-block .btn-outline[style*="color"],
 #page-svc-brand .cta-block .btn-outline[style*="color"],
 #page-consult-signup .cta-block .btn-outline[style*="color"] {
   color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important;
-}
-/* The same repeated .cta-block also carries the base site's teal glow
-   blob (.cta-block::before) on the 3 service sub-pages — the
-   .consult-cta-block::before override above only reaches the main page's
-   modifier class. Kill the glow and match the flat ink background on
-   every consultancy-family page. */
-body[data-section="consultancy"] .cta-block,
-#page-consultancy .cta-block,
-#page-svc-operations .cta-block,
-#page-svc-acquisition .cta-block,
-#page-svc-brand .cta-block,
-#page-consult-signup .cta-block {
-  background: var(--consult-ink) !important;
-}
-body[data-section="consultancy"] .cta-block::before,
-#page-consultancy .cta-block::before,
-#page-svc-operations .cta-block::before,
-#page-svc-acquisition .cta-block::before,
-#page-svc-brand .cta-block::before,
-#page-consult-signup .cta-block::before {
-  display: none !important;
 }
 
 /* Scroll reveal (GSAP enhances; CSS fallback) */
