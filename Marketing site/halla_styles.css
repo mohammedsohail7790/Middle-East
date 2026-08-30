@@ -194,27 +194,36 @@ body[data-section="consultancy"] .btn-blue:hover,
   background: rgba(10,10,12,0.78); border-bottom-color: var(--consult-hairline);
 }
 .halla-wordmark { color: var(--consult-text); }
-.nav-link { color: var(--consult-text-muted); }
-.nav-link:hover { color: var(--consult-text); background: var(--consult-surface-strong); }
+/* !important throughout this nav/dropdown/mobile-menu block: each of these
+   selectors has a second, later same-specificity definition further down
+   the file (the original light-theme block for that component) which
+   would otherwise win by source order alone and silently undo the dark
+   styling — verified by checking source order for every selector here,
+   not applied blanket. */
+.nav-link { color: var(--consult-text-muted) !important; }
+.nav-link:hover { color: var(--consult-text) !important; background: var(--consult-surface-strong) !important; }
 .section-switch { background: var(--consult-surface); }
 .section-switch-btn { color: var(--consult-text-faint); }
 .section-switch-btn:hover { color: var(--consult-text); }
 .section-switch-btn.active { background: var(--consult-surface-strong); box-shadow: none; }
-.dropdown-inner { background: var(--consult-ink-soft); border-color: var(--consult-hairline); }
-.dropdown-link { color: var(--consult-text-muted); }
-.dropdown-link:hover { color: var(--consult-text); background: var(--consult-surface-strong); }
-.ddi { background: var(--consult-surface-strong); }
-.dd-section { color: var(--consult-text-faint); }
+.dropdown-inner { background: var(--consult-ink-soft) !important; border-color: var(--consult-hairline) !important; }
+.dropdown-link { color: var(--consult-text-muted) !important; }
+.dropdown-link:hover { color: var(--consult-text) !important; background: var(--consult-surface-strong) !important; }
+.ddi { background: var(--consult-surface-strong) !important; }
+.dd-section { color: var(--consult-text-faint) !important; }
 .nav-actions .btn-outline {
   color: var(--consult-text-muted); border-color: var(--consult-hairline); background: transparent;
 }
 .nav-actions .btn-outline:hover { border-color: var(--consult-hairline-strong); background: var(--consult-surface); }
-.hamburger span { background: var(--consult-text); }
-.mob-nav { background: var(--consult-ink); }
-.mob-link { color: var(--consult-text-muted); }
-.mob-link:hover { background: var(--consult-surface-strong); color: var(--consult-text); }
-.mob-section { color: var(--consult-text-faint); }
-.mob-divider { border-top-color: var(--consult-hairline); }
+/* !important: a later same-specificity base rule (.hamburger span further
+   down the file, for the light-theme hamburger icon) would otherwise win
+   by source order and leave the icon dark-on-dark against the nav. */
+.hamburger span { background: var(--consult-text) !important; }
+.mob-nav { background: var(--consult-ink) !important; }
+.mob-link { color: var(--consult-text-muted) !important; }
+.mob-link:hover { background: var(--consult-surface-strong) !important; color: var(--consult-text) !important; }
+.mob-section { color: var(--consult-text-faint) !important; }
+.mob-divider { border-top-color: var(--consult-hairline) !important; }
 .mob-section-switch { display: none; margin: 6px 14px 10px; }
 @media (max-width: 768px) { .section-switch { display: none; } .mob-section-switch { display: flex; } }
 
@@ -603,9 +612,13 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
    different shade from the consultancy page's near-black graphite ink —
    a seam right where the page hands off to the footer. Match it exactly
    while any consultancy-family page is active. */
-#marketing-spa-root footer { background: var(--consult-ink); border-top: 1px solid var(--consult-hairline); }
+/* !important: a duplicate "FOOTER FIX" block further down the file
+   (#marketing-spa-root footer, setting background: var(--gray-900), a
+   blue-slate) has the same specificity and comes later, so it would
+   otherwise win and revert the footer to that mismatched navy tone. */
+#marketing-spa-root footer { background: var(--consult-ink) !important; border-top: 1px solid var(--consult-hairline); }
 .footer-logo .halla-wordmark .halla-ai { color: var(--consult-accent); }
-.footer-bottom { border-top-color: var(--consult-hairline); }
+.footer-bottom { border-top-color: var(--consult-hairline) !important; }
 .footer-col h5 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 16px; }
 .flink { display: block; color: rgba(255,255,255,0.55); text-decoration: none; font-size: 0.875rem; padding: 5px 0; transition: color 0.15s; }
 .flink:hover { color: var(--white); }
@@ -804,6 +817,28 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 #page-home .comp-highlight, #page-pricing .comp-highlight {
   box-shadow: none; border-color: var(--gray-200);
 }
+#page-pricing .pricing-card, #page-pricing .pricing-card:hover { box-shadow: none; }
+/* .pricing-card.popular hardcodes background:var(--black) + white text —
+   a light-theme "dark featured card on a white page" pattern. Under the
+   --black remap above that background would invert to near-white while
+   its text stays hardcoded white, i.e. unreadable. Give the featured plan
+   its own explicit dark-theme treatment instead: a slightly raised flat
+   surface with an accent border, matching how the consultancy page marks
+   its own featured service card. */
+#page-pricing .pricing-card.popular {
+  border-color: var(--consult-accent); background: var(--consult-surface-strong);
+}
+#page-pricing .pricing-card.popular h3,
+#page-pricing .pricing-card.popular h4,
+#page-pricing .pricing-card.popular .pricing-price { color: var(--consult-text); }
+#page-pricing .pricing-card.popular p,
+#page-pricing .pricing-card.popular .pricing-mins,
+#page-pricing .pricing-card.popular .pricing-plan,
+#page-pricing .pricing-card.popular .pricing-price sub { color: var(--consult-text-faint); }
+#page-pricing .pricing-card.popular .pricing-feature { color: var(--consult-text-muted); }
+#page-pricing .pricing-card.popular .pricing-feature::before { color: var(--consult-accent-soft); }
+#page-pricing .pricing-card.popular .p-divider { border-color: var(--consult-hairline); }
+#page-pricing .pop-badge { background: var(--consult-accent); color: var(--consult-ink); }
 
 /* ============ CONSULTANCY — PREMIUM LAYOUT ============ */
 #page-consultancy { position: relative; background: var(--consult-ink); color: var(--consult-text); }
