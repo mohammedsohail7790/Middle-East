@@ -237,7 +237,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 }
 .hero-neural-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
 .hero .container { position: relative; z-index: 1; }
-@media (prefers-reduced-motion: reduce) { .hero-neural-canvas, .consult-plexus-canvas { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-neural-canvas, .consult-cosmic-canvas { display: none; } }
 
 .hero h1 { margin-bottom: 22px; }
 .hero h1 em { font-style: normal; color: var(--accent); }
@@ -673,17 +673,25 @@ html[dir="rtl"] .lang-ar { display: inline; }
 html[dir="rtl"] .lang-ar.lang-block { display: block; }
 
 /* ============ CONSULTANCY — PREMIUM LAYOUT ============ */
+#page-consultancy { position: relative; background: var(--consult-ink); color: var(--consult-text); }
+#page-consultancy h1, #page-consultancy h2, #page-consultancy h3, #page-consultancy h4 { color: var(--consult-text); }
+#page-consultancy p { color: var(--consult-text-muted); }
+#page-consultancy .label { color: var(--consult-gold-soft); background: rgba(198,161,91,0.14); }
+
+/* Cosmic backdrop — one fixed canvas (starfield + spiral vortex + node
+   network) behind the entire consultancy page, not just the hero. It's a
+   direct child of #page-consultancy so it inherits that page's
+   display:none / .active toggling from the SPA router for free. */
+.consult-cosmic-canvas {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+}
+.consult-cosmic-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
+
 .consult-hero {
   position: relative; overflow: hidden;
   padding: 140px 0 88px;
-  background: radial-gradient(120% 100% at 15% 0%, #0d0f16 0%, var(--consult-ink) 55%), var(--consult-ink);
-  color: var(--consult-text);
+  background: radial-gradient(120% 100% at 15% 0%, rgba(13,15,22,0.6) 0%, transparent 55%);
 }
-/* Plexus network canvas — sits behind everything in the hero, full-bleed. */
-.consult-plexus-canvas {
-  position: absolute; inset: 0; z-index: 0; pointer-events: none;
-}
-.consult-plexus-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
 .consult-hero-glow {
   position: absolute; top: -20%; right: -10%; width: 55%; height: 70%;
   background: radial-gradient(circle, rgba(198,161,91,0.16) 0%, transparent 68%);
@@ -745,94 +753,116 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 
 .consult-marquee {
-  overflow: hidden; border-block: 1px solid var(--gray-100);
-  background: var(--gray-50); padding: 14px 0;
+  position: relative; z-index: 1;
+  overflow: hidden; border-block: 1px solid var(--consult-hairline);
+  background: rgba(255,255,255,0.02); padding: 14px 0;
 }
 .consult-marquee-track {
   display: flex; gap: 48px; width: max-content; white-space: nowrap;
   animation: consult-marquee 32s linear infinite;
 }
 .consult-marquee-track span {
-  font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
-  color: var(--gray-400);
+  font-family: var(--consult-mono);
+  font-size: 0.78rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--consult-text-muted);
 }
 @keyframes consult-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-.consult-section-dark { background: var(--gray-50); }
+/* Every consultancy section sits above the fixed cosmic canvas and stays
+   transparent (or near-transparent) so the backdrop reads through behind
+   the glass cards, rather than each section painting over it. */
+#page-consultancy .section,
+#page-consultancy .section-sm { position: relative; z-index: 1; }
+.consult-section-dark { background: rgba(255,255,255,0.015); }
 .consult-split {
   display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 48px; align-items: start;
 }
-.consult-split p { font-size: 1.05rem; color: var(--gray-600); margin-top: 8px; }
+.consult-split p { font-size: 1.05rem; color: var(--consult-text-muted); margin-top: 8px; }
 .consult-section-head { margin-bottom: 48px; max-width: 640px; }
 .consult-section-head.center, .text-center.consult-section-head { margin-left: auto; margin-right: auto; }
-.consult-section-head p { margin-top: 12px; color: var(--gray-500); }
+.consult-section-head p { margin-top: 12px; color: var(--consult-text-muted); }
 
 .consult-service-grid {
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
 }
 .consult-service-card {
   position: relative; overflow: hidden;
-  background: var(--white); border: 1px solid var(--gray-200);
+  background: var(--consult-surface); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-xl); padding: 30px 26px;
-  box-shadow: var(--shadow-sm); transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
 .consult-service-card:hover {
-  transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: rgba(13,148,136,0.25);
+  transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.35); border-color: rgba(198,161,91,0.35);
 }
-.consult-service-featured { border-color: rgba(13,148,136,0.35); background: linear-gradient(180deg, #f0fdfa 0%, var(--white) 55%); }
+.consult-service-featured { border-color: rgba(198,161,91,0.4); background: linear-gradient(180deg, rgba(198,161,91,0.08) 0%, var(--consult-surface) 55%); }
 .consult-service-glow {
   position: absolute; top: -40%; right: -30%; width: 70%; height: 70%;
-  background: radial-gradient(circle, rgba(13,148,136,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(198,161,91,0.16) 0%, transparent 70%);
   pointer-events: none; opacity: 0; transition: opacity 0.3s;
 }
 .consult-service-card:hover .consult-service-glow { opacity: 1; }
 .consult-featured-badge {
   position: absolute; top: 18px; right: 18px;
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  background: var(--accent); color: var(--white); padding: 5px 10px; border-radius: 999px;
+  background: var(--consult-gold); color: var(--consult-ink); padding: 5px 10px; border-radius: 999px;
 }
-.consult-service-card h3 { font-size: 1.2rem; margin-bottom: 10px; }
-.consult-service-card p { font-size: 0.9rem; margin-bottom: 16px; }
+.consult-service-card .feat-icon-blue { background: rgba(91,98,224,0.16); color: var(--consult-indigo-soft); }
+.consult-service-card .feat-icon-green { background: rgba(198,161,91,0.16); color: var(--consult-gold); }
+.consult-service-card .feat-icon-orange { background: rgba(198,161,91,0.16); color: var(--consult-gold-soft); }
+.consult-service-card h3 { font-size: 1.2rem; margin-bottom: 10px; color: var(--consult-text); }
+.consult-service-card p { font-size: 0.9rem; margin-bottom: 16px; color: var(--consult-text-muted); }
 .consult-service-list {
   list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px;
 }
 .consult-service-list li {
   display: flex; align-items: flex-start; gap: 8px;
-  font-size: 0.82rem; color: var(--gray-500); line-height: 1.45;
+  font-size: 0.82rem; color: var(--consult-text-muted); line-height: 1.45;
 }
-.consult-service-list i { color: var(--accent); font-size: 0.9rem; margin-top: 2px; flex-shrink: 0; }
+.consult-service-list i { color: var(--consult-indigo-soft); font-size: 0.9rem; margin-top: 2px; flex-shrink: 0; }
 .consult-service-link {
   display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.85rem; font-weight: 700; color: var(--accent); text-decoration: none;
+  font-size: 0.85rem; font-weight: 700; color: var(--consult-gold-soft); text-decoration: none;
 }
-.consult-service-link:hover { color: var(--accent-dark); }
+.consult-service-link:hover { color: var(--consult-gold); }
 
-.consult-timeline-section { background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%); }
+.consult-timeline-section { background: rgba(255,255,255,0.015); }
 .consult-timeline {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; position: relative;
 }
 .consult-timeline::before {
   content: ""; position: absolute; top: 28px; left: 8%; right: 8%; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent-light), transparent);
+  background: linear-gradient(90deg, transparent, var(--consult-indigo-soft), transparent);
   z-index: 0;
 }
 .consult-timeline-step {
   position: relative; z-index: 1;
-  background: var(--white); border: 1px solid var(--gray-200);
-  border-radius: var(--radius-lg); padding: 28px 22px; box-shadow: var(--shadow-sm);
+  background: var(--consult-surface); border: 1px solid var(--consult-hairline);
+  border-radius: var(--radius-lg); padding: 28px 22px;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
 }
 .consult-timeline-num {
   width: 42px; height: 42px; border-radius: 50%;
-  background: var(--black); color: var(--white);
+  background: linear-gradient(135deg, var(--consult-gold) 0%, var(--consult-indigo) 100%); color: var(--consult-ink);
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 0.85rem; margin-bottom: 16px;
 }
-.consult-timeline-step h4 { margin-bottom: 8px; font-size: 1rem; }
-.consult-timeline-step p { font-size: 0.85rem; }
+.consult-timeline-step h4 { margin-bottom: 8px; font-size: 1rem; color: var(--consult-text); }
+.consult-timeline-step p { font-size: 0.85rem; color: var(--consult-text-muted); }
+
+#consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: var(--consult-surface); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+#consult-compare .comp-table th { background: rgba(255,255,255,0.03); color: var(--consult-text); border-bottom: 1px solid var(--consult-hairline); }
+#consult-compare .comp-table td { color: var(--consult-text-muted); border-bottom: 1px solid var(--consult-hairline); }
+#consult-compare .comp-table tr:hover td { background: rgba(255,255,255,0.03); }
+#consult-compare .comp-table .yes { color: var(--consult-gold-soft); }
+#consult-compare .comp-table .no { color: rgba(237,238,242,0.3); }
+#consult-compare .comp-table th[style*="color"] { color: var(--consult-gold) !important; }
 
 .consult-cta-block::before {
-  background: radial-gradient(circle, rgba(13,148,136,0.28) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(91,98,224,0.28) 0%, transparent 70%);
 }
+#consult-cta .label[style*="background"] { background: rgba(198,161,91,0.15) !important; color: var(--consult-gold-soft) !important; }
+#consult-cta .btn-outline[style*="color"] { color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important; }
 
 /* Scroll reveal (GSAP enhances; CSS fallback) */
 .reveal-up {
