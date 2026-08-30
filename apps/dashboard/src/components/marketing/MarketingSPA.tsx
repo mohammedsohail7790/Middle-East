@@ -171,7 +171,6 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
   return (
     <>
       <MarketingAtmosphere variant="marketing" />
-      <div id="siteNeuralMount" className="site-neural-canvas" aria-hidden />
       <MarketingVibeLayer />
       <MarketingPremiumLayer />
       <MarketingConsultancyLayer />
