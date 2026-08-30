@@ -850,6 +850,28 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
    the glass cards, rather than each section painting over it. */
 #page-consultancy .section,
 #page-consultancy .section-sm { position: relative; z-index: 1; }
+/* The final CTA sits directly above the footer with only its own
+   section padding between them — same near-black background on both,
+   so with no extra gap it reads as one run-on block. Give it real
+   breathing room before the footer starts, at every width, on the
+   landing page and all 3 service sub-pages (their CTA has no id, just
+   a plain .section-sm, so this targets the class within each page). */
+#page-consultancy .section-sm,
+#page-svc-operations .section-sm,
+#page-svc-acquisition .section-sm,
+#page-svc-brand .section-sm,
+#page-consult-signup .section-sm {
+  padding-bottom: 96px;
+}
+@media (max-width: 640px) {
+  #page-consultancy .section-sm,
+  #page-svc-operations .section-sm,
+  #page-svc-acquisition .section-sm,
+  #page-svc-brand .section-sm,
+  #page-consult-signup .section-sm {
+    padding-bottom: 64px;
+  }
+}
 .consult-section-dark { background: rgba(255,255,255,0.012); }
 .consult-split {
   display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 48px; align-items: start;

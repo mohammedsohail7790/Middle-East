@@ -125,15 +125,18 @@
 
         sizes[i] = Math.random() * 1.6 + 0.5;
 
-        // Mostly neutral white with a subtle warm/cool temperature spread —
-        // real starfields aren't uniformly pure white.
+        // Almost entirely neutral white. A strong warm/cool split reads fine
+        // on a single still photo, but with additive blending across ~2,600
+        // overlapping glow halos it accumulates into a visible colored wash
+        // over the whole field rather than individual star tints — so both
+        // variants are now rare and barely tinted, not a design accent.
         const temp = Math.random();
-        const warm = temp < 0.15;
-        const cool = temp > 0.85;
+        const warm = temp < 0.06;
+        const cool = temp > 0.94;
         if (warm) {
-          colors[i * 3] = 1; colors[i * 3 + 1] = 0.92; colors[i * 3 + 2] = 0.82;
+          colors[i * 3] = 1; colors[i * 3 + 1] = 0.97; colors[i * 3 + 2] = 0.93;
         } else if (cool) {
-          colors[i * 3] = 0.85; colors[i * 3 + 1] = 0.9; colors[i * 3 + 2] = 1;
+          colors[i * 3] = 0.94; colors[i * 3 + 1] = 0.96; colors[i * 3 + 2] = 1;
         } else {
           colors[i * 3] = 1; colors[i * 3 + 1] = 1; colors[i * 3 + 2] = 1;
         }
@@ -185,7 +188,7 @@
           'uniform sampler2D uMap;',
           'void main() {',
           '  vec4 tex = texture2D(uMap, gl_PointCoord);',
-          '  gl_FragColor = vec4(vColor, tex.a * vTwinkle * 0.95);',
+          '  gl_FragColor = vec4(vColor, tex.a * vTwinkle * 0.75);',
           '}',
         ].join('\n'),
         transparent: true,
