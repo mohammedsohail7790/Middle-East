@@ -116,16 +116,21 @@ p { color: var(--gray-500); line-height: 1.72; }
    Scoped both by body[data-section] (covers the nav/footer, which are
    shared chrome outside any #page-* container) AND directly by the
    static #page-* ids (covers content inside those pages immediately,
-   with no dependency on the JS that sets data-section having run yet —
-   that JS runs on mount, so relying on it alone leaves a window where
-   these buttons show the receptionist product's teal by default). */
+   with no dependency on the JS that sets data-section having run yet).
+   MUST be !important: apps/dashboard/src/app/globals.css — the dashboard
+   app's own design system, imported by the marketing layout for shared
+   button/input primitives — defines `.btn-blue { background: var(--accent)
+   !important; ... }`. A plain (non-!important) rule here, however specific,
+   loses to that regardless of selector specificity, which is the actual
+   reason this kept rendering as the receptionist's teal even after the
+   #page-* id scoping fix. */
 body[data-section="consultancy"] .btn-blue,
 #page-consultancy .btn-blue,
 #page-svc-operations .btn-blue,
 #page-svc-acquisition .btn-blue,
 #page-svc-brand .btn-blue,
 #page-consult-signup .btn-blue {
-  background: var(--consult-accent); color: var(--consult-ink);
+  background: var(--consult-accent) !important; color: var(--consult-ink) !important;
 }
 body[data-section="consultancy"] .btn-blue:hover,
 #page-consultancy .btn-blue:hover,
@@ -133,7 +138,7 @@ body[data-section="consultancy"] .btn-blue:hover,
 #page-svc-acquisition .btn-blue:hover,
 #page-svc-brand .btn-blue:hover,
 #page-consult-signup .btn-blue:hover {
-  background: var(--consult-accent-soft); box-shadow: 0 8px 24px var(--consult-accent-dim);
+  background: var(--consult-accent-soft) !important; box-shadow: 0 8px 24px var(--consult-accent-dim) !important;
 }
 .btn-lg { padding: 16px 34px; font-size: 1rem; }
 .btn-sm { padding: 9px 18px; font-size: 0.85rem; }
