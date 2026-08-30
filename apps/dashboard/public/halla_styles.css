@@ -241,6 +241,9 @@ body[data-section="receptionist"] .mob-nav .nav-group[data-section="consultancy"
 
 .footer-group[data-section="receptionist"] { display: none; }
 .footer-group[data-section="consultancy"] { display: contents; }
+
+.nav-actions .nav-group[data-section="receptionist"] { display: none; }
+body[data-section="receptionist"] .nav-actions .nav-group[data-section="receptionist"] { display: inline-flex; }
 body[data-section="receptionist"] .footer-group[data-section="receptionist"] { display: contents; }
 body[data-section="receptionist"] .footer-group[data-section="consultancy"] { display: none; }
 .footer-brand p.footer-group[data-section="receptionist"] { display: none; }
