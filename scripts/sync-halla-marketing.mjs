@@ -7,6 +7,7 @@
  *   halla_styles.css
  *   halla_main.js
  *   halla_neural.js
+ *   halla_plexus.js
  *
  * Outputs:
  *   Marketing site/*
@@ -15,6 +16,7 @@
  *     marketing page that reads this file and wires up auth navigation)
  *   apps/dashboard/public/halla_main.js
  *   apps/dashboard/public/halla_neural.js
+ *   apps/dashboard/public/halla_plexus.js
  *   apps/dashboard/public/halla_styles.css
  */
 import fs from "fs";
@@ -32,6 +34,7 @@ const ROOT_FILES = {
   css: path.join(REPO_ROOT, "halla_styles.css"),
   js: path.join(REPO_ROOT, "halla_main.js"),
   neuralJs: path.join(REPO_ROOT, "halla_neural.js"),
+  plexusJs: path.join(REPO_ROOT, "halla_plexus.js"),
 };
 
 const LANG_CSS_BLOCK = `
@@ -148,6 +151,7 @@ function syncOnce() {
       path.join(DASHBOARD_PUBLIC, "marketing-body.html"),
       path.join(DASHBOARD_PUBLIC, "halla_main.js"),
       path.join(DASHBOARD_PUBLIC, "halla_neural.js"),
+      path.join(DASHBOARD_PUBLIC, "halla_plexus.js"),
       path.join(DASHBOARD_PUBLIC, "halla_styles.css"),
     ];
     const outputsMissing = missing(dashboardOutputs);
@@ -161,7 +165,7 @@ function syncOnce() {
     console.error(
       "[sync-halla-marketing] Missing root files:\n" +
         absent.map((p) => `  - ${path.relative(REPO_ROOT, p)}`).join("\n") +
-        "\n\nPlace index.html, halla_preview.html, halla_styles.css, halla_main.js, and halla_neural.js in the repo root, then re-run."
+        "\n\nPlace index.html, halla_preview.html, halla_styles.css, halla_main.js, halla_neural.js, and halla_plexus.js in the repo root, then re-run."
     );
     process.exit(1);
   }
@@ -169,6 +173,7 @@ function syncOnce() {
   const css = prepareCss(fs.readFileSync(ROOT_FILES.css, "utf8"));
   const js = prepareJs(fs.readFileSync(ROOT_FILES.js, "utf8"));
   const neuralJs = fs.readFileSync(ROOT_FILES.neuralJs, "utf8");
+  const plexusJs = fs.readFileSync(ROOT_FILES.plexusJs, "utf8");
   const indexHtml = prepareIndexHtml(fs.readFileSync(ROOT_FILES.indexHtml, "utf8"));
   const embeddedHtml = prepareEmbeddedMarketingHtml(indexHtml);
   const previewHtml = fs.readFileSync(ROOT_FILES.previewHtml, "utf8");
@@ -178,11 +183,13 @@ function syncOnce() {
   writeFileAtomic(path.join(MARKETING_DIR, "halla_styles.css"), css);
   writeFileAtomic(path.join(MARKETING_DIR, "halla_main.js"), js);
   writeFileAtomic(path.join(MARKETING_DIR, "halla_neural.js"), neuralJs);
+  writeFileAtomic(path.join(MARKETING_DIR, "halla_plexus.js"), plexusJs);
 
   writeFileAtomic(path.join(DASHBOARD_PUBLIC, "marketing-body.html"), embeddedHtml);
   writeFileAtomic(path.join(DASHBOARD_PUBLIC, "halla_styles.css"), css);
   writeFileAtomic(path.join(DASHBOARD_PUBLIC, "halla_main.js"), js);
   writeFileAtomic(path.join(DASHBOARD_PUBLIC, "halla_neural.js"), neuralJs);
+  writeFileAtomic(path.join(DASHBOARD_PUBLIC, "halla_plexus.js"), plexusJs);
 
   console.log("[sync-halla-marketing] Synced root → Marketing site + apps/dashboard/public");
   console.log("[sync-halla-marketing] Done.");

@@ -144,6 +144,9 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
       .catch(() => loadScript("/halla_neural.js").then(refreshNeural));
 
     void loadScript(GSAP_URL).then(() => loadScript(SCROLL_TRIGGER_URL));
+
+    // No three.js dependency — plain 2D canvas, loads independently of the chain above.
+    void loadScript("/halla_plexus.js");
   }, [safeInitialPage]);
 
   const onMainReady = useCallback(() => {

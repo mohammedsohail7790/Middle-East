@@ -43,6 +43,19 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-full: 9999px;
+
+  /* Consultancy hero — premium enterprise palette (scoped to .consult-hero only,
+     deliberately distinct from the teal --accent used by the receptionist product). */
+  --consult-ink: #07080b;
+  --consult-surface: rgba(255,255,255,0.04);
+  --consult-hairline: rgba(255,255,255,0.1);
+  --consult-gold: #c6a15b;
+  --consult-gold-soft: #e8d5a8;
+  --consult-indigo: #5b62e0;
+  --consult-indigo-soft: #8e93ec;
+  --consult-text: #edeef2;
+  --consult-text-muted: rgba(237,238,242,0.6);
+  --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 body { font-family: var(--font); background: var(--white); color: var(--black); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
@@ -224,7 +237,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 }
 .hero-neural-canvas canvas { display: block; width: 100% !important; height: 100% !important; }
 .hero .container { position: relative; z-index: 1; }
-@media (prefers-reduced-motion: reduce) { .hero-neural-canvas, .consult-neural-canvas { display: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-neural-canvas, .consult-plexus-canvas { display: none; } }
 
 .hero h1 { margin-bottom: 22px; }
 .hero h1 em { font-style: normal; color: var(--accent); }
@@ -663,61 +676,72 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-hero {
   position: relative; overflow: hidden;
   padding: 140px 0 88px;
-  background: linear-gradient(165deg, #0a0f0e 0%, #0d1a18 42%, #0a1211 100%);
-  color: var(--white);
+  background: radial-gradient(120% 100% at 15% 0%, #0d0f16 0%, var(--consult-ink) 55%), var(--consult-ink);
+  color: var(--consult-text);
 }
-.consult-neural-canvas {
-  position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.55;
+/* Plexus network canvas — sits behind everything in the hero, full-bleed. */
+.consult-plexus-canvas {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
 }
-.consult-neural-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
+.consult-plexus-canvas canvas { width: 100% !important; height: 100% !important; display: block; }
 .consult-hero-glow {
   position: absolute; top: -20%; right: -10%; width: 55%; height: 70%;
-  background: radial-gradient(circle, rgba(13,148,136,0.22) 0%, transparent 68%);
+  background: radial-gradient(circle, rgba(198,161,91,0.16) 0%, transparent 68%);
   pointer-events: none; z-index: 0;
 }
 .consult-hero-grid {
   position: relative; z-index: 1;
   display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 56px; align-items: center;
 }
-.consult-hero-copy h1 { color: var(--white); font-size: clamp(2.4rem, 5vw, 3.8rem); margin-bottom: 18px; }
+/* The copy sits directly over the densest part of the plexus — a soft blurred
+   scrim keeps text contrast solid regardless of what's animating behind it. */
+.consult-hero-copy {
+  position: relative; padding: 8px 12px; margin: -8px -12px;
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  background: linear-gradient(100deg, rgba(7,8,11,0.55) 0%, rgba(7,8,11,0.2) 65%, transparent 100%);
+  border-radius: var(--radius-lg);
+}
+.consult-hero-copy h1 { color: var(--consult-text); font-size: clamp(2.4rem, 5vw, 3.8rem); margin-bottom: 18px; }
 .consult-gradient-text {
-  background: linear-gradient(135deg, var(--accent-mid) 0%, #5eead4 50%, var(--accent) 100%);
+  background: linear-gradient(120deg, var(--consult-gold-soft) 0%, var(--consult-gold) 45%, var(--consult-indigo-soft) 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.consult-hero-sub { font-size: 1.08rem; color: rgba(255,255,255,0.62); max-width: 520px; line-height: 1.75; }
+.consult-hero-sub { font-size: 1.08rem; color: var(--consult-text-muted); max-width: 520px; line-height: 1.75; }
 .consult-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
 .consult-hero-outline {
-  color: rgba(255,255,255,0.85) !important; border-color: rgba(255,255,255,0.22) !important;
-  background: rgba(255,255,255,0.04) !important;
+  color: rgba(237,238,242,0.85) !important; border-color: var(--consult-hairline) !important;
+  background: var(--consult-surface) !important;
 }
-.consult-hero-outline:hover { background: rgba(255,255,255,0.08) !important; border-color: rgba(255,255,255,0.35) !important; }
-.consult-label-glow { background: rgba(13,148,136,0.18); color: var(--accent-mid); }
+.consult-hero-outline:hover { background: rgba(255,255,255,0.08) !important; border-color: rgba(255,255,255,0.28) !important; }
+.consult-label-glow { background: rgba(198,161,91,0.14); color: var(--consult-gold-soft); }
 .consult-trust-row {
   display: flex; flex-wrap: wrap; gap: 18px; margin-top: 28px;
-  font-size: 0.82rem; color: rgba(255,255,255,0.45);
+  font-family: var(--consult-mono); font-size: 0.76rem; letter-spacing: 0.01em;
+  color: rgba(237,238,242,0.45);
 }
-.consult-trust-row i { color: var(--accent-mid); margin-right: 6px; }
+.consult-trust-row i { color: var(--consult-indigo-soft); margin-right: 6px; }
 
 .consult-hero-bento {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
 }
 .consult-bento-card {
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  background: var(--consult-surface); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-lg); padding: 22px 20px;
-  backdrop-filter: blur(12px); transition: border-color 0.25s, transform 0.25s;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  transition: border-color 0.25s, transform 0.25s;
 }
-.consult-bento-card:hover { border-color: rgba(45,212,191,0.35); transform: translateY(-2px); }
+.consult-bento-card:hover { border-color: rgba(198,161,91,0.4); transform: translateY(-2px); }
 .consult-bento-main { grid-row: span 2; display: flex; flex-direction: column; justify-content: center; }
 .consult-bento-wide { grid-column: span 2; }
-.consult-bento-icon { font-size: 1.6rem; color: var(--accent-mid); margin-bottom: 12px; }
-.consult-bento-num { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; color: var(--white); line-height: 1; }
+.consult-bento-icon { font-size: 1.6rem; color: var(--consult-indigo-soft); margin-bottom: 12px; }
+.consult-bento-num { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; color: var(--consult-text); line-height: 1; }
 .consult-bento-num.sm { font-size: 1.8rem; }
-.consult-bento-num.accent { color: var(--accent-mid); }
-.consult-bento-label { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 8px; line-height: 1.45; }
+.consult-bento-num.accent { color: var(--consult-gold); }
+.consult-bento-label { font-size: 0.78rem; color: rgba(237,238,242,0.5); margin-top: 8px; line-height: 1.45; }
 .consult-stack-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .consult-stack-pills span {
   font-size: 0.72rem; font-weight: 600; padding: 5px 10px; border-radius: 999px;
-  background: rgba(13,148,136,0.15); color: var(--accent-mid); border: 1px solid rgba(45,212,191,0.2);
+  background: rgba(91,98,224,0.16); color: var(--consult-indigo-soft); border: 1px solid rgba(91,98,224,0.28);
 }
 
 .consult-marquee {
