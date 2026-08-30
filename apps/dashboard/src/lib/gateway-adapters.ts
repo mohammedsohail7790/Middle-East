@@ -163,9 +163,12 @@ export function normalizeTeamMember(row: Record<string, unknown>) {
 export function normalizeAnalyticsMetrics(raw: Record<string, unknown>) {
   const totalCalls = Number(raw.totalCalls ?? 0);
   const totalLeads = Number(raw.totalLeads ?? raw.leads ?? 0);
-  // avgCallDuration is in seconds. avgResponseLatency is AI response latency in ms.
-  // The old field name was avgLatency (incorrectly mapped to duration) — support both during migration.
-  const avgSec = Number(raw.avgCallDuration ?? raw.avgDuration ?? raw.avgResponseLatency ?? raw.avgLatency ?? 0);
+  // avgCallDuration/avgDuration are already in seconds — a 3+ minute average call
+  // is normal and must not be rescaled. Only the legacy ms-based fields
+  // (avgResponseLatency, the old avgLatency name) need converting to seconds.
+  const hasSecondsField = raw.avgCallDuration != null || raw.avgDuration != null;
+  const rawAvg = Number(raw.avgCallDuration ?? raw.avgDuration ?? raw.avgResponseLatency ?? raw.avgLatency ?? 0);
+  const avgSec = hasSecondsField ? rawAvg : rawAvg / 1000;
   return {
     totalCalls,
     totalLeads,
@@ -173,7 +176,7 @@ export function normalizeAnalyticsMetrics(raw: Record<string, unknown>) {
       raw.conversionRate ??
         (totalCalls > 0 ? Math.round((totalLeads / totalCalls) * 1000) / 10 : 0)
     ),
-    avgDuration: avgSec > 120 ? Math.round(avgSec / 1000) : Math.round(avgSec),
+    avgDuration: Math.round(avgSec),
     callsChange: Number(raw.callsChange ?? raw.calls_change ?? 0),
     leadsChange: Number(raw.leadsChange ?? raw.leads_change ?? 0),
   };

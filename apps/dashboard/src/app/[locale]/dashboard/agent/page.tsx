@@ -131,22 +131,24 @@ export default function AgentPage() {
     return api
       .get<AIConfig>("/ai-config")
       .then((data) => {
-        if (configDirtyRef.current && !saving) return;
+        if (configDirtyRef.current) return;
         setConfig(normalizeAIConfig(data));
       })
       .catch((e) => setError(e.message))
       .finally(() => {
         if (!opts?.silent) setLoading(false);
       });
-  }, [saving]);
+  }, []);
 
   useEffect(() => {
     void prefetchCsrfToken();
     void loadConfig();
   }, [loadConfig]);
 
+  const hasScrolledToHashRef = useRef(false);
   useEffect(() => {
-    if (loading || !config) return;
+    if (loading || !config || hasScrolledToHashRef.current) return;
+    hasScrolledToHashRef.current = true;
     const scrollToSection = (id: string) => {
       const el = document.getElementById(id);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });

@@ -84,6 +84,8 @@ export default function CallDetailPage() {
   const [appointmentBusy, setAppointmentBusy] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [newAppointmentTime, setNewAppointmentTime] = useState("");
+  const rescheduleOpenRef = useRef(rescheduleOpen);
+  rescheduleOpenRef.current = rescheduleOpen;
 
   const loadCall = useCallback(
     (opts?: { preservePlayback?: boolean; silent?: boolean }) => {
@@ -93,10 +95,14 @@ export default function CallDetailPage() {
         .get<CallDetail>(`/calls/${callId}`)
         .then((data) => {
           setCall(data);
-          if (data.appointment?.scheduled_time) {
-            setNewAppointmentTime(toDatetimeLocalValue(data.appointment.scheduled_time));
-          } else if (data.lead?.preferred_time) {
-            setNewAppointmentTime(toDatetimeLocalValue(data.lead.preferred_time));
+          // A background sync (realtime event, poll) must not stomp an in-progress
+          // reschedule edit — otherwise the user's date/time picks silently reset.
+          if (!rescheduleOpenRef.current) {
+            if (data.appointment?.scheduled_time) {
+              setNewAppointmentTime(toDatetimeLocalValue(data.appointment.scheduled_time));
+            } else if (data.lead?.preferred_time) {
+              setNewAppointmentTime(toDatetimeLocalValue(data.lead.preferred_time));
+            }
           }
           if (opts?.preservePlayback) {
             requestAnimationFrame(() => restoreAudio(audioRef.current, snap));
