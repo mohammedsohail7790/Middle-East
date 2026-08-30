@@ -560,7 +560,13 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 .footer-brand p { font-size: 0.875rem; color: rgba(255,255,255,0.4); margin: 16px 0 24px; max-width: 260px; line-height: 1.65; }
 .footer-logo .halla-wordmark { color: var(--white); font-size: 1.5rem; }
 .footer-logo .halla-wordmark .halla-ai { color: var(--accent); }
+/* The footer's own background (--gray-900, a blue-slate dark) is a visibly
+   different shade from the consultancy page's near-black graphite ink —
+   a seam right where the page hands off to the footer. Match it exactly
+   while any consultancy-family page is active. */
+body[data-section="consultancy"] #marketing-spa-root footer { background: var(--consult-ink); border-top: 1px solid var(--consult-hairline); }
 body[data-section="consultancy"] .footer-logo .halla-wordmark .halla-ai { color: var(--consult-accent); }
+body[data-section="consultancy"] .footer-bottom { border-top-color: var(--consult-hairline); }
 .footer-col h5 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 16px; }
 .flink { display: block; color: rgba(255,255,255,0.55); text-decoration: none; font-size: 0.875rem; padding: 5px 0; transition: color 0.15s; }
 .flink:hover { color: var(--white); }
@@ -906,8 +912,13 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-cta-block::before {
   background: radial-gradient(circle, var(--consult-accent-dim) 0%, transparent 70%);
 }
-#consult-cta .label[style*="background"] { background: var(--consult-accent-dim) !important; color: var(--consult-accent-soft) !important; }
-#consult-cta .btn-outline[style*="color"] { color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important; }
+/* The "Ready When You Are" CTA block is repeated (with a plain .cta-block,
+   no consult-cta-block modifier) at the bottom of every consultancy-family
+   page — svc-operations, svc-acquisition, svc-brand — not just the main
+   consultancy landing page, so these override by data-section rather than
+   by #consult-cta id to actually reach all of them. */
+body[data-section="consultancy"] .cta-block .label[style*="background"] { background: var(--consult-accent-dim) !important; color: var(--consult-accent-soft) !important; }
+body[data-section="consultancy"] .cta-block .btn-outline[style*="color"] { color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important; }
 
 /* Scroll reveal (GSAP enhances; CSS fallback) */
 .reveal-up {
