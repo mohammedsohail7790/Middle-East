@@ -908,6 +908,11 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-gradient-text { color: var(--consult-accent-soft); }
 .consult-hero-sub { font-size: 1.08rem; color: var(--consult-text-muted); max-width: 520px; line-height: 1.75; }
 .consult-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+/* MarketingConsultancyLayer replaces the native CTA with a ShimmerButton
+   portaled in right after it, and marks the original with this class —
+   this rule was missing, so both the plain button and the shimmer version
+   rendered side by side. */
+.consult-hero-cta-hidden { display: none !important; }
 .consult-hero-outline {
   color: rgba(244,244,245,0.85) !important; border-color: var(--consult-hairline) !important;
   background: var(--consult-surface) !important;
