@@ -130,14 +130,6 @@ module.exports = {
           "0%": { backgroundPosition: "0% 0%" },
           "100%": { backgroundPosition: "0% 200%" },
         },
-        "hero-kenburns": {
-          "0%": { transform: "scale(1) translate(0, 0)" },
-          "100%": { transform: "scale(1.08) translate(-1%, -1%)" },
-        },
-        "hero-twinkle": {
-          "0%, 100%": { opacity: "0.15" },
-          "50%": { opacity: "0.9" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -148,8 +140,6 @@ module.exports = {
         marquee: "marquee var(--duration) linear infinite",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
         "background-position-spin": "background-position-spin 3s linear infinite",
-        "hero-kenburns": "hero-kenburns 40s ease-in-out infinite alternate",
-        "hero-twinkle": "hero-twinkle ease-in-out infinite",
       },
     },
   },
