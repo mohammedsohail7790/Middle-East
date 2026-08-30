@@ -6,7 +6,6 @@ function CssPhoneFallback() {
   return (
     <div className="hp3d-phone">
       <div className="hp3d-screen">
-        <div className="hp3d-screen-glow" aria-hidden />
         <div className="hp3d-call-header">
           <p>Incoming call</p>
           <strong>+971 50 XXX XXXX</strong>
@@ -30,10 +29,6 @@ export function HeroPhone3D() {
 
   return (
     <div className="hp3d-scene hp3d-scene--enhanced" aria-hidden>
-      <div className="hp3d-orbit hp3d-orbit--outer" />
-      <div className="hp3d-orbit hp3d-orbit--inner" />
-      <div className="hp3d-depth-ring hp3d-depth-ring--a" />
-      <div className="hp3d-depth-ring hp3d-depth-ring--b" />
       <div className="hp3d-float-card hp3d-float-card--lead">Lead captured ✓</div>
       <div className="hp3d-float-card hp3d-float-card--appt">Appointment booked</div>
       <div
