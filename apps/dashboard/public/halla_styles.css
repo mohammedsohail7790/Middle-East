@@ -538,7 +538,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 
 /* ============ STEP ============ */
 .step-row { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 36px; }
-.step-num { width: 38px; height: 38px; border-radius: 50%; background: var(--black); color: var(--white); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; }
+.step-num { width: 38px; height: 38px; border-radius: 50%; background: var(--gray-100); border: 1px solid var(--gray-200); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; }
 
 /* ============ PHONE MOCKUP ============ */
 .mockup-wrap { position: relative; }
