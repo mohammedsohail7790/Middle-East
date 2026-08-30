@@ -13,22 +13,27 @@
 html { scroll-behavior: smooth; font-size: 16px; }
 
 :root {
-  --white: #ffffff;
-  --black: #0A0A0A;
-  --gray-50: #F9FAFB;
-  --gray-100: #F3F4F6;
-  --gray-200: #E5E7EB;
-  --gray-300: #D1D5DB;
-  --gray-400: #9CA3AF;
-  --gray-500: #6B7280;
-  --gray-600: #4B5563;
-  --gray-700: #374151;
-  --gray-800: #1F2937;
-  --gray-900: #111827;
-  --accent: #0D9488;
-  --accent-dark: #0F766E;
-  --accent-light: #CCFBF1;
-  --accent-mid: #2DD4BF;
+  /* Site-wide dark theme — every page and shared component (buttons, cards,
+     feat-icons, inline style="color:var(--...)" attributes scattered through
+     this file) is built entirely on these custom properties, so redefining
+     their VALUES here re-themes the whole site at once, matching the
+     consultancy landing page's own dark palette. */
+  --white: #0b1120;
+  --black: #eef1f5;
+  --gray-50: rgba(148,163,184,0.055);
+  --gray-100: rgba(148,163,184,0.16);
+  --gray-200: rgba(148,163,184,0.26);
+  --gray-300: rgba(255,255,255,0.28);
+  --gray-400: rgba(238,241,245,0.4);
+  --gray-500: rgba(238,241,245,0.62);
+  --gray-600: rgba(238,241,245,0.62);
+  --gray-700: #eef1f5;
+  --gray-800: #eef1f5;
+  --gray-900: #101828;
+  --accent: #4f6f93;
+  --accent-dark: #8fa8c4;
+  --accent-light: rgba(79,111,147,0.16);
+  --accent-mid: #8fa8c4;
   --green: #10B981;
   --green-light: #D1FAE5;
   --orange: #F59E0B;
@@ -779,34 +784,12 @@ html[dir="rtl"] .lang-en { display: none; }
 html[dir="rtl"] .lang-ar { display: inline; }
 html[dir="rtl"] .lang-ar.lang-block { display: block; }
 
-/* ============ RECEPTIONIST — CORE PAGES DARK THEME (phase 1) ============
-   Unifying the whole site under the consultancy page's dark palette,
-   starting with the pages most visitors actually see. The rest of the
-   site's CSS (buttons, cards, feat-icons, inline style="color:var(--...)"
-   attributes scattered through this file) is built entirely on
-   --black/--white/--gray-*/--accent* custom properties, so redefining
-   their VALUES at this scope re-themes everything on these pages — every
-   button, card, border, and inline color — without needing to override
-   each rule and inline style individually. Industries/solutions/blog
-   pages are intentionally not included yet (later phase). */
-#page-home, #page-pricing, #page-features, #page-how-it-works,
-#page-svc-operations, #page-svc-acquisition, #page-svc-brand, #page-consult-signup {
-  --white: var(--consult-ink);
-  --black: var(--consult-text);
-  --gray-50: var(--consult-surface);
-  --gray-100: var(--consult-hairline);
-  --gray-200: var(--consult-hairline-strong);
-  --gray-300: rgba(255,255,255,0.28);
-  --gray-400: var(--consult-text-faint);
-  --gray-500: var(--consult-text-muted);
-  --gray-600: var(--consult-text-muted);
-  --gray-700: var(--consult-text);
-  --gray-800: var(--consult-text);
-  --gray-900: var(--consult-ink-soft);
-  --accent: var(--consult-accent);
-  --accent-dark: var(--consult-accent-soft);
-  --accent-light: var(--consult-accent-dim);
-  --accent-mid: var(--consult-accent-soft);
+/* ============ SITE-WIDE DARK THEME ============
+   Every page now uses the consultancy palette by default (see the :root
+   redefinitions above). This just gives each page's own background/text
+   color explicitly, covering every page id site-wide instead of a
+   per-page allow-list. */
+.page {
   background: var(--consult-ink);
   color: var(--consult-text);
 }
