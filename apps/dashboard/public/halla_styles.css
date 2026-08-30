@@ -146,6 +146,36 @@ p { color: var(--gray-500); line-height: 1.72; }
    directly beneath it. */
 body[data-section="consultancy"] .halla-wordmark .halla-ai { color: var(--consult-accent); }
 body[data-section="consultancy"] .section-switch-btn.active { color: var(--consult-accent); }
+/* The nav itself was always a light glass bar regardless of page, which
+   read fine over the light receptionist pages but sat as a jarring white
+   strip on top of the dark consultancy page. Give it a matching dark-glass
+   treatment (and carry that through dropdowns, the mobile menu, and the
+   hamburger icon) whenever the consultancy section is active. */
+body[data-section="consultancy"] #marketing-spa-root nav {
+  background: rgba(10,10,12,0.78); border-bottom-color: var(--consult-hairline);
+}
+body[data-section="consultancy"] .halla-wordmark { color: var(--consult-text); }
+body[data-section="consultancy"] .nav-link { color: var(--consult-text-muted); }
+body[data-section="consultancy"] .nav-link:hover { color: var(--consult-text); background: var(--consult-surface-strong); }
+body[data-section="consultancy"] .section-switch { background: var(--consult-surface); }
+body[data-section="consultancy"] .section-switch-btn { color: var(--consult-text-faint); }
+body[data-section="consultancy"] .section-switch-btn:hover { color: var(--consult-text); }
+body[data-section="consultancy"] .section-switch-btn.active { background: var(--consult-surface-strong); box-shadow: none; }
+body[data-section="consultancy"] .dropdown-inner { background: var(--consult-ink-soft); border-color: var(--consult-hairline); }
+body[data-section="consultancy"] .dropdown-link { color: var(--consult-text-muted); }
+body[data-section="consultancy"] .dropdown-link:hover { color: var(--consult-text); background: var(--consult-surface-strong); }
+body[data-section="consultancy"] .ddi { background: var(--consult-surface-strong); }
+body[data-section="consultancy"] .dd-section { color: var(--consult-text-faint); }
+body[data-section="consultancy"] .nav-actions .btn-outline {
+  color: var(--consult-text-muted); border-color: var(--consult-hairline); background: transparent;
+}
+body[data-section="consultancy"] .nav-actions .btn-outline:hover { border-color: var(--consult-hairline-strong); background: var(--consult-surface); }
+body[data-section="consultancy"] .hamburger span { background: var(--consult-text); }
+body[data-section="consultancy"] .mob-nav { background: var(--consult-ink); }
+body[data-section="consultancy"] .mob-link { color: var(--consult-text-muted); }
+body[data-section="consultancy"] .mob-link:hover { background: var(--consult-surface-strong); color: var(--consult-text); }
+body[data-section="consultancy"] .mob-section { color: var(--consult-text-faint); }
+body[data-section="consultancy"] .mob-divider { border-top-color: var(--consult-hairline); }
 .mob-section-switch { display: none; margin: 6px 14px 10px; }
 @media (max-width: 768px) { .section-switch { display: none; } .mob-section-switch { display: flex; } }
 
@@ -530,6 +560,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 .footer-brand p { font-size: 0.875rem; color: rgba(255,255,255,0.4); margin: 16px 0 24px; max-width: 260px; line-height: 1.65; }
 .footer-logo .halla-wordmark { color: var(--white); font-size: 1.5rem; }
 .footer-logo .halla-wordmark .halla-ai { color: var(--accent); }
+body[data-section="consultancy"] .footer-logo .halla-wordmark .halla-ai { color: var(--consult-accent); }
 .footer-col h5 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 16px; }
 .flink { display: block; color: rgba(255,255,255,0.55); text-decoration: none; font-size: 0.875rem; padding: 5px 0; transition: color 0.15s; }
 .flink:hover { color: var(--white); }
