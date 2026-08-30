@@ -981,6 +981,32 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 #consult-compare .comp-table .no { color: var(--consult-text-faint); }
 #consult-compare .comp-table th[style*="color"] { color: var(--consult-accent-soft) !important; }
 
+/* FAQ accordion — one question open at a time, plain button/details
+   semantics (keyboard- and screen-reader-friendly) rather than a
+   JS-only div soup. */
+.consult-faq-list { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.consult-faq-item { border-bottom: 1px solid var(--consult-hairline); }
+.consult-faq-q {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  background: none; border: none; cursor: pointer; text-align: left;
+  padding: 22px 4px; font-family: var(--consult-face-display); font-size: 1.05rem; font-weight: 500;
+  color: var(--consult-text);
+}
+html[dir="rtl"] .consult-faq-q { text-align: right; }
+.consult-faq-q i { flex-shrink: 0; color: var(--consult-text-faint); transition: transform 0.25s ease; }
+.consult-faq-item.open .consult-faq-q i { transform: rotate(180deg); color: var(--consult-accent-soft); }
+.consult-faq-a {
+  max-height: 0; overflow: hidden; transition: max-height 0.3s ease;
+}
+.consult-faq-item.open .consult-faq-a { max-height: 220px; }
+.consult-faq-a p { padding: 0 4px 22px; margin: 0; color: var(--consult-text-muted); font-size: 0.92rem; line-height: 1.7; max-width: 62ch; }
+
+/* Magnetic CTA buttons (initConsultMagnetic in halla_main.js) ease toward
+   the cursor within a small radius — the transform is applied via inline
+   style/GSAP, this just establishes a smooth idle transition for browsers
+   without GSAP and keeps the button's own hover transform from fighting it. */
+.consult-magnetic { will-change: transform; }
+
 /* No radial glow blob behind the CTA — flat background only. */
 .consult-cta-block::before { display: none; }
 /* The "Ready When You Are" CTA block is repeated (with a plain .cta-block,
