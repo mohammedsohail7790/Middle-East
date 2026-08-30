@@ -63,6 +63,11 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --consult-text-muted: rgba(238,241,245,0.62);
   --consult-text-faint: rgba(238,241,245,0.4);
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* A serif display face, distinct from the receptionist product's all-sans
+     Hanken Grotesk, gives the consultancy pages their own editorial,
+     enterprise-advisory register (think Bain/McKinsey-adjacent authority)
+     rather than reading as the same startup product with different colors. */
+  --consult-face-display: 'Fraunces', Georgia, 'Times New Roman', serif;
 }
 
 body { font-family: var(--font); background: var(--white); color: var(--black); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
@@ -756,10 +761,64 @@ html[dir="rtl"] .lang-ar { display: inline; }
 html[dir="rtl"] .lang-ar.lang-block { display: block; }
 
 /* ============ CONSULTANCY — PREMIUM LAYOUT ============ */
-#page-consultancy { position: relative; background: var(--consult-ink); color: var(--consult-text); }
-#page-consultancy h1, #page-consultancy h2, #page-consultancy h3, #page-consultancy h4 { color: var(--consult-text); }
-#page-consultancy p { color: var(--consult-text-muted); }
-#page-consultancy .label { color: var(--consult-accent-soft); background: var(--consult-accent-dim); }
+/* The consultancy family is the landing page plus its three service
+   detail pages and the signup page — every page reachable without ever
+   leaving the "Halla AI Consultancy" product. All five get the same dark
+   ink theme and serif display type; only the landing page additionally
+   carries the bespoke hero/service-grid/timeline components below. */
+#page-consultancy, #page-svc-operations, #page-svc-acquisition, #page-svc-brand, #page-consult-signup {
+  position: relative; background: var(--consult-ink); color: var(--consult-text);
+}
+#page-consultancy h1, #page-consultancy h2, #page-consultancy h3, #page-consultancy h4,
+#page-svc-operations h1, #page-svc-operations h2, #page-svc-operations h3, #page-svc-operations h4,
+#page-svc-acquisition h1, #page-svc-acquisition h2, #page-svc-acquisition h3, #page-svc-acquisition h4,
+#page-svc-brand h1, #page-svc-brand h2, #page-svc-brand h3, #page-svc-brand h4,
+#page-consult-signup h1, #page-consult-signup h2, #page-consult-signup h3, #page-consult-signup h4 {
+  color: var(--consult-text); font-family: var(--consult-face-display); font-weight: 600; letter-spacing: -0.01em;
+}
+#page-consultancy p, #page-svc-operations p, #page-svc-acquisition p, #page-svc-brand p, #page-consult-signup p {
+  color: var(--consult-text-muted);
+}
+#page-consultancy .label, #page-svc-operations .label, #page-svc-acquisition .label, #page-svc-brand .label, #page-consult-signup .label {
+  color: var(--consult-accent-soft); background: var(--consult-accent-dim); font-family: var(--consult-mono); font-weight: 500;
+}
+
+/* The 3 service detail pages and signup page reuse the site's generic
+   .page-hero / .card / .divider-line / .feat-icon-* components rather than
+   the landing page's bespoke ones — reskin those generic components for
+   the dark theme instead of duplicating new component CSS. */
+#page-svc-operations .page-hero, #page-svc-acquisition .page-hero, #page-svc-brand .page-hero, #page-consult-signup .page-hero {
+  background: transparent; border-bottom: 1px solid var(--consult-hairline);
+}
+#page-svc-operations .card, #page-svc-acquisition .card, #page-svc-brand .card, #page-consult-signup .card {
+  background: rgba(16,24,40,0.7); border-color: var(--consult-hairline); box-shadow: none;
+}
+#page-svc-operations .card:hover, #page-svc-acquisition .card:hover, #page-svc-brand .card:hover, #page-consult-signup .card:hover {
+  border-color: var(--consult-accent); box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+}
+#page-svc-operations .card h4, #page-svc-acquisition .card h4, #page-svc-brand .card h4, #page-consult-signup .card h4 { color: var(--consult-text); }
+#page-svc-operations .card p, #page-svc-acquisition .card p, #page-svc-brand .card p, #page-consult-signup .card p { color: var(--consult-text-muted); }
+#page-svc-operations .divider-line, #page-svc-acquisition .divider-line, #page-svc-brand .divider-line, #page-consult-signup .divider-line {
+  border-top-color: var(--consult-hairline);
+}
+#page-svc-operations .feat-icon-blue, #page-svc-operations .feat-icon-green, #page-svc-operations .feat-icon-orange, #page-svc-operations .feat-icon-red,
+#page-svc-acquisition .feat-icon-blue, #page-svc-acquisition .feat-icon-green, #page-svc-acquisition .feat-icon-orange, #page-svc-acquisition .feat-icon-red,
+#page-svc-brand .feat-icon-blue, #page-svc-brand .feat-icon-green, #page-svc-brand .feat-icon-orange, #page-svc-brand .feat-icon-red,
+#page-consult-signup .feat-icon-blue, #page-consult-signup .feat-icon-green, #page-consult-signup .feat-icon-orange, #page-consult-signup .feat-icon-red {
+  background: var(--consult-surface-strong); color: var(--consult-accent-soft);
+}
+#page-svc-operations .btn-outline, #page-svc-acquisition .btn-outline, #page-svc-brand .btn-outline, #page-consult-signup .btn-outline {
+  color: var(--consult-text-muted); border-color: var(--consult-hairline); background: transparent;
+}
+#page-svc-operations .btn-outline:hover, #page-svc-acquisition .btn-outline:hover, #page-svc-brand .btn-outline:hover, #page-consult-signup .btn-outline:hover {
+  border-color: var(--consult-hairline-strong); background: var(--consult-surface);
+}
+/* consult-signup's own form inputs (name/email/phone) */
+#page-consult-signup input[type="text"], #page-consult-signup input[type="email"], #page-consult-signup input[type="tel"], #page-consult-signup select, #page-consult-signup textarea {
+  background: var(--consult-surface); border: 1px solid var(--consult-hairline); color: var(--consult-text);
+}
+#page-consult-signup input::placeholder, #page-consult-signup textarea::placeholder { color: var(--consult-text-faint); }
+#page-consult-signup .roi-input:focus, #page-consult-signup .roi-select:focus { border-color: var(--consult-accent); }
 
 /* Graph backdrop — one fixed canvas (starfield + an Obsidian-style 3D node
    graph with glow-stroke edges and the odd traveling signal pulse) behind
