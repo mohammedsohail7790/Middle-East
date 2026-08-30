@@ -110,6 +110,11 @@ p { color: var(--gray-500); line-height: 1.72; }
 .btn-outline:hover { border-color: var(--gray-400); background: var(--gray-50); }
 .btn-blue { background: var(--accent); color: var(--white); }
 .btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(13,148,136,0.3); }
+/* Primary CTA buttons ("Book a Diagnostic Call", etc.) use the shared
+   .btn-blue class, which is teal everywhere else on the site — swap it
+   for the consultancy accent while any page in that section is active. */
+body[data-section="consultancy"] .btn-blue { background: var(--consult-accent); color: var(--consult-ink); }
+body[data-section="consultancy"] .btn-blue:hover { background: var(--consult-accent-soft); box-shadow: 0 8px 24px var(--consult-accent-dim); }
 .btn-lg { padding: 16px 34px; font-size: 1rem; }
 .btn-sm { padding: 9px 18px; font-size: 0.85rem; }
 
@@ -698,6 +703,9 @@ body[data-section="consultancy"] .footer-bottom { border-top-color: var(--consul
   transition: background-color 0.15s, color 0.15s;
 }
 .lang-toggle button.active { background: var(--white); color: var(--black); box-shadow: var(--shadow-sm); }
+body[data-section="consultancy"] .lang-toggle { background: var(--consult-surface-strong); }
+body[data-section="consultancy"] .lang-toggle button { color: var(--consult-text-faint); }
+body[data-section="consultancy"] .lang-toggle button.active { background: var(--consult-ink-soft); color: var(--consult-text); box-shadow: none; }
 
 /* ============ RTL (ARABIC) SUPPORT ============ */
 html[dir="rtl"] body { font-family: 'Cairo', 'Hanken Grotesk', -apple-system, sans-serif; }

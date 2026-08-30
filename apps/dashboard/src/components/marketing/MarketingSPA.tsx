@@ -138,15 +138,16 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
     void import("three")
       .then((THREE) => {
         getHallaWindow().THREE = THREE;
+        // halla_plexus.js (the consultancy graph backdrop) is WebGL-based
+        // and needs window.THREE set before it runs, so it only starts
+        // loading once the three import above has resolved.
+        void loadScript("/halla_plexus.js");
         return loadScript("/halla_neural.js");
       })
       .then(refreshNeural)
       .catch(() => loadScript("/halla_neural.js").then(refreshNeural));
 
     void loadScript(GSAP_URL).then(() => loadScript(SCROLL_TRIGGER_URL));
-
-    // No three.js dependency — plain 2D canvas, loads independently of the chain above.
-    void loadScript("/halla_plexus.js");
   }, [safeInitialPage]);
 
   const onMainReady = useCallback(() => {
