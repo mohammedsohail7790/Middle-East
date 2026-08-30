@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -88,17 +88,26 @@ export default function LeadsPage() {
   const [detailSaving, setDetailSaving] = useState(false);
   const [mobileColumn, setMobileColumn] = useState(COLUMN_DEFS[0].id);
 
+  const loadLeadsSeqRef = useRef(0);
   const loadLeads = useCallback((opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
     const params = new URLSearchParams({ limit: "500", offset: "0" });
     if (leadSearch.trim()) params.set("search", leadSearch.trim());
+    const seq = ++loadLeadsSeqRef.current;
     api
       .get<Lead[]>(`/leads?${params.toString()}`)
-      .then((data) =>
-        setLeads(asArray(data).map((row) => normalizeLead(row as Record<string, unknown>) as Lead))
-      )
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false));
+      .then((data) => {
+        // A background sync can resolve after a newer search-driven fetch —
+        // ignore any response that isn't the most recently issued request.
+        if (seq !== loadLeadsSeqRef.current) return;
+        setLeads(asArray(data).map((row) => normalizeLead(row as Record<string, unknown>) as Lead));
+      })
+      .catch((e) => {
+        if (seq === loadLeadsSeqRef.current) setError(e.message);
+      })
+      .finally(() => {
+        if (seq === loadLeadsSeqRef.current) setLoading(false);
+      });
   }, [leadSearch]);
 
   useRealtimeQuery(["leads"], loadLeads, leadSearch, {

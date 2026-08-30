@@ -152,7 +152,6 @@ function AnalyticsPageContent() {
         conversions: Number(row.conversions ?? row.appointments ?? 0),
       })
     );
-    void fetchData({ withSpinner: false });
     if (!volume.length) return;
     const headers = "Date,Calls,Leads,Conversions\n";
     const rows = volume.map((r) => `${r.date},${r.calls},${r.leads},${r.conversions}`).join("\n");

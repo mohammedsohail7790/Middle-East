@@ -86,7 +86,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             accountState = await api.post<AccountState>("/billing/start-trial", {});
             syncDashboardAction("billing");
           } catch {
-            /* trial may already exist */
+            // Trial may already exist (e.g. a concurrent tab won the race) — re-fetch
+            // rather than keeping the stale mode:"none" state until the next focus.
+            try {
+              accountState = await api.get<AccountState>("/billing/account-state");
+            } catch {
+              /* keep the original state; refreshPlan() on focus will retry */
+            }
           }
         }
         if (cancelled) return;

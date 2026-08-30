@@ -75,7 +75,10 @@ async function fetchCalendarEvents(year: number, month: number): Promise<Calenda
     return asArray(data).map(
       (row) => normalizeCalendarEvent(row as Record<string, unknown>) as CalendarEvent
     );
-  } catch {
+  } catch (err) {
+    // Falling back to /appointments hides real backend regressions on the
+    // primary endpoint from the user — surface it so it doesn't go unnoticed.
+    console.error("[calendar] /calendar/events failed, falling back to /appointments", err);
     const fallback = await api.get<Record<string, unknown>[]>("/appointments?limit=200");
     const { from: f, to: t } = monthBounds(year, month);
     return asArray(fallback)
