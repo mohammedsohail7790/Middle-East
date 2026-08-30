@@ -76,6 +76,9 @@ const nextConfig = {
             { source: '/hallaai_main.js', destination: '/halla_main.js', permanent: true },
             { source: '/receptionist', destination: '/home', permanent: false },
             { source: '/ai-receptionist', destination: '/home', permanent: false },
+            // The consultancy homepage now lives at "/" directly (see (marketing)/page.tsx) —
+            // this was a duplicate preview route with the same content.
+            { source: '/design-preview/consultancy', destination: '/', permanent: true },
             { source: '/roi-calculator', destination: '/roi', permanent: true },
             { source: '/:locale/dashboard/knowledge', destination: '/:locale/dashboard/business-profile', permanent: true },
             { source: '/:locale/dashboard/crm/contacts', destination: '/:locale/dashboard/leads', permanent: true },
