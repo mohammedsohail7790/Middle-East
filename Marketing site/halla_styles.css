@@ -44,23 +44,24 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  /* Consultancy page — graphite/near-black system with a single restrained
-     signal color (scoped to #page-consultancy, deliberately distinct from
-     the teal --accent used by the receptionist product). One accent, real
-     neutral grays, no gradient-soup — this is the "professional, not
-     vibe-coded" palette. */
-  --consult-ink: #0a0a0c;
-  --consult-ink-soft: #0e0e11;
-  --consult-surface: rgba(255,255,255,0.035);
-  --consult-surface-strong: rgba(255,255,255,0.06);
-  --consult-hairline: rgba(255,255,255,0.09);
-  --consult-hairline-strong: rgba(255,255,255,0.16);
-  --consult-accent: #6e7bfa;
-  --consult-accent-soft: #a7b0fc;
-  --consult-accent-dim: rgba(110,123,250,0.14);
-  --consult-text: #f4f4f5;
-  --consult-text-muted: rgba(244,244,245,0.6);
-  --consult-text-faint: rgba(244,244,245,0.38);
+  /* Consultancy page — muted corporate navy system (scoped to
+     #page-consultancy, deliberately distinct from the teal --accent used
+     by the receptionist product). One muted slate-blue accent, flat
+     borders instead of glassy blur, no gradients on text/badges, no glow
+     effects — a restrained enterprise-consultancy look, not a dark-SaaS
+     "vibe-coded" one. */
+  --consult-ink: #0b1120;
+  --consult-ink-soft: #101828;
+  --consult-surface: rgba(148,163,184,0.055);
+  --consult-surface-strong: rgba(148,163,184,0.1);
+  --consult-hairline: rgba(148,163,184,0.16);
+  --consult-hairline-strong: rgba(148,163,184,0.26);
+  --consult-accent: #4f6f93;
+  --consult-accent-soft: #8fa8c4;
+  --consult-accent-dim: rgba(79,111,147,0.16);
+  --consult-text: #eef1f5;
+  --consult-text-muted: rgba(238,241,245,0.62);
+  --consult-text-faint: rgba(238,241,245,0.4);
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
@@ -773,30 +774,24 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-hero {
   position: relative; overflow: hidden;
   padding: 140px 0 88px;
-  background: radial-gradient(120% 100% at 15% 0%, rgba(0,0,0,0.5) 0%, transparent 55%);
 }
-.consult-hero-glow {
-  position: absolute; top: -20%; right: -10%; width: 55%; height: 70%;
-  background: radial-gradient(circle, var(--consult-accent-dim) 0%, transparent 68%);
-  pointer-events: none; z-index: 0;
-}
+/* No radial glow blob — flat ink background lets the graph canvas read
+   through on its own. */
+.consult-hero-glow { display: none; }
 .consult-hero-grid {
   position: relative; z-index: 1;
   display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 56px; align-items: center;
 }
-/* The copy sits directly over the densest part of the graph — a soft blurred
-   scrim keeps text contrast solid regardless of what's animating behind it. */
+/* A flat translucent scrim keeps text contrast solid over the graph —
+   no backdrop-filter blur, just a plain tinted overlay. */
 .consult-hero-copy {
   position: relative; padding: 8px 12px; margin: -8px -12px;
-  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-  background: linear-gradient(100deg, rgba(10,10,12,0.6) 0%, rgba(10,10,12,0.22) 65%, transparent 100%);
+  background: rgba(11,17,32,0.78);
   border-radius: var(--radius-lg);
 }
 .consult-hero-copy h1 { color: var(--consult-text); font-size: clamp(2.4rem, 5vw, 3.8rem); margin-bottom: 18px; }
-.consult-gradient-text {
-  background: linear-gradient(120deg, var(--consult-text) 0%, var(--consult-accent-soft) 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
+/* Flat accent color, not a gradient text-clip effect. */
+.consult-gradient-text { color: var(--consult-accent-soft); }
 .consult-hero-sub { font-size: 1.08rem; color: var(--consult-text-muted); max-width: 520px; line-height: 1.75; }
 .consult-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
 .consult-hero-outline {
@@ -816,9 +811,8 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
 }
 .consult-bento-card {
-  background: var(--consult-surface); border: 1px solid var(--consult-hairline);
+  background: rgba(16,24,40,0.7); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-lg); padding: 22px 20px;
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   transition: border-color 0.25s, transform 0.25s;
 }
 .consult-bento-card:hover { border-color: var(--consult-hairline-strong); transform: translateY(-2px); }
@@ -870,21 +864,17 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 .consult-service-card {
   position: relative; overflow: hidden;
-  background: var(--consult-surface); border: 1px solid var(--consult-hairline);
+  background: rgba(16,24,40,0.7); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-xl); padding: 30px 26px;
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
 .consult-service-card:hover {
-  transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: var(--consult-hairline-strong);
+  transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.35); border-color: var(--consult-accent);
 }
-.consult-service-featured { border-color: rgba(110,123,250,0.35); background: linear-gradient(180deg, var(--consult-accent-dim) 0%, var(--consult-surface) 55%); }
-.consult-service-glow {
-  position: absolute; top: -40%; right: -30%; width: 70%; height: 70%;
-  background: radial-gradient(circle, var(--consult-accent-dim) 0%, transparent 70%);
-  pointer-events: none; opacity: 0; transition: opacity 0.3s;
-}
-.consult-service-card:hover .consult-service-glow { opacity: 1; }
+/* A flat accent-colored top border marks the featured card — no gradient
+   wash, no glow blob on hover. */
+.consult-service-featured { border-color: var(--consult-accent); border-top: 2px solid var(--consult-accent); }
+.consult-service-glow { display: none; }
 .consult-featured-badge {
   position: absolute; top: 18px; right: 18px;
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
@@ -920,9 +910,8 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 .consult-timeline-step {
   position: relative; z-index: 1;
-  background: var(--consult-surface); border: 1px solid var(--consult-hairline);
+  background: rgba(16,24,40,0.7); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-lg); padding: 28px 22px;
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
 }
 .consult-timeline-num {
   width: 42px; height: 42px; border-radius: 50%;
@@ -934,7 +923,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-timeline-step h4 { margin-bottom: 8px; font-size: 1rem; color: var(--consult-text); }
 .consult-timeline-step p { font-size: 0.85rem; color: var(--consult-text-muted); }
 
-#consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: var(--consult-surface); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+#consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: rgba(16,24,40,0.7); }
 #consult-compare .comp-table th { background: rgba(255,255,255,0.025); color: var(--consult-text); border-bottom: 1px solid var(--consult-hairline); }
 #consult-compare .comp-table td { color: var(--consult-text-muted); border-bottom: 1px solid var(--consult-hairline); }
 #consult-compare .comp-table tr:hover td { background: rgba(255,255,255,0.025); }
@@ -942,9 +931,8 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 #consult-compare .comp-table .no { color: var(--consult-text-faint); }
 #consult-compare .comp-table th[style*="color"] { color: var(--consult-accent-soft) !important; }
 
-.consult-cta-block::before {
-  background: radial-gradient(circle, var(--consult-accent-dim) 0%, transparent 70%);
-}
+/* No radial glow blob behind the CTA — flat background only. */
+.consult-cta-block::before { display: none; }
 /* The "Ready When You Are" CTA block is repeated (with a plain .cta-block,
    no consult-cta-block modifier) at the bottom of every consultancy-family
    page — svc-operations, svc-acquisition, svc-brand — not just the main
@@ -967,6 +955,27 @@ body[data-section="consultancy"] .cta-block .btn-outline[style*="color"],
 #page-svc-brand .cta-block .btn-outline[style*="color"],
 #page-consult-signup .cta-block .btn-outline[style*="color"] {
   color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important;
+}
+/* The same repeated .cta-block also carries the base site's teal glow
+   blob (.cta-block::before) on the 3 service sub-pages — the
+   .consult-cta-block::before override above only reaches the main page's
+   modifier class. Kill the glow and match the flat ink background on
+   every consultancy-family page. */
+body[data-section="consultancy"] .cta-block,
+#page-consultancy .cta-block,
+#page-svc-operations .cta-block,
+#page-svc-acquisition .cta-block,
+#page-svc-brand .cta-block,
+#page-consult-signup .cta-block {
+  background: var(--consult-ink) !important;
+}
+body[data-section="consultancy"] .cta-block::before,
+#page-consultancy .cta-block::before,
+#page-svc-operations .cta-block::before,
+#page-svc-acquisition .cta-block::before,
+#page-svc-brand .cta-block::before,
+#page-consult-signup .cta-block::before {
+  display: none !important;
 }
 
 /* Scroll reveal (GSAP enhances; CSS fallback) */

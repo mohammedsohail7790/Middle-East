@@ -18,9 +18,9 @@
 (function () {
   'use strict';
 
-  const BG = 0x0a0a0c; // must match --consult-ink so fog fade reads as fade-to-background
-  const ACCENT = 0x6e7bfa; // --consult-accent
-  const WHITE = 0xf4f4f5; // --consult-text
+  const BG = 0x0b1120; // must match --consult-ink so fog fade reads as fade-to-background
+  const ACCENT = 0x4f6f93; // --consult-accent (muted slate-blue, not a bright neon indigo)
+  const WHITE = 0xeef1f5; // --consult-text
 
   function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -172,15 +172,15 @@
         (Math.random() - 0.5) * 0.4
       ));
 
-      // Two layers per node: a tight bright core plus a wider soft halo —
-      // reads as a real glow rather than a flat dot, without needing a
-      // post-process bloom pass.
+      // Two layers per node: a small solid-looking core plus a faint,
+      // tight halo — just enough to read as a point light, not a neon
+      // bloom. Muted and restrained rather than glowing.
       const coreGeom = new THREE.BufferGeometry().setFromPoints(positions);
       const coreMat = new THREE.PointsMaterial({
-        size: this.worldR * 0.028,
+        size: this.worldR * 0.02,
         map: this.glowTexHard,
-        color: new THREE.Color(WHITE).lerp(new THREE.Color(ACCENT), 0.25),
-        transparent: true, opacity: 0.95, depthWrite: false,
+        color: new THREE.Color(WHITE).lerp(new THREE.Color(ACCENT), 0.4),
+        transparent: true, opacity: 0.8, depthWrite: false,
         blending: THREE.AdditiveBlending, sizeAttenuation: true,
       });
       this.nodePoints = new THREE.Points(coreGeom, coreMat);
@@ -188,10 +188,10 @@
 
       const glowGeom = new THREE.BufferGeometry().setFromPoints(positions);
       const glowMat = new THREE.PointsMaterial({
-        size: this.worldR * 0.1,
+        size: this.worldR * 0.05,
         map: this.glowTexSoft,
         color: ACCENT,
-        transparent: true, opacity: 0.35, depthWrite: false,
+        transparent: true, opacity: 0.16, depthWrite: false,
         blending: THREE.AdditiveBlending, sizeAttenuation: true,
       });
       this.nodeGlow = new THREE.Points(glowGeom, glowMat);
@@ -223,7 +223,7 @@
       const edgeGeom = new THREE.BufferGeometry().setFromPoints(positions);
       edgeGeom.setIndex(edges);
       const edgeMat = new THREE.LineBasicMaterial({
-        color: ACCENT, transparent: true, opacity: 0.4,
+        color: ACCENT, transparent: true, opacity: 0.22,
         depthWrite: false, blending: THREE.AdditiveBlending,
       });
       this.edgeLines = new THREE.LineSegments(edgeGeom, edgeMat);
@@ -254,7 +254,7 @@
       geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
       const mat = new THREE.PointsMaterial({
         size: this.worldR * 0.012, map: this.glowTexSoft, color: WHITE,
-        transparent: true, opacity: 0.55, depthWrite: false,
+        transparent: true, opacity: 0.4, depthWrite: false,
         blending: THREE.AdditiveBlending, sizeAttenuation: true, fog: false,
       });
       this.starPoints = new THREE.Points(geom, mat);
@@ -294,10 +294,10 @@
       // Graceful settle-in: fade the whole graph up from nothing over its
       // first ~1.5s instead of popping in already mid-motion.
       const introAlpha = Math.min(1, this.introFrame / 90);
-      this.nodePoints.material.opacity = 0.95 * introAlpha;
-      this.nodeGlow.material.opacity = 0.35 * introAlpha;
-      this.edgeLines.material.opacity = 0.4 * introAlpha;
-      this.starPoints.material.opacity = 0.55 * introAlpha;
+      this.nodePoints.material.opacity = 0.8 * introAlpha;
+      this.nodeGlow.material.opacity = 0.16 * introAlpha;
+      this.edgeLines.material.opacity = 0.22 * introAlpha;
+      this.starPoints.material.opacity = 0.4 * introAlpha;
 
       this.renderer.render(this.scene, this.camera);
     }
@@ -362,7 +362,7 @@
         blending: THREE.AdditiveBlending,
       });
       const sprite = new THREE.Sprite(mat);
-      const scale = this.worldR * 0.075;
+      const scale = this.worldR * 0.05;
       sprite.scale.set(scale, scale, scale);
       this.graphGroup.add(sprite);
       this.pulses.push({ a, b, life: 0, maxLife: 70, sprite });
@@ -375,7 +375,7 @@
         const p = pulse.life / pulse.maxLife;
         pulse.sprite.position.lerpVectors(a, b, p);
         const fade = Math.sin(p * Math.PI);
-        pulse.sprite.material.opacity = fade * 0.95;
+        pulse.sprite.material.opacity = fade * 0.6;
 
         pulse.life += 1;
         const done = pulse.life >= pulse.maxLife;
