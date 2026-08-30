@@ -873,18 +873,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 #page-consultancy { position: relative; background: var(--consult-ink); color: var(--consult-text); }
 #page-consultancy h1, #page-consultancy h2, #page-consultancy h3, #page-consultancy h4 { color: var(--consult-text); }
 #page-consultancy p { color: var(--consult-text-muted); }
-/* Same brighter pill treatment on the service sub-pages (svc-operations,
-   svc-acquisition, svc-brand) and the signup page — they share the
-   consultancy's dark theme but were missing this override, so their
-   .label pills fell back to the dimmer default --accent color, reading
-   lower-contrast than the rest of the consultancy section. */
-#page-consultancy .label,
-#page-svc-operations .label,
-#page-svc-acquisition .label,
-#page-svc-brand .label,
-#page-consult-signup .label {
-  color: var(--consult-accent-soft); background: var(--consult-accent-dim);
-}
+#page-consultancy .label { color: var(--consult-accent-soft); background: var(--consult-accent-dim); }
 
 /* Graph backdrop — one fixed canvas (starfield + an Obsidian-style 3D node
    graph with glow-stroke edges and the odd traveling signal pulse) behind
