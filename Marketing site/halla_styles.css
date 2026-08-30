@@ -391,6 +391,22 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
   border-color: var(--gray-200) !important;
   box-shadow: var(--shadow-sm) !important;
 }
+/* Glassmorphism on starfield-backed pages (body.has-cosmic-bg, toggled in
+   halla_main.js's onPageActivated) — translucent + blurred so the canvas
+   reads through behind the cards, matching the consultancy page's look. */
+body.has-cosmic-bg #marketing-spa-root .card,
+body.has-cosmic-bg #marketing-spa-root .pricing-card,
+body.has-cosmic-bg #marketing-spa-root .roi-wrap,
+body.has-cosmic-bg #marketing-spa-root .roi-result {
+  background: var(--consult-surface) !important;
+  border-color: var(--consult-hairline) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: none !important;
+}
+body.has-cosmic-bg #marketing-spa-root .pricing-card.popular {
+  background: var(--consult-surface-strong) !important;
+}
 .card {
   background: var(--white); border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg); padding: 28px;
@@ -727,6 +743,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
   background: var(--gray-900);
   padding: 72px 0 40px;
   margin-top: 0;
+  position: relative; z-index: 1;
   position: relative;
   clear: both;
 }
@@ -942,11 +959,25 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 @keyframes consult-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-/* Every consultancy section sits above the fixed graph canvas and stays
-   transparent (or near-transparent) so the backdrop reads through behind
-   the glass cards, rather than each section painting over it. */
-#page-consultancy .section,
-#page-consultancy .section-sm { position: relative; z-index: 1; }
+/* Every section on a starfield-backed page (see DARK_BG_PAGES in
+   halla_main.js) sits above the fixed canvas and stays transparent (or
+   near-transparent) so the backdrop reads through behind the glass cards,
+   rather than each section painting over it. Unpositioned static content
+   would otherwise render UNDER a position:fixed element per normal CSS
+   stacking order, hiding the page behind the canvas. */
+#page-consultancy .section, #page-consultancy .section-sm, #page-consultancy .page-hero,
+#page-home .section, #page-home .section-sm, #page-home .page-hero,
+#page-pricing .section, #page-pricing .section-sm, #page-pricing .page-hero,
+#page-features .section, #page-features .section-sm, #page-features .page-hero,
+#page-how-it-works .section, #page-how-it-works .section-sm, #page-how-it-works .page-hero,
+#page-svc-operations .section, #page-svc-operations .section-sm, #page-svc-operations .page-hero,
+#page-svc-acquisition .section, #page-svc-acquisition .section-sm, #page-svc-acquisition .page-hero,
+#page-svc-brand .section, #page-svc-brand .section-sm, #page-svc-brand .page-hero,
+#page-consult-signup .section, #page-consult-signup .section-sm, #page-consult-signup .page-hero {
+  position: relative; z-index: 1;
+}
+/* nav (z-index:1000) and footer already sit above the canvas via their own
+   existing stacking; no extra rule needed here. */
 /* The final CTA sits directly above the footer with only its own
    section padding between them — same near-black background on both,
    so with no extra gap it reads as one run-on block. Give it real

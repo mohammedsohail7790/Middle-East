@@ -177,6 +177,11 @@
   </div>
 </div>
 
+<!-- Persistent starfield backdrop, shared across all dark-theme pages (see
+     DARK_BG_PAGES in halla_main.js). Lives outside #pages so switching pages
+     doesn't tear down and recreate the WebGL context each time. -->
+<div id="consultCosmicMount" class="consult-cosmic-canvas" aria-hidden="true"></div>
+
 <!-- PAGES -->
 <div id="pages">
 
@@ -9689,7 +9694,6 @@
 
 <!-- ====== CONSULTANCY ====== -->
 <div id="page-consultancy" class="page active">
-  <div id="consultCosmicMount" class="consult-cosmic-canvas" aria-hidden="true"></div>
 
   <!-- CONSULTANCY HERO -->
   <section class="consult-hero">

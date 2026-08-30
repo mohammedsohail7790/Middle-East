@@ -263,9 +263,22 @@
     const mount = document.getElementById('consultCosmicMount');
     if (!mount) return;
     scene = new StarfieldScene('consultCosmicMount');
+    // The script loads asynchronously (after the THREE import resolves), so
+    // a page switch may already have happened before the scene exists —
+    // sync to whatever body.has-cosmic-bg already says instead of assuming
+    // freshly-created means visible.
+    setVisible(document.body.classList.contains('has-cosmic-bg'));
   }
 
-  window.HallaPlexus = { init };
+  function setVisible(visible) {
+    const mount = document.getElementById('consultCosmicMount');
+    if (mount) mount.style.display = visible ? '' : 'none';
+    if (!scene) return;
+    if (visible) scene._start();
+    else scene._stop();
+  }
+
+  window.HallaPlexus = { init, setVisible };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

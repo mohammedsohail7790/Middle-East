@@ -54,6 +54,10 @@ function scrollToConsultSection(anchorId) {
 // ============ ROUTING + DEEP LINKS ============
 const DEFAULT_PAGE = 'consultancy';
 const CONSULTANCY_PAGES = new Set(['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup']);
+// Pages sharing the consultancy's dark theme + starfield backdrop + glass
+// cards. Everything else (industries/solutions/blog/etc.) stays on the
+// original light theme for now.
+const DARK_BG_PAGES = new Set([...CONSULTANCY_PAGES, 'home', 'pricing', 'features', 'how-it-works']);
 
 function pageExists(page) {
   return !!document.getElementById('page-' + page);
@@ -318,6 +322,10 @@ function loadInd(key) {
 function onPageActivated(page) {
   if (window.HallaNeural && HallaNeural.refreshForPage) {
     HallaNeural.refreshForPage(page);
+  }
+  document.body.classList.toggle('has-cosmic-bg', DARK_BG_PAGES.has(page));
+  if (window.HallaPlexus && HallaPlexus.setVisible) {
+    HallaPlexus.setVisible(DARK_BG_PAGES.has(page));
   }
   requestAnimationFrame(() => {
     initScrollAnimations();

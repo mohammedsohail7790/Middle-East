@@ -921,8 +921,8 @@
 }
 
 .premium-outcome-col--without {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: rgba(239, 68, 68, 0.07);
+  border: 1px solid rgba(239, 68, 68, 0.22);
 }
 
 .premium-outcome-col--with {
