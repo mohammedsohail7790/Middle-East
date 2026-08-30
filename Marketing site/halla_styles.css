@@ -789,7 +789,8 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
    button, card, border, and inline color — without needing to override
    each rule and inline style individually. Industries/solutions/blog
    pages are intentionally not included yet (later phase). */
-#page-home, #page-pricing, #page-features, #page-how-it-works {
+#page-home, #page-pricing, #page-features, #page-how-it-works,
+#page-svc-operations, #page-svc-acquisition, #page-svc-brand, #page-consult-signup {
   --white: var(--consult-ink);
   --black: var(--consult-text);
   --gray-50: var(--consult-surface);
