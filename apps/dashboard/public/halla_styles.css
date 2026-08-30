@@ -44,17 +44,23 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  /* Consultancy hero — premium enterprise palette (scoped to .consult-hero only,
-     deliberately distinct from the teal --accent used by the receptionist product). */
-  --consult-ink: #07080b;
-  --consult-surface: rgba(255,255,255,0.04);
-  --consult-hairline: rgba(255,255,255,0.1);
-  --consult-gold: #c6a15b;
-  --consult-gold-soft: #e8d5a8;
-  --consult-indigo: #5b62e0;
-  --consult-indigo-soft: #8e93ec;
-  --consult-text: #edeef2;
-  --consult-text-muted: rgba(237,238,242,0.6);
+  /* Consultancy page — graphite/near-black system with a single restrained
+     signal color (scoped to #page-consultancy, deliberately distinct from
+     the teal --accent used by the receptionist product). One accent, real
+     neutral grays, no gradient-soup — this is the "professional, not
+     vibe-coded" palette. */
+  --consult-ink: #0a0a0c;
+  --consult-ink-soft: #0e0e11;
+  --consult-surface: rgba(255,255,255,0.035);
+  --consult-surface-strong: rgba(255,255,255,0.06);
+  --consult-hairline: rgba(255,255,255,0.09);
+  --consult-hairline-strong: rgba(255,255,255,0.16);
+  --consult-accent: #6e7bfa;
+  --consult-accent-soft: #a7b0fc;
+  --consult-accent-dim: rgba(110,123,250,0.14);
+  --consult-text: #f4f4f5;
+  --consult-text-muted: rgba(244,244,245,0.6);
+  --consult-text-faint: rgba(244,244,245,0.38);
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
@@ -676,12 +682,13 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 #page-consultancy { position: relative; background: var(--consult-ink); color: var(--consult-text); }
 #page-consultancy h1, #page-consultancy h2, #page-consultancy h3, #page-consultancy h4 { color: var(--consult-text); }
 #page-consultancy p { color: var(--consult-text-muted); }
-#page-consultancy .label { color: var(--consult-gold-soft); background: rgba(198,161,91,0.14); }
+#page-consultancy .label { color: var(--consult-accent-soft); background: var(--consult-accent-dim); }
 
-/* Cosmic backdrop — one fixed canvas (starfield + spiral vortex + node
-   network) behind the entire consultancy page, not just the hero. It's a
-   direct child of #page-consultancy so it inherits that page's
-   display:none / .active toggling from the SPA router for free. */
+/* Graph backdrop — one fixed canvas (starfield + an Obsidian-style 3D node
+   graph with glow-stroke edges and the odd traveling signal pulse) behind
+   the entire consultancy page, not just the hero. It's a direct child of
+   #page-consultancy so it inherits that page's display:none / .active
+   toggling from the SPA router for free. */
 .consult-cosmic-canvas {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
 }
@@ -690,44 +697,44 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-hero {
   position: relative; overflow: hidden;
   padding: 140px 0 88px;
-  background: radial-gradient(120% 100% at 15% 0%, rgba(13,15,22,0.6) 0%, transparent 55%);
+  background: radial-gradient(120% 100% at 15% 0%, rgba(0,0,0,0.5) 0%, transparent 55%);
 }
 .consult-hero-glow {
   position: absolute; top: -20%; right: -10%; width: 55%; height: 70%;
-  background: radial-gradient(circle, rgba(198,161,91,0.16) 0%, transparent 68%);
+  background: radial-gradient(circle, var(--consult-accent-dim) 0%, transparent 68%);
   pointer-events: none; z-index: 0;
 }
 .consult-hero-grid {
   position: relative; z-index: 1;
   display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 56px; align-items: center;
 }
-/* The copy sits directly over the densest part of the plexus — a soft blurred
+/* The copy sits directly over the densest part of the graph — a soft blurred
    scrim keeps text contrast solid regardless of what's animating behind it. */
 .consult-hero-copy {
   position: relative; padding: 8px 12px; margin: -8px -12px;
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-  background: linear-gradient(100deg, rgba(7,8,11,0.55) 0%, rgba(7,8,11,0.2) 65%, transparent 100%);
+  background: linear-gradient(100deg, rgba(10,10,12,0.6) 0%, rgba(10,10,12,0.22) 65%, transparent 100%);
   border-radius: var(--radius-lg);
 }
 .consult-hero-copy h1 { color: var(--consult-text); font-size: clamp(2.4rem, 5vw, 3.8rem); margin-bottom: 18px; }
 .consult-gradient-text {
-  background: linear-gradient(120deg, var(--consult-gold-soft) 0%, var(--consult-gold) 45%, var(--consult-indigo-soft) 100%);
+  background: linear-gradient(120deg, var(--consult-text) 0%, var(--consult-accent-soft) 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .consult-hero-sub { font-size: 1.08rem; color: var(--consult-text-muted); max-width: 520px; line-height: 1.75; }
 .consult-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
 .consult-hero-outline {
-  color: rgba(237,238,242,0.85) !important; border-color: var(--consult-hairline) !important;
+  color: rgba(244,244,245,0.85) !important; border-color: var(--consult-hairline) !important;
   background: var(--consult-surface) !important;
 }
-.consult-hero-outline:hover { background: rgba(255,255,255,0.08) !important; border-color: rgba(255,255,255,0.28) !important; }
-.consult-label-glow { background: rgba(198,161,91,0.14); color: var(--consult-gold-soft); }
+.consult-hero-outline:hover { background: var(--consult-surface-strong) !important; border-color: var(--consult-hairline-strong) !important; }
+.consult-label-glow { background: var(--consult-accent-dim); color: var(--consult-accent-soft); }
 .consult-trust-row {
   display: flex; flex-wrap: wrap; gap: 18px; margin-top: 28px;
   font-family: var(--consult-mono); font-size: 0.76rem; letter-spacing: 0.01em;
-  color: rgba(237,238,242,0.45);
+  color: var(--consult-text-faint);
 }
-.consult-trust-row i { color: var(--consult-indigo-soft); margin-right: 6px; }
+.consult-trust-row i { color: var(--consult-accent-soft); margin-right: 6px; }
 
 .consult-hero-bento {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
@@ -738,24 +745,24 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   transition: border-color 0.25s, transform 0.25s;
 }
-.consult-bento-card:hover { border-color: rgba(198,161,91,0.4); transform: translateY(-2px); }
+.consult-bento-card:hover { border-color: var(--consult-hairline-strong); transform: translateY(-2px); }
 .consult-bento-main { grid-row: span 2; display: flex; flex-direction: column; justify-content: center; }
 .consult-bento-wide { grid-column: span 2; }
-.consult-bento-icon { font-size: 1.6rem; color: var(--consult-indigo-soft); margin-bottom: 12px; }
+.consult-bento-icon { font-size: 1.6rem; color: var(--consult-accent-soft); margin-bottom: 12px; }
 .consult-bento-num { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; color: var(--consult-text); line-height: 1; }
 .consult-bento-num.sm { font-size: 1.8rem; }
-.consult-bento-num.accent { color: var(--consult-gold); }
-.consult-bento-label { font-size: 0.78rem; color: rgba(237,238,242,0.5); margin-top: 8px; line-height: 1.45; }
+.consult-bento-num.accent { color: var(--consult-accent-soft); }
+.consult-bento-label { font-size: 0.78rem; color: var(--consult-text-faint); margin-top: 8px; line-height: 1.45; }
 .consult-stack-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .consult-stack-pills span {
   font-size: 0.72rem; font-weight: 600; padding: 5px 10px; border-radius: 999px;
-  background: rgba(91,98,224,0.16); color: var(--consult-indigo-soft); border: 1px solid rgba(91,98,224,0.28);
+  background: var(--consult-surface-strong); color: var(--consult-text-muted); border: 1px solid var(--consult-hairline);
 }
 
 .consult-marquee {
   position: relative; z-index: 1;
   overflow: hidden; border-block: 1px solid var(--consult-hairline);
-  background: rgba(255,255,255,0.02); padding: 14px 0;
+  background: rgba(255,255,255,0.015); padding: 14px 0;
 }
 .consult-marquee-track {
   display: flex; gap: 48px; width: max-content; white-space: nowrap;
@@ -764,16 +771,16 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-marquee-track span {
   font-family: var(--consult-mono);
   font-size: 0.78rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
-  color: var(--consult-text-muted);
+  color: var(--consult-text-faint);
 }
 @keyframes consult-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-/* Every consultancy section sits above the fixed cosmic canvas and stays
+/* Every consultancy section sits above the fixed graph canvas and stays
    transparent (or near-transparent) so the backdrop reads through behind
    the glass cards, rather than each section painting over it. */
 #page-consultancy .section,
 #page-consultancy .section-sm { position: relative; z-index: 1; }
-.consult-section-dark { background: rgba(255,255,255,0.015); }
+.consult-section-dark { background: rgba(255,255,255,0.012); }
 .consult-split {
   display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 48px; align-items: start;
 }
@@ -793,23 +800,23 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
 .consult-service-card:hover {
-  transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.35); border-color: rgba(198,161,91,0.35);
+  transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: var(--consult-hairline-strong);
 }
-.consult-service-featured { border-color: rgba(198,161,91,0.4); background: linear-gradient(180deg, rgba(198,161,91,0.08) 0%, var(--consult-surface) 55%); }
+.consult-service-featured { border-color: rgba(110,123,250,0.35); background: linear-gradient(180deg, var(--consult-accent-dim) 0%, var(--consult-surface) 55%); }
 .consult-service-glow {
   position: absolute; top: -40%; right: -30%; width: 70%; height: 70%;
-  background: radial-gradient(circle, rgba(198,161,91,0.16) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--consult-accent-dim) 0%, transparent 70%);
   pointer-events: none; opacity: 0; transition: opacity 0.3s;
 }
 .consult-service-card:hover .consult-service-glow { opacity: 1; }
 .consult-featured-badge {
   position: absolute; top: 18px; right: 18px;
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  background: var(--consult-gold); color: var(--consult-ink); padding: 5px 10px; border-radius: 999px;
+  background: var(--consult-accent); color: var(--consult-ink); padding: 5px 10px; border-radius: 999px;
 }
-.consult-service-card .feat-icon-blue { background: rgba(91,98,224,0.16); color: var(--consult-indigo-soft); }
-.consult-service-card .feat-icon-green { background: rgba(198,161,91,0.16); color: var(--consult-gold); }
-.consult-service-card .feat-icon-orange { background: rgba(198,161,91,0.16); color: var(--consult-gold-soft); }
+.consult-service-card .feat-icon-blue,
+.consult-service-card .feat-icon-green,
+.consult-service-card .feat-icon-orange { background: var(--consult-surface-strong); color: var(--consult-accent-soft); }
 .consult-service-card h3 { font-size: 1.2rem; margin-bottom: 10px; color: var(--consult-text); }
 .consult-service-card p { font-size: 0.9rem; margin-bottom: 16px; color: var(--consult-text-muted); }
 .consult-service-list {
@@ -819,20 +826,20 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   display: flex; align-items: flex-start; gap: 8px;
   font-size: 0.82rem; color: var(--consult-text-muted); line-height: 1.45;
 }
-.consult-service-list i { color: var(--consult-indigo-soft); font-size: 0.9rem; margin-top: 2px; flex-shrink: 0; }
+.consult-service-list i { color: var(--consult-accent-soft); font-size: 0.9rem; margin-top: 2px; flex-shrink: 0; }
 .consult-service-link {
   display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.85rem; font-weight: 700; color: var(--consult-gold-soft); text-decoration: none;
+  font-size: 0.85rem; font-weight: 700; color: var(--consult-accent-soft); text-decoration: none;
 }
-.consult-service-link:hover { color: var(--consult-gold); }
+.consult-service-link:hover { color: var(--consult-text); }
 
-.consult-timeline-section { background: rgba(255,255,255,0.015); }
+.consult-timeline-section { background: rgba(255,255,255,0.012); }
 .consult-timeline {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; position: relative;
 }
 .consult-timeline::before {
   content: ""; position: absolute; top: 28px; left: 8%; right: 8%; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--consult-indigo-soft), transparent);
+  background: linear-gradient(90deg, transparent, var(--consult-hairline-strong), transparent);
   z-index: 0;
 }
 .consult-timeline-step {
@@ -843,7 +850,8 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 .consult-timeline-num {
   width: 42px; height: 42px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--consult-gold) 0%, var(--consult-indigo) 100%); color: var(--consult-ink);
+  background: var(--consult-surface-strong); color: var(--consult-accent-soft);
+  border: 1px solid var(--consult-hairline-strong);
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; font-size: 0.85rem; margin-bottom: 16px;
 }
@@ -851,17 +859,17 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-timeline-step p { font-size: 0.85rem; color: var(--consult-text-muted); }
 
 #consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: var(--consult-surface); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
-#consult-compare .comp-table th { background: rgba(255,255,255,0.03); color: var(--consult-text); border-bottom: 1px solid var(--consult-hairline); }
+#consult-compare .comp-table th { background: rgba(255,255,255,0.025); color: var(--consult-text); border-bottom: 1px solid var(--consult-hairline); }
 #consult-compare .comp-table td { color: var(--consult-text-muted); border-bottom: 1px solid var(--consult-hairline); }
-#consult-compare .comp-table tr:hover td { background: rgba(255,255,255,0.03); }
-#consult-compare .comp-table .yes { color: var(--consult-gold-soft); }
-#consult-compare .comp-table .no { color: rgba(237,238,242,0.3); }
-#consult-compare .comp-table th[style*="color"] { color: var(--consult-gold) !important; }
+#consult-compare .comp-table tr:hover td { background: rgba(255,255,255,0.025); }
+#consult-compare .comp-table .yes { color: var(--consult-accent-soft); }
+#consult-compare .comp-table .no { color: var(--consult-text-faint); }
+#consult-compare .comp-table th[style*="color"] { color: var(--consult-accent-soft) !important; }
 
 .consult-cta-block::before {
-  background: radial-gradient(circle, rgba(91,98,224,0.28) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--consult-accent-dim) 0%, transparent 70%);
 }
-#consult-cta .label[style*="background"] { background: rgba(198,161,91,0.15) !important; color: var(--consult-gold-soft) !important; }
+#consult-cta .label[style*="background"] { background: var(--consult-accent-dim) !important; color: var(--consult-accent-soft) !important; }
 #consult-cta .btn-outline[style*="color"] { color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important; }
 
 /* Scroll reveal (GSAP enhances; CSS fallback) */

@@ -1,26 +1,35 @@
 /* ================================================
-   Halla AI — Consultancy Cosmic Backdrop
+   Halla AI — Consultancy Graph Backdrop
    Lightweight 2D canvas background for the whole
-   consultancy page: twinkling starfield, a rotating
-   gold/indigo spiral vortex (tornado) with the odd
-   lightning-bolt flicker, and a thin connecting-node
-   network layered on top. Fixed to the viewport so it
-   stays visible behind every section while scrolling.
-   No dependencies, no WebGL — cheap enough to run
-   continuously without hurting scroll/interaction perf.
+   consultancy page: a faint starfield behind an
+   Obsidian-style node graph rendered in pseudo-3D
+   (perspective projection, depth-of-field, a slow
+   orbiting camera) with glow-gradient edges — no flat
+   fills — and the occasional signal pulse traveling
+   along a link. No dependencies, no WebGL — cheap
+   enough to run continuously without hurting
+   scroll/interaction perf.
    © 2025 Halla AI
 ================================================ */
 (function () {
   'use strict';
 
-  const GOLD = 'rgba(198,161,91,';
-  const INDIGO = 'rgba(91,98,224,';
+  const ACCENT = [110, 123, 250]; // --consult-accent
+  const WHITE = [244, 244, 245]; // --consult-text
 
   function prefersReducedMotion() {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
-  class CosmicScene {
+  function rgba(rgb, a) {
+    return 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + a.toFixed(3) + ')';
+  }
+
+  function mix(a, b, t) {
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+  }
+
+  class GraphScene {
     constructor(mountId) {
       this.mount = document.getElementById(mountId);
       if (!this.mount) return;
@@ -36,8 +45,9 @@
       this.t = 0;
       this.stars = [];
       this.nodes = [];
-      this.spiralArms = [];
-      this.lightning = null;
+      this.pulses = [];
+      this.rotY = 0;
+      this.rotX = 0.18; // slight permanent tilt so the graph reads as 3D, not flat
 
       this._onResize = this._resize.bind(this);
       this._onVisibility = () => {
@@ -57,8 +67,6 @@
         this._start();
         return;
       }
-      // Fixed full-viewport layer — visible the instant its page section
-      // is display:block, so a near-zero threshold is enough.
       this.io = new IntersectionObserver((entries) => {
         const visible = entries.some((e) => e.isIntersecting);
         if (visible) this._start();
@@ -79,52 +87,57 @@
       const isTouch = window.matchMedia('(pointer: coarse)').matches;
       const area = w * h;
 
-      const starCount = Math.max(70, Math.min(Math.round(area / 8000), isTouch ? 140 : 260));
+      const starCount = Math.max(50, Math.min(Math.round(area / 11000), isTouch ? 90 : 170));
       this.stars = Array.from({ length: starCount }, () => this._spawnStar());
 
-      const nodeCount = Math.max(14, Math.min(Math.round(area / 28000), isTouch ? 24 : 44));
-      this.linkDist = Math.max(90, Math.min(w, h) * 0.15);
-      this.nodes = Array.from({ length: nodeCount }, () => this._spawnNode());
+      // World-space radius the node cloud occupies; camera distance and focal
+      // length are derived from it so the graph always fills a comfortable
+      // portion of the viewport regardless of screen size.
+      this.worldR = Math.min(w, h) * 0.62;
+      this.focal = this.worldR * 2.1;
+      this.camZ = this.worldR * 2.7;
 
-      // Vortex sits anchored near the hero copy, upper-right of the viewport,
-      // and scales with viewport size so it reads the same on any screen.
-      this.spiralCx = w * 0.78;
-      this.spiralCy = Math.min(h * 0.4, 440);
-      this.spiralScale = Math.min(w, h) * (isTouch ? 0.32 : 0.42);
-      const armCount = 3;
-      this.spiralArms = Array.from({ length: armCount }, (_, i) => ({
-        offset: (i / armCount) * Math.PI * 2,
-        gold: i % 2 === 0,
-      }));
+      const nodeCount = Math.max(26, Math.min(Math.round(area / 15000), isTouch ? 46 : 78));
+      this.nodes = Array.from({ length: nodeCount }, () => this._spawnNode());
+      this.linkDist = this.worldR * 0.62;
     }
 
     _spawnStar() {
       return {
         x: Math.random() * this.width,
         y: Math.random() * this.height,
-        r: Math.random() * 1.2 + 0.3,
+        r: Math.random() * 1.1 + 0.3,
         phase: Math.random() * Math.PI * 2,
         speed: Math.random() * 0.02 + 0.008,
       };
     }
 
+    // Nodes seeded in a handful of loose clusters (like Obsidian's graph
+    // settling into related note groups) rather than uniform noise — reads
+    // far more like a real knowledge graph than a random point cloud.
     _spawnNode() {
+      const clusterCount = 4;
+      const cluster = Math.floor(Math.random() * clusterCount);
+      const clusterAngle = (cluster / clusterCount) * Math.PI * 2;
+      const clusterR = this.worldR * 0.42;
+      const cx = Math.cos(clusterAngle) * clusterR;
+      const cy = (Math.random() - 0.5) * this.worldR * 0.3;
+      const cz = Math.sin(clusterAngle) * clusterR;
+      const spread = this.worldR * 0.4;
+
       return {
-        x: Math.random() * this.width,
-        y: Math.random() * this.height,
-        vx: (Math.random() - 0.5) * 0.1,
-        vy: (Math.random() - 0.5) * 0.1,
-        r: Math.random() * 1.3 + 0.8,
-        gold: Math.random() < 0.3,
+        x: cx + (Math.random() - 0.5) * spread,
+        y: cy + (Math.random() - 0.5) * spread,
+        z: cz + (Math.random() - 0.5) * spread,
+        vx: (Math.random() - 0.5) * 0.06,
+        vy: (Math.random() - 0.5) * 0.06,
+        vz: (Math.random() - 0.5) * 0.06,
+        r: Math.random() * 1.3 + 1.1,
       };
     }
 
     _start() {
       if (this.running || !this.ctx) return;
-      // The consultancy page may have been display:none (SPA page switch)
-      // when this scene was constructed or last resized — re-measure before
-      // running, since window.innerWidth/Height stays accurate but our
-      // canvas backing store may be stale from before the last resize event.
       if (window.innerWidth !== this.width || window.innerHeight !== this.height) {
         this._resize();
       }
@@ -144,15 +157,43 @@
       this.raf = requestAnimationFrame(() => this._tick());
     }
 
+    // Perspective-projects a 3D world point (already camera-relative) to 2D
+    // screen space, returning null if it's behind the camera.
+    _project(x, y, z) {
+      const rz = z + this.camZ;
+      if (rz <= 1) return null;
+      const scale = this.focal / rz;
+      return {
+        x: this.width / 2 + x * scale,
+        y: this.height / 2 + y * scale,
+        scale,
+        depth: rz,
+      };
+    }
+
+    _rotate(n) {
+      // Slow yaw around Y plus the fixed slight pitch around X.
+      const cosY = Math.cos(this.rotY);
+      const sinY = Math.sin(this.rotY);
+      let x = n.x * cosY - n.z * sinY;
+      let z = n.x * sinY + n.z * cosY;
+      const y0 = n.y;
+
+      const cosX = Math.cos(this.rotX);
+      const sinX = Math.sin(this.rotX);
+      const y = y0 * cosX - z * sinX;
+      z = y0 * sinX + z * cosX;
+
+      return { x, y, z };
+    }
+
     _step() {
       this.t += 1;
+      this.rotY = this.t * 0.00065;
       const { ctx, width, height } = this;
       ctx.clearRect(0, 0, width, height);
       this._drawStars();
-      this._drawSpiral();
-      this._maybeSpawnLightning();
-      this._drawLightning();
-      this._drawPlexus();
+      this._stepGraph();
     }
 
     _drawStars() {
@@ -160,135 +201,135 @@
       for (const s of stars) {
         const tw = 0.5 + 0.5 * Math.sin(t * s.speed + s.phase);
         ctx.beginPath();
-        ctx.fillStyle = 'rgba(237,238,242,' + (0.12 + tw * 0.55).toFixed(3) + ')';
+        ctx.fillStyle = rgba(WHITE, 0.08 + tw * 0.35);
         ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx.fill();
       }
     }
 
-    // A slowly rotating logarithmic-ish spiral, stretched into a funnel so it
-    // reads as a tornado rather than a flat disc, drawn as glowing strands.
-    _drawSpiral() {
-      const { ctx, spiralCx, spiralCy, spiralScale, t } = this;
-      const rotation = t * 0.0022;
-      ctx.save();
-      ctx.translate(spiralCx, spiralCy);
-      ctx.rotate(rotation);
+    _stepGraph() {
+      const { ctx, nodes, linkDist, worldR } = this;
 
-      for (const arm of this.spiralArms) {
-        const color = arm.gold ? GOLD : INDIGO;
-        const steps = 90;
-        ctx.beginPath();
-        for (let i = 0; i <= steps; i++) {
-          const p = i / steps;
-          const angle = arm.offset + p * Math.PI * 4.2;
-          const radius = p * spiralScale;
-          const x = Math.cos(angle) * radius;
-          const y = Math.sin(angle) * radius * 0.62 - p * spiralScale * 0.18;
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
-        }
-        const flicker = 0.55 + 0.45 * Math.sin(t * 0.05 + arm.offset * 3);
-        ctx.strokeStyle = color + (0.16 * flicker).toFixed(3) + ')';
-        ctx.lineWidth = 1.4;
-        ctx.stroke();
-      }
-
-      const coreGlow = ctx.createRadialGradient(0, 0, 0, 0, 0, spiralScale * 0.5);
-      coreGlow.addColorStop(0, GOLD + '0.16)');
-      coreGlow.addColorStop(1, GOLD + '0)');
-      ctx.fillStyle = coreGlow;
-      ctx.beginPath();
-      ctx.arc(0, 0, spiralScale * 0.5, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
-    }
-
-    // Occasional jagged bolt shot out from the vortex core — the "lightning"
-    // accent. Rare and brief on purpose; it's a flourish, not a strobe.
-    _maybeSpawnLightning() {
-      if (this.lightning) return;
-      if (Math.random() >= 0.006) return;
-
-      const angle = Math.random() * Math.PI * 2;
-      const len = this.spiralScale * 0.95;
-      const segments = 7;
-      const pts = [{ x: 0, y: 0 }];
-      for (let i = 1; i <= segments; i++) {
-        const p = i / segments;
-        const r = p * len;
-        const jitter = (Math.random() - 0.5) * this.spiralScale * 0.12;
-        const x = Math.cos(angle) * r + Math.cos(angle + Math.PI / 2) * jitter;
-        const y = Math.sin(angle) * r * 0.62 - p * this.spiralScale * 0.18 + Math.sin(angle + Math.PI / 2) * jitter * 0.6;
-        pts.push({ x, y });
-      }
-      this.lightning = { pts, life: 10, maxLife: 10 };
-    }
-
-    _drawLightning() {
-      const l = this.lightning;
-      if (!l) return;
-      const { ctx } = this;
-      const alpha = l.life / l.maxLife;
-
-      ctx.save();
-      ctx.translate(this.spiralCx, this.spiralCy);
-      ctx.rotate(this.t * 0.0022);
-      ctx.beginPath();
-      l.pts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
-      ctx.strokeStyle = 'rgba(237,238,242,' + (alpha * 0.8).toFixed(3) + ')';
-      ctx.lineWidth = 1.6;
-      ctx.shadowColor = 'rgba(142,147,236,0.8)';
-      ctx.shadowBlur = 8;
-      ctx.stroke();
-      ctx.restore();
-
-      l.life -= 1;
-      if (l.life <= 0) this.lightning = null;
-    }
-
-    // Thin connecting-line network drifting slowly over the whole viewport,
-    // unchanged in spirit from the original hero-only plexus effect.
-    _drawPlexus() {
-      const { ctx, width, height, nodes, linkDist } = this;
-
+      // Drift nodes gently within the world sphere, reflecting off its
+      // boundary so the cloud stays coherent instead of dispersing.
       for (const n of nodes) {
-        n.x += n.vx;
-        n.y += n.vy;
-        if (n.x < 0 || n.x > width) n.vx *= -1;
-        if (n.y < 0 || n.y > height) n.vy *= -1;
+        n.x += n.vx; n.y += n.vy; n.z += n.vz;
+        const dist = Math.hypot(n.x, n.y, n.z);
+        if (dist > worldR) {
+          n.vx -= (n.x / dist) * 0.02;
+          n.vy -= (n.y / dist) * 0.02;
+          n.vz -= (n.z / dist) * 0.02;
+        }
       }
 
-      for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const a = nodes[i];
-          const b = nodes[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const dist = Math.hypot(dx, dy);
+      const projected = nodes.map((n) => {
+        const r = this._rotate(n);
+        const p = this._project(r.x, r.y, r.z);
+        return p ? { n, r, p } : null;
+      });
+
+      // Depth-of-field cue: nodes/edges nearer the camera render sharper and
+      // brighter, farther ones fade and blur slightly — the "3D" read.
+      const depths = projected.filter(Boolean).map((o) => o.p.depth);
+      const minD = Math.min.apply(null, depths);
+      const maxD = Math.max.apply(null, depths);
+      const depthT = (d) => (maxD > minD ? 1 - (d - minD) / (maxD - minD) : 1);
+
+      this._drawEdges(projected, linkDist, depthT);
+      this._stepPulses(projected, depthT);
+      this._drawNodes(projected, depthT);
+    }
+
+    _drawEdges(projected, linkDist, depthT) {
+      const { ctx } = this;
+      for (let i = 0; i < projected.length; i++) {
+        const a = projected[i];
+        if (!a) continue;
+        for (let j = i + 1; j < projected.length; j++) {
+          const b = projected[j];
+          if (!b) continue;
+          const dx = a.r.x - b.r.x;
+          const dy = a.r.y - b.r.y;
+          const dz = a.r.z - b.r.z;
+          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
           if (dist >= linkDist) continue;
 
-          const alpha = (1 - dist / linkDist) * 0.18;
-          ctx.strokeStyle = INDIGO + alpha.toFixed(3) + ')';
-          ctx.lineWidth = 1;
+          const closeness = 1 - dist / linkDist;
+          const depth = (depthT(a.p.depth) + depthT(b.p.depth)) / 2;
+          const alpha = closeness * (0.05 + depth * 0.14);
+          if (alpha <= 0.004) continue;
+
+          // A soft glow stroke rather than a flat line: a wider, dimmer
+          // pass under a thin, brighter core.
+          ctx.strokeStyle = rgba(ACCENT, alpha * 0.6);
+          ctx.lineWidth = 2.2;
           ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
+          ctx.moveTo(a.p.x, a.p.y);
+          ctx.lineTo(b.p.x, b.p.y);
           ctx.stroke();
+
+          ctx.strokeStyle = rgba(mix(ACCENT, WHITE, 0.3), alpha);
+          ctx.lineWidth = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(a.p.x, a.p.y);
+          ctx.lineTo(b.p.x, b.p.y);
+          ctx.stroke();
+
+          if (Math.random() < 0.00025) {
+            this.pulses.push({ a: i, b: j, life: 0, maxLife: 70 });
+          }
         }
       }
+    }
 
-      for (const n of nodes) {
-        const color = n.gold ? GOLD : INDIGO;
+    // A rare, soft point of light traveling along an active edge — the
+    // "signal firing" accent, built from a real gradient dot, never a flat
+    // jagged shape.
+    _stepPulses(projected, depthT) {
+      const { ctx } = this;
+      this.pulses = this.pulses.filter((pulse) => {
+        const a = projected[pulse.a];
+        const b = projected[pulse.b];
+        if (!a || !b) return false;
+
+        const p = pulse.life / pulse.maxLife;
+        const x = a.p.x + (b.p.x - a.p.x) * p;
+        const y = a.p.y + (b.p.y - a.p.y) * p;
+        const depth = (depthT(a.p.depth) + depthT(b.p.depth)) / 2;
+        const fade = Math.sin(p * Math.PI); // ramps up then back down
+        const radius = (2.2 + depth * 2.4) * fade;
+
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, radius * 4);
+        glow.addColorStop(0, rgba(mix(ACCENT, WHITE, 0.55), 0.9 * fade));
+        glow.addColorStop(0.4, rgba(ACCENT, 0.35 * fade));
+        glow.addColorStop(1, rgba(ACCENT, 0));
+        ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.fillStyle = color + '0.75)';
-        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+        ctx.arc(x, y, radius * 4, 0, Math.PI * 2);
         ctx.fill();
 
+        pulse.life += 1;
+        return pulse.life < pulse.maxLife;
+      });
+    }
+
+    _drawNodes(projected, depthT) {
+      const { ctx } = this;
+      for (const o of projected) {
+        if (!o) continue;
+        const depth = depthT(o.p.depth);
+        const radius = o.n.r * (0.6 + depth * 0.9);
+        const alpha = 0.35 + depth * 0.5;
+
+        // Radial-gradient node — a bright core fading to nothing, never a
+        // flat filled circle.
+        const glow = ctx.createRadialGradient(o.p.x, o.p.y, 0, o.p.x, o.p.y, radius * 3.4);
+        glow.addColorStop(0, rgba(mix(ACCENT, WHITE, 0.45), alpha));
+        glow.addColorStop(0.35, rgba(ACCENT, alpha * 0.32));
+        glow.addColorStop(1, rgba(ACCENT, 0));
+        ctx.fillStyle = glow;
         ctx.beginPath();
-        ctx.fillStyle = color + '0.1)';
-        ctx.arc(n.x, n.y, n.r * 3.2, 0, Math.PI * 2);
+        ctx.arc(o.p.x, o.p.y, radius * 3.4, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -309,7 +350,7 @@
     if (scene) return;
     const mount = document.getElementById('consultCosmicMount');
     if (!mount) return;
-    scene = new CosmicScene('consultCosmicMount');
+    scene = new GraphScene('consultCosmicMount');
   }
 
   window.HallaPlexus = { init };
