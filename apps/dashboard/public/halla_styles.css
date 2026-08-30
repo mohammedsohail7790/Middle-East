@@ -95,7 +95,7 @@ p { color: var(--gray-500); line-height: 1.72; }
 .btn-sm { padding: 9px 18px; font-size: 0.85rem; }
 
 /* ============ NAV ============ */
-nav {
+#marketing-spa-root nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
   background: rgba(255,255,255,0.94); backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--gray-100);
@@ -500,7 +500,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 .comp-highlight { background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: var(--radius-lg); padding: 20px 24px; }
 
 /* ============ FOOTER ============ */
-footer { background: var(--gray-900); padding: 72px 0 40px; }
+#marketing-spa-root footer { background: var(--gray-900); padding: 72px 0 40px; }
 .footer-grid { display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 56px; }
 .footer-brand p { font-size: 0.875rem; color: rgba(255,255,255,0.4); margin: 16px 0 24px; max-width: 260px; line-height: 1.65; }
 .footer-logo .halla-wordmark { color: var(--white); font-size: 1.5rem; }
@@ -576,7 +576,7 @@ footer { background: var(--gray-900); padding: 72px 0 40px; }
 
 /* ============ FOOTER FIX ============ */
 /* Ensure footer stays at bottom consistently */
-footer {
+#marketing-spa-root footer {
   background: var(--gray-900);
   padding: 72px 0 40px;
   margin-top: 0;
