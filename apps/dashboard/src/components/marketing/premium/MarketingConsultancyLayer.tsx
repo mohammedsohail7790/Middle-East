@@ -24,16 +24,33 @@ function useConsultancyPageActive() {
   const [active, setActive] = useState(false);
 
   useEffect(() => {
-    const root = document.getElementById("marketing-spa-root");
-    const consult = document.getElementById("page-consultancy");
-    if (!root || !consult) return;
+    let observer: MutationObserver | undefined;
 
-    const check = () => setActive(consult.classList.contains("active"));
-    check();
+    // This effect can run before MarketingSPA has injected bodyHtml into
+    // #marketing-spa-root (child effects fire before the parent's), so
+    // #page-consultancy may not exist yet on the first run. Retry once the
+    // SPA signals it has mounted, instead of silently bailing out forever.
+    const attach = () => {
+      const root = document.getElementById("marketing-spa-root");
+      const consult = document.getElementById("page-consultancy");
+      if (!root || !consult) return false;
 
-    const observer = new MutationObserver(check);
-    observer.observe(root, { attributes: true, subtree: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
+      const check = () => setActive(consult.classList.contains("active"));
+      check();
+
+      observer = new MutationObserver(check);
+      observer.observe(root, { attributes: true, subtree: true, attributeFilter: ["class"] });
+      return true;
+    };
+
+    if (!attach()) {
+      window.addEventListener("halla-marketing-mounted", attach, { once: true });
+    }
+
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("halla-marketing-mounted", attach);
+    };
   }, []);
 
   return active;

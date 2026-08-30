@@ -15,16 +15,33 @@ function useHomePageActive() {
   const [active, setActive] = useState(false);
 
   useEffect(() => {
-    const root = document.getElementById("marketing-spa-root");
-    const home = document.getElementById("page-home");
-    if (!root || !home) return;
+    let observer: MutationObserver | undefined;
 
-    const check = () => setActive(home.classList.contains("active"));
-    check();
+    // This effect can run before MarketingSPA has injected bodyHtml into
+    // #marketing-spa-root (child effects fire before the parent's), so
+    // #page-home may not exist yet on the first run. Retry once the SPA
+    // signals it has mounted, instead of silently bailing out forever.
+    const attach = () => {
+      const root = document.getElementById("marketing-spa-root");
+      const home = document.getElementById("page-home");
+      if (!root || !home) return false;
 
-    const observer = new MutationObserver(check);
-    observer.observe(root, { attributes: true, subtree: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
+      const check = () => setActive(home.classList.contains("active"));
+      check();
+
+      observer = new MutationObserver(check);
+      observer.observe(root, { attributes: true, subtree: true, attributeFilter: ["class"] });
+      return true;
+    };
+
+    if (!attach()) {
+      window.addEventListener("halla-marketing-mounted", attach, { once: true });
+    }
+
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("halla-marketing-mounted", attach);
+    };
   }, []);
 
   return active;
