@@ -1,6 +1,5 @@
 "use client";
 
-import { HeroParticleCanvas } from "./HeroParticleCanvas";
 import { useParallaxTilt } from "@/components/marketing/effects/useParallaxTilt";
 
 function CssPhoneFallback() {
@@ -31,7 +30,6 @@ export function HeroPhone3D() {
 
   return (
     <div className="hp3d-scene hp3d-scene--enhanced" aria-hidden>
-      <HeroParticleCanvas />
       <div className="hp3d-orbit hp3d-orbit--outer" />
       <div className="hp3d-orbit hp3d-orbit--inner" />
       <div className="hp3d-depth-ring hp3d-depth-ring--a" />
