@@ -325,24 +325,8 @@ function onPageActivated(page) {
   });
 }
 
-// ============ SITEWIDE AUTO-REVEAL ============
-// Tags common repeating elements on the active page with .reveal-up so every
-// page (not just the ones with hand-authored reveal markup) gets the same
-// scroll-in motion, without touching each page's HTML.
-function autoTagReveals() {
-  const activePage = document.querySelector('.page.active');
-  if (!activePage) return;
-  const nodes = activePage.querySelectorAll('.card, .pricing-card, .faq-item, .cta-block, .step-row');
-  nodes.forEach((el, i) => {
-    if (el.classList.contains('reveal-up')) return;
-    el.classList.add('reveal-up');
-    el.style.setProperty('--reveal-delay', `${(i % 6) * 0.05}s`);
-  });
-}
-
 // ============ GSAP SCROLL REVEALS ============
 function initScrollAnimations() {
-  autoTagReveals();
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const targets = document.querySelectorAll('.reveal-up:not(.gsap-bound)');
   if (!targets.length) return;
@@ -406,51 +390,22 @@ function initConsultCounters() {
 
 // ============ LANGUAGE TOGGLE ============
 function setLang(lang) {
-  const supported = ['en', 'ar'];
-  const safeLang = supported.includes(lang) ? lang : 'en';
-  const dir = safeLang === 'ar' ? 'rtl' : 'ltr';
   const html = document.documentElement;
-  html.setAttribute('dir', dir);
-  html.setAttribute('lang', safeLang);
-  const root = document.getElementById('marketing-spa-root');
-  if (root) {
-    root.setAttribute('dir', dir);
-    root.setAttribute('lang', safeLang);
+  if (lang === 'ar') {
+    html.setAttribute('dir', 'rtl');
+    html.setAttribute('lang', 'ar');
+  } else {
+    html.setAttribute('dir', 'ltr');
+    html.setAttribute('lang', 'en');
   }
   document.querySelectorAll('.lang-toggle button').forEach(b => {
-    b.classList.toggle('active', b.dataset.lang === safeLang);
+    b.classList.toggle('active', b.dataset.lang === lang);
   });
-  try { localStorage.setItem('halla_lang', safeLang); } catch (e) {}
-}
-
-// ============ SITE NEURAL BACKDROP ============
-function ensureSiteNeuralMount() {
-  if (document.getElementById('siteNeuralMount')) return;
-  const mount = document.createElement('div');
-  mount.id = 'siteNeuralMount';
-  mount.className = 'site-neural-canvas';
-  mount.setAttribute('aria-hidden', 'true');
-  document.body.insertBefore(mount, document.body.firstChild);
-}
-
-function ensureConsultPageNeuralMount() {
-  if (document.getElementById('consultPageNeuralMount')) return;
-  const mount = document.createElement('div');
-  mount.id = 'consultPageNeuralMount';
-  mount.className = 'consult-page-neural-canvas';
-  mount.setAttribute('aria-hidden', 'true');
-  const siteMount = document.getElementById('siteNeuralMount');
-  if (siteMount && siteMount.nextSibling) {
-    document.body.insertBefore(mount, siteMount.nextSibling);
-  } else {
-    document.body.insertBefore(mount, document.body.firstChild);
-  }
+  try { localStorage.setItem('halla_lang', lang); } catch (e) {}
 }
 
 // ============ INIT ============
 function hallaInit() {
-  ensureSiteNeuralMount();
-  ensureConsultPageNeuralMount();
   calcROI();
   let savedLang = 'en';
   try { savedLang = localStorage.getItem('halla_lang') || 'en'; } catch (e) {}
@@ -464,14 +419,6 @@ function hallaInit() {
   initPhone3D();
   initBrowserFrameTilt();
   initConsultForm();
-  if (window.HallaNeural && typeof HallaNeural.init === 'function') {
-    HallaNeural.init();
-    if (typeof HallaNeural.refreshForPage === 'function') {
-      const activePage = document.querySelector('.page.active');
-      const pageId = activePage && activePage.id ? activePage.id.replace(/^page-/, '') : DEFAULT_PAGE;
-      HallaNeural.refreshForPage(pageId);
-    }
-  }
 }
 
 if (document.readyState === 'loading') {
