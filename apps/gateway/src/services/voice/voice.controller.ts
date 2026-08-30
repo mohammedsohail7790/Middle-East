@@ -1458,12 +1458,17 @@ export function createTenantsRouter(): express.Router {
                 system_prompt ||
                 `You are ${agentDisplayName}, the AI receptionist for ${business_name}. Be ${tone || 'professional'}, helpful, and concise.`;
 
+            // ON CONFLICT DO NOTHING (backed by idx_voice_tenants_owner_user_id_unique,
+            // migration 069) closes the race the SELECT-then-INSERT above can't: two
+            // concurrent requests for the same owner (a client retry, two open tabs)
+            // can both pass that check, but only one INSERT here wins.
             const result = await voiceDb.query(
                 `insert into public.voice_tenants (
                    id, owner_user_id, company_name, phone_number, voice_tone, timezone,
                    metadata, system_prompt, voice_id, default_language
                  )
                  values (gen_random_uuid(), $1, $2, $3, $4, $5, $6::jsonb, $7, $8, $9)
+                 on conflict (owner_user_id) do nothing
                  returning id, company_name, phone_number, metadata, created_at`,
                 [
                     ownerId,
@@ -1477,6 +1482,23 @@ export function createTenantsRouter(): express.Router {
                     language_mode || 'en',
                 ]
             );
+
+            if (result.rows.length === 0) {
+                // Lost the race — another concurrent request created the tenant first.
+                const winner = await voiceDb.query(
+                    `select id, company_name, phone_number, metadata, created_at
+                     from public.voice_tenants
+                     where owner_user_id = $1
+                     order by created_at desc
+                     limit 1`,
+                    [ownerId]
+                );
+                return res.status(200).json({
+                    success: true,
+                    data: winner.rows[0],
+                    existing: true,
+                });
+            }
 
             const tenant = result.rows[0];
 
