@@ -130,7 +130,11 @@ body[data-section="consultancy"] .btn-blue,
 #page-svc-operations .btn-blue,
 #page-svc-acquisition .btn-blue,
 #page-svc-brand .btn-blue,
-#page-consult-signup .btn-blue {
+#page-consult-signup .btn-blue,
+#page-home .btn-blue,
+#page-pricing .btn-blue,
+#page-features .btn-blue,
+#page-how-it-works .btn-blue {
   background: var(--consult-accent) !important; color: var(--consult-ink) !important;
 }
 body[data-section="consultancy"] .btn-blue:hover,
@@ -138,7 +142,11 @@ body[data-section="consultancy"] .btn-blue:hover,
 #page-svc-operations .btn-blue:hover,
 #page-svc-acquisition .btn-blue:hover,
 #page-svc-brand .btn-blue:hover,
-#page-consult-signup .btn-blue:hover {
+#page-consult-signup .btn-blue:hover,
+#page-home .btn-blue:hover,
+#page-pricing .btn-blue:hover,
+#page-features .btn-blue:hover,
+#page-how-it-works .btn-blue:hover {
   background: var(--consult-accent-soft) !important; box-shadow: 0 8px 24px var(--consult-accent-dim) !important;
 }
 .btn-lg { padding: 16px 34px; font-size: 1rem; }
@@ -175,38 +183,38 @@ body[data-section="consultancy"] .btn-blue:hover,
    page its teal accents (logo mark, active pill) switch to the consultancy
    accent so the top of the page doesn't clash with the dark graphite theme
    directly beneath it. */
-body[data-section="consultancy"] .halla-wordmark .halla-ai { color: var(--consult-accent); }
-body[data-section="consultancy"] .section-switch-btn.active { color: var(--consult-accent); }
+.halla-wordmark .halla-ai { color: var(--consult-accent); }
+.section-switch-btn.active { color: var(--consult-accent); }
 /* The nav itself was always a light glass bar regardless of page, which
    read fine over the light receptionist pages but sat as a jarring white
    strip on top of the dark consultancy page. Give it a matching dark-glass
    treatment (and carry that through dropdowns, the mobile menu, and the
    hamburger icon) whenever the consultancy section is active. */
-body[data-section="consultancy"] #marketing-spa-root nav {
+#marketing-spa-root nav {
   background: rgba(10,10,12,0.78); border-bottom-color: var(--consult-hairline);
 }
-body[data-section="consultancy"] .halla-wordmark { color: var(--consult-text); }
-body[data-section="consultancy"] .nav-link { color: var(--consult-text-muted); }
-body[data-section="consultancy"] .nav-link:hover { color: var(--consult-text); background: var(--consult-surface-strong); }
-body[data-section="consultancy"] .section-switch { background: var(--consult-surface); }
-body[data-section="consultancy"] .section-switch-btn { color: var(--consult-text-faint); }
-body[data-section="consultancy"] .section-switch-btn:hover { color: var(--consult-text); }
-body[data-section="consultancy"] .section-switch-btn.active { background: var(--consult-surface-strong); box-shadow: none; }
-body[data-section="consultancy"] .dropdown-inner { background: var(--consult-ink-soft); border-color: var(--consult-hairline); }
-body[data-section="consultancy"] .dropdown-link { color: var(--consult-text-muted); }
-body[data-section="consultancy"] .dropdown-link:hover { color: var(--consult-text); background: var(--consult-surface-strong); }
-body[data-section="consultancy"] .ddi { background: var(--consult-surface-strong); }
-body[data-section="consultancy"] .dd-section { color: var(--consult-text-faint); }
-body[data-section="consultancy"] .nav-actions .btn-outline {
+.halla-wordmark { color: var(--consult-text); }
+.nav-link { color: var(--consult-text-muted); }
+.nav-link:hover { color: var(--consult-text); background: var(--consult-surface-strong); }
+.section-switch { background: var(--consult-surface); }
+.section-switch-btn { color: var(--consult-text-faint); }
+.section-switch-btn:hover { color: var(--consult-text); }
+.section-switch-btn.active { background: var(--consult-surface-strong); box-shadow: none; }
+.dropdown-inner { background: var(--consult-ink-soft); border-color: var(--consult-hairline); }
+.dropdown-link { color: var(--consult-text-muted); }
+.dropdown-link:hover { color: var(--consult-text); background: var(--consult-surface-strong); }
+.ddi { background: var(--consult-surface-strong); }
+.dd-section { color: var(--consult-text-faint); }
+.nav-actions .btn-outline {
   color: var(--consult-text-muted); border-color: var(--consult-hairline); background: transparent;
 }
-body[data-section="consultancy"] .nav-actions .btn-outline:hover { border-color: var(--consult-hairline-strong); background: var(--consult-surface); }
-body[data-section="consultancy"] .hamburger span { background: var(--consult-text); }
-body[data-section="consultancy"] .mob-nav { background: var(--consult-ink); }
-body[data-section="consultancy"] .mob-link { color: var(--consult-text-muted); }
-body[data-section="consultancy"] .mob-link:hover { background: var(--consult-surface-strong); color: var(--consult-text); }
-body[data-section="consultancy"] .mob-section { color: var(--consult-text-faint); }
-body[data-section="consultancy"] .mob-divider { border-top-color: var(--consult-hairline); }
+.nav-actions .btn-outline:hover { border-color: var(--consult-hairline-strong); background: var(--consult-surface); }
+.hamburger span { background: var(--consult-text); }
+.mob-nav { background: var(--consult-ink); }
+.mob-link { color: var(--consult-text-muted); }
+.mob-link:hover { background: var(--consult-surface-strong); color: var(--consult-text); }
+.mob-section { color: var(--consult-text-faint); }
+.mob-divider { border-top-color: var(--consult-hairline); }
 .mob-section-switch { display: none; margin: 6px 14px 10px; }
 @media (max-width: 768px) { .section-switch { display: none; } .mob-section-switch { display: flex; } }
 
@@ -595,9 +603,9 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
    different shade from the consultancy page's near-black graphite ink —
    a seam right where the page hands off to the footer. Match it exactly
    while any consultancy-family page is active. */
-body[data-section="consultancy"] #marketing-spa-root footer { background: var(--consult-ink); border-top: 1px solid var(--consult-hairline); }
-body[data-section="consultancy"] .footer-logo .halla-wordmark .halla-ai { color: var(--consult-accent); }
-body[data-section="consultancy"] .footer-bottom { border-top-color: var(--consult-hairline); }
+#marketing-spa-root footer { background: var(--consult-ink); border-top: 1px solid var(--consult-hairline); }
+.footer-logo .halla-wordmark .halla-ai { color: var(--consult-accent); }
+.footer-bottom { border-top-color: var(--consult-hairline); }
 .footer-col h5 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 16px; }
 .flink { display: block; color: rgba(255,255,255,0.55); text-decoration: none; font-size: 0.875rem; padding: 5px 0; transition: color 0.15s; }
 .flink:hover { color: var(--white); }
@@ -729,9 +737,9 @@ body[data-section="consultancy"] .footer-bottom { border-top-color: var(--consul
   transition: background-color 0.15s, color 0.15s;
 }
 .lang-toggle button.active { background: var(--white); color: var(--black); box-shadow: var(--shadow-sm); }
-body[data-section="consultancy"] .lang-toggle { background: var(--consult-surface-strong); }
-body[data-section="consultancy"] .lang-toggle button { color: var(--consult-text-faint); }
-body[data-section="consultancy"] .lang-toggle button.active { background: var(--consult-ink-soft); color: var(--consult-text); box-shadow: none; }
+.lang-toggle { background: var(--consult-surface-strong); }
+.lang-toggle button { color: var(--consult-text-faint); }
+.lang-toggle button.active { background: var(--consult-ink-soft); color: var(--consult-text); box-shadow: none; }
 
 /* ============ RTL (ARABIC) SUPPORT ============ */
 html[dir="rtl"] body { font-family: 'Cairo', 'Hanken Grotesk', -apple-system, sans-serif; }
@@ -754,6 +762,48 @@ html[dir="rtl"] .browser-bar { flex-direction: row-reverse; }
 html[dir="rtl"] .lang-en { display: none; }
 html[dir="rtl"] .lang-ar { display: inline; }
 html[dir="rtl"] .lang-ar.lang-block { display: block; }
+
+/* ============ RECEPTIONIST — CORE PAGES DARK THEME (phase 1) ============
+   Unifying the whole site under the consultancy page's dark palette,
+   starting with the pages most visitors actually see. The rest of the
+   site's CSS (buttons, cards, feat-icons, inline style="color:var(--...)"
+   attributes scattered through this file) is built entirely on
+   --black/--white/--gray-*/--accent* custom properties, so redefining
+   their VALUES at this scope re-themes everything on these pages — every
+   button, card, border, and inline color — without needing to override
+   each rule and inline style individually. Industries/solutions/blog
+   pages are intentionally not included yet (later phase). */
+#page-home, #page-pricing, #page-features, #page-how-it-works {
+  --white: var(--consult-ink);
+  --black: var(--consult-text);
+  --gray-50: var(--consult-surface);
+  --gray-100: var(--consult-hairline);
+  --gray-200: var(--consult-hairline-strong);
+  --gray-300: rgba(255,255,255,0.28);
+  --gray-400: var(--consult-text-faint);
+  --gray-500: var(--consult-text-muted);
+  --gray-600: var(--consult-text-muted);
+  --gray-700: var(--consult-text);
+  --gray-800: var(--consult-text);
+  --gray-900: var(--consult-ink-soft);
+  --accent: var(--consult-accent);
+  --accent-dark: var(--consult-accent-soft);
+  --accent-light: var(--consult-accent-dim);
+  --accent-mid: var(--consult-accent-soft);
+  background: var(--consult-ink);
+  color: var(--consult-text);
+}
+#page-home .shadow-sm, #page-pricing .shadow-sm, #page-features .shadow-sm, #page-how-it-works .shadow-sm,
+#page-home .card, #page-pricing .card, #page-features .card, #page-how-it-works .card {
+  box-shadow: none;
+}
+/* Flat borders instead of the light theme's soft drop shadows — shadows
+   don't read against a near-black background, they just look like a dark
+   smudge. */
+#page-home .card, #page-pricing .card, #page-features .card, #page-how-it-works .card,
+#page-home .comp-highlight, #page-pricing .comp-highlight {
+  box-shadow: none; border-color: var(--gray-200);
+}
 
 /* ============ CONSULTANCY — PREMIUM LAYOUT ============ */
 #page-consultancy { position: relative; background: var(--consult-ink); color: var(--consult-text); }
@@ -967,7 +1017,11 @@ body[data-section="consultancy"] .cta-block .label[style*="background"],
 #page-svc-operations .cta-block .label[style*="background"],
 #page-svc-acquisition .cta-block .label[style*="background"],
 #page-svc-brand .cta-block .label[style*="background"],
-#page-consult-signup .cta-block .label[style*="background"] {
+#page-consult-signup .cta-block .label[style*="background"],
+#page-home .cta-block .label[style*="background"],
+#page-pricing .cta-block .label[style*="background"],
+#page-features .cta-block .label[style*="background"],
+#page-how-it-works .cta-block .label[style*="background"] {
   background: var(--consult-accent-dim) !important; color: var(--consult-accent-soft) !important;
 }
 body[data-section="consultancy"] .cta-block .btn-outline[style*="color"],
@@ -975,20 +1029,27 @@ body[data-section="consultancy"] .cta-block .btn-outline[style*="color"],
 #page-svc-operations .cta-block .btn-outline[style*="color"],
 #page-svc-acquisition .cta-block .btn-outline[style*="color"],
 #page-svc-brand .cta-block .btn-outline[style*="color"],
-#page-consult-signup .cta-block .btn-outline[style*="color"] {
+#page-consult-signup .cta-block .btn-outline[style*="color"],
+#page-home .cta-block .btn-outline[style*="color"],
+#page-pricing .cta-block .btn-outline[style*="color"],
+#page-features .cta-block .btn-outline[style*="color"],
+#page-how-it-works .cta-block .btn-outline[style*="color"] {
   color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important;
 }
 /* The same repeated .cta-block also carries the base site's teal glow
-   blob (.cta-block::before) on the 3 service sub-pages — the
-   .consult-cta-block::before override above only reaches the main page's
-   modifier class. Kill the glow and match the flat ink background on
-   every consultancy-family page. */
+   blob (.cta-block::before) — kill it and match the flat ink background
+   on every reskinned page (consultancy family + the 4 receptionist core
+   pages from this phase). */
 body[data-section="consultancy"] .cta-block,
 #page-consultancy .cta-block,
 #page-svc-operations .cta-block,
 #page-svc-acquisition .cta-block,
 #page-svc-brand .cta-block,
-#page-consult-signup .cta-block {
+#page-consult-signup .cta-block,
+#page-home .cta-block,
+#page-pricing .cta-block,
+#page-features .cta-block,
+#page-how-it-works .cta-block {
   background: var(--consult-ink) !important;
 }
 body[data-section="consultancy"] .cta-block::before,
@@ -996,7 +1057,11 @@ body[data-section="consultancy"] .cta-block::before,
 #page-svc-operations .cta-block::before,
 #page-svc-acquisition .cta-block::before,
 #page-svc-brand .cta-block::before,
-#page-consult-signup .cta-block::before {
+#page-consult-signup .cta-block::before,
+#page-home .cta-block::before,
+#page-pricing .cta-block::before,
+#page-features .cta-block::before,
+#page-how-it-works .cta-block::before {
   display: none !important;
 }
 
