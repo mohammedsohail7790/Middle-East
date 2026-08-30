@@ -97,9 +97,42 @@
       this.focal = this.worldR * 2.1;
       this.camZ = this.worldR * 2.7;
 
-      const nodeCount = Math.max(26, Math.min(Math.round(area / 15000), isTouch ? 46 : 78));
+      const nodeCount = Math.max(22, Math.min(Math.round(area / 19000), isTouch ? 36 : 60));
       this.nodes = Array.from({ length: nodeCount }, () => this._spawnNode());
       this.linkDist = this.worldR * 0.62;
+      this._buildEdges();
+      this.introFrame = 0;
+    }
+
+    // A fixed adjacency list built once per layout, rather than a live
+    // distance threshold re-evaluated every frame. A threshold-based graph
+    // flickers edges in and out as nodes drift and reads as messy; a stable
+    // "wired once" structure — each node linked to its ~3 nearest neighbors —
+    // is what actually gives Obsidian's graph view its calm, deliberate look.
+    _buildEdges() {
+      const nodes = this.nodes;
+      const maxPerNode = 3;
+      const seen = new Set();
+      const edges = [];
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        const candidates = [];
+        for (let j = 0; j < nodes.length; j++) {
+          if (i === j) continue;
+          const b = nodes[j];
+          const d = Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+          candidates.push({ j, d });
+        }
+        candidates.sort((p, q) => p.d - q.d);
+        for (let k = 0; k < Math.min(maxPerNode, candidates.length); k++) {
+          const j = candidates[k].j;
+          const key = i < j ? i + '_' + j : j + '_' + i;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          edges.push([Math.min(i, j), Math.max(i, j)]);
+        }
+      }
+      this.edges = edges;
     }
 
     _spawnStar() {
@@ -116,14 +149,14 @@
     // settling into related note groups) rather than uniform noise — reads
     // far more like a real knowledge graph than a random point cloud.
     _spawnNode() {
-      const clusterCount = 4;
+      const clusterCount = 3;
       const cluster = Math.floor(Math.random() * clusterCount);
       const clusterAngle = (cluster / clusterCount) * Math.PI * 2;
-      const clusterR = this.worldR * 0.42;
+      const clusterR = this.worldR * 0.36;
       const cx = Math.cos(clusterAngle) * clusterR;
-      const cy = (Math.random() - 0.5) * this.worldR * 0.3;
+      const cy = (Math.random() - 0.5) * this.worldR * 0.2;
       const cz = Math.sin(clusterAngle) * clusterR;
-      const spread = this.worldR * 0.4;
+      const spread = this.worldR * 0.32;
 
       return {
         x: cx + (Math.random() - 0.5) * spread,
@@ -164,8 +197,11 @@
       if (rz <= 1) return null;
       const scale = this.focal / rz;
       return {
+        // Anchored toward the top third of the viewport — behind the hero,
+        // where the page actually starts — rather than centered on whatever
+        // is currently scrolled into view.
         x: this.width / 2 + x * scale,
-        y: this.height / 2 + y * scale,
+        y: this.height * 0.4 + y * scale,
         scale,
         depth: rz,
       };
@@ -192,8 +228,16 @@
       this.rotY = this.t * 0.00065;
       const { ctx, width, height } = this;
       ctx.clearRect(0, 0, width, height);
+
+      // Graceful settle-in: the graph fades up from nothing over its first
+      // ~1.5s instead of popping in already mid-motion.
+      this.introFrame += 1;
+      ctx.globalAlpha = Math.min(1, this.introFrame / 90);
+
       this._drawStars();
       this._stepGraph();
+
+      ctx.globalAlpha = 1;
     }
 
     _drawStars() {
@@ -241,43 +285,38 @@
     }
 
     _drawEdges(projected, linkDist, depthT) {
-      const { ctx } = this;
-      for (let i = 0; i < projected.length; i++) {
+      const { ctx, edges } = this;
+      for (const [i, j] of edges) {
         const a = projected[i];
-        if (!a) continue;
-        for (let j = i + 1; j < projected.length; j++) {
-          const b = projected[j];
-          if (!b) continue;
-          const dx = a.r.x - b.r.x;
-          const dy = a.r.y - b.r.y;
-          const dz = a.r.z - b.r.z;
-          const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-          if (dist >= linkDist) continue;
+        const b = projected[j];
+        if (!a || !b) continue;
 
-          const closeness = 1 - dist / linkDist;
-          const depth = (depthT(a.p.depth) + depthT(b.p.depth)) / 2;
-          const alpha = closeness * (0.05 + depth * 0.14);
-          if (alpha <= 0.004) continue;
+        const dx = a.r.x - b.r.x;
+        const dy = a.r.y - b.r.y;
+        const dz = a.r.z - b.r.z;
+        const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        const closeness = Math.max(0, 1 - dist / (linkDist * 1.6));
+        const depth = (depthT(a.p.depth) + depthT(b.p.depth)) / 2;
+        const alpha = 0.05 + closeness * 0.1 + depth * 0.1;
 
-          // A soft glow stroke rather than a flat line: a wider, dimmer
-          // pass under a thin, brighter core.
-          ctx.strokeStyle = rgba(ACCENT, alpha * 0.6);
-          ctx.lineWidth = 2.2;
-          ctx.beginPath();
-          ctx.moveTo(a.p.x, a.p.y);
-          ctx.lineTo(b.p.x, b.p.y);
-          ctx.stroke();
+        // A soft glow stroke rather than a flat line: a wider, dimmer
+        // pass under a thin, brighter core.
+        ctx.strokeStyle = rgba(ACCENT, alpha * 0.55);
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(a.p.x, a.p.y);
+        ctx.lineTo(b.p.x, b.p.y);
+        ctx.stroke();
 
-          ctx.strokeStyle = rgba(mix(ACCENT, WHITE, 0.3), alpha);
-          ctx.lineWidth = 0.7;
-          ctx.beginPath();
-          ctx.moveTo(a.p.x, a.p.y);
-          ctx.lineTo(b.p.x, b.p.y);
-          ctx.stroke();
+        ctx.strokeStyle = rgba(mix(ACCENT, WHITE, 0.3), alpha);
+        ctx.lineWidth = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(a.p.x, a.p.y);
+        ctx.lineTo(b.p.x, b.p.y);
+        ctx.stroke();
 
-          if (Math.random() < 0.00025) {
-            this.pulses.push({ a: i, b: j, life: 0, maxLife: 70 });
-          }
+        if (Math.random() < 0.00003) {
+          this.pulses.push({ a: i, b: j, life: 0, maxLife: 70 });
         }
       }
     }

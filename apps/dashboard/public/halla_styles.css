@@ -140,6 +140,12 @@ p { color: var(--gray-500); line-height: 1.72; }
 .section-switch-btn.active {
   background: var(--white); color: var(--accent-dark); box-shadow: var(--shadow-sm);
 }
+/* The nav is global chrome shared by both products — on the consultancy
+   page its teal accents (logo mark, active pill) switch to the consultancy
+   accent so the top of the page doesn't clash with the dark graphite theme
+   directly beneath it. */
+body[data-section="consultancy"] .halla-wordmark .halla-ai { color: var(--consult-accent); }
+body[data-section="consultancy"] .section-switch-btn.active { color: var(--consult-accent); }
 .mob-section-switch { display: none; margin: 6px 14px 10px; }
 @media (max-width: 768px) { .section-switch { display: none; } .mob-section-switch { display: flex; } }
 
