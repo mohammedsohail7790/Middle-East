@@ -142,8 +142,8 @@ export function MarketingConsultancyLayer() {
             key={i}
             size={i === 1 ? 140 : 100}
             duration={7 + i}
-            colorFrom="#4338CA"
-            colorTo="#3730A3"
+            colorFrom="#635BFF"
+            colorTo="#4B44C7"
             borderWidth={2}
           />,
           mount,
@@ -153,13 +153,13 @@ export function MarketingConsultancyLayer() {
         createPortal(
           <motion.div
             style={{ display: "inline-block" }}
-            whileHover={{ scale: 1.035 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 400, damping: 22 }}
+            whileHover={{ scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
           >
             <ShimmerButton
               className="btn-lg consult-shimmer-cta"
-              background="linear-gradient(135deg, #4338CA 0%, #3730A3 100%)"
+              background="linear-gradient(135deg, #635BFF 0%, #4B44C7 100%)"
               onClick={() => spaGo("consult-signup")}
             >
               Book a Diagnostic Call →
@@ -171,13 +171,13 @@ export function MarketingConsultancyLayer() {
         createPortal(
           <motion.div
             style={{ display: "inline-block" }}
-            whileHover={{ scale: 1.035 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: "spring", stiffness: 400, damping: 22 }}
+            whileHover={{ scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
           >
             <ShimmerButton
               className="btn-lg consult-shimmer-cta"
-              background="linear-gradient(135deg, #4338CA 0%, #3730A3 100%)"
+              background="linear-gradient(135deg, #635BFF 0%, #4B44C7 100%)"
               onClick={() => spaGo("consult-signup")}
             >
               Book Your Diagnostic Call →
