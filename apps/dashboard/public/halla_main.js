@@ -54,10 +54,13 @@ function scrollToConsultSection(anchorId) {
 // ============ ROUTING + DEEP LINKS ============
 const DEFAULT_PAGE = 'consultancy';
 const CONSULTANCY_PAGES = new Set(['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup']);
-// Pages sharing the consultancy's dark theme + starfield backdrop + glass
-// cards. Everything else (industries/solutions/blog/etc.) stays on the
-// original light theme for now.
-const DARK_BG_PAGES = new Set([...CONSULTANCY_PAGES, 'home', 'pricing', 'features', 'how-it-works']);
+// The site is light-themed everywhere now, so no page runs the starfield
+// backdrop or glassmorphism card treatment — both were built for a dark
+// background (bright stars, translucent glass over near-black) and don't
+// read against white. Kept as an empty set (rather than deleting the
+// has-cosmic-bg wiring below) so a future dark section can opt back in
+// by re-adding page ids here.
+const DARK_BG_PAGES = new Set([]);
 
 function pageExists(page) {
   return !!document.getElementById('page-' + page);

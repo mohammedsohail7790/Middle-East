@@ -50,18 +50,22 @@ html { scroll-behavior: smooth; font-size: 16px; }
      borders instead of glassy blur, no gradients on text/badges, no glow
      effects — a restrained enterprise-consultancy look, not a dark-SaaS
      "vibe-coded" one. */
-  --consult-ink: #0b1120;
-  --consult-ink-soft: #101828;
-  --consult-surface: rgba(148,163,184,0.055);
-  --consult-surface-strong: rgba(148,163,184,0.1);
-  --consult-hairline: rgba(148,163,184,0.16);
-  --consult-hairline-strong: rgba(148,163,184,0.26);
-  --consult-accent: #4f6f93;
-  --consult-accent-soft: #8fa8c4;
-  --consult-accent-dim: rgba(79,111,147,0.16);
-  --consult-text: #eef1f5;
-  --consult-text-muted: rgba(238,241,245,0.62);
-  --consult-text-faint: rgba(238,241,245,0.4);
+  /* Light-theme values — the consultancy page used to run its own dark
+     "muted corporate navy" system; these tokens are now inverted so every
+     rule that already consumes var(--consult-*) renders light instead of
+     needing each of those ~100 rules touched individually. */
+  --consult-ink: #ffffff;
+  --consult-ink-soft: #f8fafc;
+  --consult-surface: rgba(100,116,139,0.06);
+  --consult-surface-strong: rgba(100,116,139,0.12);
+  --consult-hairline: rgba(100,116,139,0.22);
+  --consult-hairline-strong: rgba(100,116,139,0.35);
+  --consult-accent: #3d5a78;
+  --consult-accent-soft: #4a6d92;
+  --consult-accent-dim: rgba(61,90,120,0.12);
+  --consult-text: #101828;
+  --consult-text-muted: rgba(16,24,40,0.64);
+  --consult-text-faint: rgba(16,24,40,0.42);
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
@@ -785,7 +789,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
    no backdrop-filter blur, just a plain tinted overlay. */
 .consult-hero-copy {
   position: relative; padding: 8px 12px; margin: -8px -12px;
-  background: rgba(11,17,32,0.78);
+  background: rgba(255,255,255,0.86);
   border-radius: var(--radius-lg);
 }
 .consult-hero-copy h1 { color: var(--consult-text); font-size: clamp(2.4rem, 5vw, 3.8rem); margin-bottom: 18px; }
@@ -799,7 +803,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
    rendered side by side. */
 .consult-hero-cta-hidden { display: none !important; }
 .consult-hero-outline {
-  color: rgba(244,244,245,0.85) !important; border-color: var(--consult-hairline) !important;
+  color: var(--consult-text) !important; border-color: var(--consult-hairline) !important;
   background: var(--consult-surface) !important;
 }
 .consult-hero-outline:hover { background: var(--consult-surface-strong) !important; border-color: var(--consult-hairline-strong) !important; }
@@ -815,7 +819,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
 }
 .consult-bento-card {
-  background: rgba(16,24,40,0.7); border: 1px solid var(--consult-hairline);
+  background: rgba(255,255,255,0.7); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-lg); padding: 22px 20px;
   transition: border-color 0.25s, transform 0.25s;
 }
@@ -904,7 +908,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 .consult-service-card {
   position: relative; overflow: hidden;
-  background: rgba(16,24,40,0.7); border: 1px solid var(--consult-hairline);
+  background: rgba(255,255,255,0.7); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-xl); padding: 30px 26px;
   transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
@@ -950,7 +954,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 .consult-timeline-step {
   position: relative; z-index: 1;
-  background: rgba(16,24,40,0.7); border: 1px solid var(--consult-hairline);
+  background: rgba(255,255,255,0.7); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-lg); padding: 28px 22px;
 }
 .consult-timeline-num {
@@ -963,7 +967,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-timeline-step h4 { margin-bottom: 8px; font-size: 1rem; color: var(--consult-text); }
 .consult-timeline-step p { font-size: 0.85rem; color: var(--consult-text-muted); }
 
-#consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: rgba(16,24,40,0.7); }
+#consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: rgba(255,255,255,0.7); }
 #consult-compare .comp-table th { background: rgba(255,255,255,0.025); color: var(--consult-text); border-bottom: 1px solid var(--consult-hairline); }
 #consult-compare .comp-table td { color: var(--consult-text-muted); border-bottom: 1px solid var(--consult-hairline); }
 #consult-compare .comp-table tr:hover td { background: rgba(255,255,255,0.025); }
@@ -995,6 +999,28 @@ body[data-section="consultancy"] .cta-block .btn-outline[style*="color"],
 #page-svc-brand .cta-block .btn-outline[style*="color"],
 #page-consult-signup .cta-block .btn-outline[style*="color"] {
   color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important;
+}
+/* .cta-block h2/h3/p hardcode white/near-white text (the universal dark
+   CTA banner design), but this block's own background is remapped to
+   var(--consult-ink) above — now light — on every consultancy-family
+   page, so those hardcoded light colors need a matching dark override
+   here too, same reasoning as the label/btn-outline overrides above. */
+body[data-section="consultancy"] .cta-block h2,
+body[data-section="consultancy"] .cta-block h3,
+#page-consultancy .cta-block h2, #page-consultancy .cta-block h3,
+#page-svc-operations .cta-block h2, #page-svc-operations .cta-block h3,
+#page-svc-acquisition .cta-block h2, #page-svc-acquisition .cta-block h3,
+#page-svc-brand .cta-block h2, #page-svc-brand .cta-block h3,
+#page-consult-signup .cta-block h2, #page-consult-signup .cta-block h3 {
+  color: var(--consult-text) !important;
+}
+body[data-section="consultancy"] .cta-block p,
+#page-consultancy .cta-block p,
+#page-svc-operations .cta-block p,
+#page-svc-acquisition .cta-block p,
+#page-svc-brand .cta-block p,
+#page-consult-signup .cta-block p {
+  color: var(--consult-text-muted) !important;
 }
 /* The same repeated .cta-block also carries the base site's teal glow
    blob (.cta-block::before) on the 3 service sub-pages — the
