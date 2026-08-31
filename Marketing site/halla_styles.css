@@ -25,14 +25,16 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --gray-700: #374151;
   --gray-800: #1F2937;
   --gray-900: #111827;
-  --accent: #0D9488;
-  --accent-dark: #0F766E;
-  --accent-light: #CCFBF1;
-  --accent-mid: #2DD4BF;
+  --accent: #4338CA;
+  --accent-dark: #3730A3;
+  --accent-light: #EEF2FF;
+  --accent-mid: #6366F1;
   --green: #10B981;
   --green-light: #D1FAE5;
   --orange: #F59E0B;
   --red: #EF4444;
+  --violet: #7C3AED;
+  --violet-light: #EDE9FE;
   --font: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow: 0 4px 16px rgba(0,0,0,0.08);
@@ -60,16 +62,27 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --consult-surface-strong: rgba(100,116,139,0.12);
   --consult-hairline: rgba(100,116,139,0.22);
   --consult-hairline-strong: rgba(100,116,139,0.35);
-  --consult-accent: #0D9488;
-  --consult-accent-soft: #0F766E;
-  --consult-accent-dim: rgba(13,148,136,0.12);
+  --consult-accent: #4338CA;
+  --consult-accent-soft: #3730A3;
+  --consult-accent-dim: rgba(67,56,202,0.12);
   --consult-text: #101828;
   --consult-text-muted: rgba(16,24,40,0.64);
   --consult-text-faint: rgba(16,24,40,0.42);
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
-body { font-family: var(--font); background: var(--white); color: var(--black); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+/* Soft mesh backdrop -- low-opacity indigo/violet blobs fixed behind the
+   whole page so the glass cards below have something to actually blur. */
+body {
+  font-family: var(--font); background: var(--white); color: var(--black); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(680px circle at 8% 8%, rgba(67,56,202,0.05), transparent 60%),
+    radial-gradient(720px circle at 92% 18%, rgba(124,58,237,0.045), transparent 60%),
+    radial-gradient(620px circle at 20% 92%, rgba(37,99,235,0.04), transparent 60%);
+}
 
 /* ============ TYPOGRAPHY ============ */
 h1 { font-size: clamp(2.6rem, 6vw, 4.5rem); font-weight: 800; line-height: 1.08; letter-spacing: -0.03em; color: var(--black); }
@@ -332,26 +345,23 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
    on the marketing site (pricing, ROI form, feature boxes, etc.) stayed
    white no matter what this file set. #marketing-spa-root is more specific
    than a bare class selector, so it wins the !important-vs-!important tie. */
-#marketing-spa-root .card {
-  background: var(--white) !important;
-  border-color: var(--gray-200) !important;
-  box-shadow: var(--shadow-sm) !important;
-}
-/* Glassmorphism on starfield-backed pages (body.has-cosmic-bg, toggled in
-   halla_main.js's onPageActivated) — translucent + blurred so the canvas
-   reads through behind the cards, matching the consultancy page's look. */
-body.has-cosmic-bg #marketing-spa-root .card,
-body.has-cosmic-bg #marketing-spa-root .pricing-card,
-body.has-cosmic-bg #marketing-spa-root .roi-wrap,
-body.has-cosmic-bg #marketing-spa-root .roi-result {
-  background: var(--consult-surface) !important;
-  border-color: var(--consult-hairline) !important;
+/* Glassmorphism, site-wide — translucent + blurred so the soft mesh
+   backdrop (body::before, above) reads through behind every card. No
+   longer gated behind body.has-cosmic-bg (that toggle now stays false
+   everywhere since the starfield was retired); glass is just how cards
+   look on this site now. */
+#marketing-spa-root .card,
+#marketing-spa-root .pricing-card,
+#marketing-spa-root .roi-wrap,
+#marketing-spa-root .roi-result {
+  background: rgba(255,255,255,0.62) !important;
+  border-color: rgba(100,116,139,0.18) !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: none !important;
+  box-shadow: var(--shadow-sm) !important;
 }
-body.has-cosmic-bg #marketing-spa-root .pricing-card.popular {
-  background: var(--consult-surface-strong) !important;
+#marketing-spa-root .pricing-card.popular {
+  background: rgba(67,56,202,0.05) !important;
 }
 .card {
   background: var(--white); border: 1px solid var(--gray-200);
@@ -373,6 +383,7 @@ body.has-cosmic-bg #marketing-spa-root .pricing-card.popular {
 .feat-icon-green { background: var(--green-light); color: var(--green); }
 .feat-icon-orange { background: #FEF3C7; color: var(--orange); }
 .feat-icon-red { background: rgba(239,68,68,0.10); color: var(--red); }
+.feat-icon-violet { background: var(--violet-light); color: var(--violet); }
 
 /* ============ SECTION DIVIDERS ============ */
 .divider-line { border: none; border-top: 1px solid var(--gray-100); }
@@ -789,7 +800,8 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
    no backdrop-filter blur, just a plain tinted overlay. */
 .consult-hero-copy {
   position: relative; padding: 8px 12px; margin: -8px -12px;
-  background: rgba(255,255,255,0.86);
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-radius: var(--radius-lg);
 }
 .consult-hero-copy h1 { color: var(--consult-text); font-size: clamp(2.4rem, 5vw, 3.8rem); margin-bottom: 18px; }
@@ -819,7 +831,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
 }
 .consult-bento-card {
-  background: rgba(255,255,255,0.7); border: 1px solid var(--consult-hairline);
+  background: rgba(255,255,255,0.6); border: 1px solid var(--consult-hairline); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-radius: var(--radius-lg); padding: 22px 20px;
   transition: border-color 0.25s, transform 0.25s;
 }
@@ -908,7 +920,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 .consult-service-card {
   position: relative; overflow: hidden;
-  background: rgba(255,255,255,0.7); border: 1px solid var(--consult-hairline);
+  background: rgba(255,255,255,0.6); border: 1px solid var(--consult-hairline); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-radius: var(--radius-xl); padding: 30px 26px;
   transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
@@ -951,7 +963,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 }
 .consult-timeline-step {
   position: relative; z-index: 1;
-  background: rgba(255,255,255,0.7); border: 1px solid var(--consult-hairline);
+  background: rgba(255,255,255,0.6); border: 1px solid var(--consult-hairline); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   border-radius: var(--radius-lg); padding: 28px 22px;
   transition: border-color 0.2s ease, transform 0.2s ease;
 }
@@ -966,7 +978,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-timeline-step h4 { margin-bottom: 8px; font-size: 1rem; color: var(--consult-text); }
 .consult-timeline-step p { font-size: 0.85rem; color: var(--consult-text-muted); }
 
-#consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: rgba(255,255,255,0.7); }
+#consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: rgba(255,255,255,0.6); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 #consult-compare .comp-table th { background: var(--consult-surface); color: var(--consult-text); border-bottom: 1px solid var(--consult-hairline); }
 #consult-compare .comp-table td { color: var(--consult-text-muted); border-bottom: 1px solid var(--consult-hairline); transition: background-color 0.15s ease; }
 #consult-compare .comp-table tr:hover td { background: var(--consult-accent-dim); }

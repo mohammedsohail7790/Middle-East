@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 import { DotPattern } from "@/components/magic-ui/dot-pattern";
 import { BorderBeam } from "@/components/magic-ui/border-beam";
 import { Marquee } from "@/components/magic-ui/marquee";
@@ -170,8 +171,8 @@ export function MarketingConsultancyLayer() {
             key={i}
             size={i === 1 ? 140 : 100}
             duration={7 + i}
-            colorFrom="#0D9488"
-            colorTo="#0F766E"
+            colorFrom="#4338CA"
+            colorTo="#3730A3"
             borderWidth={2}
           />,
           mount,
@@ -192,24 +193,38 @@ export function MarketingConsultancyLayer() {
         )}
       {heroCtaMount &&
         createPortal(
-          <ShimmerButton
-            className="btn-lg consult-shimmer-cta"
-            background="linear-gradient(135deg, #0D9488 0%, #0F766E 100%)"
-            onClick={() => spaGo("consult-signup")}
+          <motion.div
+            style={{ display: "inline-block" }}
+            whileHover={{ scale: 1.035 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 22 }}
           >
-            Book a Diagnostic Call →
-          </ShimmerButton>,
+            <ShimmerButton
+              className="btn-lg consult-shimmer-cta"
+              background="linear-gradient(135deg, #4338CA 0%, #3730A3 100%)"
+              onClick={() => spaGo("consult-signup")}
+            >
+              Book a Diagnostic Call →
+            </ShimmerButton>
+          </motion.div>,
           heroCtaMount,
         )}
       {footerCtaMount &&
         createPortal(
-          <ShimmerButton
-            className="btn-lg consult-shimmer-cta"
-            background="linear-gradient(135deg, #0D9488 0%, #0F766E 100%)"
-            onClick={() => spaGo("consult-signup")}
+          <motion.div
+            style={{ display: "inline-block" }}
+            whileHover={{ scale: 1.035 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 400, damping: 22 }}
           >
-            Book Your Diagnostic Call →
-          </ShimmerButton>,
+            <ShimmerButton
+              className="btn-lg consult-shimmer-cta"
+              background="linear-gradient(135deg, #4338CA 0%, #3730A3 100%)"
+              onClick={() => spaGo("consult-signup")}
+            >
+              Book Your Diagnostic Call →
+            </ShimmerButton>
+          </motion.div>,
           footerCtaMount,
         )}
     </>
