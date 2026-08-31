@@ -60,9 +60,13 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --consult-surface-strong: rgba(100,116,139,0.12);
   --consult-hairline: rgba(100,116,139,0.22);
   --consult-hairline-strong: rgba(100,116,139,0.35);
-  --consult-accent: #3d5a78;
-  --consult-accent-soft: #4a6d92;
-  --consult-accent-dim: rgba(61,90,120,0.12);
+  /* Unified with the site's own brand teal (--accent/--accent-dark) instead
+     of a separate muted slate-blue — one consistent, more vibrant accent
+     color across the whole light-themed site, not a flatter "consultancy
+     only" palette. */
+  --consult-accent: #0D9488;
+  --consult-accent-soft: #0F766E;
+  --consult-accent-dim: rgba(13,148,136,0.12);
   --consult-text: #101828;
   --consult-text-muted: rgba(16,24,40,0.64);
   --consult-text-faint: rgba(16,24,40,0.42);
@@ -913,7 +917,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
 .consult-service-card:hover {
-  transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.35); border-color: var(--consult-accent);
+  transform: translateY(-4px); box-shadow: 0 12px 28px rgba(16,24,40,0.1); border-color: var(--consult-accent);
 }
 /* A flat accent-colored top border marks the featured card — no gradient
    wash, no glow blob on hover. */
@@ -924,9 +928,6 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
   background: var(--consult-accent); color: var(--consult-ink); padding: 5px 10px; border-radius: 999px;
 }
-.consult-service-card .feat-icon-blue,
-.consult-service-card .feat-icon-green,
-.consult-service-card .feat-icon-orange { background: var(--consult-surface-strong); color: var(--consult-accent-soft); }
 .consult-service-card h3 { font-size: 1.2rem; margin-bottom: 10px; color: var(--consult-text); }
 .consult-service-card p { font-size: 0.9rem; margin-bottom: 16px; color: var(--consult-text-muted); }
 .consult-service-list {
@@ -956,7 +957,9 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   position: relative; z-index: 1;
   background: rgba(255,255,255,0.7); border: 1px solid var(--consult-hairline);
   border-radius: var(--radius-lg); padding: 28px 22px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
 }
+.consult-timeline-step:hover { border-color: var(--consult-hairline-strong); transform: translateY(-2px); }
 .consult-timeline-num {
   width: 42px; height: 42px; border-radius: 50%;
   background: var(--consult-surface-strong); color: var(--consult-accent-soft);
@@ -968,9 +971,9 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-timeline-step p { font-size: 0.85rem; color: var(--consult-text-muted); }
 
 #consult-compare .table-wrap { border: 1px solid var(--consult-hairline); background: rgba(255,255,255,0.7); }
-#consult-compare .comp-table th { background: rgba(255,255,255,0.025); color: var(--consult-text); border-bottom: 1px solid var(--consult-hairline); }
-#consult-compare .comp-table td { color: var(--consult-text-muted); border-bottom: 1px solid var(--consult-hairline); }
-#consult-compare .comp-table tr:hover td { background: rgba(255,255,255,0.025); }
+#consult-compare .comp-table th { background: var(--consult-surface); color: var(--consult-text); border-bottom: 1px solid var(--consult-hairline); }
+#consult-compare .comp-table td { color: var(--consult-text-muted); border-bottom: 1px solid var(--consult-hairline); transition: background-color 0.15s ease; }
+#consult-compare .comp-table tr:hover td { background: var(--consult-accent-dim); }
 #consult-compare .comp-table .yes { color: var(--consult-accent-soft); }
 #consult-compare .comp-table .no { color: var(--consult-text-faint); }
 #consult-compare .comp-table th[style*="color"] { color: var(--consult-accent-soft) !important; }

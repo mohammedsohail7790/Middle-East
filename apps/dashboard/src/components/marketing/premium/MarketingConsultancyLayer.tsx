@@ -170,8 +170,8 @@ export function MarketingConsultancyLayer() {
             key={i}
             size={i === 1 ? 140 : 100}
             duration={7 + i}
-            colorFrom="#4f6f93"
-            colorTo="#8fa8c4"
+            colorFrom="#0D9488"
+            colorTo="#0F766E"
             borderWidth={2}
           />,
           mount,
@@ -194,7 +194,7 @@ export function MarketingConsultancyLayer() {
         createPortal(
           <ShimmerButton
             className="btn-lg consult-shimmer-cta"
-            background="linear-gradient(135deg, #4f6f93 0%, #8fa8c4 100%)"
+            background="linear-gradient(135deg, #0D9488 0%, #0F766E 100%)"
             onClick={() => spaGo("consult-signup")}
           >
             Book a Diagnostic Call →
@@ -205,7 +205,7 @@ export function MarketingConsultancyLayer() {
         createPortal(
           <ShimmerButton
             className="btn-lg consult-shimmer-cta"
-            background="linear-gradient(135deg, #4f6f93 0%, #8fa8c4 100%)"
+            background="linear-gradient(135deg, #0D9488 0%, #0F766E 100%)"
             onClick={() => spaGo("consult-signup")}
           >
             Book Your Diagnostic Call →
