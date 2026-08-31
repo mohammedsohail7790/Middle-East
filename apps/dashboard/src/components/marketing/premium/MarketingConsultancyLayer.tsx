@@ -5,21 +5,7 @@ import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { DotPattern } from "@/components/magic-ui/dot-pattern";
 import { BorderBeam } from "@/components/magic-ui/border-beam";
-import { Marquee } from "@/components/magic-ui/marquee";
 import { ShimmerButton } from "@/components/magic-ui/shimmer-button";
-
-const CAPABILITIES = [
-  "Process Mapping",
-  "Workflow Automation",
-  "Lead Engines",
-  "CRM Integration",
-  "AI Receptionist",
-  "Brand Systems",
-  "Review Automation",
-  "Live Dashboards",
-  "n8n & Zapier",
-  "HubSpot Sync",
-];
 
 function useConsultancyPageActive() {
   const [active, setActive] = useState(false);
@@ -88,19 +74,6 @@ function enhanceServiceCards(): HTMLElement[] {
   return mounts;
 }
 
-function enhanceMarquee(): HTMLElement | null {
-  const legacy = document.querySelector<HTMLElement>("#page-consultancy .consult-marquee");
-  if (!legacy || legacy.dataset.enhanced) return null;
-  legacy.dataset.enhanced = "true";
-  legacy.classList.add("consult-marquee--legacy");
-
-  const host = document.createElement("div");
-  host.id = "consult-marquee-mount";
-  host.className = "consult-marquee-premium";
-  legacy.insertAdjacentElement("afterend", host);
-  return host;
-}
-
 function enhanceHeroCta(): HTMLElement | null {
   const actions = document.querySelector("#page-consultancy .consult-hero-actions");
   const primary = actions?.querySelector<HTMLElement>(".consult-magnetic");
@@ -131,7 +104,6 @@ export function MarketingConsultancyLayer() {
   const active = useConsultancyPageActive();
   const [heroFx, setHeroFx] = useState<HTMLElement | null>(null);
   const [beamMounts, setBeamMounts] = useState<HTMLElement[]>([]);
-  const [marqueeMount, setMarqueeMount] = useState<HTMLElement | null>(null);
   const [heroCtaMount, setHeroCtaMount] = useState<HTMLElement | null>(null);
   const [footerCtaMount, setFooterCtaMount] = useState<HTMLElement | null>(null);
 
@@ -143,7 +115,6 @@ export function MarketingConsultancyLayer() {
     enhanceConsultHero();
     setHeroFx(document.getElementById("consult-hero-fx-mount"));
     setBeamMounts(enhanceServiceCards());
-    setMarqueeMount(enhanceMarquee());
     setHeroCtaMount(enhanceHeroCta());
     setFooterCtaMount(enhanceConsultCta());
   }, [active]);
@@ -178,19 +149,6 @@ export function MarketingConsultancyLayer() {
           mount,
         ),
       )}
-      {marqueeMount &&
-        createPortal(
-          <div className="consult-marquee-inner">
-            <Marquee pauseOnHover className="[--duration:38s]">
-              {CAPABILITIES.map((item) => (
-                <span key={item} className="consult-marquee-pill">
-                  {item}
-                </span>
-              ))}
-            </Marquee>
-          </div>,
-          marqueeMount,
-        )}
       {heroCtaMount &&
         createPortal(
           <motion.div
