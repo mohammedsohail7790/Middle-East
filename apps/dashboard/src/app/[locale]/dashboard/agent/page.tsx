@@ -485,7 +485,7 @@ export default function AgentPage() {
                     aria-label={t("addDoRule")}
                     className="input flex-1"
                   />
-                  <button type="button" onClick={addDoRule} className="btn-ghost px-3">
+                  <button type="button" onClick={addDoRule} aria-label={t("addDoRule")} className="btn-ghost px-3">
                     <Plus className="size-4" strokeWidth={ICON_STROKE} />
                   </button>
                 </div>
@@ -514,7 +514,7 @@ export default function AgentPage() {
                     aria-label={t("addDontRule")}
                     className="input flex-1"
                   />
-                  <button type="button" onClick={addDontRule} className="btn-ghost px-3">
+                  <button type="button" onClick={addDontRule} aria-label={t("addDontRule")} className="btn-ghost px-3">
                     <Plus className="size-4" strokeWidth={ICON_STROKE} />
                   </button>
                 </div>
