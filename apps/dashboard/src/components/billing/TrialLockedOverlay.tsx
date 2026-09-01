@@ -44,7 +44,10 @@ export function TrialLockedOverlay({ trial }: { trial: TrialUsageState }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="max-w-lg w-full rounded-3xl bg-card shadow-2xl border border-border overflow-hidden">
-        <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 px-8 py-10 text-center text-white">
+        <div
+          className="px-8 py-10 text-center text-white"
+          style={{ background: "linear-gradient(160deg, var(--color-ink-2) 0%, var(--color-sidebar) 100%)" }}
+        >
           <div className="w-14 h-14 rounded-2xl bg-white/10 mx-auto flex items-center justify-center mb-4">
             <Lock className="w-7 h-7" />
           </div>
