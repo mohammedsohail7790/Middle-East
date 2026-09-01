@@ -26,7 +26,7 @@ export default function NotFound() {
         href="/login"
         style={{
           display: "inline-block",
-          background: "#7C3AED",
+          background: "#8C6F3E",
           color: "#fff",
           padding: "12px 28px",
           borderRadius: "9999px",

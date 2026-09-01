@@ -37,30 +37,14 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#7C3AED",
+  themeColor: "#8C6F3E",
 };
 
 // Prevent FOUC on theme toggle
 const themeInitScript = `(function(){try{var t=localStorage.getItem('halla_theme')||localStorage.getItem('calliq_theme');document.documentElement.classList.remove('light','dark');document.documentElement.classList.add(t==='dark'?'dark':'light');}catch(e){document.documentElement.classList.add('light');}})();`;
 
-// Override dashboard gold accent with Halla AI purple/red for marketing/auth pages
-const brandOverride = `
-  :root {
-    --gold: #7C3AED;
-    --gold-dark: #6D28D9;
-    --gold-light: #C084FC;
-    --gold-text: #5B21B6;
-    --gold-glow: rgba(124,58,237,0.3);
-    --gold-muted: rgba(124,58,237,0.12);
-    --gold-border: rgba(124,58,237,0.35);
-    --accent: #7C3AED;
-    --accent-dark: #6D28D9;
-    --accent-mid: #A855F7;
-    --accent-light: #F3E8FF;
-    --brand-red: #EF4444;
-    --brand-red-dark: #DC2626;
-  }
-`;
+// Marketing & auth pages share the dashboard's warm gold/bronze accent —
+// no override needed; halla_styles.css already sets --accent to Aureate Gold.
 
 export default function MarketingRootLayout({
   children,
@@ -71,8 +55,6 @@ export default function MarketingRootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        {/* Remap accent vars to Halla AI purple/red for marketing & auth pages */}
-        <style dangerouslySetInnerHTML={{ __html: brandOverride }} />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link

@@ -1,54 +1,57 @@
 /* Call IQ · Premium Enterprise Design System */
 
 :root {
-  --color-paper: oklch(99.5% 0.003 265);
-  --color-paper-2: oklch(97.5% 0.008 265);
-  --color-paper-3: oklch(95% 0.012 265);
-  --color-elevated: oklch(100% 0 0);
+  /* AI Receptionist dashboard — restrained graphite + sandstone/gold
+     operational palette (replaces the prior blue/purple hue-265 OKLCH
+     system; see docs reference image for the source palette). */
+  --color-paper: #F9FAFC;
+  --color-paper-2: #F2F4F7;
+  --color-paper-3: #F7F8F9;
+  --color-elevated: #FFFFFF;
 
-  --color-ink: oklch(16% 0.045 265);
-  --color-ink-2: oklch(38% 0.032 265);
-  --color-ink-3: oklch(52% 0.022 265);
-  --color-ink-muted: oklch(65% 0.018 265);
+  --color-ink: #1F2328;
+  --color-ink-2: #3A4454;
+  --color-ink-3: #6B7280;
+  --color-ink-muted: #858C89;
 
-  --color-rule: oklch(91% 0.014 265);
-  --color-rule-strong: oklch(86% 0.018 265);
-  --color-focus: oklch(52% 0.14 265);
+  --color-rule: #D7D9E3;
+  --color-rule-strong: #BEC5C8;
+  --color-focus: #8C6F3E;
 
-  --color-accent: oklch(52% 0.16 265);
-  --color-accent-hover: oklch(46% 0.17 265);
-  --color-accent-muted: oklch(94% 0.04 265);
-  --color-accent-ink: oklch(99% 0.01 265);
-  --color-accent-glow: oklch(52% 0.16 265 / 0.35);
+  --color-accent: #8C6F3E;
+  --color-accent-hover: #6B5326;
+  --color-accent-muted: #ECE7DF;
+  --color-accent-ink: #FFFFFF;
+  --color-accent-glow: rgba(198,169,122,0.35);
 
-  --color-sidebar: oklch(14% 0.048 265);
-  --color-sidebar-elevated: oklch(19% 0.045 265);
-  --color-sidebar-ink: oklch(96% 0.008 265);
-  --color-sidebar-muted: oklch(68% 0.025 265);
-  --color-sidebar-rule: oklch(24% 0.04 265);
+  --color-sidebar: #0E1116;
+  --color-sidebar-elevated: #1C1D1B;
+  --color-sidebar-ink: #F9FAFC;
+  --color-sidebar-muted: #858C89;
+  --color-sidebar-rule: #2A2D2A;
 
-  --color-success: oklch(54% 0.15 155);
-  --color-success-muted: oklch(95.5% 0.045 155);
-  --color-warning: oklch(70% 0.15 75);
-  --color-warning-muted: oklch(96.5% 0.04 75);
-  --color-error: oklch(54% 0.19 25);
-  --color-error-muted: oklch(96% 0.035 25);
+  --color-success: #404A3E;
+  --color-success-muted: #EAEEE8;
+  --color-warning: #C6A97A;
+  --color-warning-muted: #F5EEE0;
+  --color-error: #A8583F;
+  --color-error-muted: #F5E9E5;
 
   --gradient-brand: linear-gradient(
     135deg,
-    oklch(52% 0.16 265) 0%,
-    oklch(58% 0.14 290) 50%,
-    oklch(48% 0.12 240) 100%
+    #C6A97A 0%,
+    #8C6F3E 50%,
+    #6B5326 100%
   );
   --gradient-surface: linear-gradient(
     180deg,
-    oklch(100% 0 0) 0%,
-    oklch(98% 0.006 265) 100%
+    #FFFFFF 0%,
+    #F7F8F9 100%
   );
   --gradient-hero-mesh:
-    radial-gradient(ellipse 90% 60% at 10% -10%, oklch(52% 0.16 265 / 0.12), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 90% 0%, oklch(58% 0.14 290 / 0.08), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 50% 100%, oklch(48% 0.1 240 / 0.06), transparent 45%);
+    radial-gradient(ellipse 90% 60% at 10% -10%, rgba(198,169,122,0.12), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 0%, rgba(140,111,62,0.08), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(64,74,62,0.06), transparent 45%);
 
   --font-display: var(--font-sans), Inter, system-ui, sans-serif;
   --font-body: var(--font-sans), Inter, system-ui, sans-serif;

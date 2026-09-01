@@ -2,36 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Halla AI brand — black + purple/red: #0A0A0A · #7C3AED · #EF4444 */
+/* Halla AI brand — graphite + sandstone/gold (warm, restrained): #1F2328 · #8C6F3E · #A8583F */
 
 :root {
-  --black: #0a0a0a;
-  --black-elevated: #111827;
+  --black: #121212;
+  --black-elevated: #1C1D1B;
   --white: #ffffff;
-  --gray-50: #f9fafb;
-  --gray-100: #f3f4f6;
-  --gray-200: #e5e7eb;
-  --gray-300: #d1d5db;
-  --gray-400: #9ca3af;
-  --gray-500: #6b7280;
-  --gray-600: #4b5563;
-  --gray-700: #374151;
-  --gray-800: #1f2937;
-  /* Navy (deep charcoal-night) — brand base */
-  --navy: #0b1220;
-  --navy-elevated: #131c2e;
-  --navy-light: #1c2740;
-  /* Brand accent — purple primary, red secondary */
-  --gold: #7c3aed;
-  --gold-dark: #6d28d9;
-  --gold-text: #5b21b6;
-  --gold-light: #c084fc;
-  --gold-glow: rgba(124, 58, 237, 0.3);
-  --gold-muted: rgba(124, 58, 237, 0.12);
-  --gold-border: rgba(124, 58, 237, 0.35);
-  --brand-red: #ef4444;
-  --brand-red-dark: #dc2626;
-  /* Legacy alias — kept so existing var(--cyan*) references still resolve to brand purple */
+  --gray-50: #F9FAFC;
+  --gray-100: #F2F4F7;
+  --gray-200: #D7D9E3;
+  --gray-300: #BEC5C8;
+  --gray-400: #858C89;
+  --gray-500: #6B7280;
+  --gray-600: #3A4454;
+  --gray-700: #2B2D2A;
+  --gray-800: #1F2328;
+  /* Ink (deep graphite-night) — brand base */
+  --navy: #0E1116;
+  --navy-elevated: #1C1D1B;
+  --navy-light: #2A2D2A;
+  /* Brand accent — warm sandstone/gold primary, muted clay secondary */
+  --gold: #8C6F3E;
+  --gold-dark: #6B5326;
+  --gold-text: #6B5326;
+  --gold-light: #C6A97A;
+  --gold-glow: rgba(198, 169, 122, 0.3);
+  --gold-muted: rgba(140, 111, 62, 0.12);
+  --gold-border: rgba(140, 111, 62, 0.35);
+  --brand-red: #A8583F;
+  --brand-red-dark: #8A4531;
+  /* Legacy alias — kept so existing var(--cyan*) references still resolve to brand gold */
   --cyan: var(--gold);
   --cyan-dark: var(--gold-dark);
   --cyan-light: var(--gold-light);
@@ -40,20 +40,20 @@
   --cyan-border: var(--gold-border);
   --accent: var(--gold);
   --accent-dark: var(--gold-dark);
-  --accent-light: #f3e8ff;
+  --accent-light: #ECE7DF;
   --accent-mid: var(--gold-light);
-  --green: #10b981;
-  --green-light: #d1fae5;
-  --orange: #f59e0b;
-  --red: #ef4444;
+  --green: #404A3E;
+  --green-light: #EAEEE8;
+  --orange: #C6A97A;
+  --red: #A8583F;
   --radius: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-glow: 0 8px 32px var(--gold-glow);
-  --shadow-card: 0 1px 2px rgba(11, 18, 32, 0.04), 0 8px 24px -6px rgba(11, 18, 32, 0.1);
-  --shadow-md: 0 12px 40px -8px rgba(11, 18, 32, 0.14);
-  --shadow-premium: 0 0 0 1px rgba(11, 18, 32, 0.04), 0 20px 48px -12px var(--gold-glow);
+  --shadow-card: 0 1px 2px rgba(14, 17, 22, 0.04), 0 8px 24px -6px rgba(14, 17, 22, 0.1);
+  --shadow-md: 0 12px 40px -8px rgba(14, 17, 22, 0.14);
+  --shadow-premium: 0 0 0 1px rgba(14, 17, 22, 0.04), 0 20px 48px -12px var(--gold-glow);
 
   /* Legacy aliases (ui-kit / older pages) */
   --color-ink: var(--foreground);
@@ -840,9 +840,9 @@ body:has(.auth-shell) {
   }
 
   .icon-box-violet {
-    background: linear-gradient(145deg, #f5f3ff 0%, #ede9fe 100%);
-    color: #6d28d9;
-    border: 1px solid #ddd6fe;
+    background: linear-gradient(145deg, #ECE7DF 0%, #E5DDC8 100%);
+    color: #6B5326;
+    border: 1px solid #D9C9A3;
   }
 
   .icon-box-neutral {
@@ -883,9 +883,9 @@ body:has(.auth-shell) {
   }
 
   .dark .icon-box-violet {
-    background: rgba(139, 92, 246, 0.12);
-    color: #c4b5fd;
-    border-color: rgba(139, 92, 246, 0.3);
+    background: rgba(198, 169, 122, 0.12);
+    color: #D9C9A3;
+    border-color: rgba(198, 169, 122, 0.3);
   }
 
   .dark .icon-box-neutral {
@@ -3550,64 +3550,61 @@ body:has(.auth-shell) {
     color: var(--black);
   }
 
-  /* Multi-layer aurora base — warm indigo-to-white */
+  /* Single restrained warm-gold wash — no multicolor aurora */
   .auth-page--light .auth-bg-gradient {
     background:
-      radial-gradient(ellipse 100% 65% at 5% 0%,   rgba(99,102,241,0.22) 0%, transparent 60%),
-      radial-gradient(ellipse 80%  70% at 95% 100%, rgba(16, 185, 129,0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 60%  80% at 85% 5%,   rgba(168,85,247,0.10) 0%, transparent 55%),
-      radial-gradient(ellipse 70%  50% at 40% 90%,  rgba(236,72,153,0.07) 0%, transparent 60%),
-      linear-gradient(160deg, #dde8ff 0%, #eef2ff 40%, #f5f0ff 100%);
+      radial-gradient(ellipse 100% 65% at 5% 0%,   rgba(198,169,122,0.16) 0%, transparent 60%),
+      radial-gradient(ellipse 80%  70% at 95% 100%, rgba(140,111,62,0.10) 0%, transparent 60%),
+      linear-gradient(160deg, #F9FAFC 0%, #F2F4F7 50%, #F9FAFC 100%);
   }
 
   /* Fine grid — dots-style via crossing lines */
   .auth-page--light .auth-bg-grid {
     background-image:
-      linear-gradient(rgba(99,102,241,0.07) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(99,102,241,0.07) 1px, transparent 1px);
+      linear-gradient(rgba(31,35,40,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(31,35,40,0.06) 1px, transparent 1px);
     background-size: 40px 40px;
     mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 30%, transparent 80%);
   }
 
-  /* TL — large indigo aurora, slow drift */
+  /* TL — sandstone-gold glow, slow drift */
   .auth-page--light .auth-bg-glow--tl {
     top: -15%; left: -10%;
     width: 65vw; height: 65vw;
     max-width: 750px; max-height: 750px;
     background: radial-gradient(circle at 40% 40%,
-      rgba(99,102,241,0.45) 0%,
-      rgba(59,130,246,0.25) 35%,
+      rgba(198,169,122,0.35) 0%,
+      rgba(140,111,62,0.16) 35%,
       transparent 70%);
     filter: blur(110px);
     opacity: 0.7;
     animation: aurora-drift-a 14s ease-in-out infinite;
   }
 
-  /* BR — cyan accent */
+  /* BR — muted graphite accent */
   .auth-page--light .auth-bg-glow--br {
     bottom: -15%; right: -10%;
     width: 55vw; height: 55vw;
     max-width: 620px; max-height: 620px;
     background: radial-gradient(circle at 55% 55%,
-      rgba(16, 185, 129,0.40) 0%,
-      rgba(99,102,241,0.20) 40%,
+      rgba(107,115,128,0.22) 0%,
+      rgba(140,111,62,0.10) 40%,
       transparent 70%);
     filter: blur(100px);
-    opacity: 0.65;
+    opacity: 0.55;
     animation: aurora-drift-b 11s ease-in-out infinite;
   }
 
-  /* TR — violet whisper */
+  /* TR — gold whisper */
   .auth-page--light .auth-bg-glow--tr {
     top: 0%; right: -5%;
     width: 38vw; height: 38vw;
     max-width: 380px; max-height: 380px;
     background: radial-gradient(circle at 60% 30%,
-      rgba(168,85,247,0.28) 0%,
-      rgba(236,72,153,0.12) 45%,
+      rgba(198,169,122,0.20) 0%,
       transparent 70%);
     filter: blur(80px);
-    opacity: 0.75;
+    opacity: 0.6;
     animation: aurora-drift-c 9s ease-in-out infinite;
   }
 
@@ -3618,22 +3615,22 @@ body:has(.auth-shell) {
     backdrop-filter: blur(20px) !important;
   }
 
-  /* Light card — glass over aurora */
+  /* Light card — glass over wash */
   .auth-page--light .auth-card {
     background: rgba(255,255,255,0.82) !important;
     backdrop-filter: blur(24px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-    border: 1px solid rgba(99,102,241,0.14) !important;
+    border: 1px solid rgba(140,111,62,0.14) !important;
     border-radius: 1.25rem !important;
     box-shadow:
-      0 0 0 1px rgba(99,102,241,0.06),
-      0 4px 24px rgba(99,102,241,0.10),
+      0 0 0 1px rgba(140,111,62,0.06),
+      0 4px 24px rgba(140,111,62,0.10),
       0 24px 64px rgba(15,23,42,0.10) !important;
     position: relative;
     overflow: hidden;
   }
 
-  /* Top aurora line on light card */
+  /* Top accent line on light card */
   .auth-page--light .auth-card::before {
     content: "";
     position: absolute;
@@ -3641,16 +3638,14 @@ body:has(.auth-shell) {
     height: 2px;
     background: linear-gradient(90deg,
       transparent 0%,
-      rgba(99,102,241,0.8) 25%,
-      rgba(16, 185, 129,0.9) 55%,
-      rgba(168,85,247,0.7) 80%,
+      rgba(198,169,122,0.85) 50%,
       transparent 100%);
     z-index: 1;
   }
 
   /* Light card halo */
   .auth-page--light .auth-card-halo::before {
-    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 30%, transparent) 0%, rgba(16, 185, 129,0.06) 50%, transparent 100%);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 30%, transparent) 0%, rgba(107,115,128,0.06) 50%, transparent 100%);
     filter: blur(22px);
     opacity: 0.5;
   }
@@ -3736,14 +3731,12 @@ body:has(.auth-shell) {
     color-scheme: dark;
   }
 
-  /* Dark base — deep midnight gradient */
+  /* Dark base — deep graphite gradient with warm gold glow */
   .auth-page--dark .auth-bg-gradient {
     background:
-      radial-gradient(ellipse 100% 65% at 5% 0%,   rgba(16, 185, 129,0.18) 0%,  transparent 58%),
-      radial-gradient(ellipse 80%  70% at 98% 100%, rgba(99,102,241,0.20) 0%,  transparent 58%),
-      radial-gradient(ellipse 55%  80% at 88% 5%,   rgba(168,85,247,0.12) 0%,  transparent 55%),
-      radial-gradient(ellipse 65%  45% at 38% 95%,  rgba(59,130,246,0.10)  0%, transparent 60%),
-      linear-gradient(160deg, #090916 0%, #06060f 50%, #07060e 100%);
+      radial-gradient(ellipse 100% 65% at 5% 0%,   rgba(198,169,122,0.16) 0%,  transparent 58%),
+      radial-gradient(ellipse 80%  70% at 98% 100%, rgba(140,111,62,0.14) 0%,  transparent 58%),
+      linear-gradient(160deg, #0E1116 0%, #06070a 50%, #0a0b0d 100%);
   }
 
   /* Fine grid — subtle white lines */

@@ -14,9 +14,6 @@ html { scroll-behavior: smooth; font-size: 16px; }
 
 :root {
   --white: #ffffff;
-  /* Stripe-style dark navy instead of flat black — every "black" text/
-     button color on the site is warmer and reads as designed rather
-     than a stock #000. */
   --black: #0A2540;
   --gray-50: #F9FAFB;
   --gray-100: #F3F4F6;
@@ -28,9 +25,6 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --gray-700: #374151;
   --gray-800: #1F2937;
   --gray-900: #0A2540;
-  /* Stripe's "blurple" — a recognizable, professional indigo-violet
-     rather than a generic AI-gradient purple. Used for every
-     button/link/CTA site-wide. */
   --accent: #635BFF;
   --accent-dark: #4B44C7;
   --accent-light: #F3F2FF;
@@ -39,9 +33,6 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --green-light: #D1FAE5;
   --orange: #F59E0B;
   --red: #EF4444;
-  /* Violet — a second brand-family accent so multi-card sections (the
-     three consultancy services, etc.) read as intentionally varied
-     rather than one flat hue repeated, without introducing green. */
   --violet: #7C3AED;
   --violet-light: #EDE9FE;
   --font: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -71,9 +62,6 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --consult-surface-strong: rgba(100,116,139,0.12);
   --consult-hairline: rgba(100,116,139,0.22);
   --consult-hairline-strong: rgba(100,116,139,0.35);
-  /* Unified with the site's own brand blurple (--accent/--accent-dark)
-     instead of a separate muted slate-blue or teal — one consistent
-     accent color across the whole light-themed site. */
   --consult-accent: #635BFF;
   --consult-accent-soft: #4B44C7;
   --consult-accent-dim: rgba(99,91,255,0.10);
@@ -161,7 +149,11 @@ body[data-section="consultancy"] .btn-blue,
 #page-svc-operations .btn-blue,
 #page-svc-acquisition .btn-blue,
 #page-svc-brand .btn-blue,
-#page-consult-signup .btn-blue {
+#page-consult-signup .btn-blue,
+#page-home .btn-blue,
+#page-pricing .btn-blue,
+#page-features .btn-blue,
+#page-how-it-works .btn-blue {
   background: var(--consult-accent) !important; color: var(--consult-ink) !important;
 }
 body[data-section="consultancy"] .btn-blue:hover,
@@ -169,7 +161,11 @@ body[data-section="consultancy"] .btn-blue:hover,
 #page-svc-operations .btn-blue:hover,
 #page-svc-acquisition .btn-blue:hover,
 #page-svc-brand .btn-blue:hover,
-#page-consult-signup .btn-blue:hover {
+#page-consult-signup .btn-blue:hover,
+#page-home .btn-blue:hover,
+#page-pricing .btn-blue:hover,
+#page-features .btn-blue:hover,
+#page-how-it-works .btn-blue:hover {
   background: var(--consult-accent-soft) !important; box-shadow: 0 8px 24px var(--consult-accent-dim) !important;
 }
 .btn-lg { padding: 16px 34px; font-size: 1rem; }
@@ -742,9 +738,9 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
   transition: background-color 0.15s, color 0.15s;
 }
 .lang-toggle button.active { background: var(--white); color: var(--black); box-shadow: var(--shadow-sm); }
-body[data-section="consultancy"] .lang-toggle { background: var(--consult-surface-strong); }
-body[data-section="consultancy"] .lang-toggle button { color: var(--consult-text-faint); }
-body[data-section="consultancy"] .lang-toggle button.active { background: var(--consult-ink-soft); color: var(--consult-text); box-shadow: none; }
+.lang-toggle { background: var(--consult-surface-strong); }
+.lang-toggle button { color: var(--consult-text-faint); }
+.lang-toggle button.active { background: var(--consult-ink-soft); color: var(--consult-text); box-shadow: none; }
 
 /* ============ RTL (ARABIC) SUPPORT ============ */
 html[dir="rtl"] body { font-family: 'Cairo', 'Hanken Grotesk', -apple-system, sans-serif; }
@@ -767,6 +763,49 @@ html[dir="rtl"] .browser-bar { flex-direction: row-reverse; }
 html[dir="rtl"] .lang-en { display: none; }
 html[dir="rtl"] .lang-ar { display: inline; }
 html[dir="rtl"] .lang-ar.lang-block { display: block; }
+
+/* ============ SITE-WIDE DARK THEME ============
+   Every page now uses the consultancy palette by default (see the :root
+   redefinitions above). This just gives each page's own background/text
+   color explicitly, covering every page id site-wide instead of a
+   per-page allow-list. */
+.page {
+  background: var(--consult-ink);
+  color: var(--consult-text);
+}
+#page-home .shadow-sm, #page-pricing .shadow-sm, #page-features .shadow-sm, #page-how-it-works .shadow-sm,
+#page-home .card, #page-pricing .card, #page-features .card, #page-how-it-works .card {
+  box-shadow: none;
+}
+/* Flat borders instead of the light theme's soft drop shadows — shadows
+   don't read against a near-black background, they just look like a dark
+   smudge. */
+#page-home .card, #page-pricing .card, #page-features .card, #page-how-it-works .card,
+#page-home .comp-highlight, #page-pricing .comp-highlight {
+  box-shadow: none; border-color: var(--gray-200);
+}
+#page-pricing .pricing-card, #page-pricing .pricing-card:hover { box-shadow: none; }
+/* .pricing-card.popular hardcodes background:var(--black) + white text —
+   a light-theme "dark featured card on a white page" pattern. Under the
+   --black remap above that background would invert to near-white while
+   its text stays hardcoded white, i.e. unreadable. Give the featured plan
+   its own explicit dark-theme treatment instead: a slightly raised flat
+   surface with an accent border, matching how the consultancy page marks
+   its own featured service card. */
+#page-pricing .pricing-card.popular {
+  border-color: var(--consult-accent); background: var(--consult-surface-strong);
+}
+#page-pricing .pricing-card.popular h3,
+#page-pricing .pricing-card.popular h4,
+#page-pricing .pricing-card.popular .pricing-price { color: var(--consult-text); }
+#page-pricing .pricing-card.popular p,
+#page-pricing .pricing-card.popular .pricing-mins,
+#page-pricing .pricing-card.popular .pricing-plan,
+#page-pricing .pricing-card.popular .pricing-price sub { color: var(--consult-text-faint); }
+#page-pricing .pricing-card.popular .pricing-feature { color: var(--consult-text-muted); }
+#page-pricing .pricing-card.popular .pricing-feature::before { color: var(--consult-accent-soft); }
+#page-pricing .pricing-card.popular .p-divider { border-color: var(--consult-hairline); }
+#page-pricing .pop-badge { background: var(--consult-accent); color: var(--consult-ink); }
 
 /* ============ CONSULTANCY — PREMIUM LAYOUT ============ */
 #page-consultancy { position: relative; }
@@ -991,7 +1030,11 @@ body[data-section="consultancy"] .cta-block .label[style*="background"],
 #page-svc-operations .cta-block .label[style*="background"],
 #page-svc-acquisition .cta-block .label[style*="background"],
 #page-svc-brand .cta-block .label[style*="background"],
-#page-consult-signup .cta-block .label[style*="background"] {
+#page-consult-signup .cta-block .label[style*="background"],
+#page-home .cta-block .label[style*="background"],
+#page-pricing .cta-block .label[style*="background"],
+#page-features .cta-block .label[style*="background"],
+#page-how-it-works .cta-block .label[style*="background"] {
   background: var(--consult-accent-dim) !important; color: var(--consult-accent-soft) !important;
 }
 body[data-section="consultancy"] .cta-block .btn-outline[style*="color"],
@@ -999,21 +1042,28 @@ body[data-section="consultancy"] .cta-block .btn-outline[style*="color"],
 #page-svc-operations .cta-block .btn-outline[style*="color"],
 #page-svc-acquisition .cta-block .btn-outline[style*="color"],
 #page-svc-brand .cta-block .btn-outline[style*="color"],
-#page-consult-signup .cta-block .btn-outline[style*="color"] {
+#page-consult-signup .cta-block .btn-outline[style*="color"],
+#page-home .cta-block .btn-outline[style*="color"],
+#page-pricing .cta-block .btn-outline[style*="color"],
+#page-features .cta-block .btn-outline[style*="color"],
+#page-how-it-works .cta-block .btn-outline[style*="color"] {
   color: var(--consult-text-muted) !important; border-color: var(--consult-hairline) !important;
 }
 /* .cta-block h2/h3/p hardcode white/near-white text (the universal dark
    CTA banner design), but this block's own background is remapped to
-   var(--consult-ink) above — now light — on every consultancy-family
-   page, so those hardcoded light colors need a matching dark override
-   here too, same reasoning as the label/btn-outline overrides above. */
-body[data-section="consultancy"] .cta-block h2,
-body[data-section="consultancy"] .cta-block h3,
+   var(--consult-ink) above — now light — on every reskinned page, so
+   those hardcoded light colors need a matching dark override here too,
+   same reasoning as the label/btn-outline overrides above. */
+body[data-section="consultancy"] .cta-block h2, body[data-section="consultancy"] .cta-block h3,
 #page-consultancy .cta-block h2, #page-consultancy .cta-block h3,
 #page-svc-operations .cta-block h2, #page-svc-operations .cta-block h3,
 #page-svc-acquisition .cta-block h2, #page-svc-acquisition .cta-block h3,
 #page-svc-brand .cta-block h2, #page-svc-brand .cta-block h3,
-#page-consult-signup .cta-block h2, #page-consult-signup .cta-block h3 {
+#page-consult-signup .cta-block h2, #page-consult-signup .cta-block h3,
+#page-home .cta-block h2, #page-home .cta-block h3,
+#page-pricing .cta-block h2, #page-pricing .cta-block h3,
+#page-features .cta-block h2, #page-features .cta-block h3,
+#page-how-it-works .cta-block h2, #page-how-it-works .cta-block h3 {
   color: var(--consult-text) !important;
 }
 body[data-section="consultancy"] .cta-block p,
@@ -1021,20 +1071,27 @@ body[data-section="consultancy"] .cta-block p,
 #page-svc-operations .cta-block p,
 #page-svc-acquisition .cta-block p,
 #page-svc-brand .cta-block p,
-#page-consult-signup .cta-block p {
+#page-consult-signup .cta-block p,
+#page-home .cta-block p,
+#page-pricing .cta-block p,
+#page-features .cta-block p,
+#page-how-it-works .cta-block p {
   color: var(--consult-text-muted) !important;
 }
 /* The same repeated .cta-block also carries the base site's teal glow
-   blob (.cta-block::before) on the 3 service sub-pages — the
-   .consult-cta-block::before override above only reaches the main page's
-   modifier class. Kill the glow and match the flat ink background on
-   every consultancy-family page. */
+   blob (.cta-block::before) — kill it and match the flat ink background
+   on every reskinned page (consultancy family + the 4 receptionist core
+   pages from this phase). */
 body[data-section="consultancy"] .cta-block,
 #page-consultancy .cta-block,
 #page-svc-operations .cta-block,
 #page-svc-acquisition .cta-block,
 #page-svc-brand .cta-block,
-#page-consult-signup .cta-block {
+#page-consult-signup .cta-block,
+#page-home .cta-block,
+#page-pricing .cta-block,
+#page-features .cta-block,
+#page-how-it-works .cta-block {
   background: var(--consult-ink) !important;
 }
 body[data-section="consultancy"] .cta-block::before,
@@ -1042,7 +1099,11 @@ body[data-section="consultancy"] .cta-block::before,
 #page-svc-operations .cta-block::before,
 #page-svc-acquisition .cta-block::before,
 #page-svc-brand .cta-block::before,
-#page-consult-signup .cta-block::before {
+#page-consult-signup .cta-block::before,
+#page-home .cta-block::before,
+#page-pricing .cta-block::before,
+#page-features .cta-block::before,
+#page-how-it-works .cta-block::before {
   display: none !important;
 }
 
