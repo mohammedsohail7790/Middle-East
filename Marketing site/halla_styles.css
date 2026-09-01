@@ -827,17 +827,17 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
   position: relative; overflow: hidden;
   padding: 140px 0 88px;
 }
-/* A restrained gradient wash, not a literal graphic — pure CSS (no image
-   asset), so it's crisp and correctly framed at every viewport width with
-   nothing to crop, stretch, or mirror for RTL. */
+/* Abstract line art — soft rings, a thin gold connection network with
+   node dots, flowing wave accents — not literal 3D shapes. Vector (no
+   raster asset), so it's crisp at any width/DPI. Mirrored for RTL since
+   the composition is weighted to one side, matching the mask direction
+   the rest of this hero already uses. */
 .consult-hero::before {
   content: ""; position: absolute; inset: 0; z-index: 0;
-  background:
-    radial-gradient(1100px 640px at 82% 12%, rgba(199, 162, 90, 0.16), transparent 62%),
-    radial-gradient(800px 560px at 60% 100%, rgba(199, 162, 90, 0.09), transparent 65%),
-    radial-gradient(rgba(23, 21, 18, 0.05) 1px, transparent 1px),
-    linear-gradient(135deg, #F7F3EC 0%, #F1EAE0 55%, #E9DFCC 100%);
-  background-size: auto, auto, 28px 28px, auto;
+  background: url('/consultancy-hero-bg.svg') center right / cover no-repeat;
+}
+html[dir="rtl"] .consult-hero::before {
+  transform: scaleX(-1);
 }
 .consult-hero-glow { display: none; }
 .consult-hero-grid {
