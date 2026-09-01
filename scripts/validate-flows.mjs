@@ -135,7 +135,7 @@ async function simulateMediaStream(wsUrl, callSid, timeoutMs = 12_000) {
 }
 
 async function main() {
-  console.log('\n=== Call IQ flow validation ===\n');
+  console.log('\n=== Halla AI flow validation ===\n');
 
   if (!(await waitForGateway())) {
     log('Gateway reachable', false, BASE);

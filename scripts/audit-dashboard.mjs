@@ -296,7 +296,7 @@ async function auditApis(token) {
 }
 
 async function main() {
-  console.log('=== Call IQ Dashboard Audit ===');
+  console.log('=== Halla AI Dashboard Audit ===');
   console.log(`Dashboard: ${DASHBOARD}`);
   console.log(`Gateway:   ${GATEWAY}`);
   console.log(`User:      ${EMAIL}`);

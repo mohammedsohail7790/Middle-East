@@ -1,5 +1,5 @@
 /**
- * Production / staging smoke test for Call IQ gateway + realtime path.
+ * Production / staging smoke test for Halla AI gateway + realtime path.
  *
  * Usage:
  *   node scripts/smoke-production.mjs
@@ -327,7 +327,7 @@ async function checkInternalMetrics() {
   }
 }
 
-console.log(`\nCall IQ smoke — gateway: ${GATEWAY}\n`);
+console.log(`\nHalla AI smoke — gateway: ${GATEWAY}\n`);
 
 await checkHealth();
 await checkReady();

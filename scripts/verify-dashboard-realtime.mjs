@@ -425,7 +425,7 @@ async function checkReady() {
   }
 }
 
-console.log(`\nCall IQ dashboard realtime verify — gateway: ${GATEWAY}`);
+console.log(`\nHalla AI dashboard realtime verify — gateway: ${GATEWAY}`);
 console.log(`Dashboard origin (SSE): ${DASHBOARD_ORIGIN}\n`);
 
 await checkHealth();

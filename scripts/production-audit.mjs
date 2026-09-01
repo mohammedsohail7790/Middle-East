@@ -420,7 +420,7 @@ async function auditGateway(token, tenantRow) {
   }
 }
 
-console.log(`\n=== Call IQ Production Audit ===`);
+console.log(`\n=== Halla AI Production Audit ===`);
 console.log(`Gateway: ${GATEWAY}`);
 console.log(`Tenant:  ${TENANT_ID}`);
 console.log(`User:    ${EMAIL}\n`);
