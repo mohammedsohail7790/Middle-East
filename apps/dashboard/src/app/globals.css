@@ -3309,20 +3309,21 @@ body:has(.auth-shell) {
 
   /* ─── Premium auth buttons, inputs & links ─────────────────────────────── */
 
-  /* Primary submit button — matches the landing page's cyan CTA (was black,
-     the biggest auth/marketing brand mismatch in the app). Lift + press feedback. */
+  /* Primary submit button — dark/onyx fill matching the marketing nav CTA
+     right next to it on the same page (gold is reserved for the dashboard's
+     own primary action, per the approved design system). Lift + press feedback. */
   .auth-btn-primary {
-    background: var(--accent) !important;
+    background: linear-gradient(160deg, var(--color-ink-2, #2B2D2A) 0%, var(--color-sidebar, #121212) 100%) !important;
     color: var(--white) !important;
     border-color: transparent !important;
-    box-shadow: 0 4px 14px rgba(140, 111, 62, 0.35) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
     transition: transform 0.14s cubic-bezier(0.16,1,0.3,1), box-shadow 0.14s ease, background-color 0.14s ease !important;
     letter-spacing: 0.01em;
   }
 
   .auth-btn-primary:hover:not(:disabled) {
-    background: var(--accent-dark) !important;
-    box-shadow: 0 10px 28px rgba(140, 111, 62, 0.4) !important;
+    background: linear-gradient(160deg, var(--accent-dark) 0%, var(--color-sidebar, #121212) 100%) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32) !important;
     transform: translateY(-1px);
   }
 
