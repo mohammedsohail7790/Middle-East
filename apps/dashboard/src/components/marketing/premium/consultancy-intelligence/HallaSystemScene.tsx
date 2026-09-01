@@ -37,6 +37,25 @@ const SYSTEMS: SystemDef[] = [
   { id: "data", label: "Data & Insights", position: [1.15, -0.15, 1.75] },
 ];
 
+type PerformanceTier = "high" | "medium" | "low";
+
+/**
+ * Coarse device-capability tiering (Phase 14 of the brief): cores + device
+ * memory are the cheapest reliable signals available without a WebGL probe.
+ * Only used to scale render cost (pixel ratio, AA, whether we pay for a
+ * PMREM environment pass) — never to change what's shown, so there's no
+ * "mobile got a worse composition" risk, just a cheaper render of the same
+ * scene on weaker hardware.
+ */
+function getPerformanceTier(): PerformanceTier {
+  if (typeof navigator === "undefined") return "high";
+  const cores = navigator.hardwareConcurrency ?? 4;
+  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
+  if (cores <= 2 || mem <= 2) return "low";
+  if (cores <= 4 || mem <= 4) return "medium";
+  return "high";
+}
+
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -59,6 +78,7 @@ type NodeRig = {
   particle: THREE.Mesh;
   labelEl: HTMLDivElement | null;
   baseY: number;
+  baseOpacity: number;
 };
 
 /** Builds and animates the Halla System scene with plain Three.js (no react-reconciler). */
@@ -72,12 +92,20 @@ function useHallaSystem(
     const mount = mountRef.current;
     if (!mount) return;
 
+    const tier = getPerformanceTier();
+    const maxPixelRatio = tier === "high" ? 1.75 : tier === "medium" ? 1.25 : 1;
+    const useEnvironment = tier !== "low";
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
     camera.position.set(0, 0.2, 5.4);
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: tier !== "low",
+      powerPreference: "high-performance",
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPixelRatio));
     mount.appendChild(renderer.domElement);
     renderer.domElement.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block;";
 
@@ -98,10 +126,17 @@ function useHallaSystem(
     // instead of a flat translucent color — without it the core looked
     // like a solid matte rock. RoomEnvironment is a neutral studio-lit
     // box used purely for reflections/refraction; it's never rendered as
-    // a visible background, only baked into an env map via PMREM.
-    const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    const envTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environment = envTexture;
+    // a visible background, only baked into an env map via PMREM. Skipped
+    // on the low performance tier — the PMREM bake is the single most
+    // expensive thing this scene does, and transmission without it just
+    // falls back to a flat (still on-brand) translucent fill below.
+    let pmremGenerator: THREE.PMREMGenerator | null = null;
+    let envTexture: THREE.Texture | null = null;
+    if (useEnvironment) {
+      pmremGenerator = new THREE.PMREMGenerator(renderer);
+      envTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+      scene.environment = envTexture;
+    }
 
     // Halla Core — a translucent faceted crystal, not a glowing orb.
     const coreOuter = new THREE.Mesh(
@@ -109,10 +144,10 @@ function useHallaSystem(
       new THREE.MeshPhysicalMaterial({
         color: new THREE.Color(INK),
         transparent: true,
-        opacity: 0.22,
+        opacity: useEnvironment ? 0.22 : 0.4,
         roughness: 0.1,
         metalness: 0,
-        transmission: 0.92,
+        transmission: useEnvironment ? 0.92 : 0,
         thickness: 0.9,
         ior: 1.4,
         envMapIntensity: 1.1,
@@ -142,15 +177,16 @@ function useHallaSystem(
       const nodeGroup = new THREE.Group();
       nodeGroup.position.set(def.position[0], 0, def.position[2]);
 
+      const baseOpacity = useEnvironment ? 0.22 : 0.32;
       const box = new THREE.Mesh(
         new THREE.BoxGeometry(0.22, 0.22, 0.22),
         new THREE.MeshPhysicalMaterial({
           color: new THREE.Color(INK),
           transparent: true,
-          opacity: 0.22,
+          opacity: baseOpacity,
           roughness: 0.12,
           metalness: 0,
-          transmission: 0.75,
+          transmission: useEnvironment ? 0.75 : 0,
           thickness: 0.4,
           ior: 1.4,
           envMapIntensity: 1,
@@ -194,6 +230,7 @@ function useHallaSystem(
         particle,
         labelEl: null,
         baseY: def.position[1],
+        baseOpacity,
       };
     });
 
@@ -263,7 +300,9 @@ function useHallaSystem(
         const bob = reduced ? 0 : Math.sin(t * 0.6 + node.def.position[0]) * 0.04;
         node.inner.position.y = node.baseY + bob + lift;
         node.edge.position.y = node.inner.position.y;
-        (node.inner.material as THREE.MeshPhysicalMaterial).opacity = isHovered ? 0.38 : 0.22;
+        (node.inner.material as THREE.MeshPhysicalMaterial).opacity = isHovered
+          ? node.baseOpacity + 0.16
+          : node.baseOpacity;
         (node.edge.material as THREE.LineBasicMaterial).opacity = isHovered ? 1 : 0.65;
         node.lineMaterial.opacity = isActive ? 0.55 : 0.22;
         node.particle.visible = isActive && !reduced;
@@ -299,8 +338,8 @@ function useHallaSystem(
       mount!.removeEventListener("pointermove", onPointerMove);
       mount!.removeEventListener("pointerleave", onPointerLeave);
       mount!.removeChild(renderer.domElement);
-      envTexture.dispose();
-      pmremGenerator.dispose();
+      envTexture?.dispose();
+      pmremGenerator?.dispose();
       scene.traverse((obj) => {
         if (obj instanceof THREE.Mesh || obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
           obj.geometry?.dispose();
