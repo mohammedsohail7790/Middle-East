@@ -826,6 +826,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-hero {
   position: relative; overflow: hidden;
   padding: 140px 0 88px;
+  background: url('/consultancy-hero-bg.jpg') center right / cover no-repeat;
 }
 /* No radial glow blob — flat ink background lets the graph canvas read
    through on its own. */

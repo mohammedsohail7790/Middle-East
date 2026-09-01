@@ -2495,8 +2495,8 @@ body:has(.auth-shell) {
     padding: 0.5rem 1rem 0.5rem 0.55rem;
     border-radius: 9999px;
     border: 1px solid rgba(140, 111, 62, 0.45);
-    background: linear-gradient(145deg, #f0f9ff 0%, #f7edd8 48%, #bae6fd 100%);
-    color: #0c4a6e;
+    background: linear-gradient(145deg, #FAF8F3 0%, #F4EFE4 48%, #EEEAE2 100%);
+    color: #4A473F;
     font-size: 0.875rem;
     font-weight: 600;
     box-shadow:
@@ -2532,9 +2532,9 @@ body:has(.auth-shell) {
   }
 
   .dark .dashboard-assistant-fab:not(.is-open) {
-    background: linear-gradient(145deg, #0c4a6e 0%, #075985 48%, #0369a1 100%);
-    color: #f7edd8;
-    border-color: rgba(56, 189, 248, 0.45);
+    background: linear-gradient(145deg, #2B2D2A 0%, #1F2328 48%, #121212 100%);
+    color: #EEEAE2;
+    border-color: rgba(199, 162, 90, 0.45);
   }
 
   .dark .dashboard-assistant-header {
@@ -2646,7 +2646,7 @@ body:has(.auth-shell) {
     width: 6px;
     height: 6px;
     border-radius: 9999px;
-    background: #10b981;
+    background: #C7A25A;
     box-shadow: 0 0 6px rgba(140, 111, 62, 0.8);
     animation: robot-blink 2s ease-in-out infinite;
   }
@@ -2674,7 +2674,7 @@ body:has(.auth-shell) {
     width: 0.35rem;
     height: 0.35rem;
     border-radius: 9999px;
-    background: #10b981;
+    background: #C7A25A;
     box-shadow: 0 0 4px rgba(140, 111, 62, 0.7);
   }
 
@@ -2691,9 +2691,9 @@ body:has(.auth-shell) {
     width: 1.45rem;
     height: 1rem;
     margin-top: 1px;
-    background: linear-gradient(180deg, #6ee7b7, #059669);
+    background: linear-gradient(180deg, #C7A25A, #8C6F3E);
     border-radius: 0.35rem 0.35rem 0.5rem 0.5rem;
-    border: 1.5px solid #0369a1;
+    border: 1.5px solid #4A473F;
     position: relative;
   }
 
