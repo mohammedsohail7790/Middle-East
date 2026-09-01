@@ -13,28 +13,31 @@
 html { scroll-behavior: smooth; font-size: 16px; }
 
 :root {
+  /* Halla AI Consultancy — warm-luxury design system (porcelain/ivory
+     neutrals + restrained gold, replaces the prior violet/navy SaaS
+     palette site-wide; see docs reference image for the source system). */
   --white: #ffffff;
-  --black: #0A2540;
-  --gray-50: #F9FAFB;
-  --gray-100: #F3F4F6;
-  --gray-200: #E5E7EB;
-  --gray-300: #D1D5DB;
-  --gray-400: #9CA3AF;
-  --gray-500: #6B7280;
-  --gray-600: #4B5563;
-  --gray-700: #374151;
-  --gray-800: #1F2937;
-  --gray-900: #0A2540;
-  --accent: #635BFF;
-  --accent-dark: #4B44C7;
-  --accent-light: #F3F2FF;
-  --accent-mid: #7A73FF;
-  --green: #10B981;
-  --green-light: #D1FAE5;
-  --orange: #F59E0B;
-  --red: #EF4444;
-  --violet: #7C3AED;
-  --violet-light: #EDE9FE;
+  --black: #121212;
+  --gray-50: #FAF8F3;
+  --gray-100: #F4F1EC;
+  --gray-200: #E9E6DF;
+  --gray-300: #DCD6C9;
+  --gray-400: #A7ADA3;
+  --gray-500: #7C7568;
+  --gray-600: #636865;
+  --gray-700: #4A473F;
+  --gray-800: #2B2D2A;
+  --gray-900: #1A1A1A;
+  --accent: #C7A25A;
+  --accent-dark: #8C6F3E;
+  --accent-light: #EEEAE2;
+  --accent-mid: #C7A25A;
+  --green: #6B7A6B;
+  --green-light: #E4E8E1;
+  --orange: #C7A25A;
+  --red: #A8583F;
+  --violet: #8C6F3E;
+  --violet-light: #EEEAE2;
   --font: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow: 0 4px 16px rgba(0,0,0,0.08);
@@ -57,17 +60,17 @@ html { scroll-behavior: smooth; font-size: 16px; }
      rule that already consumes var(--consult-*) renders light instead of
      needing each of those ~100 rules touched individually. */
   --consult-ink: #ffffff;
-  --consult-ink-soft: #f8fafc;
-  --consult-surface: rgba(100,116,139,0.06);
-  --consult-surface-strong: rgba(100,116,139,0.12);
-  --consult-hairline: rgba(100,116,139,0.22);
-  --consult-hairline-strong: rgba(100,116,139,0.35);
-  --consult-accent: #635BFF;
-  --consult-accent-soft: #4B44C7;
-  --consult-accent-dim: rgba(99,91,255,0.10);
-  --consult-text: #0A2540;
-  --consult-text-muted: rgba(10,37,64,0.64);
-  --consult-text-faint: rgba(10,37,64,0.42);
+  --consult-ink-soft: #FAF8F3;
+  --consult-surface: rgba(43,45,42,0.05);
+  --consult-surface-strong: rgba(43,45,42,0.10);
+  --consult-hairline: rgba(43,45,42,0.14);
+  --consult-hairline-strong: rgba(43,45,42,0.24);
+  --consult-accent: #C7A25A;
+  --consult-accent-soft: #8C6F3E;
+  --consult-accent-dim: rgba(199,162,90,0.12);
+  --consult-text: #121212;
+  --consult-text-muted: rgba(18,18,18,0.64);
+  --consult-text-faint: rgba(18,18,18,0.42);
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
