@@ -835,7 +835,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
    like this one. */
 .consult-hero::before {
   content: ""; position: absolute; inset: 0; z-index: 0;
-  background: url('/consultancy-hero-bg.jpg') center right / cover no-repeat;
+  background: url('/consultancy-hero-bg.svg') center right / cover no-repeat;
 }
 html[dir="rtl"] .consult-hero::before {
   transform: scaleX(-1);
