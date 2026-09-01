@@ -171,7 +171,7 @@ export function AuthError({ message }: { message: string }) {
 export function AuthNotice({ message }: { message: string }) {
   return (
     <p
-      className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm text-sky-700"
+      className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
       role="status"
     >
       {message}

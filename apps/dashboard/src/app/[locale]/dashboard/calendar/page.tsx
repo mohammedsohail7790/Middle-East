@@ -44,9 +44,9 @@ interface CalendarEvent {
 const EVENT_COLORS: Record<string, string> = {
   appointment: "bg-accent",
   callback: "bg-amber-500",
-  meeting: "bg-blue-500",
+  meeting: "bg-stone-500",
   follow_up: "bg-emerald-500",
-  default: "bg-indigo-500",
+  default: "bg-slate-500",
 };
 
 function monthBounds(year: number, month: number) {

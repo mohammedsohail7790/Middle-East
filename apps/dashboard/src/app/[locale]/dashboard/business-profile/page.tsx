@@ -102,8 +102,8 @@ async function fileToUploadPayload(file: File): Promise<{
 
 const CATEGORY_STYLES: Record<string, string> = {
   all: "bg-gray-100 text-gray-700",
-  hvac: "bg-blue-500/10 text-blue-600",
-  plumbing: "bg-cyan-500/10 text-cyan-700",
+  hvac: "bg-stone-200/60 text-stone-700",
+  plumbing: "bg-slate-200/60 text-slate-700",
   electrical: "bg-amber-50 text-amber-800",
   general: "bg-accent/10 text-accent-dark",
 };

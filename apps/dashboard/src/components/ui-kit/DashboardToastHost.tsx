@@ -22,7 +22,7 @@ const STYLES: Record<DashboardToastType, string> = {
     "border-emerald-200/80 bg-emerald-50/95 text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950/90 dark:text-emerald-100",
   error:
     "border-red-200/80 bg-red-50/95 text-red-950 dark:border-red-900 dark:bg-red-950/90 dark:text-red-100",
-  info: "border-sky-200/80 bg-sky-50/95 text-sky-950 dark:border-sky-900 dark:bg-sky-950/90 dark:text-sky-100",
+  info: "border-slate-200/80 bg-slate-50/95 text-slate-950 dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-100",
   warning:
     "border-amber-200/80 bg-amber-50/95 text-amber-950 dark:border-amber-900 dark:bg-amber-950/90 dark:text-amber-100",
 };
@@ -30,7 +30,7 @@ const STYLES: Record<DashboardToastType, string> = {
 const ICON_STYLES: Record<DashboardToastType, string> = {
   success: "text-emerald-600 dark:text-emerald-400",
   error: "text-red-600 dark:text-red-400",
-  info: "text-sky-600 dark:text-sky-400",
+  info: "text-slate-600 dark:text-slate-400",
   warning: "text-amber-600 dark:text-amber-400",
 };
 
