@@ -272,6 +272,7 @@ function useHallaSystem(
     const clock = new THREE.Clock();
     let raf = 0;
     const projected = new THREE.Vector3();
+    const nodeWorldTmp = new THREE.Vector3();
 
     function frame() {
       raf = requestAnimationFrame(frame);
@@ -281,8 +282,15 @@ function useHallaSystem(
       // Checked every frame (not cached) so a live language toggle — the
       // site swaps dir without a page reload — repositions the scene
       // immediately, including under prefers-reduced-motion where nothing
-      // else in this function runs every frame.
-      const anchorX = document.documentElement.dir === "rtl" ? -ANCHOR_X : ANCHOR_X;
+      // else in this function runs every frame. dirSign mirrors every
+      // node's local X too, not just the group anchor — the six system
+      // nodes sit up to ~2 units off-center, so translating the rigid
+      // group alone left them pinned to their LTR (right) side while the
+      // mask flipped to reveal the left: in RTL they rendered entirely
+      // outside the visible region.
+      const isRTL = document.documentElement.dir === "rtl";
+      const dirSign = isRTL ? -1 : 1;
+      const anchorX = dirSign * ANCHOR_X;
       root.position.x = anchorX;
       camera.lookAt(anchorX, 0, 0);
 
@@ -313,6 +321,7 @@ function useHallaSystem(
         const isActive = hoveredId === null || isHovered;
         const lift = isHovered ? 0.08 : 0;
         const bob = reduced ? 0 : Math.sin(t * 0.6 + node.def.position[0]) * 0.04;
+        node.outer.position.x = dirSign * node.def.position[0];
         node.inner.position.y = node.baseY + bob + lift;
         node.edge.position.y = node.inner.position.y;
         (node.inner.material as THREE.MeshPhysicalMaterial).opacity = isHovered
@@ -322,15 +331,20 @@ function useHallaSystem(
         node.lineMaterial.opacity = isActive ? 0.55 : 0.22;
         node.particle.visible = isActive && !reduced;
 
+        nodeWorldTmp.set(dirSign * node.def.position[0], node.def.position[1], node.def.position[2]);
+        const linePos = node.line.geometry.attributes.position as THREE.BufferAttribute;
+        linePos.setXYZ(1, nodeWorldTmp.x, nodeWorldTmp.y, nodeWorldTmp.z);
+        linePos.needsUpdate = true;
+
         if (!reduced && node.particle.visible) {
           const speed = 0.18;
           const pt = (t * speed + node.def.position[0]) % 1;
-          node.particle.position.set(0, 0, 0).lerp(new THREE.Vector3(...node.def.position), pt);
+          node.particle.position.set(0, 0, 0).lerp(nodeWorldTmp, pt);
         }
 
         const labelEl = labelRefs.current?.[node.def.id];
         if (labelEl) {
-          projected.set(node.def.position[0], node.inner.position.y - 0.22, node.def.position[2]);
+          projected.set(dirSign * node.def.position[0], node.inner.position.y - 0.22, node.def.position[2]);
           root.localToWorld(projected);
           projected.project(camera);
           const rect = mount!.getBoundingClientRect();
