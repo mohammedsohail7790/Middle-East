@@ -109,8 +109,16 @@ function useHallaSystem(
     mount.appendChild(renderer.domElement);
     renderer.domElement.style.cssText = "position:absolute;inset:0;width:100%;height:100%;display:block;";
 
+    // Anchored toward the right of the hero by default because
+    // .consult-hero-fx's mask reveals the right side there — but in RTL
+    // (Arabic) the copy column and the mask both flip to the left, and the
+    // 3D content has to flip with them or it collides with the headline
+    // and gets clipped by the mask instead of sitting in the revealed
+    // area. Read live each frame (not baked in once) so switching language
+    // mid-session — no page reload — repositions the scene immediately.
+    const ANCHOR_X = 0.4;
     const root = new THREE.Group();
-    root.position.set(0.4, 0, 0);
+    root.position.set(ANCHOR_X, 0, 0);
     scene.add(root);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.65));
@@ -270,6 +278,14 @@ function useHallaSystem(
       const delta = reduced ? 0 : clock.getDelta();
       const t = clock.elapsedTime;
 
+      // Checked every frame (not cached) so a live language toggle — the
+      // site swaps dir without a page reload — repositions the scene
+      // immediately, including under prefers-reduced-motion where nothing
+      // else in this function runs every frame.
+      const anchorX = document.documentElement.dir === "rtl" ? -ANCHOR_X : ANCHOR_X;
+      root.position.x = anchorX;
+      camera.lookAt(anchorX, 0, 0);
+
       if (!reduced) {
         coreOuter.rotation.y += delta * 0.06;
         coreInner.rotation.y -= delta * 0.09;
@@ -279,7 +295,6 @@ function useHallaSystem(
         pointerTarget.y += (pointerNDC.y - pointerTarget.y) * 0.04;
         camera.position.x = pointerTarget.x * 0.35;
         camera.position.y = 0.2 + pointerTarget.y * 0.2;
-        camera.lookAt(0.4, 0, 0);
       }
 
       // Hover raycast (kept live even under reduced motion — it's a
