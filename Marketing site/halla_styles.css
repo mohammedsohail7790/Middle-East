@@ -69,8 +69,8 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --consult-accent-soft: #8C6F3E;
   --consult-accent-dim: rgba(199,162,90,0.12);
   --consult-text: #121212;
-  --consult-text-muted: rgba(18,18,18,0.64);
-  --consult-text-faint: rgba(18,18,18,0.42);
+  --consult-text-muted: #5B5F5A;
+  --consult-text-faint: #8E928D;
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
