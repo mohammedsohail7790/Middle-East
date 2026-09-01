@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
 const GOLD = "#C7A25A";
 const BRONZE = "#8C6F3E";
@@ -92,22 +93,34 @@ function useHallaSystem(
     goldLight.position.set(-2, -1, 2);
     scene.add(goldLight);
 
+    // A real environment map is what makes MeshPhysicalMaterial's
+    // `transmission` actually read as glass (refracting *something*)
+    // instead of a flat translucent color — without it the core looked
+    // like a solid matte rock. RoomEnvironment is a neutral studio-lit
+    // box used purely for reflections/refraction; it's never rendered as
+    // a visible background, only baked into an env map via PMREM.
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    const envTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = envTexture;
+
     // Halla Core — a translucent faceted crystal, not a glowing orb.
     const coreOuter = new THREE.Mesh(
       new THREE.OctahedronGeometry(0.62, 0),
       new THREE.MeshPhysicalMaterial({
         color: new THREE.Color(INK),
         transparent: true,
-        opacity: 0.16,
-        roughness: 0.15,
-        metalness: 0.1,
-        transmission: 0.6,
-        thickness: 0.8,
+        opacity: 0.22,
+        roughness: 0.1,
+        metalness: 0,
+        transmission: 0.92,
+        thickness: 0.9,
+        ior: 1.4,
+        envMapIntensity: 1.1,
       }),
     );
     const coreWire = new THREE.Mesh(
       new THREE.OctahedronGeometry(0.62, 0),
-      new THREE.MeshBasicMaterial({ color: new THREE.Color(GOLD), wireframe: true, transparent: true, opacity: 0.55 }),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(GOLD), wireframe: true, transparent: true, opacity: 0.7 }),
     );
     const coreInner = new THREE.Mesh(
       new THREE.IcosahedronGeometry(1, 0),
@@ -134,17 +147,20 @@ function useHallaSystem(
         new THREE.MeshPhysicalMaterial({
           color: new THREE.Color(INK),
           transparent: true,
-          opacity: 0.2,
-          roughness: 0.25,
-          metalness: 0.15,
-          transmission: 0.4,
+          opacity: 0.22,
+          roughness: 0.12,
+          metalness: 0,
+          transmission: 0.75,
+          thickness: 0.4,
+          ior: 1.4,
+          envMapIntensity: 1,
         }),
       );
       box.position.y = def.position[1];
 
       const edge = new THREE.LineSegments(
         new THREE.EdgesGeometry(new THREE.BoxGeometry(0.22, 0.22, 0.22)),
-        new THREE.LineBasicMaterial({ color: new THREE.Color(GOLD), transparent: true, opacity: 0.45 }),
+        new THREE.LineBasicMaterial({ color: new THREE.Color(GOLD), transparent: true, opacity: 0.65 }),
       );
       edge.position.y = def.position[1];
 
@@ -247,8 +263,8 @@ function useHallaSystem(
         const bob = reduced ? 0 : Math.sin(t * 0.6 + node.def.position[0]) * 0.04;
         node.inner.position.y = node.baseY + bob + lift;
         node.edge.position.y = node.inner.position.y;
-        (node.inner.material as THREE.MeshPhysicalMaterial).opacity = isHovered ? 0.35 : 0.2;
-        (node.edge.material as THREE.LineBasicMaterial).opacity = isHovered ? 0.95 : 0.45;
+        (node.inner.material as THREE.MeshPhysicalMaterial).opacity = isHovered ? 0.38 : 0.22;
+        (node.edge.material as THREE.LineBasicMaterial).opacity = isHovered ? 1 : 0.65;
         node.lineMaterial.opacity = isActive ? 0.55 : 0.22;
         node.particle.visible = isActive && !reduced;
 
@@ -283,6 +299,8 @@ function useHallaSystem(
       mount!.removeEventListener("pointermove", onPointerMove);
       mount!.removeEventListener("pointerleave", onPointerLeave);
       mount!.removeChild(renderer.domElement);
+      envTexture.dispose();
+      pmremGenerator.dispose();
       scene.traverse((obj) => {
         if (obj instanceof THREE.Mesh || obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
           obj.geometry?.dispose();
