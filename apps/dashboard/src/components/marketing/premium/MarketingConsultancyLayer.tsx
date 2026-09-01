@@ -3,15 +3,8 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
-import { DotPattern } from "@/components/magic-ui/dot-pattern";
 import { BorderBeam } from "@/components/magic-ui/border-beam";
 import { ShimmerButton } from "@/components/magic-ui/shimmer-button";
-
-const HallaSystemScene = dynamic(
-  () => import("./consultancy-intelligence/HallaSystemScene").then((m) => ({ default: m.HallaSystemScene })),
-  { ssr: false },
-);
 
 function useConsultancyPageActive() {
   const [active, setActive] = useState(false);
@@ -56,14 +49,7 @@ function spaGo(page: string) {
 
 function enhanceConsultHero() {
   const hero = document.querySelector("#page-consultancy .consult-hero");
-  if (!hero || hero.querySelector(".consult-hero-fx")) return;
-
-  const fx = document.createElement("div");
-  fx.className = "consult-hero-fx";
-  fx.id = "consult-hero-fx-mount";
-  hero.insertBefore(fx, hero.firstChild);
-
-  const gradient = hero.querySelector(".consult-gradient-text");
+  const gradient = hero?.querySelector(".consult-gradient-text");
   gradient?.classList.add("consult-gradient-text--animated");
 }
 
@@ -108,7 +94,6 @@ function enhanceConsultCta(): HTMLElement | null {
 
 export function MarketingConsultancyLayer() {
   const active = useConsultancyPageActive();
-  const [heroFx, setHeroFx] = useState<HTMLElement | null>(null);
   const [beamMounts, setBeamMounts] = useState<HTMLElement[]>([]);
   const [heroCtaMount, setHeroCtaMount] = useState<HTMLElement | null>(null);
   const [footerCtaMount, setFooterCtaMount] = useState<HTMLElement | null>(null);
@@ -119,7 +104,6 @@ export function MarketingConsultancyLayer() {
     consult?.classList.add("has-consult-premium");
 
     enhanceConsultHero();
-    setHeroFx(document.getElementById("consult-hero-fx-mount"));
     setBeamMounts(enhanceServiceCards());
     setHeroCtaMount(enhanceHeroCta());
     setFooterCtaMount(enhanceConsultCta());
@@ -129,22 +113,6 @@ export function MarketingConsultancyLayer() {
 
   return (
     <>
-      {heroFx &&
-        createPortal(
-          <>
-            <DotPattern
-              className="consult-dot-pattern [mask-image:radial-gradient(500px_circle_at_center,white,transparent)]"
-              width={20}
-              height={20}
-              cx={1}
-              cy={1}
-              cr={1}
-              glow
-            />
-            <HallaSystemScene />
-          </>,
-          heroFx,
-        )}
       {beamMounts.map((mount, i) =>
         createPortal(
           <BorderBeam

@@ -826,23 +826,22 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-hero {
   position: relative; overflow: hidden;
   padding: 140px 0 88px;
+}
+/* Background lives on a pseudo-element (not the section's own background)
+   so RTL can flip it with a transform — the graphic's content sits in its
+   own right two-thirds, so just repositioning the crop (background-position)
+   left it colliding with the now-right-aligned body copy instead of moving
+   with it. Mirroring the image is the standard fix for a decorative photo
+   like this one. */
+.consult-hero::before {
+  content: ""; position: absolute; inset: 0; z-index: 0;
   background: url('/consultancy-hero-bg.jpg') center right / cover no-repeat;
 }
-/* No radial glow blob — flat ink background lets the graph canvas read
-   through on its own. */
+html[dir="rtl"] .consult-hero::before {
+  transform: scaleX(-1);
+}
+/* No radial glow blob — the hero background photo reads through on its own. */
 .consult-hero-glow { display: none; }
-/* Halla System 3D scene mount — confined to the right side via a mask so it
-   never sits behind the headline/body copy (left column stays flat text on
-   the porcelain background regardless of what the scene is doing). */
-.consult-hero-fx {
-  position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, transparent 30%, black 52%, black 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, transparent 30%, black 52%, black 100%);
-}
-html[dir="rtl"] .consult-hero-fx {
-  -webkit-mask-image: linear-gradient(270deg, transparent 0%, transparent 30%, black 52%, black 100%);
-  mask-image: linear-gradient(270deg, transparent 0%, transparent 30%, black 52%, black 100%);
-}
 .consult-hero-grid {
   position: relative; z-index: 1;
   display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 56px; align-items: center;
@@ -1137,11 +1136,6 @@ body[data-section="consultancy"] .cta-block::before,
   .consult-timeline { grid-template-columns: 1fr 1fr; }
   .consult-timeline::before { display: none; }
   .consult-split { grid-template-columns: 1fr; }
-  /* Below desktop the hero stacks to one column and the bento block sits
-     under the copy at full width — the WebGL scene has no dedicated lane to
-     live in there, so it's a tablet/mobile-specific choice to drop it
-     rather than squeeze/scale the desktop composition into a strip. */
-  .halla-system-scene { display: none; }
 }
 @media (max-width: 640px) {
   .consult-hero { padding: 120px 0 64px; }
