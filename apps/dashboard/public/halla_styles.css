@@ -876,11 +876,19 @@ html[dir="rtl"] .consult-hero::before {
   display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
 }
 .consult-bento-card {
-  background: var(--white); border: 1px solid var(--consult-hairline);
+  /* Translucent glass, not opaque white — the hero background graphic
+     sits directly behind this grid, and an opaque card fully hides
+     whatever part of it is underneath. Blur keeps stat text readable
+     over the image without blocking the image out entirely. */
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: var(--radius-lg); padding: 22px 20px;
-  transition: border-color 0.25s, transform 0.25s;
+  box-shadow: 0 8px 24px rgba(23, 21, 18, 0.06);
+  transition: border-color 0.25s, transform 0.25s, background-color 0.25s;
 }
-.consult-bento-card:hover { border-color: var(--consult-hairline-strong); transform: translateY(-2px); }
+.consult-bento-card:hover { background: rgba(255, 255, 255, 0.78); border-color: var(--consult-hairline-strong); transform: translateY(-2px); }
 .consult-bento-main { grid-row: span 2; display: flex; flex-direction: column; justify-content: center; }
 .consult-bento-wide { grid-column: span 2; }
 .consult-bento-icon { font-size: 1.6rem; color: var(--consult-accent-soft); margin-bottom: 12px; }
