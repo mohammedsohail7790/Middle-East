@@ -203,8 +203,8 @@ export function funnelFromApi(raw: unknown) {
   const steps = [
     { key: "calls", name: "Calls", fill: "#C9A24B" },
     { key: "leads", name: "Leads", fill: "#E4C878" },
-    { key: "qualified", name: "Qualified", fill: "#818CF8" },
-    { key: "appointments", name: "Appointments", fill: "#A78BFA" },
+    { key: "qualified", name: "Qualified", fill: "#B8AD9A" },
+    { key: "appointments", name: "Appointments", fill: "#8C6F3E" },
     { key: "confirmed", name: "Confirmed", fill: "#10B981" },
   ];
   const max = Math.max(...steps.map((s) => Number(o[s.key] ?? 0)), 1);

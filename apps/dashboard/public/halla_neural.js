@@ -6,8 +6,8 @@
 (function () {
   'use strict';
 
-  const ACCENT = 0x0d9488;
-  const ACCENT_GLOW = 0x2dd4bf;
+  const ACCENT = 0x8c6f3e;
+  const ACCENT_GLOW = 0xc7a25a;
   const BG_FADE = 0xf9fafb;
 
   const scenes = new Map();

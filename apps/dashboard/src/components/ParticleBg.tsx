@@ -47,7 +47,7 @@ export function ParticleBg() {
           const dy = pts[i].y - pts[j].y;
           const d = Math.hypot(dx, dy);
           if (d < 140) {
-            ctx.strokeStyle = `rgba(139,92,246,${(1 - d / 140) * 0.2})`;
+            ctx.strokeStyle = `rgba(140,111,62,${(1 - d / 140) * 0.2})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(pts[i].x, pts[i].y);
@@ -58,7 +58,7 @@ export function ParticleBg() {
       }
       // Draw dots
       for (const p of pts) {
-        ctx.fillStyle = "rgba(139,92,246,0.5)";
+        ctx.fillStyle = "rgba(140,111,62,0.5)";
         ctx.beginPath();
         ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
         ctx.fill();

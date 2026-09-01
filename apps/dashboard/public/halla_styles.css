@@ -1,7 +1,7 @@
 /* ================================================
    Halla AI — Stylesheet
-   Design: SkipCalls/SideShift inspired
-   Font: Hanken Grotesk | Primary: #0A0A0A | Accent: #0D9488
+   Design: warm porcelain/gold luxury system
+   Font: Hanken Grotesk | Primary: #121212 | Accent: #C7A25A
    © 2025 Halla AI
 ================================================ */
 
@@ -132,7 +132,7 @@ p { color: var(--gray-500); line-height: 1.72; }
 .btn-outline { background: transparent; color: var(--black); border: 1.5px solid var(--gray-200); }
 .btn-outline:hover { border-color: var(--gray-400); background: var(--gray-50); }
 .btn-blue { background: var(--accent); color: var(--white); }
-.btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(13,148,136,0.3); }
+.btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(140,111,62,0.3); }
 /* Primary CTA buttons ("Book a Diagnostic Call", etc.) use the shared
    .btn-blue class, which is teal everywhere else on the site — swap it
    for the consultancy accent while any page in that section is active.
@@ -481,7 +481,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 .cta-block::before {
   content: ""; position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
   width: 500px; height: 300px;
-  background: radial-gradient(circle, rgba(13,148,136,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(140,111,62,0.15) 0%, transparent 70%);
   pointer-events: none;
 }
 .cta-block h2, .cta-block h3 { color: var(--white); }
@@ -672,7 +672,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 }
 .logo-pill:hover {
   border-color: var(--accent); color: var(--accent);
-  box-shadow: 0 4px 12px rgba(13,148,136,0.15);
+  box-shadow: 0 4px 12px rgba(140,111,62,0.15);
   transform: translateY(-1px);
 }
 .logo-pill svg { flex-shrink: 0; border-radius: 4px; }

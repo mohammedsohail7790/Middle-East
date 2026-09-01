@@ -44,7 +44,7 @@ export function ParticleField({ density = 70, className = "" }: { density?: numb
           const dy = pts[i].y - pts[j].y;
           const d = Math.hypot(dx, dy);
           if (d < 140 * dpr) {
-            ctx.strokeStyle = `rgba(168,85,247,${(1 - d / (140 * dpr)) * 0.25})`;
+            ctx.strokeStyle = `rgba(140,111,62,${(1 - d / (140 * dpr)) * 0.25})`;
             ctx.lineWidth = dpr;
             ctx.beginPath();
             ctx.moveTo(pts[i].x, pts[i].y);
@@ -54,7 +54,7 @@ export function ParticleField({ density = 70, className = "" }: { density?: numb
         }
       }
       for (const p of pts) {
-        ctx.fillStyle = "rgba(168,85,247,0.55)";
+        ctx.fillStyle = "rgba(140,111,62,0.55)";
         ctx.beginPath();
         ctx.arc(p.x, p.y, 1.6 * dpr, 0, Math.PI * 2);
         ctx.fill();
@@ -77,11 +77,11 @@ export function AnimatedMesh({ className = "" }: { className?: string }) {
     <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`} aria-hidden>
       <div
         className="absolute -top-40 -left-40 w-[60rem] h-[60rem] rounded-full opacity-30 blur-3xl animate-pulse-slow"
-        style={{ background: "radial-gradient(circle, rgba(124,58,237,0.5), transparent 60%)" }}
+        style={{ background: "radial-gradient(circle, rgba(140,111,62,0.5), transparent 60%)" }}
       />
       <div
         className="absolute -bottom-40 -right-40 w-[60rem] h-[60rem] rounded-full opacity-25 blur-3xl animate-pulse-slow"
-        style={{ background: "radial-gradient(circle, rgba(192,132,252,0.4), transparent 60%)" }}
+        style={{ background: "radial-gradient(circle, rgba(199,162,90,0.4), transparent 60%)" }}
       />
     </div>
   );

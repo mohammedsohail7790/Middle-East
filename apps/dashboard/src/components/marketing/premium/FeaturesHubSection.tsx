@@ -25,7 +25,7 @@ export function FeaturesHubSection() {
         <p className="lead">Hover a capability to see how Halla AI handles it for your business.</p>
         <div className="premium-features-hub">
           <div>
-            <h3 style={{ fontSize: "1.25rem", marginBottom: 12, color: "#2dd4bf" }}>{current.label}</h3>
+            <h3 style={{ fontSize: "1.25rem", marginBottom: 12, color: "#C7A25A" }}>{current.label}</h3>
             <p style={{ color: "rgba(248,250,252,0.75)", lineHeight: 1.7 }}>{current.detail}</p>
             <div className="premium-gcc-strip" style={{ marginTop: 24 }}>
               <span className="premium-gcc-badge">English + Arabic</span>

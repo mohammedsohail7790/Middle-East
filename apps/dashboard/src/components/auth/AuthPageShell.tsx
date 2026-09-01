@@ -145,7 +145,7 @@ export function AuthCard({
 }) {
   return (
     <div className="relative w-full max-w-[420px] overflow-hidden rounded-2xl border border-border/70 bg-white/90 px-6 py-8 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)] backdrop-blur-sm sm:px-10 sm:py-10">
-      <BorderBeam size={90} duration={10} colorFrom="#0D9488" colorTo="#2DD4BF" borderWidth={1.5} />
+      <BorderBeam size={90} duration={10} colorFrom="#C7A25A" colorTo="#8C6F3E" borderWidth={1.5} />
       <h1 className="text-2xl font-extrabold tracking-tight text-foreground">{title}</h1>
       {description && (
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{description}</p>

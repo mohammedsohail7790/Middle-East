@@ -159,7 +159,7 @@ export function MarketingConsultancyLayer() {
           >
             <ShimmerButton
               className="btn-lg consult-shimmer-cta"
-              background="linear-gradient(135deg, #C7A25A 0%, #8C6F3E 100%)"
+              background="linear-gradient(160deg, #2B2D2A 0%, #121212 100%)"
               onClick={() => spaGo("consult-signup")}
             >
               Book a Diagnostic Call →
@@ -177,7 +177,7 @@ export function MarketingConsultancyLayer() {
           >
             <ShimmerButton
               className="btn-lg consult-shimmer-cta"
-              background="linear-gradient(135deg, #C7A25A 0%, #8C6F3E 100%)"
+              background="linear-gradient(160deg, #2B2D2A 0%, #121212 100%)"
               onClick={() => spaGo("consult-signup")}
             >
               Book Your Diagnostic Call →

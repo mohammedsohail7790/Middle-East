@@ -15,7 +15,7 @@ export function VibePanel({ children, className, innerClassName, beam = false }:
   return (
     <div className={cn("vibe-panel relative overflow-hidden", className)}>
       {beam && (
-        <BorderBeam size={85} duration={10} colorFrom="#0D9488" colorTo="#2DD4BF" borderWidth={1.5} />
+        <BorderBeam size={85} duration={10} colorFrom="#C7A25A" colorTo="#8C6F3E" borderWidth={1.5} />
       )}
       <div className={cn("relative z-[1]", innerClassName)}>{children}</div>
     </div>

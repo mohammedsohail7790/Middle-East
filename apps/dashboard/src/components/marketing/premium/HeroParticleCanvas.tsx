@@ -51,7 +51,7 @@ export function HeroParticleCanvas({ className }: { className?: string }) {
           const dy = pts[i].y - pts[j].y;
           const d = Math.hypot(dx, dy);
           if (d < 120 * dpr) {
-            ctx.strokeStyle = `rgba(13,148,136,${(1 - d / (120 * dpr)) * 0.18})`;
+            ctx.strokeStyle = `rgba(140,111,62,${(1 - d / (120 * dpr)) * 0.18})`;
             ctx.lineWidth = dpr;
             ctx.beginPath();
             ctx.moveTo(pts[i].x, pts[i].y);
@@ -61,7 +61,7 @@ export function HeroParticleCanvas({ className }: { className?: string }) {
         }
       }
       for (const p of pts) {
-        ctx.fillStyle = "rgba(45,212,191,0.55)";
+        ctx.fillStyle = "rgba(199,162,90,0.55)";
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fill();

@@ -45,7 +45,7 @@ function TealParticleCanvas() {
           const dy = pts[i].y - pts[j].y;
           const d = Math.hypot(dx, dy);
           if (d < 100 * dpr) {
-            ctx.strokeStyle = `rgba(13,148,136,${(1 - d / (100 * dpr)) * 0.12})`;
+            ctx.strokeStyle = `rgba(140,111,62,${(1 - d / (100 * dpr)) * 0.12})`;
             ctx.lineWidth = dpr;
             ctx.beginPath();
             ctx.moveTo(pts[i].x, pts[i].y);
@@ -55,7 +55,7 @@ function TealParticleCanvas() {
         }
       }
       for (const p of pts) {
-        ctx.fillStyle = "rgba(13,148,136,0.35)";
+        ctx.fillStyle = "rgba(140,111,62,0.35)";
         ctx.beginPath();
         ctx.arc(p.x, p.y, 1.2 * dpr, 0, Math.PI * 2);
         ctx.fill();
