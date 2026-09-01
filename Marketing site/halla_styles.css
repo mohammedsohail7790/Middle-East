@@ -117,14 +117,14 @@ p { color: var(--gray-500); line-height: 1.72; }
    stylesheet, see the .card note above) otherwise wins on every marketing
    CTA button site-wide. */
 #marketing-spa-root .btn-primary {
-  background: var(--consult-accent) !important;
-  color: var(--consult-ink) !important;
+  background: var(--consult-text) !important;
+  color: var(--white) !important;
   border: none !important;
   box-shadow: none !important;
 }
 #marketing-spa-root .btn-primary:hover {
   background: var(--consult-accent-soft) !important;
-  box-shadow: none !important;
+  box-shadow: 0 8px 24px var(--consult-accent-dim) !important;
 }
 .btn-outline { background: transparent; color: var(--black); border: 1.5px solid var(--gray-200); }
 .btn-outline:hover { border-color: var(--gray-400); background: var(--gray-50); }
@@ -154,7 +154,7 @@ body[data-section="consultancy"] .btn-blue,
 #page-pricing .btn-blue,
 #page-features .btn-blue,
 #page-how-it-works .btn-blue {
-  background: var(--consult-accent) !important; color: var(--consult-ink) !important;
+  background: var(--consult-text) !important; color: var(--white) !important;
 }
 body[data-section="consultancy"] .btn-blue:hover,
 #page-consultancy .btn-blue:hover,
@@ -805,7 +805,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 #page-pricing .pricing-card.popular .pricing-feature { color: var(--consult-text-muted); }
 #page-pricing .pricing-card.popular .pricing-feature::before { color: var(--consult-accent-soft); }
 #page-pricing .pricing-card.popular .p-divider { border-color: var(--consult-hairline); }
-#page-pricing .pop-badge { background: var(--consult-accent); color: var(--consult-ink); }
+#page-pricing .pop-badge { background: var(--consult-accent); color: var(--consult-text); }
 
 /* ============ CONSULTANCY — PREMIUM LAYOUT ============ */
 #page-consultancy { position: relative; }
@@ -964,7 +964,7 @@ html[dir="rtl"] .lang-ar.lang-block { display: block; }
 .consult-featured-badge {
   position: absolute; top: 18px; right: 18px;
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  background: var(--consult-accent); color: var(--consult-ink); padding: 5px 10px; border-radius: 999px;
+  background: var(--consult-accent); color: var(--consult-text); padding: 5px 10px; border-radius: 999px;
 }
 .consult-service-card h3 { font-size: 1.2rem; margin-bottom: 10px; color: var(--consult-text); }
 .consult-service-card p { font-size: 0.9rem; margin-bottom: 16px; color: var(--consult-text-muted); }
