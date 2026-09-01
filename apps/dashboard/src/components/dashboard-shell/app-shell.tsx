@@ -161,7 +161,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <HallaAiLogo href={undefined} iconOnly size="sm" />
             </Link>
           ) : (
-            <div className="dashboard-sidebar-logo flex justify-center pr-8">
+            <div className="dashboard-sidebar-logo dark flex justify-center pr-8">
             <HallaAiLogo href="/dashboard" size="lg" centered className="w-full max-w-[220px]" linkAs={Link} />
             </div>
           )}

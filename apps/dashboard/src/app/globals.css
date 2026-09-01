@@ -94,17 +94,19 @@
   --chart-1: var(--cyan);
   --chart-2: var(--green);
   --chart-3: var(--cyan-light);
-  --sidebar: var(--white);
-  --sidebar-foreground: var(--gray-600);
+  /* Sidebar is a fixed dark operational rail — always dark regardless of the
+     app's own light/dark theme toggle, per the approved dashboard reference. */
+  --sidebar: #0E1116;
+  --sidebar-foreground: #F9FAFC;
   --sidebar-accent: var(--cyan-muted);
-  --sidebar-border: var(--gray-200);
+  --sidebar-border: #2A313C;
   --nav-hover: var(--gray-100);
 
-  /* Sidebar component variables (light) */
-  --color-sidebar-ink: var(--black);
-  --color-sidebar-muted: var(--gray-500);
-  --color-sidebar-elevated: var(--gray-100);
-  --color-sidebar-rule: var(--gray-200);
+  /* Sidebar component variables — always dark, matching --sidebar above. */
+  --color-sidebar-ink: #F9FAFC;
+  --color-sidebar-muted: #858C89;
+  --color-sidebar-elevated: #2A313C;
+  --color-sidebar-rule: #404753;
   --color-accent: var(--cyan);
   --color-accent-ink: var(--white);
   --color-ink: var(--black);
@@ -113,7 +115,7 @@
   --color-paper-2: var(--gray-50);
   --color-paper-3: var(--gray-100);
   --color-elevated: var(--white);
-  --color-sidebar: var(--white);
+  --color-sidebar: #0E1116;
   --color-accent-muted: var(--accent-light);
   --color-ink-2: var(--gray-600);
   --color-rule: var(--gray-200);
@@ -1567,6 +1569,18 @@ body:has(.auth-shell) {
     background: var(--sidebar);
   }
 
+  /* Collapse/expand/close icon buttons in the sidebar header are plain
+     Tailwind utilities (text-muted-foreground) with no dedicated class —
+     that resolves dark-gray, invisible against the always-dark sidebar. */
+  .dashboard-sidebar-brand button {
+    color: rgba(255,255,255,0.55) !important;
+  }
+
+  .dashboard-sidebar-brand button:hover {
+    color: rgba(255,255,255,0.9) !important;
+    background: rgba(255,255,255,0.08) !important;
+  }
+
   @media (max-width: 1023px) {
     .dashboard-sidebar {
       height: 100dvh;
@@ -1985,7 +1999,8 @@ body:has(.auth-shell) {
   }
 
   .dashboard-nav-group-label {
-    @apply px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground;
+    @apply px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest;
+    color: rgba(255,255,255,0.35);
   }
 
   .nav-icon-well {
@@ -2006,17 +2021,17 @@ body:has(.auth-shell) {
 
   .dashboard-nav-link {
     @apply flex items-center gap-2.5 px-2 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 relative min-h-[44px] lg:min-h-[38px] no-underline;
-    color: var(--gray-500);
+    color: rgba(255,255,255,0.45);
   }
 
   .dashboard-nav-link:hover {
-    background: color-mix(in srgb, var(--accent) 6%, transparent);
-    color: var(--foreground);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.85);
   }
 
   .dashboard-nav-link.is-active {
-    background: color-mix(in srgb, var(--accent) 10%, transparent);
-    color: var(--accent-dark);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    color: var(--gold-light);
     font-weight: 600;
   }
 
