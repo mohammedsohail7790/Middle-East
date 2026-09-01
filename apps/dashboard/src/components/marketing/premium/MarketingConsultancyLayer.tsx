@@ -3,9 +3,15 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { DotPattern } from "@/components/magic-ui/dot-pattern";
 import { BorderBeam } from "@/components/magic-ui/border-beam";
 import { ShimmerButton } from "@/components/magic-ui/shimmer-button";
+
+const HallaSystemScene = dynamic(
+  () => import("./consultancy-intelligence/HallaSystemScene").then((m) => ({ default: m.HallaSystemScene })),
+  { ssr: false },
+);
 
 function useConsultancyPageActive() {
   const [active, setActive] = useState(false);
@@ -125,15 +131,18 @@ export function MarketingConsultancyLayer() {
     <>
       {heroFx &&
         createPortal(
-          <DotPattern
-            className="consult-dot-pattern [mask-image:radial-gradient(500px_circle_at_center,white,transparent)]"
-            width={20}
-            height={20}
-            cx={1}
-            cy={1}
-            cr={1}
-            glow
-          />,
+          <>
+            <DotPattern
+              className="consult-dot-pattern [mask-image:radial-gradient(500px_circle_at_center,white,transparent)]"
+              width={20}
+              height={20}
+              cx={1}
+              cy={1}
+              cr={1}
+              glow
+            />
+            <HallaSystemScene />
+          </>,
           heroFx,
         )}
       {beamMounts.map((mount, i) =>
