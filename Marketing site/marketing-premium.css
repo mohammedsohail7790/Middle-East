@@ -62,7 +62,7 @@
   font-size: 0.65rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--consult-text-faint);
 }
 
 .hp3d-call-header strong {
@@ -98,11 +98,11 @@
   margin: 14px 12px 0;
   padding: 10px 12px;
   border-radius: 14px 14px 14px 4px;
-  background: rgba(140, 111, 62, 0.15);
+  background: rgba(140, 111, 62, 0.12);
   border: 1px solid rgba(199, 162, 90, 0.25);
   font-size: 0.72rem;
   line-height: 1.45;
-  color: #e2e8f0;
+  color: var(--consult-text);
 }
 
 .hp3d-wave {
@@ -189,8 +189,14 @@
 
 .premium-section--muted { background: var(--gray-50); }
 .premium-section--dark {
-  background: linear-gradient(180deg, var(--consult-ink) 0%, var(--consult-ink-soft) 100%);
-  color: var(--consult-text);
+  /* Explicit dark tones, not var(--consult-ink)/--consult-ink-soft — those
+     flipped to white in the rebrand (see their definition in halla_styles.css),
+     which silently broke every rgba(248,250,252,…) / rgba(255,255,255,…)
+     child rule in this "dark" section that assumed a dark background under
+     white text. Reuses the same dark-chrome palette as .hp3d-phone rather
+     than inventing a new one. */
+  background: linear-gradient(180deg, #1a1f2e 0%, #0d1117 60%, #151b28 100%);
+  color: #F4EFE4;
 }
 
 .premium-label {
@@ -206,6 +212,13 @@
 }
 
 .premium-section--dark .premium-label { color: var(--consult-accent-soft); }
+/* halla_styles.css sets a global `h2 { color: var(--black) }` / `h3 { … }`
+   rule — a direct match always beats an inherited value, so
+   .premium-section--dark's own `color` (above) never reaches headings on
+   its own. Without this, every dark-section heading renders near-black on
+   a near-black background regardless of what the section sets. */
+.premium-section--dark h2,
+.premium-section--dark h3:not(.premium-features-core) { color: #F4EFE4; }
 
 .premium-section h2 {
   font-size: clamp(1.75rem, 3.5vw, 2.5rem);
@@ -404,7 +417,11 @@
 
 .premium-video-thumb {
   aspect-ratio: 16/10;
-  background: linear-gradient(135deg, var(--consult-ink), #8C6F3E);
+  /* Explicit dark tones, not var(--consult-ink) — this is a self-contained
+     device-chrome mockup (a WebGL/CSS interactive demo screen), not a page
+     section. --consult-ink is white post-rebrand, which broke this card's
+     always-white child text once the gradient's start stop went dark→light. */
+  background: linear-gradient(135deg, #171512, #8C6F3E);
   display: grid;
   place-items: center;
   position: relative;
@@ -580,7 +597,7 @@
   padding: 12px 16px;
   border-radius: 14px;
   background: var(--white);
-  color: var(--consult-ink);
+  color: var(--consult-text);
   border: 1px solid var(--gray-200);
   font-size: 0.8rem;
   font-weight: 600;
@@ -706,7 +723,7 @@
   margin-bottom: 4px;
 }
 
-.premium-dash-card span { font-size: 0.75rem; color: rgba(255, 255, 255, 0.5); }
+.premium-dash-card span { font-size: 0.75rem; color: var(--consult-text-faint); }
 
 /* Industry cards */
 .premium-industry-grid {
@@ -1025,7 +1042,7 @@
 .premium-section--dark .premium-call-stage.is-active {
   background: rgba(140, 111, 62, 0.18);
   border-color: rgba(199, 162, 90, 0.35);
-  color: var(--consult-text);
+  color: #F4EFE4;
 }
 
 .premium-action-divider {
@@ -1389,7 +1406,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   background: var(--white);
-  color: var(--consult-ink);
+  color: var(--consult-text);
   border: 1px solid rgba(140, 111, 62, 0.2);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
   animation: dash3d-float 5s ease-in-out infinite;
@@ -1613,7 +1630,7 @@
 .dash3d-email-head strong {
   display: block;
   font-size: 0.88rem;
-  color: var(--consult-ink);
+  color: var(--consult-text);
 }
 
 .dash3d-email-head span {
