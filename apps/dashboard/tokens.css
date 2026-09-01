@@ -1,4 +1,4 @@
-/* Call IQ · Premium Enterprise Design System */
+/* Halla AI · AI Receptionist Design System */
 
 :root {
   /* AI Receptionist dashboard — restrained graphite + sandstone/gold
@@ -11,7 +11,7 @@
 
   --color-ink: #1F2328;
   --color-ink-2: #3A4454;
-  --color-ink-3: #6B7280;
+  --color-ink-3: #687280;
   --color-ink-muted: #858C89;
 
   --color-rule: #D7D9E3;
@@ -25,10 +25,10 @@
   --color-accent-glow: rgba(198,169,122,0.35);
 
   --color-sidebar: #0E1116;
-  --color-sidebar-elevated: #1C1D1B;
+  --color-sidebar-elevated: #2A313C;
   --color-sidebar-ink: #F9FAFC;
   --color-sidebar-muted: #858C89;
-  --color-sidebar-rule: #2A2D2A;
+  --color-sidebar-rule: #404753;
 
   --color-success: #404A3E;
   --color-success-muted: #EAEEE8;
