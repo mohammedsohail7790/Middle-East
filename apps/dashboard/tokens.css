@@ -6,7 +6,7 @@
      system; see docs reference image for the source palette). */
   --color-paper: #F9FAFC;
   --color-paper-2: #F2F4F7;
-  --color-paper-3: #F7F8F9;
+  --color-paper-3: #E7EBEF;
   --color-elevated: #FFFFFF;
 
   --color-ink: #1F2328;
@@ -14,7 +14,7 @@
   --color-ink-3: #687280;
   --color-ink-muted: #858C89;
 
-  --color-rule: #D7D9E3;
+  --color-rule: #D7DCE3;
   --color-rule-strong: #BEC5C8;
   --color-focus: #8C6F3E;
 
@@ -30,10 +30,23 @@
   --color-sidebar-muted: #858C89;
   --color-sidebar-rule: #404753;
 
-  --color-success: #404A3E;
-  --color-success-muted: #EAEEE8;
-  --color-warning: #C6A97A;
-  --color-warning-muted: #F5EEE0;
+  /* Brand neutrals (approved reference "Brand Palette") */
+  --color-brand-stone: #6C7178;
+  --color-brand-clay: #8A8F98;
+  --color-brand-sand: #C8CED6;
+  --color-brand-silver: #E5E8ED;
+  --color-brand-chalk: #F3F5F8;
+
+  /* Semantic palette (approved reference) */
+  --color-success: #0E6B57;
+  --color-success-muted: #E3F0EC;
+  --color-warning: #F5A623;
+  --color-warning-muted: #FCEFDA;
+  --color-info: #8B5CF6;
+  --color-info-muted: #EFE9FD;
+  --color-highlight: #F7B500;
+  --color-highlight-muted: #FEF3D6;
+  --color-disabled: #E5E7EB;
   --color-error: #A8583F;
   --color-error-muted: #F5E9E5;
 
