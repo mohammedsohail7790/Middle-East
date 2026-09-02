@@ -67,13 +67,12 @@ export default function MarketingRootLayout({
         <link id="halla-styles" rel="stylesheet" href="/halla_styles.css" />
         {/* eslint-disable-next-line @next/next/no-css-tags */}
         <link id="marketing-premium" rel="stylesheet" href="/marketing-premium.css" />
-        {/* eslint-disable-next-line @next/next/no-css-tags */}
         <link
           id="tabler-icons"
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.46.0/dist/tabler-icons.min.css"
         />
-        {/* eslint-disable-next-line @next/next/no-css-tags, @next/next/no-page-custom-font */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           id="halla-fonts"
           rel="stylesheet"

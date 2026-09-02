@@ -11,6 +11,9 @@ export async function signOutAndRedirect() {
   clearDashboardHomeCache();
   clearDashboardBootstrap();
   await supabase.auth.signOut();
+  // Full page reload (not router.push) is intentional here — clears all
+  // client-side React/Zustand state along with the Supabase session.
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
   window.location.href = "/login";
 }
 

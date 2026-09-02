@@ -97,10 +97,7 @@
     "vitest": "^4.1.8"
   },
   "overrides": {
-    "postcss": "^8.5.15",
-    "next": {
-      "postcss": "^8.5.15"
-    }
+    "postcss": "^8.5.15"
   },
   "engines": {
     "node": "22.x",
