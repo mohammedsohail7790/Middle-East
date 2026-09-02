@@ -643,6 +643,12 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
   .hamburger { display: block; }
   .section-switch { display: none; }
   .mob-section-switch { display: flex; }
+  /* Sign In and the primary CTA also don't fit next to the logo, lang
+     toggle, and hamburger at this width — drop both from the top bar. The
+     mobile nav panel (opened by the hamburger) repeats both at the bottom
+     of its link list, so nothing is lost. */
+  .nav-actions .btn-outline,
+  .nav-actions #navPrimaryCta { display: none; }
   .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
   .footer-brand { grid-column: 1 / -1; }
   .grid-4 { grid-template-columns: repeat(2,1fr); }
@@ -665,14 +671,14 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 @media (max-width: 480px) {
   .footer-grid { grid-template-columns: 1fr; }
   .grid-4 { grid-template-columns: 1fr; }
-  .nav-actions .btn-outline { display: none; }
-  /* The primary CTA button ("Get My AI Receptionist"/"Book a Consultation")
-     plus the lang toggle and hamburger no longer fit next to the logo on a
-     phone-width screen — it was overflowing past the viewport (body has
-     overflow-x:hidden, so it was just cut off, not scrollable). The mobile
-     nav panel already repeats this same CTA at the bottom of its list, so
-     drop the top-bar copy here instead of shrinking it illegibly. */
-  .nav-actions #navPrimaryCta { display: none; }
+}
+@media (max-width: 380px) {
+  /* Extra safety margin on the smallest phones (iPhone SE-class, ~320-375px):
+     logo + lang toggle + hamburger still needed a bit more room to
+     comfortably clear the 28px container padding on both sides. */
+  .container { padding: 0 16px; }
+  .halla-wordmark { font-size: 1.35rem; }
+  .lang-toggle button { padding: 6px 9px; font-size: 0.75rem; }
 }
 
 /* ============ INTEGRATION LOGO PILLS ============ */
