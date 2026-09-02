@@ -412,6 +412,9 @@ function setLang(lang) {
   document.querySelectorAll('.lang-toggle button').forEach(b => {
     b.classList.toggle('active', b.dataset.lang === lang);
   });
+  document.querySelectorAll('[data-en][data-ar]').forEach(el => {
+    el.textContent = lang === 'ar' ? el.dataset.ar : el.dataset.en;
+  });
   try { localStorage.setItem('halla_lang', lang); } catch (e) {}
 }
 
