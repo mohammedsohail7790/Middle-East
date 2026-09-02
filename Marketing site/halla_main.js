@@ -192,7 +192,10 @@ function calcROI() {
   document.getElementById('r-annual').textContent = '$' + annual.toLocaleString();
   document.getElementById('r-cost').textContent = '$' + cost.toLocaleString();
   document.getElementById('r-net').textContent = '$' + net.toLocaleString();
-  document.getElementById('r-mult').textContent = 'Net Annual ROI — ' + mult + 'x your investment';
+  const isAr = document.documentElement.getAttribute('lang') === 'ar';
+  document.getElementById('r-mult').textContent = isAr
+    ? 'صافي العائد السنوي — ' + mult + 'x من استثمارك'
+    : 'Net Annual ROI — ' + mult + 'x your investment';
 }
 
 // ============ SOLUTIONS ============
@@ -415,6 +418,7 @@ function setLang(lang) {
   document.querySelectorAll('[data-en][data-ar]').forEach(el => {
     el.textContent = lang === 'ar' ? el.dataset.ar : el.dataset.en;
   });
+  if (document.getElementById('r-mult')) calcROI();
   try { localStorage.setItem('halla_lang', lang); } catch (e) {}
 }
 

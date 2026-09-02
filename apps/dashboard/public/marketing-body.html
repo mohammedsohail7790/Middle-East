@@ -2017,23 +2017,23 @@
 
 <!-- ====== ROI ====== -->
 <div id="page-roi" class="page">
-  <div class="page-hero"><div class="container text-center"><div class="label">ROI Calculator</div><h1>Calculate Your Return</h1><p style="margin-top:12px;font-size:1.05rem">See exactly how fast Halla AI pays for itself.</p></div></div>
+  <div class="page-hero"><div class="container text-center"><div class="label"><span class="lang-en">ROI Calculator</span><span class="lang-ar">حاسبة العائد على الاستثمار</span></div><h1><span class="lang-en">Calculate Your Return</span><span class="lang-ar">احسب عائدك</span></h1><p style="margin-top:12px;font-size:1.05rem"><span class="lang-en">See exactly how fast Halla AI pays for itself.</span><span class="lang-ar">اعرف بالضبط كم يستغرق Halla AI ليعوّض تكلفته.</span></p></div></div>
   <section class="section"><div class="container">
     <div class="grid-2" style="gap:48px;max-width:880px;margin:0 auto;align-items:start">
       <div class="roi-wrap">
-        <h3 style="margin-bottom:24px">Your Business</h3>
-        <div class="roi-group"><label class="roi-label">Industry</label><select class="roi-select" id="r-ind" onchange="calcROI()"><option value="plumbing">Plumbing / HVAC</option><option value="legal">Legal Firm</option><option value="real">Real Estate</option><option value="salon">Salon / Spa</option><option value="general">Other</option></select></div>
-        <div class="roi-group"><label class="roi-label">Monthly Calls You Currently Miss</label><input class="roi-input" type="number" id="r-miss" value="20" oninput="calcROI()"></div>
-        <div class="roi-group"><label class="roi-label">Average Job / Sale Value ($)</label><input class="roi-input" type="number" id="r-val" value="500" oninput="calcROI()"></div>
-        <div class="roi-group"><label class="roi-label">% of Answered Calls That Convert</label><input class="roi-input" type="number" id="r-conv" value="30" min="1" max="100" oninput="calcROI()"></div>
-        <div class="roi-group"><label class="roi-label">Plan</label><select class="roi-select" id="r-plan" onchange="calcROI()"><option value="39">Essential — $39/mo</option><option value="149" selected>Professional — $149/mo</option></select></div>
+        <h3 style="margin-bottom:24px"><span class="lang-en">Your Business</span><span class="lang-ar">عملك</span></h3>
+        <div class="roi-group"><label class="roi-label"><span class="lang-en">Industry</span><span class="lang-ar">المجال</span></label><select class="roi-select" id="r-ind" onchange="calcROI()"><option value="plumbing" data-en="Plumbing / HVAC" data-ar="السباكة / التكييف والتدفئة">Plumbing / HVAC</option><option value="legal" data-en="Legal Firm" data-ar="مكتب محاماة">Legal Firm</option><option value="real" data-en="Real Estate" data-ar="العقارات">Real Estate</option><option value="salon" data-en="Salon / Spa" data-ar="صالون / منتجع صحي">Salon / Spa</option><option value="general" data-en="Other" data-ar="أخرى">Other</option></select></div>
+        <div class="roi-group"><label class="roi-label"><span class="lang-en">Monthly Calls You Currently Miss</span><span class="lang-ar">المكالمات الشهرية التي تفوتك حالياً</span></label><input class="roi-input" type="number" id="r-miss" value="20" oninput="calcROI()"></div>
+        <div class="roi-group"><label class="roi-label"><span class="lang-en">Average Job / Sale Value ($)</span><span class="lang-ar">متوسط قيمة العمل / البيع ($)</span></label><input class="roi-input" type="number" id="r-val" value="500" oninput="calcROI()"></div>
+        <div class="roi-group"><label class="roi-label"><span class="lang-en">% of Answered Calls That Convert</span><span class="lang-ar">% من المكالمات المُجاب عليها التي تتحول إلى عملاء</span></label><input class="roi-input" type="number" id="r-conv" value="30" min="1" max="100" oninput="calcROI()"></div>
+        <div class="roi-group"><label class="roi-label"><span class="lang-en">Plan</span><span class="lang-ar">الباقة</span></label><select class="roi-select" id="r-plan" onchange="calcROI()"><option value="39" data-en="Essential — $39/mo" data-ar="أساسية — 39$/شهرياً">Essential — $39/mo</option><option value="149" selected data-en="Professional — $149/mo" data-ar="احترافية — 149$/شهرياً">Professional — $149/mo</option></select></div>
       </div>
       <div>
-        <div class="roi-result highlight"><div class="roi-result-num" id="r-monthly">$3,000</div><div class="roi-result-label">Monthly Revenue Recovered</div></div>
-        <div class="roi-result" style="margin-top:12px"><div class="roi-result-num" id="r-annual">$36,000</div><div class="roi-result-label">Annual Revenue Recovered</div></div>
-        <div class="roi-result" style="margin-top:12px"><div class="roi-result-num" id="r-cost" style="color:var(--gray-500)">$1,788</div><div class="roi-result-label">Annual Halla AI Cost</div></div>
+        <div class="roi-result highlight"><div class="roi-result-num" id="r-monthly">$3,000</div><div class="roi-result-label"><span class="lang-en">Monthly Revenue Recovered</span><span class="lang-ar">الإيرادات الشهرية المستعادة</span></div></div>
+        <div class="roi-result" style="margin-top:12px"><div class="roi-result-num" id="r-annual">$36,000</div><div class="roi-result-label"><span class="lang-en">Annual Revenue Recovered</span><span class="lang-ar">الإيرادات السنوية المستعادة</span></div></div>
+        <div class="roi-result" style="margin-top:12px"><div class="roi-result-num" id="r-cost" style="color:var(--gray-500)">$1,788</div><div class="roi-result-label"><span class="lang-en">Annual Halla AI Cost</span><span class="lang-ar">التكلفة السنوية لـ Halla AI</span></div></div>
         <div class="roi-result highlight" style="margin-top:12px"><div class="roi-result-num" id="r-net">$34,212</div><div class="roi-result-label" id="r-mult">Net Annual ROI — 20x your investment</div></div>
-        <a class="btn btn-primary btn-lg" style="width:100%;margin-top:20px" href="javascript:void(0)" onclick="go('signup')">Start Free Trial — Capture This Revenue →</a>
+        <a class="btn btn-primary btn-lg" style="width:100%;margin-top:20px" href="javascript:void(0)" onclick="go('signup')"><span class="lang-en">Start Free Trial — Capture This Revenue →</span><span class="lang-ar">ابدأ تجربتك المجانية — استعد هذه الإيرادات ←</span></a>
       </div>
     </div>
   </div></section>
