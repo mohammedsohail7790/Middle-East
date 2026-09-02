@@ -442,6 +442,25 @@ function initConsultForm() {
   const btn = document.getElementById('consultSignupBtn');
   const form = btn && btn.closest('.card');
   if (!btn || !form) return;
+
+  const nameInput = form.querySelector('input[type="text"]');
+  const emailInput = form.querySelector('input[type="email"]');
+  const phoneInput = form.querySelector('input[type="tel"]');
+  const businessInput = form.querySelectorAll('input[type="text"]')[1] || null;
+  const prioritySelect = form.querySelector('select');
+  const notesTextarea = form.querySelector('textarea');
+
+  let statusEl = form.querySelector('.consult-form-status');
+  if (!statusEl) {
+    statusEl = document.createElement('div');
+    statusEl.className = 'consult-form-status';
+    statusEl.style.marginTop = '12px';
+    statusEl.style.fontSize = '0.9rem';
+    btn.insertAdjacentElement('afterend', statusEl);
+  }
+
+  const btnDefaultText = btn.textContent;
+
   btn.addEventListener('click', (e) => {
     e.preventDefault();
     const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]');
@@ -453,13 +472,46 @@ function initConsultForm() {
         valid = false;
       }
     });
-    const email = form.querySelector('input[type="email"]');
-    if (email && email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-      email.style.borderColor = 'var(--red)';
+    if (emailInput && emailInput.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+      emailInput.style.borderColor = 'var(--red)';
       valid = false;
     }
     if (!valid) return;
-    alert('Thank you! We will reach out within 1 business day to schedule your diagnostic call.');
+
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    statusEl.style.color = '';
+    statusEl.textContent = '';
+
+    fetch('https://gateway.hallaai.com/api/v1/public/consult-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: nameInput ? nameInput.value.trim() : '',
+        email: emailInput ? emailInput.value.trim() : '',
+        phone: phoneInput ? phoneInput.value.trim() : undefined,
+        business: businessInput ? businessInput.value.trim() : undefined,
+        priority: prioritySelect ? prioritySelect.value : undefined,
+        notes: notesTextarea ? notesTextarea.value.trim() : undefined,
+      }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Something went wrong. Please email hello@hallaai.com directly.');
+        }
+        statusEl.style.color = 'var(--green, #2ecc71)';
+        statusEl.textContent = 'Thank you! We will reach out within 1 business day to schedule your diagnostic call.';
+        form.querySelectorAll('input, select, textarea').forEach((el) => { el.value = ''; });
+        btn.textContent = btnDefaultText;
+        btn.disabled = false;
+      })
+      .catch((err) => {
+        statusEl.style.color = 'var(--red)';
+        statusEl.textContent = err.message || 'Something went wrong. Please email hello@hallaai.com directly.';
+        btn.textContent = btnDefaultText;
+        btn.disabled = false;
+      });
   });
 }
 

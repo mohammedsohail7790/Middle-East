@@ -36,6 +36,9 @@ const PUBLIC_POST_ROUTES = new Set([
   // same trust model as the other CRM OAuth callbacks above (no tenant JWT
   // available on an unsolicited vendor-initiated request).
   '/integrations/clio/deauthorize',
+  // Consultancy marketing site's "Book a Diagnostic Call" form — submitted
+  // by a prospect who has no account yet, so no tenant JWT exists.
+  '/public/consult-request',
 ]);
 
 const PUBLIC_GET_ROUTES = new Set([

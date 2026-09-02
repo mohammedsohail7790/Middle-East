@@ -9,6 +9,7 @@ import { createRecordingRouter } from '../services/recordings/recording.controll
 import { createAnalyticsRouter } from '../services/analytics/analytics.controller.js';
 import { createSmsRouter } from '../services/sms/sms.controller.js';
 import { createLeadsRouter } from '../services/leads/leads.controller.js';
+import { createPublicConsultRequestRouter } from '../services/leads/public-consult-request.controller.js';
 import { createTeamRouter } from '../services/team/team.controller.js';
 import { createBusinessHoursRouter } from '../services/business-hours/business-hours.controller.js';
 import { createAIConfigRouter } from '../services/ai-config/ai-config.controller.js';
@@ -70,6 +71,7 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/integrations', createIntegrationOAuthRouter());
     apiRouter.use('/integrations', createIntegrationRouter());
     apiRouter.use('/leads', createLeadsRouter());
+    apiRouter.use('/public/consult-request', createPublicConsultRequestRouter());
     apiRouter.use('/calls', createCallsRouter());
     apiRouter.use('/campaigns', createCampaignsRouter());
     apiRouter.use('/appointments', createAppointmentsRouter());
