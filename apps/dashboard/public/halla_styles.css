@@ -202,7 +202,6 @@ body[data-section="consultancy"] .btn-blue:hover,
   background: var(--white); color: var(--accent-dark); box-shadow: var(--shadow-sm);
 }
 .mob-section-switch { display: none; margin: 6px 14px 10px; }
-@media (max-width: 768px) { .section-switch { display: none; } .mob-section-switch { display: flex; } }
 
 /* ============ SECTION MODE (Consultancy vs AI Receptionist) ============ */
 /* Default (before JS runs, or if data-section is absent): Consultancy shows, Receptionist hides. */
@@ -635,13 +634,20 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
 
 /* ============ RESPONSIVE ============ */
 @media (max-width: 1024px) {
+  /* Tablet: the full desktop nav (section-switch pill + dropdowns + lang
+     toggle + Sign In + CTA button) doesn't fit in the 1024px container —
+     it silently overflowed past the viewport (body has overflow-x:hidden)
+     instead of wrapping, cutting off the later nav links. Switch to the
+     hamburger menu here instead of waiting until the 768px phone breakpoint. */
+  .nav-links { display: none; }
+  .hamburger { display: block; }
+  .section-switch { display: none; }
+  .mob-section-switch { display: flex; }
   .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
   .footer-brand { grid-column: 1 / -1; }
   .grid-4 { grid-template-columns: repeat(2,1fr); }
 }
 @media (max-width: 768px) {
-  .nav-links { display: none; }
-  .hamburger { display: block; }
   .grid-2 { grid-template-columns: 1fr; }
   .grid-3 { grid-template-columns: 1fr; }
   .grid-4 { grid-template-columns: 1fr 1fr; }
@@ -660,6 +666,13 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
   .footer-grid { grid-template-columns: 1fr; }
   .grid-4 { grid-template-columns: 1fr; }
   .nav-actions .btn-outline { display: none; }
+  /* The primary CTA button ("Get My AI Receptionist"/"Book a Consultation")
+     plus the lang toggle and hamburger no longer fit next to the logo on a
+     phone-width screen — it was overflowing past the viewport (body has
+     overflow-x:hidden, so it was just cut off, not scrollable). The mobile
+     nav panel already repeats this same CTA at the bottom of its list, so
+     drop the top-bar copy here instead of shrinking it illegibly. */
+  .nav-actions #navPrimaryCta { display: none; }
 }
 
 /* ============ INTEGRATION LOGO PILLS ============ */
