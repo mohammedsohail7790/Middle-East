@@ -33,7 +33,7 @@ export interface EmailLayoutOptions {
 }
 
 export function renderBrandedEmail(options: EmailLayoutOptions): string {
-  const logoUrl = `${getDashboardBaseUrl()}/logo.png`;
+  const logoUrl = `${getDashboardBaseUrl()}/logo-receptionist.jpg`;
   const { eyebrow, title, bodyHtml, ctaLabel, ctaUrl, preheader } = options;
 
   const ctaBlock = ctaLabel && ctaUrl

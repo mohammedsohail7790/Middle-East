@@ -185,6 +185,12 @@ body[data-section="consultancy"] .btn-blue:hover,
 .logo { display: flex; align-items: center; text-decoration: none; margin-right: 20px; flex-shrink: 0; }
 .halla-wordmark { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; color: var(--black); }
 .halla-wordmark .halla-ai { color: var(--accent); }
+.logo-img { height: 44px; width: auto; border-radius: 6px; object-fit: contain; }
+.footer-logo .logo-img { height: 52px; border-radius: 8px; }
+.logo-img.nav-group[data-section="receptionist"] { display: none; }
+.logo-img.nav-group[data-section="consultancy"] { display: block; }
+body[data-section="receptionist"] .logo-img.nav-group[data-section="receptionist"] { display: block; }
+body[data-section="receptionist"] .logo-img.nav-group[data-section="consultancy"] { display: none; }
 
 .section-switch {
   display: flex; align-items: center; gap: 2px;
@@ -690,6 +696,7 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
      comfortably clear the 28px container padding on both sides. */
   .container { padding: 0 16px; }
   .halla-wordmark { font-size: 1.35rem; }
+  .logo-img { height: 34px; }
   .lang-toggle button { padding: 6px 9px; font-size: 0.75rem; }
 }
 

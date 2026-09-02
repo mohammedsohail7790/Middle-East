@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     "Halla AI answers every call 24/7, books appointments, captures leads, and routes emergencies — automatically.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.hallaai.com"),
   icons: {
-    icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/logo-icon.png", type: "image/png" }],
+    icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/logo-receptionist.jpg", type: "image/jpeg" }],
     apple: "/apple-touch-icon.png",
   },
 };

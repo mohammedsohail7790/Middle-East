@@ -37,11 +37,11 @@ export function HallaAiLogo({
 
   const content = iconOnly ? (
     <Image
-      src="/logo-icon.png"
-      alt="Halla AI"
+      src="/logo-receptionist.jpg"
+      alt="Halla AI — AI Receptionist"
       width={s.icon}
       height={s.icon}
-      className="object-contain mx-auto size-full max-h-10 max-w-10"
+      className="object-contain mx-auto size-full max-h-10 max-w-10 rounded-md"
       priority
     />
   ) : (
@@ -53,24 +53,12 @@ export function HallaAiLogo({
       )}
     >
       <Image
-        src="/logo.png"
-        alt="Halla AI — Smart, Seamless, Always"
+        src="/logo-receptionist.jpg"
+        alt="Halla AI — AI Receptionist"
         width={s.wordmark}
         height={s.height}
         className={cn(
-          "object-contain h-auto w-auto max-h-[var(--logo-h)] dark:hidden",
-          centered ? "object-center mx-auto" : "object-left"
-        )}
-        style={{ "--logo-h": `${s.height}px` } as React.CSSProperties}
-        priority
-      />
-      <Image
-        src="/logo-dark.png"
-        alt="Halla AI — Smart, Seamless, Always"
-        width={s.wordmark}
-        height={s.height}
-        className={cn(
-          "hidden object-contain h-auto w-auto max-h-[var(--logo-h)] dark:block",
+          "object-contain h-auto w-auto max-h-[var(--logo-h)] rounded-md",
           centered ? "object-center mx-auto" : "object-left"
         )}
         style={{ "--logo-h": `${s.height}px` } as React.CSSProperties}
@@ -119,7 +107,7 @@ export function HallaAiMark({
 }) {
   const inner = (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <Image src="/logo-icon.png" alt="" width={44} height={44} className="h-11 w-11 rounded-lg object-contain" />
+      <Image src="/logo-receptionist.jpg" alt="" width={44} height={44} className="h-11 w-11 rounded-lg object-contain" />
       <span className="font-bold text-lg tracking-tight text-foreground leading-none">
         Halla<span className="text-[var(--gold)]">AI</span>
       </span>

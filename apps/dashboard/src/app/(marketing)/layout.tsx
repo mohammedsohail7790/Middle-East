@@ -18,17 +18,17 @@ export const metadata: Metadata = {
       "We install AI systems for operations, growth, and brand — plus a receptionist that never misses a call.",
     type: "website",
     siteName: "Halla AI",
-    images: [{ url: "/logo.png" }],
+    images: [{ url: "/logo-consultancy.jpg" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Halla AI – AI Consultancy & Pure AI Receptionist",
     description:
       "Connected AI systems for small business — and a 24/7 receptionist from $39/month.",
-    images: ["/logo.png"],
+    images: ["/logo-consultancy.jpg"],
   },
   icons: {
-    icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/logo-icon.png", type: "image/png" }],
+    icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/logo-consultancy.jpg", type: "image/jpeg" }],
     apple: "/apple-touch-icon.png",
   },
 };
