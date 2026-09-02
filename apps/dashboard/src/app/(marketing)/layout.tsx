@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     images: ["/logo-consultancy.jpg"],
   },
   icons: {
-    icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/logo-consultancy.jpg", type: "image/jpeg" }],
+    icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/logo-consultancy-favicon.jpg", type: "image/jpeg" }],
     apple: "/apple-touch-icon.png",
   },
 };

@@ -37,7 +37,7 @@ export function HallaAiLogo({
 
   const content = iconOnly ? (
     <Image
-      src="/logo-receptionist.jpg"
+      src="/logo-receptionist-nav.jpg"
       alt="Halla AI — AI Receptionist"
       width={s.icon}
       height={s.icon}
@@ -53,7 +53,7 @@ export function HallaAiLogo({
       )}
     >
       <Image
-        src="/logo-receptionist.jpg"
+        src="/logo-receptionist-nav.jpg"
         alt="Halla AI — AI Receptionist"
         width={s.wordmark}
         height={s.height}
@@ -107,7 +107,7 @@ export function HallaAiMark({
 }) {
   const inner = (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <Image src="/logo-receptionist.jpg" alt="" width={44} height={44} className="h-11 w-11 rounded-lg object-contain" />
+      <Image src="/logo-receptionist-nav.jpg" alt="" width={44} height={44} className="h-11 w-11 rounded-lg object-contain" />
       <span className="font-bold text-lg tracking-tight text-foreground leading-none">
         Halla<span className="text-[var(--gold)]">AI</span>
       </span>

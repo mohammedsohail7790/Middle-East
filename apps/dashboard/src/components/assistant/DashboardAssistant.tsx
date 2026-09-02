@@ -136,7 +136,7 @@ export function DashboardAssistant() {
             <div className="flex items-center gap-3 min-w-0">
               <div className="assistant-logo-wrap shrink-0">
                 <Image
-                  src="/logo-receptionist.jpg"
+                  src="/logo-receptionist-nav.jpg"
                   alt=""
                   width={48}
                   height={48}
