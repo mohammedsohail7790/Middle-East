@@ -1,6 +1,9 @@
 # Build outputs
 .next
 *.next
+# Next.js dev-server generated agent-rules files (recreated on every `next dev`)
+apps/dashboard/AGENTS.md
+apps/dashboard/CLAUDE.md
 dist
 out
 build
