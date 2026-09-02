@@ -638,17 +638,29 @@ body[data-section="receptionist"] .footer-brand p.footer-group[data-section="con
      toggle + Sign In + CTA button) doesn't fit in the 1024px container —
      it silently overflowed past the viewport (body has overflow-x:hidden)
      instead of wrapping, cutting off the later nav links. Switch to the
-     hamburger menu here instead of waiting until the 768px phone breakpoint. */
-  .nav-links { display: none; }
+     hamburger menu here instead of waiting until the 768px phone breakpoint.
+     Must match/exceed the specificity of the section-mode display rules
+     above (e.g. `body[data-section="receptionist"] .nav-links.nav-group
+     [data-section="receptionist"] { display: flex }`, specificity 0,0,4,0)
+     — a plain `.nav-links { display: none }` (0,0,1,0) loses that fight
+     regardless of media query or source order, so nav-links never actually
+     hid and instead overflowed off-screen, pushing the hamburger out of
+     view with it. */
+  body[data-section="receptionist"] .nav-links.nav-group[data-section="receptionist"],
+  body[data-section="consultancy"] .nav-links.nav-group[data-section="consultancy"],
+  .nav-links.nav-group[data-section="consultancy"] { display: none !important; }
   .hamburger { display: block; }
   .section-switch { display: none; }
   .mob-section-switch { display: flex; }
   /* Sign In and the primary CTA also don't fit next to the logo, lang
      toggle, and hamburger at this width — drop both from the top bar. The
      mobile nav panel (opened by the hamburger) repeats both at the bottom
-     of its link list, so nothing is lost. */
+     of its link list, so nothing is lost. Sign In also carries
+     nav-group[data-section="receptionist"], which has its own higher-
+     specificity `display: inline-flex` rule above — !important to be sure
+     this one actually wins, same issue as .nav-links below. */
   .nav-actions .btn-outline,
-  .nav-actions #navPrimaryCta { display: none; }
+  .nav-actions #navPrimaryCta { display: none !important; }
   .footer-grid { grid-template-columns: 1fr 1fr 1fr; }
   .footer-brand { grid-column: 1 / -1; }
   .grid-4 { grid-template-columns: repeat(2,1fr); }
