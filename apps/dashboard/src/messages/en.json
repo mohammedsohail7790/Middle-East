@@ -671,7 +671,7 @@
     "trialDesc": "Professional features · {days} day{daysSuffix} left · {minutes} minutes remaining (60 total, cumulative)",
     "trialWarnings": "Warnings at 40, 50, 55, and 58 minutes. Trial ends when you hit 60 minutes or 14 days — whichever comes first.",
     "managePayment": "Manage payment method",
-    "stripeNotActive": "Stripe checkout not active",
+    "stripeNotActive": "Paid plans coming soon",
     "currentPlan": "Current Plan",
     "usagePeriod": "Usage This Period",
     "invoices": "Invoices",

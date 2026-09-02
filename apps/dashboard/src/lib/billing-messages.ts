@@ -1,5 +1,5 @@
 export const PAID_BILLING_NOT_CONFIGURED_MSG =
-  "Paid billing is not enabled on the server yet. Your trial still works — add STRIPE_SECRET_KEY on Render and redeploy the gateway.";
+  "Paid plans aren't available just yet — your free trial works as normal in the meantime. Contact support if you need to upgrade sooner.";
 
 /** True only when the gateway reports Stripe is missing — not generic Stripe API errors. */
 export function isStripeNotConfiguredError(msg: string): boolean {
