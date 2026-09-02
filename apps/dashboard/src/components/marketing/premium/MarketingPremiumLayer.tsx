@@ -7,7 +7,6 @@ import { OutcomeCompareSection } from "./OutcomeCompareSection";
 import { WorkflowSection } from "./WorkflowSection";
 import { VideoDemoSection } from "./VideoDemoSection";
 import { FeaturesHubSection } from "./FeaturesHubSection";
-import { DashboardShowcaseSection } from "./DashboardShowcaseSection";
 import { IndustryStripSection } from "./IndustryStripSection";
 import { HomeClosingSection } from "./HomeClosingSection";
 
@@ -108,7 +107,6 @@ function PremiumHomeSections() {
             <WorkflowSection />
             <VideoDemoSection />
             <FeaturesHubSection />
-            <DashboardShowcaseSection />
             <IndustryStripSection />
             <HomeClosingSection />
           </>,
