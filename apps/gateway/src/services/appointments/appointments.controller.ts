@@ -23,7 +23,8 @@ export function createAppointmentsRouter(): express.Router {
             const tenantId = getTenant(req);
             const limit = Math.min(parseInt(String(req.query.limit), 10) || 200, 500);
             const result = await voiceDb.query(
-                `select id, tenant_id, name, phone, service, scheduled_time, status, calendar_event_id, created_at
+                `select id, tenant_id, name, phone, service, scheduled_time, status,
+                        calendar_event_id, external_calendar_event_id, calendar_provider, created_at
                  from public.appointments
                  where tenant_id = $1
                    and status not in ('cancelled', 'canceled')
@@ -76,7 +77,8 @@ export function createAppointmentsRouter(): express.Router {
         try {
             const tenantId = getTenant(req);
             const result = await voiceDb.query(
-                `select id, tenant_id, name, phone, service, scheduled_time, status, calendar_event_id, created_at
+                `select id, tenant_id, name, phone, service, scheduled_time, status,
+                        calendar_event_id, external_calendar_event_id, calendar_provider, created_at
                  from public.appointments
                  where id = $1 and tenant_id = $2`,
                 [req.params.id, tenantId],
