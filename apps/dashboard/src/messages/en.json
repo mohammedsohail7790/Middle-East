@@ -59,7 +59,9 @@
     "reconnecting": "Reconnecting",
     "apiConnectionIssue": "API connection issue",
     "noSession": "No active session — sign in again.",
-    "upgradeRequired": "upgrade required"
+    "upgradeRequired": "upgrade required",
+    "bootTimeout": "This is taking longer than expected.",
+    "backToSignIn": "Back to sign in"
   },
   "common": {
     "save": "Save",

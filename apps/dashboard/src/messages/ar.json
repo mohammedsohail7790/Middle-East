@@ -59,7 +59,9 @@
     "reconnecting": "إعادة الاتصال",
     "apiConnectionIssue": "مشكلة في الاتصال بالواجهة البرمجية",
     "noSession": "لا توجد جلسة نشطة — سجّل الدخول مرة أخرى.",
-    "upgradeRequired": "يتطلب ترقية"
+    "upgradeRequired": "يتطلب ترقية",
+    "bootTimeout": "يستغرق هذا وقتًا أطول من المتوقع.",
+    "backToSignIn": "العودة إلى تسجيل الدخول"
   },
   "common": {
     "save": "حفظ",

@@ -125,7 +125,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     async function init() {
       setInitError(null);
-      const { data: sessionData } = await supabase.auth.getSession();
+
+      let sessionData: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"];
+      try {
+        ({ data: sessionData } = await supabase.auth.getSession());
+      } catch (e) {
+        if (cancelled) return;
+        setInitError(e instanceof Error ? e.message : "Could not verify session");
+        setReady(true);
+        return;
+      }
+
       const user = sessionData.session?.user;
       if (!user) {
         routerRef.current.replace("/login");
@@ -139,13 +149,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       let tenantId = cachedTenant?.trim() || getTenantId() || null;
       if (!tenantId) {
-        tenantId = await ensureTenantSession({ maxWaitMs: 2_000 });
+        try {
+          tenantId = await ensureTenantSession({ maxWaitMs: 2_000 });
+        } catch {
+          tenantId = null;
+        }
       }
       if (tenantId) setTenantId(tenantId);
 
       if (!sessionData.session?.access_token) {
+        if (cancelled) return;
         setInitError("No active session — sign in again.");
-        if (!cancelled) setReady(true);
+        setReady(true);
         return;
       }
 
@@ -160,7 +175,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       void loadAccount(user);
     }
 
-    init();
+    // Watchdog: a hang anywhere above (auth.getSession, gateway lookups, a
+    // stuck router transition) must never leave the boot screen spinning
+    // forever with no way out — surface an error and stop waiting instead.
+    const watchdog = window.setTimeout(() => {
+      if (cancelled) return;
+      setReady((current) => {
+        if (current) return current;
+        setInitError("Taking too long to load your workspace. Please sign in again.");
+        return true;
+      });
+    }, 15_000);
+
+    init().catch((e) => {
+      if (cancelled) return;
+      setInitError(e instanceof Error ? e.message : "Failed to load dashboard");
+      setReady(true);
+    });
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_OUT") {
@@ -190,6 +221,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     return () => {
       cancelled = true;
+      window.clearTimeout(watchdog);
       authListener.subscription.unsubscribe();
       window.removeEventListener("focus", onFocus);
     };

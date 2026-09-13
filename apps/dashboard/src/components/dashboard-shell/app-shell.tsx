@@ -83,7 +83,7 @@ function NavLink({
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const t = useTranslations();
+  const t = useTranslations("shell");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
