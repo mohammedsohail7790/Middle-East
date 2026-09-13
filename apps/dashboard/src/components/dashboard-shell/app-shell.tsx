@@ -83,7 +83,8 @@ function NavLink({
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const t = useTranslations("shell");
+  const t = useTranslations();
+  const tShell = useTranslations("shell");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
@@ -140,7 +141,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="dashboard-app h-[100dvh] max-h-[100dvh] flex w-full min-w-0 overflow-hidden">
       <a href="#main-content" className="dashboard-skip-link">
-        {t("skipToContent")}
+        {tShell("skipToContent")}
       </a>
       <aside
         className={cn(
@@ -235,13 +236,13 @@ export function AppShell({ children }: { children: ReactNode }) {
                 "dashboard-nav-link w-full border-0 bg-transparent cursor-pointer",
                 collapsed && "justify-center px-2",
               )}
-              title={collapsed ? t("signOut") : undefined}
-              aria-label={t("signOut")}
+              title={collapsed ? tShell("signOut") : undefined}
+              aria-label={tShell("signOut")}
             >
               <span className="nav-icon-well">
                 <LogOut className="size-4" strokeWidth={ICON_STROKE} />
               </span>
-              {!collapsed && <span>{t("signOut")}</span>}
+              {!collapsed && <span>{tShell("signOut")}</span>}
             </button>
             {!collapsed && (
               <p className="px-2 pt-2 text-[10px] leading-snug text-muted-foreground/60">
