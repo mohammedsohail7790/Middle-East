@@ -1,9 +1,16 @@
 import { Router } from 'express';
-import { asyncHandler } from '../../middleware/index.js';
+import { asyncHandler, MiddlewareFactory } from '../../middleware/index.js';
 import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
 import { renderBrandedEmail, renderDetailList, stripToPlainText } from '../automation/email-template.js';
 import { Resend } from 'resend';
+
+// Public, unauthenticated endpoint — throttle per IP to prevent spam/cost-exhaustion abuse.
+const consultRequestRateLimit = MiddlewareFactory.createRateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  message: 'Too many requests. Please try again later or email hello@hallaai.com directly.',
+});
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const LEAD_NOTIFICATION_TO = process.env.CONSULT_LEAD_EMAIL || 'hello@hallaai.com';
@@ -30,6 +37,7 @@ export function createPublicConsultRequestRouter(): Router {
 
   router.post(
     '/',
+    consultRequestRateLimit,
     validate(consultRequestBodySchema),
     asyncHandler(async (req: any, res: any) => {
       const { name, email, phone, business, priority, notes } = req.body as {

@@ -7,6 +7,16 @@ import { getDashboardBaseUrl } from '../integrations/oauth-redirect.js';
 
 const FONT = "'Segoe UI', Helvetica, Arial, sans-serif";
 
+/** Escapes HTML-significant characters so untrusted input can't inject markup into emails. */
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const BRAND = {
   black: '#0A0A0A',
   accent: '#0EA5E9',
@@ -46,11 +56,11 @@ export function renderBrandedEmail(options: EmailLayoutOptions): string {
     : '';
 
   const eyebrowBlock = eyebrow
-    ? `<p style="margin: 0 0 10px; font-family: ${FONT}; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: ${BRAND.accent};">${eyebrow}</p>`
+    ? `<p style="margin: 0 0 10px; font-family: ${FONT}; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: ${BRAND.accent};">${escapeHtml(eyebrow)}</p>`
     : '';
 
   const preheaderBlock = preheader
-    ? `<div style="display: none; max-height: 0; overflow: hidden; mso-hide: all; font-size: 1px; line-height: 1px; color: ${BRAND.gray50};">${preheader}</div>`
+    ? `<div style="display: none; max-height: 0; overflow: hidden; mso-hide: all; font-size: 1px; line-height: 1px; color: ${BRAND.gray50};">${escapeHtml(preheader)}</div>`
     : '';
 
   return `<!DOCTYPE html>
@@ -60,7 +70,7 @@ export function renderBrandedEmail(options: EmailLayoutOptions): string {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
-<title>${title}</title>
+<title>${escapeHtml(title)}</title>
 </head>
 <body style="margin: 0; padding: 0; background: ${BRAND.gray100}; font-family: ${FONT};">
 ${preheaderBlock}
@@ -79,7 +89,7 @@ ${preheaderBlock}
           <tr>
             <td style="padding: 40px 40px 8px;">
               ${eyebrowBlock}
-              <h1 style="margin: 0 0 20px; font-family: ${FONT}; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; color: ${BRAND.black};">${title}</h1>
+              <h1 style="margin: 0 0 20px; font-family: ${FONT}; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; color: ${BRAND.black};">${escapeHtml(title)}</h1>
               <div style="font-family: ${FONT}; font-size: 15px; line-height: 1.65; color: ${BRAND.gray600};">
                 ${bodyHtml}
               </div>
@@ -109,8 +119,8 @@ export function renderDetailList(rows: Array<{ label: string; value: string }>):
     .map(
       (r, i) => `
       <tr>
-        <td style="padding: 10px 0; font-family: ${FONT}; font-size: 13px; color: ${BRAND.gray500}; width: 130px; vertical-align: top; border-top: ${i === 0 ? 'none' : `1px solid ${BRAND.gray200}`};">${r.label}</td>
-        <td style="padding: 10px 0; font-family: ${FONT}; font-size: 14px; color: ${BRAND.black}; font-weight: 600; vertical-align: top; border-top: ${i === 0 ? 'none' : `1px solid ${BRAND.gray200}`};">${r.value}</td>
+        <td style="padding: 10px 0; font-family: ${FONT}; font-size: 13px; color: ${BRAND.gray500}; width: 130px; vertical-align: top; border-top: ${i === 0 ? 'none' : `1px solid ${BRAND.gray200}`};">${escapeHtml(r.label)}</td>
+        <td style="padding: 10px 0; font-family: ${FONT}; font-size: 14px; color: ${BRAND.black}; font-weight: 600; vertical-align: top; border-top: ${i === 0 ? 'none' : `1px solid ${BRAND.gray200}`};">${escapeHtml(r.value)}</td>
       </tr>`
     )
     .join('');
