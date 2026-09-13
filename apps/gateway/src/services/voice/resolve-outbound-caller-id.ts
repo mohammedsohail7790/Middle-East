@@ -65,14 +65,14 @@ export async function resolveOutboundCallerId(
       };
     }
     const tenantRow = await voiceDb.query(
-      `SELECT phone_number, ai_agent_id FROM public.voice_tenants WHERE id = $1`,
+      `SELECT phone_number FROM public.voice_tenants WHERE id = $1`,
       [tenantId]
     );
     const primary = tenantRow.rows[0]?.phone_number;
     if (primary && !isPlaceholderPhoneNumber(primary) && normalizePhone(primary) === normalized) {
       return {
         fromNumber: primary,
-        agentId: tenantRow.rows[0]?.ai_agent_id ?? null,
+        agentId: null,
         phoneNumberId: null,
       };
     }
@@ -96,14 +96,14 @@ export async function resolveOutboundCallerId(
   }
 
   const tenantRow = await voiceDb.query(
-    `SELECT phone_number, ai_agent_id FROM public.voice_tenants WHERE id = $1`,
+    `SELECT phone_number FROM public.voice_tenants WHERE id = $1`,
     [tenantId]
   );
   const fromNumber = tenantRow.rows[0]?.phone_number;
   if (!fromNumber || isPlaceholderPhoneNumber(fromNumber)) return null;
   return {
     fromNumber,
-    agentId: tenantRow.rows[0]?.ai_agent_id ?? null,
+    agentId: null,
     phoneNumberId: null,
   };
 }
