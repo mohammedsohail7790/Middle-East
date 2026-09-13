@@ -11,6 +11,16 @@ function normalizePhone(value: string): string {
 }
 
 /**
+ * Onboarding (POST /tenants) fills voice_tenants.phone_number with a fake
+ * `+1000<timestamp>` placeholder for tenants that skip phone provisioning
+ * (column is NOT NULL). That's not a real, callable number — treat it as
+ * absent here rather than handing it to Twilio as a caller ID.
+ */
+function isPlaceholderPhoneNumber(value: string | null | undefined): boolean {
+  return !!value && /^\+1000\d{7}$/.test(value);
+}
+
+/**
  * Resolve and validate the outbound caller ID for a tenant.
  * Never returns a number owned by another tenant.
  */
@@ -59,7 +69,7 @@ export async function resolveOutboundCallerId(
       [tenantId]
     );
     const primary = tenantRow.rows[0]?.phone_number;
-    if (primary && normalizePhone(primary) === normalized) {
+    if (primary && !isPlaceholderPhoneNumber(primary) && normalizePhone(primary) === normalized) {
       return {
         fromNumber: primary,
         agentId: tenantRow.rows[0]?.ai_agent_id ?? null,
@@ -90,7 +100,7 @@ export async function resolveOutboundCallerId(
     [tenantId]
   );
   const fromNumber = tenantRow.rows[0]?.phone_number;
-  if (!fromNumber) return null;
+  if (!fromNumber || isPlaceholderPhoneNumber(fromNumber)) return null;
   return {
     fromNumber,
     agentId: tenantRow.rows[0]?.ai_agent_id ?? null,
