@@ -49,7 +49,7 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
     label: "Channels",
     labelKey: "navGroups.channels",
     items: [
-      { href: "/dashboard/calls", label: "Calls", labelKey: "nav.calls", subtitle: "Transcripts, outcomes, and call history", subtitleKey: "nav.callsSubtitle" },
+      { href: "/dashboard/calls", label: "Inbound", labelKey: "nav.calls", subtitle: "Transcripts, outcomes, and call history", subtitleKey: "nav.callsSubtitle" },
       { href: "/dashboard/outbound", label: "Outbound", labelKey: "nav.outbound", subtitle: "Click-to-call, campaigns, and reminders", subtitleKey: "nav.outboundSubtitle" },
     ],
   },
