@@ -1,8 +1,13 @@
 const { Pool } = require('pg');
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
+if (!process.env.DATABASE_URL) {
+  console.error('❌ DATABASE_URL environment variable is required');
+  process.exit(1);
+}
+
 const pool = new Pool({
-  connectionString: 'postgresql://postgres.btgwgfphgdgnoaqtopwy:8618957790sohail@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres',
+  connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
