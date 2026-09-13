@@ -65,15 +65,30 @@ export class SmsService {
 
       // Get tenant's phone number if not provided
       if (!from) {
-        const tenantResult = await pool.query(
-          'SELECT phone_number FROM public.voice_tenants WHERE id = $1',
+        const provisioned = await pool.query(
+          `SELECT phone_number FROM public.tenant_phone_numbers
+           WHERE tenant_id = $1 AND status = 'active'
+           ORDER BY purchased_at ASC NULLS LAST, created_at ASC
+           LIMIT 1`,
           [tenantId]
         );
-        from = tenantResult.rows[0]?.phone_number;
+        from = provisioned.rows[0]?.phone_number;
+        if (!from) {
+          const tenantResult = await pool.query(
+            'SELECT phone_number FROM public.voice_tenants WHERE id = $1',
+            [tenantId]
+          );
+          const primary = tenantResult.rows[0]?.phone_number;
+          // Onboarding fills this with a fake +1000<timestamp> placeholder for
+          // tenants that skip phone provisioning — never hand that to Twilio.
+          if (primary && !/^\+1000\d{7}$/.test(primary)) {
+            from = primary;
+          }
+        }
       }
 
       if (!from) {
-        throw new Error('No phone number configured for tenant');
+        throw new Error('No authorized phone number configured for this workspace');
       }
 
       // Send via Twilio
