@@ -280,6 +280,10 @@ export function createCampaignsRouter(): express.Router {
 
             res.json({ success: true, queued });
         } catch (error) {
+            logger.error('CAMPAIGN_START_FAILED', {
+                campaignId: req.params.id,
+                error: error instanceof Error ? error.stack || error.message : String(error),
+            });
             res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to start campaign') });
         }
     });
