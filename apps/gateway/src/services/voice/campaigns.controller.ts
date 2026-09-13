@@ -13,6 +13,8 @@ function getTenantScope(req: any): string {
     return tenantId;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 interface CampaignTarget {
     phoneNumber: string;
     leadId?: string;
@@ -29,6 +31,13 @@ export function createCampaignsRouter(): express.Router {
     router.use(requireVoiceApiAccess);
     router.use(voiceRateLimit);
     router.use(requireEssentialOrHigher());
+
+    router.use('/:id', (req: any, res: any, next: any) => {
+        if (!UUID_RE.test(req.params.id)) {
+            return res.status(400).json({ success: false, error: 'Invalid campaign id' });
+        }
+        next();
+    });
 
     router.get('/', async (req: any, res: any) => {
         try {
@@ -223,6 +232,12 @@ export function createCampaignsRouter(): express.Router {
                 return res.status(400).json({
                     success: false,
                     error: 'No authorized outbound phone number configured for this workspace',
+                });
+            }
+            if (!caller.agentId) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'The outbound phone number for this workspace has no AI agent assigned yet',
                 });
             }
             const fromNumber = caller.fromNumber;
