@@ -26,7 +26,7 @@ export class HouseCallProProvider {
             firstName: this.parseFirstName(lead.name),
             lastName: this.parseLastName(lead.name),
             phoneNumber: lead.phone || '',
-            email: lead.notes?.includes('@') ? lead.notes : undefined,
+            email: lead.email || undefined,
         });
 
         const scheduledStart = lead.preferred_time

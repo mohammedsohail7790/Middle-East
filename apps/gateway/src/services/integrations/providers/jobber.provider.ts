@@ -87,7 +87,7 @@ export class JobberProvider {
             firstName: this.parseFirstName(lead.name),
             lastName: this.parseLastName(lead.name),
             phoneNumber: lead.phone || '',
-            email: lead.email || (lead.notes?.includes('@') ? lead.notes : undefined),
+            email: lead.email || undefined,
         });
 
         await this.createJobRequest(config, {

@@ -26,7 +26,7 @@ export class HubSpotProvider {
             firstName: this.parseFirstName(lead.name),
             lastName: this.parseLastName(lead.name),
             phone: lead.phone || '',
-            email: lead.notes?.includes('@') ? lead.notes : undefined,
+            email: lead.email || undefined,
         });
 
         // Step 2: Create deal

@@ -47,7 +47,7 @@ export class ServiceTitanProvider {
         const customerId = await this.findOrCreateCustomer(config, {
             name: lead.name || 'Unknown',
             phoneNumber: lead.phone || '',
-            email: lead.notes?.includes('@') ? lead.notes : undefined,
+            email: lead.email || undefined,
         });
 
         // Step 3: Create job

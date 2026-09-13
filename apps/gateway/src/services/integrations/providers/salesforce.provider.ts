@@ -142,7 +142,7 @@ export class SalesforceProvider {
             || lead.service
             || 'Inbound Call';
 
-        const leadData = {
+        const leadData: Record<string, string> = {
             FirstName: this.parseFirstName(lead.name),
             LastName: this.parseLastName(lead.name) || 'Unknown',
             Phone: lead.phone || '',
@@ -156,6 +156,9 @@ export class SalesforceProvider {
                 `Call ID: ${payload.callId}`,
             ].join('\n'),
         };
+        if (lead.email) {
+            leadData.Email = lead.email;
+        }
 
         let response: globalThis.Response;
         if (existingId) {
