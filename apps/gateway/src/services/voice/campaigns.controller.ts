@@ -234,12 +234,6 @@ export function createCampaignsRouter(): express.Router {
                     error: 'No authorized outbound phone number configured for this workspace',
                 });
             }
-            if (!caller.agentId) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'The outbound phone number for this workspace has no AI agent assigned yet',
-                });
-            }
             const fromNumber = caller.fromNumber;
             const agentId = caller.agentId;
 
