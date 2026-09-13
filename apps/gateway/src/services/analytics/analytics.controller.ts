@@ -56,6 +56,20 @@ function requireDates(req: any, res: any): boolean {
   return true;
 }
 
+/**
+ * `endDate` arrives as a bare date (e.g. "2026-09-13"), which `new Date(...)`
+ * parses as UTC midnight. Used directly as a BETWEEN upper bound, that
+ * excludes every record created later that same day — so a range ending
+ * "today" always undercounts today's calls/leads/appointments. Push the
+ * upper bound to the end of that calendar day so it's inclusive.
+ */
+function parseDateRange(req: any): { start: Date; end: Date } {
+  const start = new Date(req.query.startDate as string);
+  const end = new Date(req.query.endDate as string);
+  end.setUTCHours(23, 59, 59, 999);
+  return { start, end };
+}
+
 const router = Router();
 router.use(requireVoiceApiAccess);
 
@@ -68,11 +82,8 @@ router.get('/metrics', async (req: any, res: any) => {
   if (!requireDates(req, res)) return;
 
   try {
-    const metrics = await analyticsService.getDashboardMetrics(
-      tenantId,
-      new Date(req.query.startDate as string),
-      new Date(req.query.endDate as string)
-    );
+    const { start, end } = parseDateRange(req);
+    const metrics = await analyticsService.getDashboardMetrics(tenantId, start, end);
     res.json({ success: true, data: metrics });
   } catch (error: any) {
     console.error('[Analytics API] Error getting metrics:', error);
@@ -89,11 +100,8 @@ router.get('/call-volume', async (req: any, res: any) => {
   if (!requireDates(req, res)) return;
 
   try {
-    const data = await analyticsService.getCallVolumeByDate(
-      tenantId,
-      new Date(req.query.startDate as string),
-      new Date(req.query.endDate as string)
-    );
+    const { start, end } = parseDateRange(req);
+    const data = await analyticsService.getCallVolumeByDate(tenantId, start, end);
     res.json({ success: true, data });
   } catch (error: any) {
     console.error('[Analytics API] Error getting call volume:', error);
@@ -110,11 +118,8 @@ router.get('/peak-hours', async (req: any, res: any) => {
   if (!requireDates(req, res)) return;
 
   try {
-    const data = await analyticsService.getPeakHours(
-      tenantId,
-      new Date(req.query.startDate as string),
-      new Date(req.query.endDate as string)
-    );
+    const { start, end } = parseDateRange(req);
+    const data = await analyticsService.getPeakHours(tenantId, start, end);
     res.json({ success: true, data });
   } catch (error: any) {
     console.error('[Analytics API] Error getting peak hours:', error);
@@ -132,11 +137,8 @@ router.get('/conversion-funnel', async (req: any, res: any) => {
   if (!await requireAdvancedAnalytics(tenantId, res)) return;
 
   try {
-    const data = await analyticsService.getConversionFunnel(
-      tenantId,
-      new Date(req.query.startDate as string),
-      new Date(req.query.endDate as string)
-    );
+    const { start, end } = parseDateRange(req);
+    const data = await analyticsService.getConversionFunnel(tenantId, start, end);
     res.json({ success: true, data });
   } catch (error: any) {
     console.error('[Analytics API] Error getting conversion funnel:', error);
@@ -154,8 +156,7 @@ router.get('/export', async (req: any, res: any) => {
   if (!await requireAdvancedAnalytics(tenantId, res)) return;
 
   try {
-    const start = new Date(req.query.startDate as string);
-    const end = new Date(req.query.endDate as string);
+    const { start, end } = parseDateRange(req);
     const format = String(req.query.format || 'csv').toLowerCase();
 
     if (format === 'pdf') {
