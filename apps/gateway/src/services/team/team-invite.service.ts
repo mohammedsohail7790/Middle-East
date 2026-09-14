@@ -132,6 +132,11 @@ export async function linkTeamMemberFromAuth(
   if (!tenantId) return null;
 
   if (emailNorm) {
+    // Match either the already-linked row (user_id = $1) or this specific
+    // invitee's placeholder row (user_id = 'invite:<their email>' — set at
+    // invite time in inviteTeamMember). A bare `user_id LIKE 'invite:%'`
+    // would match every pending invite in the tenant, not just this one,
+    // and silently overwrite other invitees' rows with this user's identity.
     await voiceDb.query(
       `UPDATE public.team_members
        SET user_id = $1,
@@ -142,15 +147,15 @@ export async function linkTeamMemberFromAuth(
          AND (
            user_id = $1
            OR lower(trim(email)) = $2
-           OR user_id::text LIKE 'invite:%'
+           OR user_id = $4
          )`,
-      [userId, emailNorm, tenantId]
+      [userId, emailNorm, tenantId, `invite:${emailNorm}`]
     );
   } else {
     await voiceDb.query(
       `UPDATE public.team_members
        SET user_id = $1, is_active = true, updated_at = NOW()
-       WHERE tenant_id = $2 AND (user_id = $1 OR user_id::text LIKE 'invite:%')`,
+       WHERE tenant_id = $2 AND user_id = $1`,
       [userId, tenantId]
     );
   }
