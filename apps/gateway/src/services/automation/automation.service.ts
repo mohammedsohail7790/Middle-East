@@ -316,7 +316,10 @@ export class AutomationService {
       if (appointmentResult.rows.length === 0) return;
 
       const appointment = appointmentResult.rows[0];
-      const { phone, name, service, scheduled_time, company_name, business_phone } = appointment;
+      const { phone, name, service, scheduled_time, company_name, business_phone: rawBusinessPhone } = appointment;
+      // Onboarding fills phone_number with a fake +1000<timestamp> placeholder for
+      // tenants that skip phone provisioning — never show that to a customer.
+      const business_phone = /^\+1000\d{7}$/.test(String(rawBusinessPhone || '')) ? null : rawBusinessPhone;
       const startTime = new Date(scheduled_time);
       const formattedDate = startTime.toLocaleDateString('en-US', {
         weekday: 'long',
