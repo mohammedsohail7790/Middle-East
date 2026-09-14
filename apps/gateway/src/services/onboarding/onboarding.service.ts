@@ -209,7 +209,12 @@ export class OnboardingService {
                     `SELECT phone_number FROM public.voice_tenants WHERE id = $1`,
                     [tenantId]
                 );
-                fromNumber = tenantResult.rows[0]?.phone_number as string | undefined;
+                const primary = tenantResult.rows[0]?.phone_number as string | undefined;
+                // Onboarding fills this with a fake +1000<timestamp> placeholder for
+                // tenants that skip phone provisioning — never call Twilio with it.
+                if (primary && !/^\+1000\d{7}$/.test(primary)) {
+                    fromNumber = primary;
+                }
             }
 
             if (!fromNumber) {
