@@ -90,7 +90,7 @@ async function loadTenantSnippet(tenantId: string): Promise<string> {
 
     const text = [
       `Company: ${r.company_name || 'Unknown'}`,
-      r.phone_number ? `Main line: ${r.phone_number}` : null,
+      r.phone_number && !/^\+1000\d{7}$/.test(String(r.phone_number)) ? `Main line: ${r.phone_number}` : null,
       r.agent_name ? `AI agent name: ${r.agent_name}` : null,
       services ? `Services: ${services}` : null,
       sub?.plan ? `Plan: ${sub.plan} (${sub.status || 'unknown'})` : null,

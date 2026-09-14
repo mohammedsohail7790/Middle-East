@@ -245,7 +245,7 @@ export function createDashboardRouter(): express.Router {
                               id: tenant.id,
                               company_name: tenant.company_name,
                               companyName: tenant.company_name,
-                              phone_number: tenant.phone_number,
+                              phone_number: /^\+1000\d{7}$/.test(String(tenant.phone_number || '')) ? null : tenant.phone_number,
                           }
                         : { id: tenantId },
                 },
