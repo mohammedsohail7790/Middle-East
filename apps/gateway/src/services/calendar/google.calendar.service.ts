@@ -19,13 +19,14 @@ export class GoogleCalendarService {
     }
 
     /** Google Calendar event id (external), not local appointments.id */
-    async createEvent(tenantId: string, eventDetails: { summary: string, start: Date, end: Date, description: string }): Promise<string> {
+    async createEvent(tenantId: string, eventDetails: { summary: string, start: Date, end: Date, description: string, attendeeEmail?: string }): Promise<string> {
         return calendarService.createGoogleEventOnly(
             tenantId,
             eventDetails.summary,
             eventDetails.start,
             eventDetails.end,
-            eventDetails.description
+            eventDetails.description,
+            eventDetails.attendeeEmail
         );
     }
 

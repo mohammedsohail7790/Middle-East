@@ -49,6 +49,7 @@ export async function syncAppointmentToExternalCalendars(
           start: input.start,
           end: input.end,
           description,
+          attendeeEmail: input.email,
         }),
         SYNC_TIMEOUT_MS
       );
@@ -80,7 +81,7 @@ export async function syncAppointmentToExternalCalendars(
           title,
           input.start,
           input.end,
-          undefined,
+          input.email,
           input.phone,
           description
         ),
