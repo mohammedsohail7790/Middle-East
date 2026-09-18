@@ -929,9 +929,24 @@ html[dir="rtl"] .consult-hero::before {
 .consult-bento-wide { grid-column: span 2; }
 .consult-bento-icon { font-size: 1.6rem; color: var(--consult-accent-soft); margin-bottom: 12px; }
 .consult-bento-num { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; color: var(--consult-text); line-height: 1; }
-.consult-bento-num.sm { font-size: 1.8rem; }
+.consult-bento-num.sm { font-size: 1.5rem; }
 .consult-bento-num.accent { color: var(--consult-accent-soft); }
 .consult-bento-label { font-size: 0.78rem; color: var(--consult-text-faint); margin-top: 8px; line-height: 1.45; }
+
+/* Unified stats card — replaces two separate boxy stat tiles with a
+   single card holding two icon-led rows, so the hero's right column
+   reads as one coherent stat block instead of disjointed squares. */
+.consult-bento-stats { grid-row: span 2; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+.consult-stat-item { display: flex; align-items: center; gap: 12px; }
+.consult-stat-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--consult-accent-dim); color: var(--consult-accent-soft); font-size: 1rem;
+}
+.consult-stat-icon-accent { background: var(--consult-accent-soft); color: #fff; }
+.consult-stat-text .consult-bento-num { margin-top: 0; }
+.consult-stat-text .consult-bento-label { margin-top: 2px; }
+.consult-stat-divider { height: 1px; background: var(--consult-hairline); margin-left: 48px; }
 .consult-stack-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .consult-stack-pills span {
   font-size: 0.72rem; font-weight: 600; padding: 5px 10px; border-radius: 999px;
@@ -1185,6 +1200,7 @@ body[data-section="consultancy"] .cta-block::before,
   .consult-hero { padding: 120px 0 64px; }
   .consult-hero-bento { grid-template-columns: 1fr; }
   .consult-bento-main { grid-row: auto; }
+  .consult-bento-stats { grid-row: auto; }
   .consult-bento-wide { grid-column: auto; }
   .consult-timeline { grid-template-columns: 1fr; }
   .consult-trust-row { flex-direction: column; gap: 8px; }
