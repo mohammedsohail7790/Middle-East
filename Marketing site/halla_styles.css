@@ -971,20 +971,40 @@ html[dir="rtl"] .consult-hero::before {
 }
 .consult-trust-row i { color: var(--consult-accent-soft); margin-right: 6px; }
 
-/* Hero visual: a real dashboard-mockup card (browser chrome + live-
-   looking content), not a stat-tile grid — reuses .browser-frame/.card
-   already established elsewhere on the site (Customize Your AI Agent,
-   email preview) instead of inventing a third visual language. Sized
-   down and floated for the hero's right column specifically. */
-.consult-hero-visual { position: relative; }
-.consult-hero-visual .browser-frame { max-width: 460px; margin: 0; }
+/* Hero visual v2: a larger, layered dashboard-mockup composition — a
+   soft color glow behind a bigger tilted frame (the existing
+   initBrowserFrameTilt() mouse/scroll tilt already applies to any
+   .browser-frame), with two floating badges at different depths/corners
+   instead of one, and a live-cycling activity feed (see
+   startHeroLiveFeed in halla_main.js) so the card visibly updates
+   itself rather than sitting as three static lines of text. */
+.consult-hero-visual { position: relative; padding: 28px 24px 0 0; }
+html[dir="rtl"] .consult-hero-visual { padding: 28px 0 0 24px; }
+.consult-hero-visual::before {
+  content: ""; position: absolute; inset: 10% -10% -10% 10%; z-index: 0;
+  background: radial-gradient(60% 60% at 60% 40%, var(--consult-accent-dim), transparent 70%);
+  filter: blur(6px); pointer-events: none;
+}
+.consult-hero-visual .browser-frame { max-width: 520px; margin: 0; position: relative; z-index: 1; }
 .consult-hero-visual .browser-bar { padding: 10px 14px; }
+.consult-activity-feed { display: flex; flex-direction: column; gap: 8px; min-height: 186px; }
 .consult-activity-row {
   display: flex; align-items: center; gap: 12px; padding: 10px 12px;
   border: 1px solid var(--consult-hairline); border-radius: var(--radius);
   background: var(--white);
+  animation: consult-row-in 0.45s ease both;
 }
-.consult-activity-row + .consult-activity-row { margin-top: 8px; }
+@keyframes consult-row-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.consult-activity-row.leaving {
+  animation: consult-row-out 0.35s ease both;
+}
+@keyframes consult-row-out {
+  from { opacity: 1; transform: translateY(0); max-height: 60px; margin-bottom: 8px; }
+  to { opacity: 0; transform: translateY(6px); max-height: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; border-width: 0; }
+}
 .consult-activity-icon {
   width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
@@ -995,16 +1015,28 @@ html[dir="rtl"] .consult-hero::before {
 .consult-mini-stat { border: 1px solid var(--consult-hairline); border-radius: var(--radius); padding: 12px 14px; }
 .consult-mini-stat-num { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: var(--consult-text); line-height: 1; }
 .consult-mini-stat-label { font-size: 0.74rem; color: var(--consult-text-faint); margin-top: 4px; }
-.consult-hero-visual-badge {
-  position: absolute; top: -16px; right: -16px; z-index: 2;
-  background: var(--consult-text); color: var(--white);
-  border-radius: var(--radius-lg); padding: 12px 16px; box-shadow: var(--shadow-lg);
+
+.consult-float-badge {
+  position: absolute; z-index: 2; background: var(--white);
+  border: 1px solid var(--consult-hairline); border-radius: var(--radius-lg);
+  padding: 12px 16px; box-shadow: var(--shadow-lg);
 }
-html[dir="rtl"] .consult-hero-visual-badge { right: auto; left: -16px; }
-.consult-hero-visual-badge .consult-mini-stat-num { color: var(--white); font-size: 1.7rem; }
-.consult-hero-visual-badge .consult-mini-stat-label { color: rgba(255,255,255,0.7); }
+.consult-float-badge-1 {
+  top: 0; right: 0; background: var(--consult-text); border-color: var(--consult-text);
+}
+.consult-float-badge-1 .consult-mini-stat-num { color: var(--white); font-size: 1.7rem; }
+.consult-float-badge-1 .consult-mini-stat-label { color: rgba(255,255,255,0.7); }
+.consult-float-badge-2 {
+  bottom: 28px; left: -18px; display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; font-size: 0.78rem; font-weight: 600; color: var(--consult-text);
+}
+html[dir="rtl"] .consult-float-badge-1 { right: auto; left: 0; }
+html[dir="rtl"] .consult-float-badge-2 { left: auto; right: -18px; }
 @media (max-width: 640px) {
-  .consult-hero-visual-badge { position: static; margin-top: 14px; display: inline-block; }
+  .consult-hero-visual { padding: 0; }
+  .consult-hero-visual::before { display: none; }
+  .consult-float-badge-1 { position: static; display: inline-block; margin-bottom: 14px; }
+  .consult-float-badge-2 { display: none; }
 }
 .consult-stack-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .consult-stack-pills span {
@@ -1258,6 +1290,7 @@ body[data-section="consultancy"] .cta-block::before,
 @media (max-width: 640px) {
   .consult-hero { padding: 120px 0 64px; }
   .consult-hero-visual .browser-frame { max-width: 100%; }
+  .consult-hero-visual { padding: 0; }
   .consult-timeline { grid-template-columns: 1fr; }
   .consult-trust-row { flex-direction: column; gap: 8px; }
 }

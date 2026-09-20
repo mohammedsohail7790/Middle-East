@@ -426,6 +426,66 @@ function setLang(lang) {
   try { localStorage.setItem('halla_lang', lang); } catch (e) {}
 }
 
+// ============ HERO LIVE ACTIVITY FEED ============
+// Cycles rows into a hero dashboard-mockup feed on an interval so the
+// card visibly updates itself instead of sitting as static text — only
+// mutates while its own page is the active one (cheap visibility check
+// each tick, no IntersectionObserver needed) and respects
+// prefers-reduced-motion by rendering the full set once and never
+// animating further. Each row carries data-en/data-ar so the existing
+// setLang() sweep (which retargets every [data-en][data-ar] element on
+// toggle) keeps already-rendered rows correctly translated even after
+// the language is switched mid-cycle, not just on the next row in.
+const HERO_FEED_ICONS = {
+  'user-check': 'ti-user-check', star: 'ti-star', invoice: 'ti-file-invoice',
+  quote: 'ti-file-text', bolt: 'ti-bolt', mail: 'ti-mail', check: 'ti-circle-check',
+};
+function startHeroLiveFeed(containerId, items) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function currentLang() {
+    return document.documentElement.getAttribute('lang') === 'ar' ? 'ar' : 'en';
+  }
+  function rowEl(item) {
+    const lang = currentLang();
+    const wrap = document.createElement('div');
+    wrap.className = 'consult-activity-row';
+    wrap.innerHTML = `<div class="consult-activity-icon"><i class="ti ${HERO_FEED_ICONS[item.icon] || 'ti-bolt'}"></i></div>
+      <div>
+        <div class="consult-activity-text" data-en="${item.en}" data-ar="${item.ar}">${lang === 'ar' ? item.ar : item.en}</div>
+        <div class="consult-activity-time" data-en="${item.timeEn}" data-ar="${item.timeAr}">${lang === 'ar' ? item.timeAr : item.timeEn}</div>
+      </div>`;
+    return wrap;
+  }
+
+  let i = 0;
+  const visible = 3;
+  function renderInitial() {
+    container.innerHTML = '';
+    items.slice(0, visible).forEach((item) => container.appendChild(rowEl(item)));
+    i = visible % items.length;
+  }
+  renderInitial();
+  if (reduceMotion) return;
+
+  setInterval(() => {
+    if (!container.offsetParent) return; // paused while its page/section isn't active
+    const item = items[i % items.length];
+    i++;
+    const first = container.firstElementChild;
+    if (first) {
+      first.classList.add('leaving');
+      setTimeout(() => first.remove(), 340);
+    }
+    container.appendChild(rowEl(item));
+    while (container.children.length > visible + 1) {
+      container.removeChild(container.firstElementChild);
+    }
+  }, 3200);
+}
+
 // ============ INIT ============
 function hallaInit() {
   calcROI();
@@ -441,6 +501,22 @@ function hallaInit() {
   initPhone3D();
   initBrowserFrameTilt();
   initConsultForm();
+
+  startHeroLiveFeed('consult-activity-feed-consultancy', [
+    { icon: 'user-check', en: 'New lead auto-qualified &amp; synced to CRM', ar: 'عميل محتمل جديد مؤهّل تلقائياً ومتزامن مع نظام العملاء', timeEn: 'Just now', timeAr: 'الآن' },
+    { icon: 'star', en: 'Review request sent to 3 recent customers', ar: 'طلب تقييم أُرسل إلى 3 عملاء حديثين', timeEn: '14 minutes ago', timeAr: 'قبل 14 دقيقة' },
+    { icon: 'invoice', en: 'Overdue invoice reminder sent automatically', ar: 'تذكير فاتورة متأخرة أُرسل تلقائياً', timeEn: '1 hour ago', timeAr: 'قبل ساعة' },
+    { icon: 'bolt', en: 'Workflow triggered — new form submission routed', ar: 'تم تشغيل سير عمل — تم توجيه نموذج جديد', timeEn: '2 hours ago', timeAr: 'قبل ساعتين' },
+    { icon: 'mail', en: 'Weekly report emailed to the owner', ar: 'تقرير أسبوعي أُرسل بالبريد إلى المالك', timeEn: '3 hours ago', timeAr: 'قبل 3 ساعات' },
+    { icon: 'check', en: 'Missed call follow-up sent by text', ar: 'متابعة مكالمة فائتة أُرسلت برسالة نصية', timeEn: '5 hours ago', timeAr: 'قبل 5 ساعات' },
+  ]);
+  startHeroLiveFeed('consult-activity-feed-intelligence', [
+    { icon: 'invoice', en: 'Overdue invoice — follow-up proposed', ar: 'فاتورة متأخرة — تم اقتراح متابعة', timeEn: 'Awaiting your approval', timeAr: 'بانتظار موافقتك' },
+    { icon: 'quote', en: 'Quote gone quiet — reminder sent', ar: 'عرض سعر بلا رد — تم إرسال تذكير', timeEn: 'Ran automatically', timeAr: 'تم تلقائياً' },
+    { icon: 'user-check', en: 'New lead scored &amp; routed to pipeline', ar: 'عميل محتمل جديد مُقيَّم وموجَّه إلى خط المبيعات', timeEn: 'Ran automatically', timeAr: 'تم تلقائياً' },
+    { icon: 'bolt', en: 'Job marked complete — invoice drafted', ar: 'مهمة اكتملت — تم إعداد مسودة فاتورة', timeEn: 'Awaiting your approval', timeAr: 'بانتظار موافقتك' },
+    { icon: 'star', en: 'Review request queued for a happy customer', ar: 'طلب تقييم في قائمة الانتظار لعميل راضٍ', timeEn: 'Ran automatically', timeAr: 'تم تلقائياً' },
+  ]);
 }
 
 if (document.readyState === 'loading') {

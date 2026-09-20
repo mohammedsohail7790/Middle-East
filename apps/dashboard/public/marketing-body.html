@@ -9536,9 +9536,13 @@
           </div>
         </div>
         <div class="consult-hero-visual reveal-up" style="--reveal-delay:0.12s">
-          <div class="consult-hero-visual-badge">
+          <div class="consult-float-badge consult-float-badge-1">
             <div class="consult-mini-stat-num">20</div>
             <div class="consult-mini-stat-label"><span class="lang-en">hrs/week reclaimed</span><span class="lang-ar">ساعة/أسبوع مستعادة</span></div>
+          </div>
+          <div class="consult-float-badge consult-float-badge-2">
+            <span class="status-dot"></span>
+            <span><span class="lang-en">3 systems connected</span><span class="lang-ar">3 أنظمة متصلة</span></span>
           </div>
           <div class="browser-frame">
             <div class="browser-bar">
@@ -9548,29 +9552,9 @@
             <div style="padding:20px">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
                 <span style="font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--consult-accent-soft)"><span class="lang-en">Operations Activity</span><span class="lang-ar">نشاط العمليات</span></span>
-                <span style="display:inline-flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--gray-500)"><span class="status-dot"></span><span class="status-text lang-en">Connected</span><span class="status-text lang-ar">متصل</span></span>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--gray-500)"><span class="status-dot"></span><span class="status-text lang-en">Live</span><span class="status-text lang-ar">مباشر</span></span>
               </div>
-              <div class="consult-activity-row">
-                <div class="consult-activity-icon"><i class="ti ti-user-check"></i></div>
-                <div>
-                  <div class="consult-activity-text"><span class="lang-en">New lead auto-qualified &amp; synced to CRM</span><span class="lang-ar">عميل محتمل جديد مؤهّل تلقائياً ومتزامن مع نظام العملاء</span></div>
-                  <div class="consult-activity-time"><span class="lang-en">2 minutes ago</span><span class="lang-ar">قبل دقيقتين</span></div>
-                </div>
-              </div>
-              <div class="consult-activity-row">
-                <div class="consult-activity-icon"><i class="ti ti-star"></i></div>
-                <div>
-                  <div class="consult-activity-text"><span class="lang-en">Review request sent to 3 recent customers</span><span class="lang-ar">طلب تقييم أُرسل إلى 3 عملاء حديثين</span></div>
-                  <div class="consult-activity-time"><span class="lang-en">14 minutes ago</span><span class="lang-ar">قبل 14 دقيقة</span></div>
-                </div>
-              </div>
-              <div class="consult-activity-row">
-                <div class="consult-activity-icon"><i class="ti ti-file-invoice"></i></div>
-                <div>
-                  <div class="consult-activity-text"><span class="lang-en">Overdue invoice reminder sent automatically</span><span class="lang-ar">تذكير فاتورة متأخرة أُرسل تلقائياً</span></div>
-                  <div class="consult-activity-time"><span class="lang-en">1 hour ago</span><span class="lang-ar">قبل ساعة</span></div>
-                </div>
-              </div>
+              <div class="consult-activity-feed" id="consult-activity-feed-consultancy"></div>
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--consult-hairline)">
                 <div class="consult-stack-pills" style="margin-bottom:0"><span>n8n</span><span>Zapier</span><span>HubSpot</span><span>OpenAI</span><span>Calendly</span></div>
               </div>
@@ -9768,9 +9752,13 @@
           </div>
         </div>
         <div class="consult-hero-visual reveal-up" style="--reveal-delay:0.12s">
-          <div class="consult-hero-visual-badge">
+          <div class="consult-float-badge consult-float-badge-1">
             <div class="consult-mini-stat-num">+18%</div>
             <div class="consult-mini-stat-label"><span class="lang-en">pipeline this week</span><span class="lang-ar">خط المبيعات هذا الأسبوع</span></div>
+          </div>
+          <div class="consult-float-badge consult-float-badge-2">
+            <span class="status-dot"></span>
+            <span><span class="lang-en">AI provider connected</span><span class="lang-ar">مزوّد الذكاء الاصطناعي متصل</span></span>
           </div>
           <div class="browser-frame">
             <div class="browser-bar">
@@ -9780,7 +9768,7 @@
             <div style="padding:20px">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
                 <span style="font-size:0.72rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--consult-accent-soft)"><span class="lang-en">Owner Attention Queue</span><span class="lang-ar">قائمة انتباه المالك</span></span>
-                <span style="display:inline-flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--gray-500)"><span class="status-dot"></span><span class="status-text lang-en">AI provider connected</span><span class="status-text lang-ar">مزوّد الذكاء الاصطناعي متصل</span></span>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--gray-500)"><span class="status-dot"></span><span class="status-text lang-en">Live</span><span class="status-text lang-ar">مباشر</span></span>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
                 <div class="consult-mini-stat">
@@ -9792,20 +9780,7 @@
                   <div class="consult-mini-stat-label"><span class="lang-en">Automatic today</span><span class="lang-ar">تلقائي اليوم</span></div>
                 </div>
               </div>
-              <div class="consult-activity-row">
-                <div class="consult-activity-icon"><i class="ti ti-file-invoice"></i></div>
-                <div>
-                  <div class="consult-activity-text"><span class="lang-en">Overdue invoice — follow-up proposed</span><span class="lang-ar">فاتورة متأخرة — تم اقتراح متابعة</span></div>
-                  <div class="consult-activity-time"><span class="lang-en">Awaiting your approval</span><span class="lang-ar">بانتظار موافقتك</span></div>
-                </div>
-              </div>
-              <div class="consult-activity-row">
-                <div class="consult-activity-icon"><i class="ti ti-file-text"></i></div>
-                <div>
-                  <div class="consult-activity-text"><span class="lang-en">Quote gone quiet — reminder sent</span><span class="lang-ar">عرض سعر بلا رد — تم إرسال تذكير</span></div>
-                  <div class="consult-activity-time"><span class="lang-en">Ran automatically</span><span class="lang-ar">تم تلقائياً</span></div>
-                </div>
-              </div>
+              <div class="consult-activity-feed" id="consult-activity-feed-intelligence"></div>
               <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--consult-hairline)">
                 <div class="consult-stack-pills" style="margin-bottom:0"><span>Stripe</span><span>Google Calendar</span><span>QuickBooks</span></div>
               </div>
