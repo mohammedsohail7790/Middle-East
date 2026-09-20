@@ -971,40 +971,41 @@ html[dir="rtl"] .consult-hero::before {
 }
 .consult-trust-row i { color: var(--consult-accent-soft); margin-right: 6px; }
 
-.consult-hero-bento {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+/* Hero visual: a real dashboard-mockup card (browser chrome + live-
+   looking content), not a stat-tile grid — reuses .browser-frame/.card
+   already established elsewhere on the site (Customize Your AI Agent,
+   email preview) instead of inventing a third visual language. Sized
+   down and floated for the hero's right column specifically. */
+.consult-hero-visual { position: relative; }
+.consult-hero-visual .browser-frame { max-width: 460px; margin: 0; }
+.consult-hero-visual .browser-bar { padding: 10px 14px; }
+.consult-activity-row {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border: 1px solid var(--consult-hairline); border-radius: var(--radius);
+  background: var(--white);
 }
-.consult-bento-card {
-  /* Translucent glass, not opaque white — the hero background graphic
-     sits directly behind this grid, and an opaque card fully hides
-     whatever part of it is underneath. Blur keeps stat text readable
-     over the image without blocking the image out entirely. */
-  background: rgba(255, 255, 255, 0.62);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: var(--radius-lg); padding: 22px 20px;
-  box-shadow: 0 8px 24px rgba(23, 21, 18, 0.06);
-  transition: border-color 0.25s, transform 0.25s, background-color 0.25s;
-}
-.consult-bento-card:hover { background: rgba(255, 255, 255, 0.78); border-color: var(--consult-hairline-strong); transform: translateY(-2px); }
-.consult-bento-wide { grid-column: span 3; }
-
-/* One consistent icon-badge treatment across every stat card — replaces
-   the old mismatch of a plain colored icon glyph on the first card vs.
-   boxed icon badges crammed two-to-a-card (with a divider between them)
-   on the second. Three equal cards read as one coherent set instead of
-   two different visual languages side by side. */
-.consult-bento-icon-badge {
-  width: 36px; height: 36px; border-radius: 10px;
+.consult-activity-row + .consult-activity-row { margin-top: 8px; }
+.consult-activity-icon {
+  width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  background: var(--consult-accent-dim); color: var(--consult-accent-soft); font-size: 1rem;
-  margin-bottom: 14px;
+  background: var(--consult-accent-dim); color: var(--consult-accent-soft); font-size: 0.9rem;
 }
-.consult-bento-icon-badge-accent { background: var(--consult-accent-soft); color: #fff; }
-.consult-bento-num { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; color: var(--consult-text); line-height: 1; }
-.consult-bento-num.accent { color: var(--consult-accent-soft); }
-.consult-bento-label { font-size: 0.78rem; color: var(--consult-text-faint); margin-top: 8px; line-height: 1.45; }
+.consult-activity-text { font-size: 0.83rem; font-weight: 600; color: var(--consult-text); line-height: 1.35; }
+.consult-activity-time { font-size: 0.7rem; color: var(--consult-text-faint); margin-top: 2px; }
+.consult-mini-stat { border: 1px solid var(--consult-hairline); border-radius: var(--radius); padding: 12px 14px; }
+.consult-mini-stat-num { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: var(--consult-text); line-height: 1; }
+.consult-mini-stat-label { font-size: 0.74rem; color: var(--consult-text-faint); margin-top: 4px; }
+.consult-hero-visual-badge {
+  position: absolute; top: -16px; right: -16px; z-index: 2;
+  background: var(--consult-text); color: var(--white);
+  border-radius: var(--radius-lg); padding: 12px 16px; box-shadow: var(--shadow-lg);
+}
+html[dir="rtl"] .consult-hero-visual-badge { right: auto; left: -16px; }
+.consult-hero-visual-badge .consult-mini-stat-num { color: var(--white); font-size: 1.7rem; }
+.consult-hero-visual-badge .consult-mini-stat-label { color: rgba(255,255,255,0.7); }
+@media (max-width: 640px) {
+  .consult-hero-visual-badge { position: static; margin-top: 14px; display: inline-block; }
+}
 .consult-stack-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .consult-stack-pills span {
   font-size: 0.72rem; font-weight: 600; padding: 5px 10px; border-radius: 999px;
@@ -1256,8 +1257,7 @@ body[data-section="consultancy"] .cta-block::before,
 }
 @media (max-width: 640px) {
   .consult-hero { padding: 120px 0 64px; }
-  .consult-hero-bento { grid-template-columns: 1fr; }
-  .consult-bento-wide { grid-column: auto; }
+  .consult-hero-visual .browser-frame { max-width: 100%; }
   .consult-timeline { grid-template-columns: 1fr; }
   .consult-trust-row { flex-direction: column; gap: 8px; }
 }
