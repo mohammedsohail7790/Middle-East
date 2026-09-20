@@ -25,14 +25,20 @@
       <a class="logo" href="javascript:void(0)" onclick="logoClick()">
         <img class="logo-img nav-group" data-section="consultancy" src="/logo-consultancy-nav.jpg" alt="Halla AI — AI Consultancy">
         <img class="logo-img nav-group" data-section="receptionist" src="/logo-receptionist-nav.jpg" alt="Halla AI — AI Receptionist">
+        <span class="logo-img nav-group klaros-wordmark-nav" data-section="intelligence">Klaros</span>
       </a>
       <div class="section-switch" role="tablist" aria-label="Site section">
         <button class="section-switch-btn active" data-section="consultancy" onclick="switchSection('consultancy')" role="tab" aria-selected="true">Consultancy</button>
         <button class="section-switch-btn" data-section="receptionist" onclick="switchSection('receptionist')" role="tab" aria-selected="false">AI Receptionist</button>
-        <a class="section-switch-btn" href="https://meetklaros.com" target="_blank" rel="noopener">AI Intelligence</a>
+        <button class="section-switch-btn" data-section="intelligence" onclick="switchSection('intelligence')" role="tab" aria-selected="false">AI Intelligence</button>
       </div>
 
       <!-- RECEPTIONIST NAV -->
+      <div class="nav-links nav-group" data-section="intelligence">
+        <a class="nav-link" href="https://meetklaros.com/#features" target="_blank" rel="noopener">Features</a>
+        <a class="nav-link" href="https://meetklaros.com/pricing" target="_blank" rel="noopener">Pricing</a>
+        <a class="nav-link" href="https://meetklaros.com/#faq" target="_blank" rel="noopener">FAQ</a>
+      </div>
       <div class="nav-links nav-group" data-section="receptionist">
         <div class="nav-item">
           <div class="nav-link" onclick="toggleDropdown(event, this)" role="button" tabindex="0">Product <svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4"/></svg></div>
@@ -118,6 +124,7 @@
           <button data-lang="ar" onclick="setLang('ar')">عربي</button>
         </div>
         <a class="btn btn-outline btn-sm nav-group" data-section="receptionist" href="javascript:void(0)" onclick="go('login')">Sign In</a>
+        <a class="btn btn-outline btn-sm nav-group" data-section="intelligence" href="https://meetklaros.com/login" target="_blank" rel="noopener">Sign In</a>
         <a class="btn btn-primary btn-sm" id="navPrimaryCta" href="javascript:void(0)" onclick="navPrimaryCtaClick()">Book a Consultation →</a>
       </div>
       <button class="hamburger" onclick="toggleMob()" id="hamb"><span></span><span></span><span></span></button>
@@ -130,11 +137,18 @@
   <div class="section-switch mob-section-switch" role="tablist" aria-label="Site section">
     <button class="section-switch-btn active" data-section="consultancy" onclick="switchSection('consultancy');closeMob()" role="tab" aria-selected="true">Consultancy</button>
     <button class="section-switch-btn" data-section="receptionist" onclick="switchSection('receptionist');closeMob()" role="tab" aria-selected="false">AI Receptionist</button>
-    <a class="section-switch-btn" href="https://meetklaros.com" target="_blank" rel="noopener">AI Intelligence</a>
+    <button class="section-switch-btn" data-section="intelligence" onclick="switchSection('intelligence');closeMob()" role="tab" aria-selected="false">AI Intelligence</button>
   </div>
 
   <!-- RECEPTIONIST MOBILE NAV -->
-  <div class="nav-group" data-section="receptionist">
+  <div class="nav-group" data-section="intelligence">
+  <div class="mob-section">Klaros AI — AI Intelligence</div>
+  <a class="mob-link" href="https://meetklaros.com/#features" target="_blank" rel="noopener">Features</a>
+  <a class="mob-link" href="https://meetklaros.com/pricing" target="_blank" rel="noopener">Pricing</a>
+  <a class="mob-link" href="https://meetklaros.com/#faq" target="_blank" rel="noopener">FAQ</a>
+  <a class="btn btn-outline btn-sm" style="margin-top:10px" href="https://meetklaros.com/login" target="_blank" rel="noopener">Sign In</a>
+</div>
+<div class="nav-group" data-section="receptionist">
   <div class="mob-section">AI Receptionist (Product)</div>
   <a class="mob-link" href="javascript:void(0)" onclick="go('home');closeMob()" style="color:var(--accent)"><i class="ti ti-phone"></i> Overview</a>
   <a class="mob-link" href="javascript:void(0)" onclick="go('features');closeMob()"><i class="ti ti-sparkles"></i> Features</a>
@@ -9720,6 +9734,173 @@
 </div>
 
 <!-- ====== SERVICE: OPERATIONS AUTOMATION ====== -->
+<div id="page-intelligence" class="page">
+
+  <!-- INTELLIGENCE HERO -->
+  <section class="consult-hero">
+    <div class="consult-hero-glow" aria-hidden="true"></div>
+    <div class="container">
+      <div class="consult-hero-grid">
+        <div class="consult-hero-copy reveal-up">
+          <div class="label consult-label-glow"><span class="lang-en">Klaros AI &middot; AI Intelligence</span><span class="lang-ar">Klaros AI &middot; الذكاء الاصطناعي التشغيلي</span></div>
+          <h1><span class="lang-en">Run Your Entire Business.<br><span class="consult-gradient-text">Not Just Track It.</span></span><span class="lang-ar">أدر عملك بالكامل.<br><span class="consult-gradient-text">لا تكتفِ بتتبّعه.</span></span></h1>
+          <p class="consult-hero-sub"><span class="lang-en">Klaros is the operating system built for solo operators and small service businesses — leads to cash, quotes to reviews, one governed AI layer that proposes, waits for you, and executes.</span><span class="lang-ar">Klaros هو نظام التشغيل المصمم لأصحاب الأعمال المنفردين والشركات الصغيرة للخدمات — من العملاء المحتملين إلى التحصيل، ومن عروض الأسعار إلى التقييمات، طبقة ذكاء اصطناعي محكومة واحدة تقترح، وتنتظر موافقتك، ثم تنفّذ.</span></p>
+          <div class="consult-hero-actions">
+            <a class="btn btn-blue btn-lg consult-magnetic" href="https://meetklaros.com/register" target="_blank" rel="noopener"><span class="lang-en">Create Your Company →</span><span class="lang-ar">أنشئ شركتك ←</span></a>
+            <a class="btn btn-outline btn-lg consult-hero-outline" href="javascript:void(0)" onclick="switchSection('receptionist')"><span class="lang-en">See the AI Receptionist</span><span class="lang-ar">تعرّف على موظف الاستقبال الذكي</span></a>
+          </div>
+          <div class="consult-trust-row">
+            <span><i class="ti ti-check"></i> <span class="lang-en">Governed AI execution</span><span class="lang-ar">تنفيذ محكوم بالذكاء الاصطناعي</span></span>
+            <span><i class="ti ti-check"></i> <span class="lang-en">Every action audited</span><span class="lang-ar">كل إجراء مسجَّل في سجل تدقيق</span></span>
+            <span><i class="ti ti-check"></i> <span class="lang-en">Built for one person</span><span class="lang-ar">مصمَّم للفرد الواحد</span></span>
+          </div>
+        </div>
+        <div class="consult-hero-bento reveal-up" style="--reveal-delay:0.12s">
+          <div class="consult-bento-card consult-bento-main">
+            <div class="consult-bento-icon"><i class="ti ti-list-check"></i></div>
+            <div class="consult-bento-num" data-count="100">0</div>
+            <div class="consult-bento-label"><span class="lang-en">% of AI actions policy-checked before they run</span><span class="lang-ar">% من إجراءات الذكاء الاصطناعي يتم التحقق منها وفق السياسات قبل التنفيذ</span></div>
+          </div>
+          <div class="consult-bento-card consult-bento-stats">
+            <div class="consult-stat-item">
+              <div class="consult-stat-icon"><i class="ti ti-plug"></i></div>
+              <div class="consult-stat-text">
+                <div class="consult-bento-num sm" data-count="3">0</div>
+                <div class="consult-bento-label"><span class="lang-en">real integrations — Stripe, Google Calendar, QuickBooks</span><span class="lang-ar">تكاملات حقيقية — Stripe وتقويم جوجل وQuickBooks</span></div>
+              </div>
+            </div>
+            <div class="consult-stat-divider"></div>
+            <div class="consult-stat-item">
+              <div class="consult-stat-icon consult-stat-icon-accent"><i class="ti ti-bolt"></i></div>
+              <div class="consult-stat-text">
+                <div class="consult-bento-num sm accent"><span class="lang-en">Live</span><span class="lang-ar">مباشر</span></div>
+                <div class="consult-bento-label"><span class="lang-en">Owner Attention Queue — nothing falls through silently</span><span class="lang-ar">قائمة انتباه المالك المباشرة — لا شيء يضيع دون تنبيه</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="consult-bento-card consult-bento-wide">
+            <div class="consult-stack-pills">
+              <span>Stripe</span><span>Google Calendar</span><span>QuickBooks</span><span>CRM</span><span>Invoicing</span>
+            </div>
+            <div class="consult-bento-label"><span class="lang-en">One operating system, not twelve tabs</span><span class="lang-ar">نظام تشغيل واحد، لا اثنتا عشرة نافذة متفرقة</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT KLAROS DOES -->
+  <section class="section" id="intel-features">
+    <div class="container">
+      <div class="text-center consult-section-head reveal-up">
+        <div class="label"><span class="lang-en">Everything One Person Needs</span><span class="lang-ar">كل ما يحتاجه الفرد الواحد</span></div>
+        <h2><span class="lang-en">An AI operating system, not another app to babysit</span><span class="lang-ar">نظام تشغيل بالذكاء الاصطناعي، لا تطبيقاً إضافياً يحتاج إلى مراقبة</span></h2>
+        <p><span class="lang-en">CRM, scheduling, quoting, invoicing, and retention live in one place, wired together by a real event system.</span><span class="lang-ar">إدارة علاقات العملاء والجدولة وعروض الأسعار والفوترة والاحتفاظ بالعملاء، كلها في مكان واحد، مترابطة عبر نظام أحداث حقيقي.</span></p>
+      </div>
+      <div class="consult-service-grid">
+        <article class="consult-service-card reveal-up" style="--reveal-delay:0s">
+          <div class="consult-service-glow" aria-hidden="true"></div>
+          <div class="feat-icon feat-icon-blue"><i class="ti ti-robot"></i></div>
+          <div class="label" style="margin-bottom:10px"><span class="lang-en">Execution</span><span class="lang-ar">التنفيذ</span></div>
+          <h3><span class="lang-en">An AI that acts, not just chats</span><span class="lang-ar">ذكاء اصطناعي يتصرّف، لا يكتفي بالمحادثة</span></h3>
+          <p><span class="lang-en">Klaros reads every lead, quote, invoice, and job — then proposes the next action, waits for your approval on anything that matters, and executes safely within limits you set.</span><span class="lang-ar">يقرأ Klaros كل عميل محتمل وعرض سعر وفاتورة ومهمة عمل — ثم يقترح الخطوة التالية، وينتظر موافقتك على أي أمر مهم، وينفّذ بأمان ضمن الحدود التي تضعها.</span></p>
+          <ul class="consult-service-list">
+            <li><i class="ti ti-arrow-right"></i> <span class="lang-en">Real-time Owner Attention Queue</span><span class="lang-ar">قائمة انتباه المالك المباشرة</span></li>
+            <li><i class="ti ti-arrow-right"></i> <span class="lang-en">Proposes, never auto-approves itself</span><span class="lang-ar">يقترح فقط، ولا يوافق على قراراته بنفسه أبداً</span></li>
+          </ul>
+        </article>
+        <article class="consult-service-card reveal-up consult-service-featured" style="--reveal-delay:0.08s">
+          <div class="consult-service-glow" aria-hidden="true"></div>
+          <div class="consult-featured-badge"><span class="lang-en">The core idea</span><span class="lang-ar">الفكرة الجوهرية</span></div>
+          <div class="feat-icon feat-icon-violet"><i class="ti ti-stack-2"></i></div>
+          <div class="label" style="margin-bottom:10px"><span class="lang-en">Unified</span><span class="lang-ar">موحَّد</span></div>
+          <h3><span class="lang-en">One operating system, not twelve tabs</span><span class="lang-ar">نظام تشغيل واحد، لا اثنتا عشرة نافذة متفرقة</span></h3>
+          <p><span class="lang-en">CRM, scheduling, quoting, invoicing, and retention live in one place, wired together by a real event system — not a pile of disconnected tools pretending to integrate.</span><span class="lang-ar">إدارة علاقات العملاء والجدولة وعروض الأسعار والفوترة والاحتفاظ بالعملاء، كلها في مكان واحد، مترابطة عبر نظام أحداث حقيقي — لا مجموعة أدوات متفرقة تتظاهر بالتكامل.</span></p>
+          <ul class="consult-service-list">
+            <li><i class="ti ti-arrow-right"></i> <span class="lang-en">Leads, jobs, quotes, invoices — one record</span><span class="lang-ar">العملاء المحتملون والمهام وعروض الأسعار والفواتير — سجل واحد</span></li>
+            <li><i class="ti ti-arrow-right"></i> <span class="lang-en">Real integrations: Stripe, Calendar, QuickBooks</span><span class="lang-ar">تكاملات حقيقية: Stripe والتقويم وQuickBooks</span></li>
+          </ul>
+        </article>
+        <article class="consult-service-card reveal-up" style="--reveal-delay:0.16s">
+          <div class="consult-service-glow" aria-hidden="true"></div>
+          <div class="feat-icon feat-icon-orange"><i class="ti ti-shield-check"></i></div>
+          <div class="label" style="margin-bottom:10px"><span class="lang-en">Trust</span><span class="lang-ar">الثقة</span></div>
+          <h3><span class="lang-en">Nothing runs outside your rules</span><span class="lang-ar">لا شيء يعمل خارج قواعدك</span></h3>
+          <p><span class="lang-en">Every AI action is checked against a fixed policy before it executes and written to an audit trail afterward — the AI can propose, but it can never quietly approve its own request.</span><span class="lang-ar">يُتحقَّق من كل إجراء للذكاء الاصطناعي وفق سياسة ثابتة قبل تنفيذه، ويُسجَّل بعد ذلك في سجل تدقيق — يمكن للذكاء الاصطناعي أن يقترح، لكنه لا يستطيع أبداً أن يوافق بصمت على طلبه الخاص.</span></p>
+          <ul class="consult-service-list">
+            <li><i class="ti ti-arrow-right"></i> <span class="lang-en">Full audit trail, always inspectable</span><span class="lang-ar">سجل تدقيق كامل، قابل للمراجعة دائماً</span></li>
+            <li><i class="ti ti-arrow-right"></i> <span class="lang-en">Reject any recommendation — it learns from it</span><span class="lang-ar">ارفض أي توصية — وسيتعلّم منها النظام</span></li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section consult-timeline-section" id="intel-how">
+    <div class="container">
+      <div class="consult-section-head reveal-up">
+        <div class="label"><span class="lang-en">How It Actually Works</span><span class="lang-ar">كيف يعمل النظام فعلياً</span></div>
+        <h2><span class="lang-en">Three real steps, no black box</span><span class="lang-ar">ثلاث خطوات حقيقية، بلا صندوق أسود</span></h2>
+        <p><span class="lang-en">Set up your business once. Klaros proposes the next action. You approve, or it runs on its own — your call.</span><span class="lang-ar">أعدّ عملك مرة واحدة. يقترح Klaros الخطوة التالية. أنت من يوافق، أو يعمل تلقائياً — القرار لك.</span></p>
+      </div>
+      <div class="consult-timeline">
+        <div class="consult-timeline-step reveal-up" style="--reveal-delay:0s">
+          <div class="consult-timeline-num">01</div>
+          <h4><span class="lang-en">Set up your business</span><span class="lang-ar">أعدّ عملك</span></h4>
+          <p><span class="lang-en">Add your pricing rules, service catalog, and brand voice once — Klaros reads these before it ever proposes anything on your behalf.</span><span class="lang-ar">أضف قواعد التسعير وكتالوج الخدمات وأسلوب علامتك التجارية مرة واحدة — يقرأها Klaros قبل أن يقترح أي شيء نيابة عنك.</span></p>
+        </div>
+        <div class="consult-timeline-step reveal-up" style="--reveal-delay:0.1s">
+          <div class="consult-timeline-num">02</div>
+          <h4><span class="lang-en">Klaros proposes the next action</span><span class="lang-ar">يقترح Klaros الخطوة التالية</span></h4>
+          <p><span class="lang-en">A new lead, an overdue invoice, a quote gone quiet — Klaros reads what changed and recommends what to do about it, in plain language.</span><span class="lang-ar">عميل محتمل جديد، فاتورة متأخرة، عرض سعر بلا رد — يقرأ Klaros ما تغيّر ويوصي بالخطوة المناسبة، بلغة واضحة.</span></p>
+        </div>
+        <div class="consult-timeline-step reveal-up" style="--reveal-delay:0.2s">
+          <div class="consult-timeline-num">03</div>
+          <h4><span class="lang-en">You approve, or it runs on its own</span><span class="lang-ar">أنت من يوافق، أو يعمل تلقائياً</span></h4>
+          <p><span class="lang-en">Set what's automatic and what needs your sign-off. Every action — either way — is policy-checked and written to an audit trail you can always inspect.</span><span class="lang-ar">حدّد ما يُنفَّذ تلقائياً وما يحتاج إلى موافقتك. كل إجراء — في الحالتين — يُتحقَّق منه وفق السياسات ويُسجَّل في سجل تدقيق يمكنك مراجعته دائماً.</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section-sm" id="intel-faq">
+    <div class="container" style="max-width:820px">
+      <div class="consult-section-head reveal-up">
+        <div class="label"><span class="lang-en">Questions Worth Answering Honestly</span><span class="lang-ar">أسئلة تستحق إجابة صادقة</span></div>
+        <h2><span class="lang-en">Can the AI take actions without me knowing?</span><span class="lang-ar">هل يمكن للذكاء الاصطناعي اتخاذ إجراءات دون علمي؟</span></h2>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Can the AI take actions without me knowing?<span class="faq-icon">+</span></div>
+        <div class="faq-a">No. Every action — automatic or approved — is logged to an audit trail you can see in full, including exactly what was proposed, what was approved, and what ran. Nothing happens silently.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">What if I don't trust an AI recommendation?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Reject it. Klaros treats every AI output as a proposal, never a decision — you can require approval on any action type, and rejecting one doesn't just discard it, it teaches Klaros what you'd actually do instead.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Which tools does Klaros actually integrate with today?<span class="faq-icon">+</span></div>
+        <div class="faq-a">Stripe, Google Calendar, and QuickBooks connect for real today. Every integration's connection status on your dashboard is checked live against the real provider — never simulated.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-sm" id="intel-cta">
+    <div class="container">
+      <div class="cta-block consult-cta-block reveal-up">
+        <div class="label" style="background:var(--intel-accent-dim);color:var(--intel-accent-soft)"><span class="lang-en">Built For One Person</span><span class="lang-ar">مصمَّم للفرد الواحد</span></div>
+        <h2><span class="lang-en">Run what used to take a team</span><span class="lang-ar">أدر ما كان يحتاج إلى فريق كامل</span></h2>
+        <p style="margin-top:16px;max-width:480px;margin-left:auto;margin-right:auto"><span class="lang-en">Set up your company in a couple of minutes and see your first Morning Brief before your coffee's cold.</span><span class="lang-ar">أعدّ شركتك خلال دقيقتين وشاهد أول ملخص صباحي لك قبل أن يبرد قهوتك.</span></p>
+        <div class="btn-group">
+          <a class="btn btn-blue btn-lg consult-magnetic" href="https://meetklaros.com/register" target="_blank" rel="noopener"><span class="lang-en">Create Your Company →</span><span class="lang-ar">أنشئ شركتك ←</span></a>
+          <a class="btn btn-outline btn-lg" style="color:rgba(255,255,255,0.7);border-color:rgba(255,255,255,0.2)" href="javascript:void(0)" onclick="switchSection('receptionist')"><span class="lang-en">See the AI Receptionist</span><span class="lang-ar">تعرّف على موظف الاستقبال الذكي</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
 <div id="page-svc-operations" class="page">
   <div class="page-hero">
     <div class="container">
@@ -10684,6 +10865,7 @@
         <div class="footer-logo">
           <img class="logo-img nav-group" data-section="consultancy" src="/logo-consultancy-nav.jpg" alt="Halla AI — AI Consultancy">
           <img class="logo-img nav-group" data-section="receptionist" src="/logo-receptionist-nav.jpg" alt="Halla AI — AI Receptionist">
+        <span class="logo-img nav-group klaros-wordmark-nav" data-section="intelligence">Klaros</span>
         </div>
        <p class="footer-group" data-section="consultancy">An AI implementation partner for small businesses — operations, client acquisition, and brand growth, backed by a full AI team.</p>
        <p class="footer-group" data-section="receptionist">Pure AI Receptionist. No live agents. No hidden fees. 24/7/365 answering for 27 industries.</p>
@@ -10768,7 +10950,29 @@
       </div>
       <div class="footer-col"></div>
       </div>
-      
+
+      <!-- Intelligence Footer Columns -->
+      <div class="footer-group" data-section="intelligence">
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a class="flink" href="https://meetklaros.com/#features" target="_blank" rel="noopener">Features</a>
+        <a class="flink" href="https://meetklaros.com/pricing" target="_blank" rel="noopener">Pricing</a>
+        <a class="flink" href="https://meetklaros.com/#faq" target="_blank" rel="noopener">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h5>Why Klaros</h5>
+        <a class="flink" href="https://meetklaros.com/#how" target="_blank" rel="noopener">How It Works</a>
+        <a class="flink" href="javascript:void(0)" onclick="switchSection('receptionist')">Our AI Receptionist</a>
+        <a class="flink" href="javascript:void(0)" onclick="switchSection('consultancy')">Halla AI Consultancy</a>
+      </div>
+      <div class="footer-col">
+        <h5>Get Started</h5>
+        <a class="flink" href="https://meetklaros.com/register" target="_blank" rel="noopener">Create Your Company</a>
+        <a class="flink" href="https://meetklaros.com/login" target="_blank" rel="noopener">Sign In</a>
+      </div>
+      <div class="footer-col"></div>
+      </div>
+
       <!-- Company Column -->
       <div class="footer-col">
         <h5><span class="lang-en">Company</span><span class="lang-ar">الشركة</span></h5>

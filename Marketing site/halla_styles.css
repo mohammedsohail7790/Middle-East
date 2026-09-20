@@ -72,6 +72,28 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --consult-text-muted: #5B5F5A;
   --consult-text-faint: #8E928D;
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  /* AI Intelligence (Klaros AI) — the product's own real brand accent
+     (deep indigo-navy), kept distinct from the shared gold used by
+     Consultancy/Receptionist. Scoped onto #page-intelligence below by
+     redeclaring the SAME --consult-* variable names, so every existing
+     .consult-* structural class (hero, bento cards, service grid,
+     timeline, cta-block) renders with zero new layout CSS. */
+  --intel-accent: #2B3A63;
+  --intel-accent-soft: #202C4D;
+  --intel-accent-dim: rgba(43,58,99,0.12);
+  --intel-text: #1C1A16;
+}
+
+#page-intelligence {
+  --consult-accent: var(--intel-accent);
+  --consult-accent-soft: var(--intel-accent-soft);
+  --consult-accent-dim: var(--intel-accent-dim);
+  --consult-text: var(--intel-text);
+}
+.klaros-wordmark-nav {
+  font-family: Georgia, 'Times New Roman', serif; font-style: italic;
+  font-weight: 700; font-size: 1.35rem; letter-spacing: -0.01em; color: var(--black);
+  line-height: 44px; height: 44px; display: flex; align-items: center;
 }
 
 body { font-family: var(--font); background: var(--white); color: var(--black); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
@@ -156,7 +178,8 @@ body[data-section="consultancy"] .btn-blue,
 #page-home .btn-blue,
 #page-pricing .btn-blue,
 #page-features .btn-blue,
-#page-how-it-works .btn-blue {
+#page-how-it-works .btn-blue,
+#page-intelligence .btn-blue {
   background: var(--consult-text) !important; color: var(--white) !important;
 }
 body[data-section="consultancy"] .btn-blue:hover,
@@ -168,7 +191,8 @@ body[data-section="consultancy"] .btn-blue:hover,
 #page-home .btn-blue:hover,
 #page-pricing .btn-blue:hover,
 #page-features .btn-blue:hover,
-#page-how-it-works .btn-blue:hover {
+#page-how-it-works .btn-blue:hover,
+#page-intelligence .btn-blue:hover {
   background: var(--consult-accent-soft) !important; box-shadow: 0 8px 24px var(--consult-accent-dim) !important;
 }
 .btn-lg { padding: 16px 34px; font-size: 1rem; }
@@ -187,10 +211,16 @@ body[data-section="consultancy"] .btn-blue:hover,
 .halla-wordmark .halla-ai { color: var(--accent); }
 .logo-img { height: 44px; width: auto; border-radius: 6px; object-fit: contain; }
 .footer-logo .logo-img { height: 52px; border-radius: 8px; }
-.logo-img.nav-group[data-section="receptionist"] { display: none; }
+.logo-img.nav-group[data-section="receptionist"],
+.logo-img.nav-group[data-section="intelligence"] { display: none; }
 .logo-img.nav-group[data-section="consultancy"] { display: block; }
+
 body[data-section="receptionist"] .logo-img.nav-group[data-section="receptionist"] { display: block; }
-body[data-section="receptionist"] .logo-img.nav-group[data-section="consultancy"] { display: none; }
+body[data-section="receptionist"] .logo-img.nav-group[data-section="consultancy"],
+body[data-section="receptionist"] .logo-img.nav-group[data-section="intelligence"] { display: none; }
+body[data-section="intelligence"] .logo-img.nav-group[data-section="intelligence"] { display: block; }
+body[data-section="intelligence"] .logo-img.nav-group[data-section="consultancy"],
+body[data-section="intelligence"] .logo-img.nav-group[data-section="receptionist"] { display: none; }
 
 .section-switch {
   display: flex; align-items: center; gap: 2px;
@@ -211,27 +241,60 @@ body[data-section="receptionist"] .logo-img.nav-group[data-section="consultancy"
 
 /* ============ SECTION MODE (Consultancy vs AI Receptionist) ============ */
 /* Default (before JS runs, or if data-section is absent): Consultancy shows, Receptionist hides. */
-.nav-links.nav-group[data-section="receptionist"] { display: none; }
+.nav-links.nav-group[data-section="receptionist"],
+.nav-links.nav-group[data-section="intelligence"] { display: none; }
 .nav-links.nav-group[data-section="consultancy"] { display: flex; }
+
 body[data-section="receptionist"] .nav-links.nav-group[data-section="receptionist"] { display: flex; }
-body[data-section="receptionist"] .nav-links.nav-group[data-section="consultancy"] { display: none; }
+body[data-section="receptionist"] .nav-links.nav-group[data-section="consultancy"],
+body[data-section="receptionist"] .nav-links.nav-group[data-section="intelligence"] { display: none; }
+body[data-section="intelligence"] .nav-links.nav-group[data-section="intelligence"] { display: flex; }
+body[data-section="intelligence"] .nav-links.nav-group[data-section="consultancy"],
+body[data-section="intelligence"] .nav-links.nav-group[data-section="receptionist"] { display: none; }
 
-.mob-nav .nav-group[data-section="receptionist"] { display: none; }
+.mob-nav .nav-group[data-section="receptionist"],
+.mob-nav .nav-group[data-section="intelligence"] { display: none; }
 .mob-nav .nav-group[data-section="consultancy"] { display: block; }
-body[data-section="receptionist"] .mob-nav .nav-group[data-section="receptionist"] { display: block; }
-body[data-section="receptionist"] .mob-nav .nav-group[data-section="consultancy"] { display: none; }
 
-.footer-group[data-section="receptionist"] { display: none; }
+body[data-section="receptionist"] .mob-nav .nav-group[data-section="receptionist"] { display: block; }
+body[data-section="receptionist"] .mob-nav .nav-group[data-section="consultancy"],
+body[data-section="receptionist"] .mob-nav .nav-group[data-section="intelligence"] { display: none; }
+body[data-section="intelligence"] .mob-nav .nav-group[data-section="intelligence"] { display: block; }
+body[data-section="intelligence"] .mob-nav .nav-group[data-section="consultancy"],
+body[data-section="intelligence"] .mob-nav .nav-group[data-section="receptionist"] { display: none; }
+
+.footer-group[data-section="receptionist"],
+.footer-group[data-section="intelligence"] { display: none; }
 .footer-group[data-section="consultancy"] { display: contents; }
 
-.nav-actions .nav-group[data-section="receptionist"] { display: none; }
-body[data-section="receptionist"] .nav-actions .nav-group[data-section="receptionist"] { display: inline-flex; }
 body[data-section="receptionist"] .footer-group[data-section="receptionist"] { display: contents; }
-body[data-section="receptionist"] .footer-group[data-section="consultancy"] { display: none; }
-.footer-brand p.footer-group[data-section="receptionist"] { display: none; }
+body[data-section="receptionist"] .footer-group[data-section="consultancy"],
+body[data-section="receptionist"] .footer-group[data-section="intelligence"] { display: none; }
+body[data-section="intelligence"] .footer-group[data-section="intelligence"] { display: contents; }
+body[data-section="intelligence"] .footer-group[data-section="consultancy"],
+body[data-section="intelligence"] .footer-group[data-section="receptionist"] { display: none; }
+
+.nav-actions .nav-group[data-section="receptionist"],
+.nav-actions .nav-group[data-section="intelligence"] { display: none; }
+.nav-actions .nav-group[data-section="consultancy"] { display: inline-flex; }
+
+body[data-section="receptionist"] .nav-actions .nav-group[data-section="receptionist"] { display: inline-flex; }
+body[data-section="receptionist"] .nav-actions .nav-group[data-section="consultancy"],
+body[data-section="receptionist"] .nav-actions .nav-group[data-section="intelligence"] { display: none; }
+body[data-section="intelligence"] .nav-actions .nav-group[data-section="intelligence"] { display: inline-flex; }
+body[data-section="intelligence"] .nav-actions .nav-group[data-section="consultancy"],
+body[data-section="intelligence"] .nav-actions .nav-group[data-section="receptionist"] { display: none; }
+
+.footer-brand p.footer-group[data-section="receptionist"],
+.footer-brand p.footer-group[data-section="intelligence"] { display: none; }
 .footer-brand p.footer-group[data-section="consultancy"] { display: block; }
+
 body[data-section="receptionist"] .footer-brand p.footer-group[data-section="receptionist"] { display: block; }
-body[data-section="receptionist"] .footer-brand p.footer-group[data-section="consultancy"] { display: none; }
+body[data-section="receptionist"] .footer-brand p.footer-group[data-section="consultancy"],
+body[data-section="receptionist"] .footer-brand p.footer-group[data-section="intelligence"] { display: none; }
+body[data-section="intelligence"] .footer-brand p.footer-group[data-section="intelligence"] { display: block; }
+body[data-section="intelligence"] .footer-brand p.footer-group[data-section="consultancy"],
+body[data-section="intelligence"] .footer-brand p.footer-group[data-section="receptionist"] { display: none; }
 
 .nav-links { display: flex; align-items: center; gap: 1px; flex: 1; }
 .nav-item { position: relative; }

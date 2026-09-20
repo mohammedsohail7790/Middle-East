@@ -13,29 +13,33 @@
 // consultancy section; every other page belongs to the receptionist section.
 function sectionForPage(page) {
   const consultancyPages = ['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup'];
-  return consultancyPages.includes(page) ? 'consultancy' : 'receptionist';
+  const intelligencePages = ['intelligence'];
+  if (consultancyPages.includes(page)) return 'consultancy';
+  if (intelligencePages.includes(page)) return 'intelligence';
+  return 'receptionist';
 }
 function setSectionMode(section) {
   document.body.setAttribute('data-section', section);
   document.querySelectorAll('.section-switch-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.section === section);
   });
+  const ctaText = section === 'consultancy' ? 'Book a Consultation →'
+    : section === 'intelligence' ? 'Create Your Company →'
+    : 'Get My AI Receptionist →';
   const ctaBtn = document.getElementById('navPrimaryCta');
-  if (ctaBtn) {
-    ctaBtn.textContent = (section === 'consultancy') ? 'Book a Consultation →' : 'Get My AI Receptionist →';
-  }
+  if (ctaBtn) ctaBtn.textContent = ctaText;
   const footerCtaBtn = document.getElementById('footerPrimaryCta');
-  if (footerCtaBtn) {
-    footerCtaBtn.textContent = (section === 'consultancy') ? 'Book a Consultation →' : 'Get My AI Receptionist →';
-  }
+  if (footerCtaBtn) footerCtaBtn.textContent = ctaText;
 }
 function switchSection(section) {
   if (section === 'consultancy') { go('consultancy'); }
+  else if (section === 'intelligence') { go('intelligence'); }
   else { go('home'); }
 }
 function navPrimaryCtaClick() {
   const section = document.body.getAttribute('data-section') || 'consultancy';
   if (section === 'consultancy') { go('consult-signup'); }
+  else if (section === 'intelligence') { window.open('https://meetklaros.com/register', '_blank', 'noopener'); }
   else { go('signup'); }
 }
 function logoClick() {
