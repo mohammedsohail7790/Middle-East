@@ -27,15 +27,18 @@
     "dev": "concurrently -n \"gateway,dashboard\" -c \"cyan,magenta\" \"npx --yes cross-env PORT=3003 npm run dev -w @halla-ai/gateway\" \"npx --yes wait-on http-get://127.0.0.1:3003/health -t 180000 -i 2500 && npx --yes cross-env PORT=3000 npm run dev -w @halla-ai/dashboard\"",
     "dev:dashboard": "npx --yes cross-env PORT=3000 npm run dev -w @halla-ai/dashboard",
     "dev:gateway": "npx --yes cross-env PORT=3003 npm run dev -w @halla-ai/gateway",
+    "dev:klaros": "npx --yes cross-env PORT=3001 npm run dev -w @halla-ai/klaros",
     "build": "npm run build:packages && npm run build:apps",
     "build:packages": "npm run build -w @halla-ai/types && npm run build -w @halla-ai/db && npm run build -w @halla-ai/memory && npm run build -w @halla-ai/mcp-client",
     "build:apps": "npm run build -w @halla-ai/gateway && npm run build -w @halla-ai/dashboard && npm run build -w @halla-ai/worker",
     "build:worker": "npm run build -w @halla-ai/worker",
     "build:dashboard": "npm run build -w @halla-ai/dashboard",
     "build:gateway": "npm run build -w @halla-ai/gateway",
+    "build:klaros": "npm run build -w @halla-ai/klaros",
     "start": "concurrently \"npm run start -w @halla-ai/gateway\" \"npm run start -w @halla-ai/dashboard\"",
     "start:dashboard": "npm run start -w @halla-ai/dashboard",
     "start:gateway": "npm run start -w @halla-ai/gateway",
+    "start:klaros": "npm run start -w @halla-ai/klaros",
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint --workspaces --if-present -- --fix",
     "test": "vitest run",
@@ -97,7 +100,9 @@
     "vitest": "^4.1.8"
   },
   "overrides": {
-    "postcss": "^8.5.15"
+    "postcss": "^8.5.15",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7"
   },
   "engines": {
     "node": "22.x",

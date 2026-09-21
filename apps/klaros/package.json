@@ -1,27 +1,27 @@
 {
-  "name": "klaros-ai-frontend",
+  "name": "@halla-ai/klaros",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "geist": "^1.7.2",
     "lucide-react": "^1.45.0",
-    "next": "^16.3.3",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "next": "^16.3.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@types/node": "20.16.11",
-    "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.1",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "autoprefixer": "10.4.20",
     "postcss": "8.5.26",
     "tailwindcss": "3.4.13",
