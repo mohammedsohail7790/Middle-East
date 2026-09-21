@@ -1,0 +1,216 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Klaros brand palette — now sharing the Halla AI family's own warm
+     porcelain/gold system exactly (same hex values as hallaai.com's
+     --accent/--accent-dark/--accent-light), not just typography: one
+     shared color identity across Consultancy, AI Receptionist, and
+     Klaros itself. Klaros's original navy lives on as --color-accent-2,
+     a secondary/decorative accent (gradient backdrop, badges) rather
+     than being deleted outright.
+     Space-separated RGB channels (not hex) so Tailwind can apply opacity
+     modifiers like bg-accent-soft/40 via rgb(var(--x) / <alpha-value>). */
+  --color-background: 250 249 246;
+  --color-surface: 255 255 255;
+  --color-surface-muted: 244 242 236;
+  --color-border: 231 227 217;
+  --color-border-strong: 216 211 196;
+  --color-foreground: 28 26 22;
+  --color-muted: 107 101 88;
+  --color-muted-foreground: 148 141 124;
+  --color-accent: 199 162 90;
+  --color-accent-hover: 140 111 62;
+  --color-accent-foreground: 255 255 255;
+  --color-accent-soft: 238 234 226;
+  --color-accent-2: 43 58 99;
+  --color-success: 47 107 79;
+  --color-warning: 165 105 12;
+  --color-danger: 173 59 44;
+}
+
+body {
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-foreground));
+  position: relative;
+}
+
+/* Every <select> in the app, styled globally rather than per-file — the
+   native OS dropdown arrow was the single most "unstyled browser default"
+   element on the page, present in 38+ call sites with otherwise-identical
+   border/background classes. A custom chevron + consistent focus ring
+   here upgrades every one of them without touching call sites. Scoped to
+   plain <select> (not [multiple] or [size]) so a native listbox keeps its
+   own OS chrome, which this treatment isn't designed for. */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236B6558' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  padding-right: 1.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+select:not([multiple]):not([size]):focus {
+  border-color: rgb(var(--color-accent));
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(var(--color-accent-soft));
+}
+select:not([multiple]):not([size]):disabled {
+  cursor: not-allowed;
+}
+
+/* Subtle film-grain texture for tactile depth — applied as a fixed,
+   near-invisible overlay so flat color fields don't read as flat/generated. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Modal entrance — backdrop fades in while the panel itself scales up
+   from 97% with a slight upward drift, the same "settles into place"
+   easing Linear/Stripe use for dialogs rather than a flat opacity pop. */
+@keyframes klaros-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes klaros-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Toast entrance — slides up from where it docks (bottom-right on
+   desktop, bottom-center on mobile) rather than just fading in, so a
+   stack of several feels like each one is arriving, not popping. */
+@keyframes klaros-toast-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes klaros-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-14px); }
+}
+.klaros-float {
+  animation: klaros-float 7s ease-in-out infinite;
+}
+
+.klaros-perspective {
+  perspective: 1800px;
+}
+
+/* Shimmer for loading skeletons — a moving highlight band over a flat
+   muted fill, the same "content is about to arrive" language as
+   Linear/Stripe loading states, replacing bare "Loading..." text. */
+@keyframes klaros-shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.klaros-skeleton {
+  background-color: rgb(var(--color-surface-muted));
+  background-image: linear-gradient(
+    90deg,
+    rgb(var(--color-surface-muted)) 0%,
+    rgb(var(--color-border)) 50%,
+    rgb(var(--color-surface-muted)) 100%
+  );
+  background-size: 800px 100%;
+  animation: klaros-shimmer 1.6s ease-in-out infinite;
+}
+
+@layer components {
+  .klaros-card {
+    @apply rounded-xl border border-border bg-surface shadow-card;
+  }
+
+  /* A card that's itself a click target (a summary tile linking to a
+     detail page, a clickable settings row) — lifts and gains a stronger
+     shadow on hover so it reads as interactive before the cursor even
+     changes, the same restrained affordance StatCard uses. */
+  .klaros-card-interactive {
+    @apply cursor-pointer transition-all duration-200 ease-out hover:-translate-y-px hover:border-border-strong hover:shadow-raised;
+  }
+
+  .klaros-input {
+    @apply w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft;
+  }
+
+  .klaros-label {
+    @apply text-xs font-medium uppercase tracking-wide text-muted;
+  }
+
+  /* Both buttons get the same tactile shape: a soft shadow at rest, a
+     lift + accent-tinted glow on hover, and a press-down on click — the
+     same "hover adds a colored glow" language as the Halla AI family's
+     own primary buttons, not just a flat color swap. */
+  .klaros-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground shadow-card transition-all duration-200 ease-out hover:-translate-y-px hover:bg-accent-hover hover:shadow-glow active:translate-y-0 active:shadow-card disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none disabled:hover:translate-y-0;
+  }
+
+  .klaros-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-card transition-all duration-200 ease-out hover:-translate-y-px hover:border-border-strong hover:bg-surface-muted hover:shadow-raised active:translate-y-0 active:shadow-card disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none disabled:hover:translate-y-0;
+  }
+
+  .klaros-table-wrap {
+    @apply overflow-x-auto rounded-xl border border-border bg-surface shadow-card;
+  }
+
+  .klaros-table {
+    @apply w-full text-left text-sm;
+  }
+
+  .klaros-table thead {
+    @apply sticky top-0 z-10 bg-surface-muted/95 text-xs font-medium uppercase tracking-wide text-muted backdrop-blur-sm;
+  }
+
+  .klaros-table th {
+    @apply px-4 py-3 font-medium;
+  }
+
+  .klaros-table td {
+    @apply px-4 py-3;
+  }
+
+  .klaros-table tbody tr {
+    @apply border-t border-border transition-colors hover:bg-accent-soft/40;
+  }
+
+  /* Rows that are themselves a navigation target (e.g. a table where each
+     row links to a detail page) get a pointer cursor and a touch more
+     lift on hover, so the affordance reads before the click. */
+  .klaros-table tbody tr.klaros-row-link {
+    @apply cursor-pointer;
+  }
+
+  .klaros-filter-tab {
+    @apply rounded-full border px-3 py-1 text-xs font-medium transition-all duration-150;
+  }
+
+  .klaros-filter-tab-active {
+    @apply border-accent bg-accent-soft text-accent;
+  }
+
+  .klaros-filter-tab-inactive {
+    @apply border-border-strong text-muted hover:border-accent/40 hover:text-foreground;
+  }
+
+  /* Glassmorphism — reserved for chrome/marketing surfaces (nav bars, hero
+     panels, modals) that sit over the gradient-orb backdrop, never over
+     data tables or forms: a blurred, translucent surface is a genuine
+     readability regression for dense text/numbers, which is why Stripe's
+     and Linear's own dashboards never apply this to their data views. */
+  .klaros-glass {
+    @apply border border-white/40 bg-white/60 shadow-popover backdrop-blur-xl;
+  }
+
+  .klaros-glass-dark {
+    @apply border border-white/10 bg-foreground/70 text-white shadow-popover backdrop-blur-xl;
+  }
+}
