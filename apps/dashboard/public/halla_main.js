@@ -18,18 +18,29 @@ function sectionForPage(page) {
   if (intelligencePages.includes(page)) return 'intelligence';
   return 'receptionist';
 }
+// Section -> { en, ar } primary CTA copy. Arabic uses ← (not →) since the
+// whole button reads right-to-left in RTL, matching every other
+// arrow-suffixed CTA on the site (see the hero's own lang-ar copy).
+const SECTION_CTA_TEXT = {
+  consultancy: { en: 'Book a Consultation →', ar: 'احجز استشارة ←' },
+  intelligence: { en: 'Create Your Company →', ar: 'أنشئ شركتك ←' },
+  receptionist: { en: 'Get My AI Receptionist →', ar: 'احصل على موظف الاستقبال الذكي ←' },
+};
+function applyPrimaryCtaText() {
+  const section = document.body.getAttribute('data-section') || 'consultancy';
+  const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
+  const ctaText = (SECTION_CTA_TEXT[section] || SECTION_CTA_TEXT.receptionist)[lang];
+  const ctaBtn = document.getElementById('navPrimaryCta');
+  if (ctaBtn) ctaBtn.textContent = ctaText;
+  const footerCtaBtn = document.getElementById('footerPrimaryCta');
+  if (footerCtaBtn) footerCtaBtn.textContent = ctaText;
+}
 function setSectionMode(section) {
   document.body.setAttribute('data-section', section);
   document.querySelectorAll('.section-switch-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.section === section);
   });
-  const ctaText = section === 'consultancy' ? 'Book a Consultation →'
-    : section === 'intelligence' ? 'Create Your Company →'
-    : 'Get My AI Receptionist →';
-  const ctaBtn = document.getElementById('navPrimaryCta');
-  if (ctaBtn) ctaBtn.textContent = ctaText;
-  const footerCtaBtn = document.getElementById('footerPrimaryCta');
-  if (footerCtaBtn) footerCtaBtn.textContent = ctaText;
+  applyPrimaryCtaText();
 }
 function switchSection(section) {
   if (section === 'consultancy') { go('consultancy'); }
@@ -422,6 +433,10 @@ function setLang(lang) {
   document.querySelectorAll('[data-en][data-ar]').forEach(el => {
     el.textContent = lang === 'ar' ? el.dataset.ar : el.dataset.en;
   });
+  // The primary CTA's text is built from section + lang together (see
+  // applyPrimaryCtaText), not just swapped via the [data-en][data-ar]
+  // sweep above, so a plain language toggle has to re-run it too.
+  applyPrimaryCtaText();
   if (document.getElementById('r-mult')) calcROI();
   try { localStorage.setItem('halla_lang', lang); } catch (e) {}
 }
