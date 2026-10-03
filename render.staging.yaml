@@ -1,0 +1,52 @@
+# Halla AI — Render Blueprint (STAGING ONLY)
+# Deploy: Render Dashboard → New → Blueprint → this repo, branch `staging`,
+#         Blueprint file path `render.staging.yaml`.
+# Never apply this file to the production service (`render.yaml` is production, branch main).
+#
+# Isolated resources created here:
+#   halla-ai-gateway-staging  — gateway built from the `staging` branch
+#   halla-ai-redis-staging    — dedicated Valkey/Redis (NOT the production instance)
+#
+# Secrets (sync: false) must point at a dedicated STAGING Supabase project and are entered
+# in the Render prompt — never committed. Apply supabase/migrations 001–071 to that database
+# before the first deploy.
+
+services:
+  - type: web
+    name: halla-ai-gateway-staging
+    runtime: node
+    region: oregon
+    plan: free
+    branch: staging
+    buildCommand: npm install && npm run build:gateway
+    startCommand: npm run start:gateway
+    healthCheckPath: /ready
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3003
+      - key: PGSSLMODE
+        value: require
+      - key: ALLOWED_ORIGINS
+        value: http://localhost:3000
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: halla-ai-redis-staging
+          property: connectionString
+      - key: DATABASE_URL
+        sync: false
+      - key: GATEWAY_DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+  - type: keyvalue
+    name: halla-ai-redis-staging
+    region: oregon
+    plan: free
+    ipAllowList: []
