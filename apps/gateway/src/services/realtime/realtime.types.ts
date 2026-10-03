@@ -41,6 +41,8 @@ export interface RealtimeSession {
   reconnectCount?: number;
   /** Persisted on call row when session ends */
   callOutcome?: 'completed' | 'transferred' | 'failed';
+  /** Number the call was transferred to (set by the transfer_call tool); persisted as calls.transfer_target. */
+  transferTarget?: string;
   /** Greeting scheduled but not yet sent */
   greetingPending?: boolean;
   /** Greeting response.create already sent */

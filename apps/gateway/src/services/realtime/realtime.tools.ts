@@ -449,6 +449,25 @@ export class RealtimeToolsManager {
 
       await transferService.transferCall(session.callSid, targetNumber);
       session.callOutcome = 'transferred';
+      session.transferTarget = targetNumber;
+
+      void import('../../events/event-publisher.js')
+        .then(async ({ publishPlatformEvent }) => {
+          const { PlatformEventTypes } = await import('../../events/event-types.js');
+          const { resolveCallCorrelation } = await import('../klaros/correlation.js');
+          const correlation = await resolveCallCorrelation(session.tenantId, session.callSid);
+          publishPlatformEvent(
+            PlatformEventTypes.LEAD_ESCALATED,
+            {
+              callId: session.callSid,
+              target: targetNumber,
+              reason: params.reason,
+              ...correlation,
+            },
+            { tenantId: session.tenantId, callSid: session.callSid, sessionId: session.id }
+          );
+        })
+        .catch(() => {});
 
       return {
         success: true,

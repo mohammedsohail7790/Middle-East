@@ -21,7 +21,7 @@ export const leadsListQuerySchema: ValidationSchema = {
 };
 
 export const leadCreateBodySchema: ValidationSchema = {
-  allowOnlyBody: ['phoneNumber', 'source', 'email', 'name', 'notes', 'metadata'],
+  allowOnlyBody: ['phoneNumber', 'source', 'email', 'name', 'notes', 'metadata', 'klarosLeadId'],
   body: {
     phoneNumber: { type: 'string', required: true, minLength: 3, maxLength: 32 },
     source: { type: 'string', required: true, minLength: 1, maxLength: 64 },
@@ -29,11 +29,12 @@ export const leadCreateBodySchema: ValidationSchema = {
     name: { type: 'string', maxLength: 200 },
     notes: { type: 'string', maxLength: 5000 },
     metadata: { type: 'object' },
+    klarosLeadId: { type: 'string', maxLength: 128 },
   },
 };
 
 export const leadUpdateBodySchema: ValidationSchema = {
-  allowOnlyBody: ['email', 'name', 'notes', 'metadata', 'source', 'phoneNumber', 'phone'],
+  allowOnlyBody: ['email', 'name', 'notes', 'metadata', 'source', 'phoneNumber', 'phone', 'klarosLeadId'],
   body: {
     email: { type: 'email', maxLength: 254 },
     name: { type: 'string', maxLength: 200 },
@@ -42,6 +43,7 @@ export const leadUpdateBodySchema: ValidationSchema = {
     source: { type: 'string', maxLength: 64 },
     phoneNumber: { type: 'string', minLength: 3, maxLength: 32 },
     phone: { type: 'string', minLength: 3, maxLength: 32 },
+    klarosLeadId: { type: 'string', maxLength: 128 },
   },
 };
 

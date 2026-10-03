@@ -12,6 +12,8 @@ import { concurrencyGuard } from '../voice/concurrency.guard.js';
 import { sessionCoordinator } from './session-coordinator.js';
 import { heartbeatManager } from './heartbeat-manager.js';
 import { wsRateLimiter } from '../ws-rate-limiter.js';
+import { runPostCallCompletion } from './post-call-completion.js';
+import type { QualificationResult } from './qualification-mapper.js';
 
 export interface PostCallState {
   sessionId: string;
@@ -110,6 +112,7 @@ export async function finalizeRuntimeSession(
           latency: 0,
           durationMs,
           outcome: callOutcome,
+          transferTarget: session.transferTarget,
           recordingUrl: null,
           configHash,
         }).catch(err => {
@@ -182,16 +185,26 @@ export async function finalizeRuntimeSession(
           }
         }
 
+        // The AI evaluation + structured qualification is prepared here but run by
+        // runPostCallCompletion below, so call.completed can carry its final result.
+        let evaluate: (() => Promise<QualificationResult>) | null = null;
+        let qualificationFields: { name?: string; phone?: string; service?: string } = {};
         if (persistedCallId && state.tenantConfig && transcriptTurns.length > 0) {
           const leadForEval = {
             name: resolvedName,
             phone: resolvedPhone,
             service: resolvedService,
           };
+          qualificationFields = leadForEval;
           const hasAppointment = Boolean(bookedAppointment);
-          deps.aiService
-            .evaluateCall(state.tenantConfig, transcriptTurns, leadForEval, hasAppointment)
-            .then(async (evaluation) => {
+          evaluate = async () => {
+            const evaluation = await deps.aiService.evaluateCall(
+              state.tenantConfig!,
+              transcriptTurns,
+              leadForEval,
+              hasAppointment
+            );
+            try {
               const { qaService } = await import('../qa/qa.service.js');
               await qaService.recordAiEvaluation({
                 callId: persistedCallId,
@@ -203,24 +216,34 @@ export async function finalizeRuntimeSession(
                 leadQuality: evaluation.leadQuality,
                 summary: evaluation.summary,
               });
-              import('../slack/slack.service.js').then(({ slackService }) => {
-                slackService
-                  .sendNewCallNotification(state.tenantId!, {
-                    from: leadForEval.phone || 'Unknown',
-                    duration: durationMs,
-                    disposition: callOutcome,
-                    sentiment: evaluation.sentiment,
-                  })
-                  .catch(() => {});
-              }).catch(() => {});
-            })
-            .catch((err) => {
+            } catch (recordErr) {
               logger.warn('REALTIME_CALL_EVALUATION_FAILED', {
                 tenantId: state.tenantId,
                 callSid: state.callSid,
-                error: String(err),
+                error: String(recordErr),
               });
+            }
+            import('../slack/slack.service.js').then(({ slackService }) => {
+              slackService
+                .sendNewCallNotification(state.tenantId!, {
+                  from: leadForEval.phone || 'Unknown',
+                  duration: durationMs,
+                  disposition: callOutcome,
+                  sentiment: evaluation.sentiment,
+                })
+                .catch(() => {});
+            }).catch(() => {});
+
+            // Derived entirely from the real evaluation plus ai_agent_configs.requiredFields
+            // - never invented. See qualification-mapper.ts for the mapping rules.
+            const { aiConfigService } = await import('../ai-config/ai-config.service.js');
+            const { computeMissingFields, mapEvaluationToQualification } = await import('./qualification-mapper.js');
+            const agentConfig = await aiConfigService.getConfig(state.tenantId!);
+            return mapEvaluationToQualification(evaluation, {
+              missingFields: computeMissingFields(agentConfig.requiredFields, leadForEval),
+              escalated: callOutcome === 'transferred',
             });
+          };
         } else {
           import('../slack/slack.service.js').then(({ slackService }) => {
             slackService
@@ -296,25 +319,117 @@ export async function finalizeRuntimeSession(
           logger.error('REALTIME_TRACK_MINUTES_FAILED', { tenantId: state.tenantId, error: String(err) });
         });
 
-        void import('../../events/event-publisher.js')
-          .then(async ({ publishPlatformEvent }) => {
-            const { PlatformEventTypes } = await import('../../events/event-types.js');
-            publishPlatformEvent(
-              PlatformEventTypes.CALL_ENDED,
-              {
-                callSid: state.callSid,
-                durationMs,
-                callerPhone: state.callerPhone,
-                hasTranscript: !!transcript,
-              },
-              {
-                tenantId: state.tenantId!,
-                callSid: state.callSid,
-                sessionId: state.sessionId,
-              }
+        // Ordered end-of-call events: evaluate -> persist qualification -> lead.qualified
+        // -> call.completed (with the final persisted qualificationStatus). Detached so a
+        // slow evaluation never delays the cleanup below or the next call's capacity.
+        const completionTenantId = state.tenantId;
+        const completionCallSid = state.callSid;
+        const completionSessionId = state.sessionId;
+        const publishEvent = async (
+          type: 'CALL_ENDED',
+          payload: Record<string, unknown>
+        ): Promise<void> => {
+          const { publishPlatformEvent } = await import('../../events/event-publisher.js');
+          const { PlatformEventTypes } = await import('../../events/event-types.js');
+          publishPlatformEvent(PlatformEventTypes[type], payload, {
+            tenantId: completionTenantId,
+            callSid: completionCallSid,
+            sessionId: completionSessionId,
+          });
+        };
+        void runPostCallCompletion({
+          evaluate,
+          evaluationTimeoutMs: Number(process.env.POST_CALL_EVALUATION_TIMEOUT_MS) || undefined,
+          claim: async () => {
+            try {
+              const claimed = await voiceRedis.set(
+                `call_completed:${completionTenantId}:${completionCallSid}`,
+                '1',
+                'EX',
+                86400,
+                'NX'
+              );
+              return claimed === 'OK';
+            } catch {
+              return true; // Redis unavailable: emit rather than lose the event
+            }
+          },
+          persistQualification: async (q) => {
+            const { voiceDb: db } = await import('../voice/tenant-scope.js');
+            await db.query(
+              `UPDATE public.calls
+               SET qualification_status = $1,
+                   qualification_fields = $2::jsonb,
+                   qualification_missing = $3::jsonb,
+                   qualification_reason = $4,
+                   qualification_confidence = $5
+               WHERE call_sid = $6 AND tenant_id = $7`,
+              [
+                q.status,
+                JSON.stringify(qualificationFields),
+                JSON.stringify(q.missingFields),
+                q.reason,
+                q.confidence,
+                completionCallSid,
+                completionTenantId,
+              ]
             );
-          })
-          .catch(() => {});
+          },
+          buildQualificationEvent: async (q) => {
+            const { resolveCallCorrelation } = await import('../klaros/correlation.js');
+            const correlation = await resolveCallCorrelation(completionTenantId, completionCallSid);
+            return {
+              callId: completionCallSid,
+              ...correlation,
+              status: q.status,
+              fields: qualificationFields,
+              missingFields: q.missingFields,
+              reason: q.reason,
+              confidence: q.confidence,
+            };
+          },
+          readFinalState: async () => {
+            const { voiceDb: db } = await import('../voice/tenant-scope.js');
+            const result = await db.query(
+              `SELECT klaros_lead_id, qualification_status, transfer_target
+               FROM public.calls WHERE call_sid = $1 AND tenant_id = $2 LIMIT 1`,
+              [completionCallSid, completionTenantId]
+            );
+            const row = result.rows[0] ?? {};
+            return {
+              klarosLeadId: row.klaros_lead_id ?? undefined,
+              qualificationStatus: row.qualification_status ?? 'unknown',
+              escalation: row.transfer_target ?? undefined,
+            };
+          },
+          publishCompleted: async (finalState, qualificationEvent) => {
+            await publishEvent('CALL_ENDED', {
+              callSid: completionCallSid,
+              durationMs,
+              callerPhone: state.callerPhone,
+              hasTranscript: !!transcript,
+              klarosLeadId: finalState.klarosLeadId,
+              qualificationStatus: finalState.qualificationStatus,
+              escalation: finalState.escalation,
+              // Delivered to Klaros as lead.qualified immediately BEFORE call.completed (ordered sequence).
+              ...(qualificationEvent ? { qualificationEvent } : {}),
+            });
+          },
+          onError: (stage, err) => {
+            logger.warn('REALTIME_POST_CALL_COMPLETION_STAGE_FAILED', {
+              tenantId: completionTenantId,
+              callSid: completionCallSid,
+              stage,
+              error: String(err),
+            });
+          },
+        }).catch((err) => {
+          logger.error('REALTIME_POST_CALL_COMPLETION_FAILED', {
+            tenantId: completionTenantId,
+            callSid: completionCallSid,
+            error: String(err),
+          });
+        });
 
         // Post-call CRM — skip when live tools or backfill already synced CRM/calendars
         const leadToolRan = state.sessionId

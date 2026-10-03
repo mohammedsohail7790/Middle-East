@@ -16,6 +16,8 @@ export interface OutboundCallContext {
     campaignCallId?: string | null;
     leadId?: string | null;
     customerId?: string | null;
+    /** Klaros lead reference — persisted on the call row and carried into the call.completed event. */
+    klarosLeadId?: string | null;
 }
 
 function outboundContextKey(callSid: string): string {
@@ -66,10 +68,10 @@ export async function initiateOutboundCall(
         });
 
     await voiceDb.query(
-        `INSERT INTO public.calls (tenant_id, call_sid, transcript, language, latency, duration_ms, direction, from_number, to_number, campaign_call_id, outbound_reason)
-         VALUES ($1, $2, '', 'en', 0, 0, 'outbound', $3, $4, $5, $6)
+        `INSERT INTO public.calls (tenant_id, call_sid, transcript, language, latency, duration_ms, direction, from_number, to_number, campaign_call_id, outbound_reason, klaros_lead_id)
+         VALUES ($1, $2, '', 'en', 0, 0, 'outbound', $3, $4, $5, $6, $7)
          ON CONFLICT (call_sid) DO NOTHING`,
-        [ctx.tenantId, call.sid, ctx.fromNumber, ctx.toNumber, ctx.campaignCallId ?? null, ctx.reason]
+        [ctx.tenantId, call.sid, ctx.fromNumber, ctx.toNumber, ctx.campaignCallId ?? null, ctx.reason, ctx.klarosLeadId ?? null]
     );
 
     if (ctx.campaignCallId) {

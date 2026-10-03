@@ -38,6 +38,8 @@ export interface Lead {
   assignedTo?: string;
   notes?: string;
   metadata?: Record<string, any>;
+  /** External lead reference supplied by Klaros — preserved through the lead lifecycle. */
+  klarosLeadId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -123,6 +125,7 @@ export class LeadsService {
       callId?: string;
       service?: string;
       preferred_time?: string;
+      klarosLeadId?: string;
     }
   ): Promise<Lead> {
     try {
@@ -141,6 +144,7 @@ export class LeadsService {
           data?.name ||
           data?.notes ||
           data?.preferred_time ||
+          data?.klarosLeadId ||
           Object.keys(customFields).length
         ) {
           await voiceDb.query(
@@ -150,7 +154,8 @@ export class LeadsService {
                  notes = COALESCE($3, notes),
                  custom_fields = COALESCE(custom_fields, '{}'::jsonb) || $4::jsonb,
                  service = COALESCE($5, service),
-                 preferred_time = COALESCE($6, preferred_time)
+                 preferred_time = COALESCE($6, preferred_time),
+                 klaros_lead_id = COALESCE($9, klaros_lead_id)
              WHERE id = $7 AND tenant_id = $8`,
             [
               data.callId ?? null,
@@ -161,6 +166,7 @@ export class LeadsService {
               data.preferred_time ?? null,
               leadId,
               tenantId,
+              data.klarosLeadId ?? null,
             ]
           );
           const { publishDashboardPushType } = await import('../dashboard/dashboard-events.js');
@@ -188,8 +194,8 @@ export class LeadsService {
 
       const result = await voiceDb.query(
         `INSERT INTO public.leads
-         (tenant_id, phone, name, source, status, score, notes, custom_fields, service, call_id, preferred_time)
-         VALUES ($1, $2, $3, $4, 'new', $5, $6, $7::jsonb, $8, $9, $10)
+         (tenant_id, phone, name, source, status, score, notes, custom_fields, service, call_id, preferred_time, klaros_lead_id)
+         VALUES ($1, $2, $3, $4, 'new', $5, $6, $7::jsonb, $8, $9, $10, $11)
          RETURNING ${await leadSelect()}`,
         [
           tenantId,
@@ -202,6 +208,7 @@ export class LeadsService {
           data?.service ?? data?.metadata?.service ?? null,
           data?.callId ?? null,
           data?.preferred_time ?? null,
+          data?.klarosLeadId ?? null,
         ]
       );
 
@@ -225,6 +232,7 @@ export class LeadsService {
               phone: phoneNumber,
               name: data?.name,
               callId: data?.callId,
+              klarosLeadId: data?.klarosLeadId,
             },
             { tenantId }
           );
@@ -444,6 +452,7 @@ export class LeadsService {
       source?: string;
       phoneNumber?: string;
       metadata?: Record<string, any>;
+      klarosLeadId?: string;
     }
   ): Promise<Lead> {
     try {
@@ -469,7 +478,8 @@ export class LeadsService {
              phone = COALESCE($3, phone),
              source = COALESCE($4, source),
              custom_fields = COALESCE(custom_fields, '{}'::jsonb) || $5::jsonb,
-             score = $6
+             score = $6,
+             klaros_lead_id = COALESCE($9, klaros_lead_id)
          WHERE id = $7 AND tenant_id = $8
          RETURNING ${await leadSelect()}`,
         [
@@ -481,6 +491,7 @@ export class LeadsService {
           newScore,
           leadId,
           tenantId,
+          updates.klarosLeadId ?? null,
         ]
       );
 
@@ -488,6 +499,17 @@ export class LeadsService {
 
       const { publishDashboardPushType } = await import('../dashboard/dashboard-events.js');
       publishDashboardPushType(tenantId, 'lead.updated', [], { leadId });
+
+      void import('../../events/event-publisher.js')
+        .then(async ({ publishPlatformEvent }) => {
+          const { PlatformEventTypes } = await import('../../events/event-types.js');
+          publishPlatformEvent(
+            PlatformEventTypes.LEAD_UPDATED,
+            { leadId, klarosLeadId: updates.klarosLeadId },
+            { tenantId }
+          );
+        })
+        .catch(() => {});
 
       return this.mapToLead(result.rows[0]);
     } catch (error) {
@@ -798,6 +820,7 @@ export class LeadsService {
       assignedTo: row.assigned_to,
       notes: row.notes,
       metadata: customFields,
+      klarosLeadId: row.klaros_lead_id ?? undefined,
       createdAt: row.created_at,
       updatedAt: row.created_at,
     };

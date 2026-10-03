@@ -6,6 +6,13 @@ import { handleAuditEvent } from './audit.consumer.js';
 import { handleNotificationsEvent } from './notifications.consumer.js';
 import { handleLeadEvent } from './lead.consumer.js';
 import { handleAppointmentEvent } from './appointment.consumer.js';
+import { handleKlarosWebhookEvent } from './klaros-webhook.consumer.js';
+
+/** Dedicated consumer group so this consumer sees every event independently
+ *  of the existing notifications/lead/appointment consumers on the same
+ *  streams (same Redis Streams consumer group would otherwise compete for
+ *  messages rather than each receiving every one). */
+const KLAROS_WEBHOOK_GROUP = 'calliq-klaros-webhook';
 
 async function withAudit(
   event: PlatformEvent,
@@ -30,5 +37,12 @@ export function registerPlatformConsumers(bus: RedisPlatformEventBus): void {
 
   bus.registerConsumer('appointment', [streamKey('appointment-events')], (event) =>
     withAudit(event, handleAppointmentEvent)
+  );
+
+  bus.registerConsumer(
+    'klaros-webhook',
+    [streamKey('call-events'), streamKey('lead-events'), streamKey('appointment-events')],
+    handleKlarosWebhookEvent,
+    { groupName: KLAROS_WEBHOOK_GROUP, maxRetries: Number(process.env.KLAROS_WEBHOOK_MAX_RETRIES) || 8 }
   );
 }

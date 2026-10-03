@@ -5,6 +5,7 @@ import { logger } from '../logger.js';
 import { logAppointmentWrite } from '../observability/validation-telemetry.js';
 import { patchCorrelation } from '../observability/correlation-context.js';
 import { invalidateTenantAvailabilityCache } from './tenant-availability.service.js';
+import { resolveAppointmentCorrelation } from '../klaros/correlation.js';
 
 const GOOGLE_AVAIL_TIMEOUT_MS = Number(process.env.VOICE_GOOGLE_AVAIL_TIMEOUT_MS || 2500);
 
@@ -324,9 +325,10 @@ export class AppointmentService {
         void import('../../events/event-publisher.js')
             .then(async ({ publishPlatformEvent }) => {
                 const { PlatformEventTypes } = await import('../../events/event-types.js');
+                const correlation = await resolveAppointmentCorrelation(input.tenantId, appointmentId);
                 publishPlatformEvent(
                     PlatformEventTypes.APPOINTMENT_CREATED,
-                    { appointmentId, scheduledTime, phone: input.phone },
+                    { appointmentId, scheduledTime, phone: input.phone, ...correlation },
                     { tenantId: input.tenantId }
                 );
             })
@@ -535,11 +537,13 @@ export class AppointmentService {
         void import('../../events/event-publisher.js')
             .then(async ({ publishPlatformEvent }) => {
                 const { PlatformEventTypes } = await import('../../events/event-types.js');
+                const correlation = await resolveAppointmentCorrelation(tenantId, appointment.id as string);
                 publishPlatformEvent(
                     PlatformEventTypes.APPOINTMENT_RESCHEDULED,
                     {
                         appointmentId: appointment.id,
                         scheduledTime: parsed.toISOString(),
+                        ...correlation,
                     },
                     { tenantId }
                 );
@@ -608,9 +612,10 @@ export class AppointmentService {
         void import('../../events/event-publisher.js')
             .then(async ({ publishPlatformEvent }) => {
                 const { PlatformEventTypes } = await import('../../events/event-types.js');
+                const correlation = await resolveAppointmentCorrelation(tenantId, appointmentId);
                 publishPlatformEvent(
                     PlatformEventTypes.APPOINTMENT_CANCELLED,
-                    { appointmentId, reason },
+                    { appointmentId, reason, ...correlation },
                     { tenantId }
                 );
             })

@@ -15,6 +15,10 @@ const ROUTES: Record<PlatformEventType, EventStreamName> = {
 
   LEAD_CREATED: 'lead-events',
   LEAD_UPDATED: 'lead-events',
+  // Routed with call events so lead.qualified / lead.escalated keep their
+  // publish order relative to call.completed within a single stream.
+  LEAD_QUALIFIED: 'call-events',
+  LEAD_ESCALATED: 'call-events',
 
   APPOINTMENT_CREATED: 'appointment-events',
   APPOINTMENT_RESCHEDULED: 'appointment-events',

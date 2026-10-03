@@ -37,6 +37,7 @@ import { createOrganizationsRouter } from '../services/organizations/organizatio
 import { createCrmRouter } from '../services/crm/crm.controller.js';
 import { createChannelsRouter } from '../services/channels/channels.controller.js';
 import { createIntegrationRouter } from '../services/integrations/integration.controller.js';
+import { createKlarosRouter } from '../services/klaros/klaros.controller.js';
 import { createIntegrationOAuthRouter } from '../services/integrations/oauth.controller.js';
 import { createCalendarRouter } from '../services/calendar/calendar.controller.js';
 import { createSlackRouter } from '../services/slack/slack.controller.js';
@@ -70,6 +71,7 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/channels', createChannelsRouter());
     apiRouter.use('/integrations', createIntegrationOAuthRouter());
     apiRouter.use('/integrations', createIntegrationRouter());
+    apiRouter.use('/integrations/klaros', createKlarosRouter());
     apiRouter.use('/leads', createLeadsRouter());
     apiRouter.use('/public/consult-request', createPublicConsultRequestRouter());
     apiRouter.use('/calls', createCallsRouter());

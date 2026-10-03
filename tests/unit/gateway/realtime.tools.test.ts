@@ -126,12 +126,17 @@ describe('RealtimeToolsManager', () => {
       (voiceDb.query as any).mockResolvedValue({ rows: [{ transfer_phone_number: '+15553334444' }] });
       const r = await mgr.executeTool(session, 'transfer_call', { reason: 'Need human', department: 'support' });
       expect(r.success).toBe(true);
+      // Recorded on the session so post-call processing persists it as calls.transfer_target
+      // (-> `escalation` in call.completed).
+      expect(session.callOutcome).toBe('transferred');
+      expect(session.transferTarget).toBe('+15553334444');
     });
 
     it('fails without transfer number', async () => {
       (voiceDb.query as any).mockResolvedValue({ rows: [] });
       const r = await mgr.executeTool(session, 'transfer_call', { reason: 'Escalation' });
       expect(r.success).toBe(false); expect(r.error).toContain('No transfer number');
+      expect(session.transferTarget).toBeUndefined(); // no escalation is recorded when no transfer happened
     });
   });
 

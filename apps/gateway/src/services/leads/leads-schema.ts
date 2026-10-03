@@ -19,6 +19,7 @@ const OPTIONAL_COLUMNS = [
   'call_id',
   'preferred_time',
   'email',
+  'klaros_lead_id',
 ] as const;
 
 let cachedSelect: string | null = null;

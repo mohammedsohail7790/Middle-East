@@ -42,7 +42,7 @@ export class TenantApiKeyService {
       `INSERT INTO public.tenant_api_keys (tenant_id, name, key_hash, key_prefix, scopes, expires_at)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, tenant_id, name, key_prefix, scopes, expires_at, created_at`,
-      [tenantId, name, keyHash, keyPrefix, JSON.stringify(scopes), expiresAt || null]
+      [tenantId, name, keyHash, keyPrefix, scopes, expiresAt || null]
     );
 
     const row = result.rows[0];

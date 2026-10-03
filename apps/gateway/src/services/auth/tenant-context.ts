@@ -1,7 +1,7 @@
 import type { Request } from 'express';
 
 /** How the active tenant was established (audit / policy). */
-export type TenantAuthSource = 'user_jwt' | 'internal_service' | 'legacy_jwt';
+export type TenantAuthSource = 'user_jwt' | 'internal_service' | 'legacy_jwt' | 'tenant_api_key';
 
 export interface TenantContext {
   id: string;
