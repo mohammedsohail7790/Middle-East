@@ -16,6 +16,7 @@ import {
   leadIdParamSchema,
 } from '../../security/validation-schemas.js';
 import { requireVoiceApiAccess } from '../voice/security.js';
+import { requireScope } from '../../middleware/require-scope.js';
 import { logger } from '../logger.js';
 import { Router } from 'express';
 
@@ -114,10 +115,11 @@ export function createLeadsRouter(): Router {
    */
   router.post(
     '/',
+    requireScope('leads.write'),
     validate(leadCreateBodySchema),
     asyncHandler(async (req: any, res: any) => {
       const tenantId = req.headers['x-tenant-id'] as string;
-      const { phoneNumber, source, email, name, notes, metadata } = req.body;
+      const { phoneNumber, source, email, name, notes, metadata, klarosLeadId } = req.body;
 
       if (!tenantId) {
         return res.status(400).json({ error: 'Missing x-tenant-id header' });
@@ -132,6 +134,7 @@ export function createLeadsRouter(): Router {
         name,
         notes,
         metadata,
+        klarosLeadId,
       });
 
       logger.info('[Leads] Lead created', { tenantId, leadId: lead.id });
@@ -149,11 +152,12 @@ export function createLeadsRouter(): Router {
    */
   router.put(
     '/:leadId',
+    requireScope('leads.write'),
     validate({ ...leadIdParamSchema, ...leadUpdateBodySchema }),
     asyncHandler(async (req: any, res: any) => {
       const tenantId = req.headers['x-tenant-id'] as string;
       const { leadId } = req.params;
-      const { email, name, notes, metadata, source, phoneNumber, phone } = req.body;
+      const { email, name, notes, metadata, source, phoneNumber, phone, klarosLeadId } = req.body;
 
       if (!tenantId) {
         return res.status(400).json({ error: 'Missing x-tenant-id header' });
@@ -166,6 +170,7 @@ export function createLeadsRouter(): Router {
         metadata,
         source,
         phoneNumber: phoneNumber ?? phone,
+        klarosLeadId,
       });
 
       logger.info('[Leads] Lead updated', { tenantId, leadId });

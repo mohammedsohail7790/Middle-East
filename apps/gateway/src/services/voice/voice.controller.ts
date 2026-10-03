@@ -12,6 +12,7 @@ import express from 'express';
 import { getGatewayPublicHttpsBase, getTwilioStreamWssBase } from '../env.js';
 import { clientErrorMessage } from '../../security/safe-error.js';
 import { requireEssentialOrHigher, requireCallMinutes } from '../../middleware/plan-gating.js';
+import { requireScope } from '../../middleware/require-scope.js';
 
 function fallbackRequestHost(): string {
     const base = getGatewayPublicHttpsBase();
@@ -1088,7 +1089,7 @@ export function createCallsRouter(): express.Router {
     router.use(voiceRateLimit);
 
     /** Click-to-call / single outbound dial (reminders, follow-ups, ad-hoc agent-triggered calls). */
-    router.post('/outbound', requireEssentialOrHigher(), requireCallMinutes(), async (req: any, res: any) => {
+    router.post('/outbound', requireScope('calls.write'), requireEssentialOrHigher(), requireCallMinutes(), async (req: any, res: any) => {
         try {
             const tenantId = getTenantScope(req);
             const toNumber = String(req.body?.toNumber || '').trim();
@@ -1096,6 +1097,7 @@ export function createCallsRouter(): express.Router {
             const openingContext = typeof req.body?.openingContext === 'string' ? req.body.openingContext.trim() : undefined;
             const fromNumberInput = typeof req.body?.fromNumber === 'string' ? req.body.fromNumber.trim() : undefined;
             const phoneNumberId = typeof req.body?.phoneNumberId === 'string' ? req.body.phoneNumberId.trim() : undefined;
+            const klarosLeadId = typeof req.body?.klarosLeadId === 'string' ? req.body.klarosLeadId.trim() || undefined : undefined;
 
             if (!toNumber) {
                 return res.status(400).json({ success: false, error: 'toNumber is required' });
@@ -1121,6 +1123,7 @@ export function createCallsRouter(): express.Router {
                 agentId: caller.agentId,
                 reason,
                 openingContext,
+                klarosLeadId,
             });
 
             return res.json({ success: true, callSid });

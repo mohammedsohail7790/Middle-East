@@ -24,7 +24,7 @@ export class RedisPlatformEventBus {
   private readonly enabled: boolean;
   private readonly consumersEnabled: boolean;
   private consumerTimer: ReturnType<typeof setInterval> | null = null;
-  private handlers: Array<{ streams: string[]; name: string; handler: EventHandler }> = [];
+  private handlers: Array<{ streams: string[]; name: string; handler: EventHandler; groupName?: string; maxRetries?: number }> = [];
   private metrics = {
     published: 0,
     consumed: 0,
@@ -44,18 +44,31 @@ export class RedisPlatformEventBus {
     fields: Record<string, string | number | boolean | undefined>
   ) => void;
 
+  /**
+   * `groupName` defaults to the shared platform group. Pass a distinct
+   * group when a consumer must see every event on a stream independently
+   * of the stream's existing handler(s) — Redis Streams consumer groups
+   * distribute each message to exactly one consumer *within* a group, so
+   * two handlers reading the same stream in the same group would compete
+   * for messages rather than both receiving them.
+   */
   registerConsumer(
     name: string,
     streams: string[],
-    handler: EventHandler
+    handler: EventHandler,
+    opts?: { groupName?: string; maxRetries?: number }
   ): void {
-    this.handlers.push({ name, streams, handler });
+    this.handlers.push({ name, streams, handler, groupName: opts?.groupName, maxRetries: opts?.maxRetries });
   }
 
   async start(): Promise<void> {
     if (!this.enabled) return;
     const streams = allPlatformStreams();
     await ensureConsumerGroups(this.redis, streams);
+    const customGroups = new Set(this.handlers.map((h) => h.groupName).filter((g): g is string => Boolean(g)));
+    for (const groupName of customGroups) {
+      await ensureConsumerGroups(this.redis, streams, groupName);
+    }
     if (!this.consumersEnabled || this.handlers.length === 0) return;
 
     const tick = async () => {
@@ -65,6 +78,8 @@ export class RedisPlatformEventBus {
             {
               redis: this.redis,
               streams: reg.streams,
+              groupName: reg.groupName,
+              maxRetries: reg.maxRetries,
               consumerName: `${reg.name}-${process.pid}`,
               onTelemetry: (kind, fields) => {
                 if (kind === 'EVENT_CONSUMED') this.metrics.consumed++;

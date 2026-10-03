@@ -7,6 +7,13 @@ import {
 import { verifyUserBearerToken } from '../services/auth/jwt-tenant-verifier.js';
 import { verifyInternalServiceRequest } from '../services/auth/internal-service-auth.js';
 import { verifySseDashboardToken } from '../security/sse-token.js';
+import { tenantApiKeyService } from '../services/api-keys/apiKey.service.js';
+import { evaluateApiKeyPolicy } from '../security/api-key-scope-policy.js';
+
+/** Tenant-scoped server-to-server credential prefix (e.g. Klaros). Distinct
+ *  from the single shared x-internal-api-key secret — this key identifies
+ *  exactly one tenant and carries its own scopes, enforced server-side. */
+const TENANT_API_KEY_PREFIX = 'sk_calliq_';
 
 /**
  * Zero-trust tenant middleware (Halla AI V4).
@@ -42,6 +49,48 @@ export async function requireTenant(
       source: 'internal_service',
       scopes: internal.scopes,
     });
+    next();
+    return;
+  }
+
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  if (bearerToken.startsWith(TENANT_API_KEY_PREFIX)) {
+    const apiKeyResult = await tenantApiKeyService.validateKey(bearerToken);
+    if (!apiKeyResult) {
+      res.status(401).json({ success: false, error: 'Invalid or revoked API key' });
+      return;
+    }
+    if (clientTenantHeader && clientTenantHeader !== apiKeyResult.tenantId) {
+      res.status(403).json({
+        success: false,
+        error: 'Tenant scope mismatch — x-tenant-id does not match the API key tenant',
+      });
+      return;
+    }
+    // Default-deny: an API key may only reach explicitly classified routes
+    // with the scope that route requires (see security/api-key-scope-policy.ts).
+    const decision = evaluateApiKeyPolicy(req.method, req.originalUrl || '', apiKeyResult.scopes);
+    if (!decision.allowed) {
+      res.status(403).json({
+        success: false,
+        error:
+          decision.reason === 'missing_scope'
+            ? `Missing required scope: ${decision.scope}`
+            : 'API key is not permitted to access this route',
+      });
+      return;
+    }
+    attachTenantContext(req, {
+      id: apiKeyResult.tenantId,
+      source: 'tenant_api_key',
+      scopes: apiKeyResult.scopes,
+    });
+    // Back-fill for legacy controllers that still read the header directly
+    // instead of req.tenant — the header is never trusted as the source of
+    // authorization here, only as a convenience echo of the verified tenant.
+    if (!clientTenantHeader) {
+      req.headers['x-tenant-id'] = apiKeyResult.tenantId;
+    }
     next();
     return;
   }

@@ -31,6 +31,16 @@ export async function claimEventForProcessing(
   return result === 'OK';
 }
 
+export type EventClaimState = 'processed' | 'processing' | 'none';
+
+/** Distinguishes "already handled" from "another worker is handling it right now". */
+export async function getEventClaimState(redis: Redis, eventId: string): Promise<EventClaimState> {
+  const v = await redis.get(`${PREFIX}${eventId}`);
+  if (v === '1') return 'processed';
+  if (v === 'processing') return 'processing';
+  return 'none';
+}
+
 export async function releaseEventClaim(redis: Redis, eventId: string): Promise<void> {
   const key = `${PREFIX}${eventId}`;
   const v = await redis.get(key);

@@ -99,6 +99,8 @@ export interface CallEvaluationResult {
     callSuccess: boolean;
     leadQuality: 'high' | 'medium' | 'low';
     summary: string;
+    /** True when the AI evaluation did not run (no key, API error); the other fields are placeholders, not a judgement. */
+    degraded?: boolean;
 }
 
 export interface AppointmentActionResult {
@@ -1181,7 +1183,7 @@ CALLER PAST: {callerMemory}`;
 
     async evaluateCall(config: TenantVoiceConfig, transcript: TranscriptTurn[], lead: VoiceLeadPayload, hasAppointment: boolean): Promise<CallEvaluationResult> {
         if (!this.openAiKey) {
-            return { sentiment: 'neutral', sentimentScore: 50, frustrationLevel: 0, callSuccess: hasAppointment || Boolean(lead.phone), leadQuality: 'low', summary: 'Evaluation unavailable (AI key missing).' };
+            return { sentiment: 'neutral', sentimentScore: 50, frustrationLevel: 0, callSuccess: hasAppointment || Boolean(lead.phone), leadQuality: 'low', summary: 'Evaluation unavailable (AI key missing).', degraded: true };
         }
 
         const transcriptText = transcript.map(t => `${t.role}: ${t.text}`).join('\n');
@@ -1250,7 +1252,7 @@ CALLER PAST: {callerMemory}`;
 
             if (!response.ok) {
                 logger.warn('Call evaluation API failed', { status: response.status });
-                return { sentiment: 'neutral', sentimentScore: 50, frustrationLevel: 0, callSuccess: hasAppointment || Boolean(lead.phone), leadQuality: 'low', summary: 'Evaluation unavailable.' };
+                return { sentiment: 'neutral', sentimentScore: 50, frustrationLevel: 0, callSuccess: hasAppointment || Boolean(lead.phone), leadQuality: 'low', summary: 'Evaluation unavailable.', degraded: true };
             }
 
             const completion = (await response.json()) as any;
@@ -1267,7 +1269,7 @@ CALLER PAST: {callerMemory}`;
             };
         } catch (error) {
             logger.warn('Call evaluation failed', { error: String(error) });
-            return { sentiment: 'neutral', sentimentScore: 50, frustrationLevel: 0, callSuccess: hasAppointment || Boolean(lead.phone), leadQuality: 'low', summary: 'Evaluation unavailable.' };
+            return { sentiment: 'neutral', sentimentScore: 50, frustrationLevel: 0, callSuccess: hasAppointment || Boolean(lead.phone), leadQuality: 'low', summary: 'Evaluation unavailable.', degraded: true };
         }
     }
 }
