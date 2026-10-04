@@ -47,15 +47,15 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 describe.skipIf(!streamsSupported)('event consumer retry/reclaim/DLQ — real Redis Streams', () => {
   let redis: Redis;
 
-  const opts = (consumerName: string, maxRetries = 3) => ({
+  const opts = (consumerName: string, maxRetries = 3, baseDelayMs = 150) => ({
     redis,
     streams: [TEST_STREAM],
     groupName: TEST_GROUP,
     consumerName,
     maxRetries,
     blockMs: 50,
-    retryBaseDelayMs: 150,
-    retryMaxDelayMs: 600,
+    retryBaseDelayMs: baseDelayMs,
+    retryMaxDelayMs: Math.max(600, baseDelayMs * 4),
     reclaimIntervalMs: 0,
   });
 
@@ -91,15 +91,18 @@ describe.skipIf(!streamsSupported)('event consumer retry/reclaim/DLQ — real Re
       if (++attempts < 2) throw new Error('transient');
     };
 
-    await readAndProcessBatch(opts('c1'), handler);
+    // A roomy 1.5 s backoff: the "still inside the window" assertion below is an upper bound on elapsed time, so a
+    // tight window (150 ms) flaked when a loaded machine delayed the second call. Waiting longer is always safe.
+    const BACKOFF_MS = 1500;
+    await readAndProcessBatch(opts('c1', 3, BACKOFF_MS), handler);
     expect(attempts).toBe(1);
     expect(await pendingCount()).toBe(1);
 
-    await readAndProcessBatch(opts('c1'), handler); // still inside the backoff window
+    await readAndProcessBatch(opts('c1', 3, BACKOFF_MS), handler); // still inside the backoff window
     expect(attempts).toBe(1);
 
-    await sleep(200);
-    await readAndProcessBatch(opts('c1'), handler);
+    await sleep(BACKOFF_MS + 200);
+    await readAndProcessBatch(opts('c1', 3, BACKOFF_MS), handler);
     expect(attempts).toBe(2);
     expect(await pendingCount()).toBe(0);
   });
@@ -167,7 +170,7 @@ describe.skipIf(!streamsSupported)('event consumer retry/reclaim/DLQ — real Re
     expect(rows).toHaveLength(1);
     expect(rows[0][1]).toBe('c1'); // owner
     expect(Number(rows[0][3])).toBe(1); // delivered once so far
-    expect(await redis.get(`calliq:event:retry:${event.eventId}`)).toBe('1');
+    expect(await redis.get(`calliq:event:retry:${TEST_GROUP}:${event.eventId}`)).toBe('1');
 
     await sleep(200);
     await readAndProcessBatch(opts('c2', 5), async () => {
@@ -176,7 +179,7 @@ describe.skipIf(!streamsSupported)('event consumer retry/reclaim/DLQ — real Re
     const after = (await (redis as any).xpending(TEST_STREAM, TEST_GROUP, '-', '+', 10)) as Array<[string, string, number, number]>;
     expect(after[0][1]).toBe('c2'); // ownership moved via XCLAIM
     expect(Number(after[0][3])).toBe(2); // delivery counter incremented by the claim
-    expect(await redis.get(`calliq:event:retry:${event.eventId}`)).toBe('2');
+    expect(await redis.get(`calliq:event:retry:${TEST_GROUP}:${event.eventId}`)).toBe('2');
 
     // clean up so later assertions on pendingCount stay exact
     for (const [id] of after) await redis.xack(TEST_STREAM, TEST_GROUP, id);

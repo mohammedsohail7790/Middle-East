@@ -227,7 +227,7 @@ describe('Klaros ordered delivery: lead.qualified is never delivered after call.
     addHook('w1.example.com');
     const event = await publishCallEnded();
     await redis.xreadgroup('GROUP', GROUP, 'dead-worker', 'COUNT', 10, 'BLOCK', 0, 'STREAMS', STREAM, '>');
-    await redis.set(`calliq:event:processed:${event.eventId}`, 'processing', 'EX', 300, 'NX');
+    await redis.set(`calliq:event:processed:${GROUP}:${event.eventId}`, 'processing', 'EX', 300, 'NX');
 
     redis.advance(BASE_MS);
     await tick('worker-b');
