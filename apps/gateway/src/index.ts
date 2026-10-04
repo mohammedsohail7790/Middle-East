@@ -230,6 +230,14 @@ registerService({
 });
 
 registerService({
+    name: 'platform-event-bus',
+    shutdown: async () => {
+        const { stopPlatformEventBus } = await import('./events/platform-event-bus.js');
+        await stopPlatformEventBus();
+    },
+});
+
+registerService({
     name: 'ws-rate-limiter',
     shutdown: async () => {
         if (typeof (wsRateLimiter as any).destroy === 'function') {

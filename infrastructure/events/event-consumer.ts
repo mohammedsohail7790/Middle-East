@@ -40,7 +40,7 @@ export interface ConsumerOptions {
   /** Minimum time between reclaim passes per consumer+stream. Env: P2_RECLAIM_INTERVAL_MS (default 5000). */
   reclaimIntervalMs?: number;
   onTelemetry?: (
-    kind: 'EVENT_CONSUMED' | 'EVENT_RETRY' | 'EVENT_DLQ',
+    kind: 'EVENT_CONSUMED' | 'EVENT_RETRY' | 'EVENT_DLQ' | 'EVENT_UNDECODABLE',
     fields: Record<string, string | number | boolean | undefined>
   ) => void;
 }
@@ -81,8 +81,17 @@ export async function ensureConsumerGroups(
   }
 }
 
-async function incrementRetry(redis: Redis, eventId: string): Promise<number> {
-  const key = `${RETRY_PREFIX}${eventId}`;
+/**
+ * Retry state is scoped per CONSUMER GROUP, like the idempotency marker (event-idempotency.ts): each group is an
+ * independent pipeline with its own retry budget, so one group's failures must not count against another group's
+ * `maxRetries`, `finalAttempt` or DLQ decision.
+ */
+function retryKey(groupName: string, eventId: string): string {
+  return `${RETRY_PREFIX}${groupName}:${eventId}`;
+}
+
+async function incrementRetry(redis: Redis, groupName: string, eventId: string): Promise<number> {
+  const key = retryKey(groupName, eventId);
   const n = await redis.incr(key);
   await redis.expire(key, 86400);
   return n;
@@ -113,13 +122,15 @@ async function processEntry(
 
   const event = decodeEventEnvelope(fieldList);
   if (!event) {
+    // Dropped (acked) as before, but no longer silently: log identifiers only, never the raw entry.
+    onTelemetry?.('EVENT_UNDECODABLE', { stream: streamName, group: groupName, consumer: consumerName, messageId });
     await redis.xack(streamName, groupName, messageId);
     return false;
   }
 
-  const claimed = await claimEventForProcessing(redis, event.eventId);
+  const claimed = await claimEventForProcessing(redis, groupName, event.eventId);
   if (!claimed) {
-    const state = await getEventClaimState(redis, event.eventId);
+    const state = await getEventClaimState(redis, groupName, event.eventId);
     if (state === 'processed') {
       // Duplicate of an event that already completed — no second external effect.
       await redis.xack(streamName, groupName, messageId);
@@ -129,7 +140,7 @@ async function processEntry(
     return false;
   }
 
-  const priorFailures = Number((await redis.get(`${RETRY_PREFIX}${event.eventId}`)) ?? 0);
+  const priorFailures = Number((await redis.get(retryKey(groupName, event.eventId))) ?? 0);
   const started = Date.now();
   try {
     await handler(event, {
@@ -138,7 +149,7 @@ async function processEntry(
       consumer: consumerName,
       finalAttempt: priorFailures + 1 >= maxRetries,
     });
-    await markEventProcessed(redis, event.eventId);
+    await markEventProcessed(redis, groupName, event.eventId);
     await redis.xack(streamName, groupName, messageId);
     onTelemetry?.('EVENT_CONSUMED', {
       eventId: event.eventId,
@@ -149,7 +160,7 @@ async function processEntry(
     });
     return true;
   } catch (err) {
-    const retries = await incrementRetry(redis, event.eventId);
+    const retries = await incrementRetry(redis, groupName, event.eventId);
     const reason = err instanceof Error ? err.message : String(err);
     if (retries >= maxRetries) {
       await publishToDlq(redis, {
@@ -159,7 +170,7 @@ async function processEntry(
         failureReason: reason,
         failedAt: new Date().toISOString(),
       });
-      await markEventProcessed(redis, event.eventId);
+      await markEventProcessed(redis, groupName, event.eventId);
       await redis.xack(streamName, groupName, messageId);
       onTelemetry?.('EVENT_DLQ', {
         eventId: event.eventId,
@@ -170,7 +181,7 @@ async function processEntry(
         failureReason: reason,
       });
     } else {
-      await releaseEventClaim(redis, event.eventId);
+      await releaseEventClaim(redis, groupName, event.eventId);
       onTelemetry?.('EVENT_RETRY', {
         eventId: event.eventId,
         eventType: event.eventType,

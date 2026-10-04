@@ -82,7 +82,7 @@ describe('platform event consumer — retry / reclaim / DLQ (fake Redis Streams)
     });
 
     expect(redis.pendingCount(STREAM, GROUP)).toBe(1);
-    expect(await redis.get(`calliq:event:retry:${event.eventId}`)).toBe('1');
+    expect(await redis.get(`calliq:event:retry:${GROUP}:${event.eventId}`)).toBe('1');
     expect(telemetry.map((t) => t.kind)).toEqual(['EVENT_RETRY']);
   });
 
@@ -111,7 +111,7 @@ describe('platform event consumer — retry / reclaim / DLQ (fake Redis Streams)
     };
 
     await readAndProcessBatch(opts('c1'), flaky);
-    expect(await redis.get(`calliq:event:retry:${event.eventId}`)).toBe('1');
+    expect(await redis.get(`calliq:event:retry:${GROUP}:${event.eventId}`)).toBe('1');
 
     redis.advance(BASE_MS);
     await readAndProcessBatch(opts('c1'), flaky);
@@ -161,7 +161,7 @@ describe('platform event consumer — retry / reclaim / DLQ (fake Redis Streams)
 
     expect(calls).toBe(3); // maxRetries, then never again
     expect(redis.pendingCount(STREAM, GROUP)).toBe(0);
-    expect(await redis.get(`calliq:event:retry:${event.eventId}`)).toBe('3');
+    expect(await redis.get(`calliq:event:retry:${GROUP}:${event.eventId}`)).toBe('3');
 
     const dlq = (await redis.xrange(DLQ_STREAM_KEY)).map(([, f]) => decodeEventEnvelope(f));
     expect(dlq).toHaveLength(1);
@@ -249,7 +249,7 @@ describe('platform event consumer — retry / reclaim / DLQ (fake Redis Streams)
     const event = await publish();
     // Worker "crashed": entry delivered, claim left in place, never acked.
     await redis.xreadgroup('GROUP', GROUP, 'dead-worker', 'COUNT', 10, 'BLOCK', 0, 'STREAMS', STREAM, '>');
-    await redis.set(`calliq:event:processed:${event.eventId}`, 'processing', 'EX', 300, 'NX');
+    await redis.set(`calliq:event:processed:${GROUP}:${event.eventId}`, 'processing', 'EX', 300, 'NX');
 
     let calls = 0;
     const handler = async () => {

@@ -12,6 +12,12 @@ async function leadSelect(): Promise<string> {
   return cachedLeadSelect;
 }
 
+/** Publishing is fire-and-forget by design, but a failure must not vanish: log ids and a bounded message only (no lead PII, no payload). */
+function logEventPublishError(eventType: string, tenantId: string, leadId: string, err: unknown): void {
+  const message = (err instanceof Error ? `${err.name}: ${err.message}` : String(err)).slice(0, 200);
+  console.error('[Leads] Platform event publish failed', { eventType, tenantId, leadId, error: message });
+}
+
 function toDbStatus(status: Lead['status']): string {
   return status === 'appointment_set' ? 'qualified' : status;
 }
@@ -180,7 +186,7 @@ export class LeadsService {
                 { tenantId }
               );
             })
-            .catch(() => {});
+            .catch((err) => logEventPublishError('LEAD_UPDATED', tenantId, leadId, err));
         }
         return await this.getLead(tenantId, leadId);
       }
@@ -237,7 +243,7 @@ export class LeadsService {
             { tenantId }
           );
         })
-        .catch(() => {});
+        .catch((err) => logEventPublishError('LEAD_CREATED', tenantId, lead.id, err));
 
       void import('../slack/slack.service.js').then(({ slackService }) => {
         slackService
@@ -509,7 +515,7 @@ export class LeadsService {
             { tenantId }
           );
         })
-        .catch(() => {});
+        .catch((err) => logEventPublishError('LEAD_UPDATED', tenantId, leadId, err));
 
       return this.mapToLead(result.rows[0]);
     } catch (error) {
