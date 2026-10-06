@@ -364,13 +364,13 @@ export class AIConfigService {
     try {
       const config = await this.getConfig(tenantId);
 
-      let prompt = `You are ${config.agentName}, the live phone receptionist for this business — a real person on the line, not a phone tree.\n\n`;
+      let prompt = `You are ${config.agentName}, an AI voice assistant answering calls for this business. If a caller sincerely asks, say plainly that you are an AI assistant; never claim to be human.\n\n`;
 
       // Personality & Tone
       prompt += `PERSONALITY: ${config.personality}\n`;
       prompt += `TONE: ${config.tone}\n`;
       prompt += `SPEAKING STYLE: ${config.speakingStyle}\n`;
-      prompt += `Speak in natural conversational American English. Short sentences. One question at a time. Never say you are an AI.\n\n`;
+      prompt += `Speak naturally in the caller's language. Short sentences. One question at a time. Be honest that you are an AI if asked.\n\n`;
 
       // Business Context
       if (config.businessDescription) {

@@ -53,7 +53,7 @@ vi.mock('node:dns/promises', () => ({ lookup: vi.fn(async () => [{ address: '93.
 const received: Array<{ host: string; type: string; id: string }> = [];
 /** `${host}|${type}` -> remaining forced failures (Infinity = permanent). */
 const failures = new Map<string, number>();
-vi.mock('../../apps/gateway/src/security/safe-http.js', () => ({
+vi.mock('../../apps/gateway/src/security/safe-http.js', async (importOriginal) => ({ ...(await importOriginal<typeof import('../../apps/gateway/src/security/safe-http.js')>()),
   safePostJson: vi.fn(async (url: URL, _addresses: string[], opts: { body: string }) => {
     const env = JSON.parse(opts.body);
     const key = `${url.hostname}|${env.type}`;

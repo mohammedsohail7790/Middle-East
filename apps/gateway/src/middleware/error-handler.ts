@@ -1,4 +1,5 @@
 import { logger, getRequestContext } from '../services/logger.js';
+import { redactToolArguments } from '../security/tool-arg-redaction.js';
 
 interface GravityError extends Error {
   code: string;
@@ -27,23 +28,16 @@ export function errorHandler(
     const requestId = (req as any).requestId;
     const context = getRequestContext(req);
 
+    // A failed request's body and query are what the caller sent: names, phone numbers, emails, notes, medical or
+    // payment details. Only their STRUCTURE is logged (field names and constant markers), never the values.
     const safeBody =
-        req.body && typeof req.body === 'object'
-            ? Object.fromEntries(
-                  Object.entries(req.body as Record<string, unknown>).map(([k, v]) => {
-                      if (/password|token|secret|key|authorization/i.test(k)) {
-                          return [k, '[redacted]'];
-                      }
-                      return [k, typeof v === 'string' && v.length > 200 ? `${v.slice(0, 200)}…` : v];
-                  })
-              )
-            : undefined;
+        req.body && typeof req.body === 'object' ? redactToolArguments('request_body', req.body) : undefined;
 
     logger.error('Request error', context, err, {
         path: req.path,
         method: req.method,
         body: safeBody,
-        query: req.query,
+        query: req.query && Object.keys(req.query).length > 0 ? redactToolArguments('request_query', req.query) : undefined,
     });
 
     // GravityError uses string codes (e.g. "1001"); Gaxios uses numeric HTTP codes — do not conflate

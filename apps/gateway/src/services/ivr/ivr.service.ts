@@ -107,7 +107,7 @@ export class IVRService {
        RETURNING id, tenant_id, name, role, system_prompt, voice_id, tone, services, max_duration_seconds, transfer_on_timeout, transfer_number, knowledge_category, active, created_at, updated_at`,
       [
         tenantId, data.name, data.role, data.systemPrompt, data.voiceId || null,
-        data.tone || 'professional', JSON.stringify(data.services || []),
+        data.tone || 'professional', data.services || [], // ai_agents.services is TEXT[]: bind a real array, not a JSON string
         data.maxDurationSeconds || 600, data.transferOnTimeout || false,
         data.transferNumber || null, data.knowledgeCategory || null,
       ]
@@ -137,7 +137,7 @@ export class IVRService {
     if (data.systemPrompt !== undefined) { fields.push(`system_prompt = $${i++}`); values.push(data.systemPrompt); }
     if (data.voiceId !== undefined) { fields.push(`voice_id = $${i++}`); values.push(data.voiceId); }
     if (data.tone !== undefined) { fields.push(`tone = $${i++}`); values.push(data.tone); }
-    if (data.services !== undefined) { fields.push(`services = $${i++}`); values.push(JSON.stringify(data.services)); }
+    if (data.services !== undefined) { fields.push(`services = $${i++}`); values.push(data.services); } // TEXT[] column: native array
     if (data.maxDurationSeconds !== undefined) { fields.push(`max_duration_seconds = $${i++}`); values.push(data.maxDurationSeconds); }
     if (data.transferOnTimeout !== undefined) { fields.push(`transfer_on_timeout = $${i++}`); values.push(data.transferOnTimeout); }
     if (data.transferNumber !== undefined) { fields.push(`transfer_number = $${i++}`); values.push(data.transferNumber); }

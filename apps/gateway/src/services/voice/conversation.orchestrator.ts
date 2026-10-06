@@ -315,7 +315,7 @@ export class ConversationOrchestrator {
     }
     
     logger.info('TRANSCRIPT_STABLE_ACCEPTED', {
-      transcript: transcript.substring(0, 50),
+      transcriptChars: typeof transcript === 'string' ? transcript.length : 0, // caller speech is never logged
       stability,
       turnId: this.activeTurn.turnId,
       turnRevision: this.currentRevisions.turnRevision,

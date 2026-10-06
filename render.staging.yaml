@@ -29,6 +29,14 @@ services:
         value: 3003
       - key: PGSSLMODE
         value: require
+      # Workforce provisioning (services/workforce-templates/provision.ts) refuses unless this is explicitly a sandbox
+      # value. NODE_ENV cannot tell staging from production (both are "production"), so this is the switch. It must
+      # NEVER be set on the production service.
+      - key: HALLA_ENVIRONMENT
+        value: staging
+      # Comma-separated sandbox tenant ids the provisioning module may write to. Empty/unset = it refuses everything.
+      - key: HALLA_WORKFORCE_SANDBOX_TENANT_IDS
+        sync: false
       - key: ALLOWED_ORIGINS
         value: http://localhost:3000
       - key: REDIS_URL

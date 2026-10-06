@@ -102,7 +102,7 @@ export function createSmsRouter(): Router {
 
       const smsMessage = await smsService.sendSms(tenantId, to, message, from);
 
-      logger.info('[SMS] Message sent', { tenantId, to, messageId: smsMessage.id });
+      logger.info('[SMS] Message sent', { tenantId, messageId: smsMessage.id });
 
       res.json({
         success: true,
@@ -136,7 +136,7 @@ export function createSmsRouter(): Router {
       }
 
       if (!tenantId) {
-        logger.warn('[SMS] Webhook received without tenant ID', { from: From, to: To });
+        logger.warn('[SMS] Webhook received without tenant ID', { hasFrom: Boolean(From), hasTo: Boolean(To) });
         return res.status(400).send('Missing tenant ID');
       }
 
@@ -246,7 +246,7 @@ export function createSmsRouter(): Router {
 
       const message = await smsService.sendFromTemplate(tenantId, to, templateId, variables);
 
-      logger.info('[SMS] Template message sent', { tenantId, to, templateId });
+      logger.info('[SMS] Template message sent', { tenantId, templateId });
 
       res.json({
         success: true,

@@ -60,7 +60,7 @@ vi.mock('../../apps/gateway/src/security/sse-token.js', () => ({ verifySseDashbo
 interface Received { host: string; type: string; id: string; tenantId: string; data: any; headers: Record<string, string>; body: string }
 const received: Received[] = [];
 const failures = new Map<string, number>(); // `${host}|${type}` -> remaining forced 503s (Infinity = permanent)
-vi.mock('../../apps/gateway/src/security/safe-http.js', () => ({
+vi.mock('../../apps/gateway/src/security/safe-http.js', async (importOriginal) => ({ ...(await importOriginal<typeof import('../../apps/gateway/src/security/safe-http.js')>()),
   safePostJson: vi.fn(async (url: URL, _addresses: string[], opts: { body: string; headers: Record<string, string> }) => {
     // Other suites share this Redis/Postgres and run in parallel: their tenants' events legitimately
     // flow through this consumer, but only this file's own webhook hosts are recorded and failure-injected.

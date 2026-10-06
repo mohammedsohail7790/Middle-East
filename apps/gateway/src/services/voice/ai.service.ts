@@ -1,4 +1,5 @@
 import { CacheManager } from '../cache.js';
+import { scrubFreeText } from '../../security/tool-arg-redaction.js';
 import { logger } from '../logger.js';
 import { appointmentService } from '../appointments/appointment.service.js';
 import { knowledgeService } from '../knowledge/knowledge.service.js';
@@ -62,6 +63,8 @@ export interface TenantVoiceConfig {
         collectPayments?: boolean;
         sendSMS?: boolean;
         accessKnowledge?: boolean;
+        /** Offer the read-only lookup_order tool. Honoured only while an order-lookup provider is registered. */
+        orderLookup?: boolean;
     };
     /** Service-area check for on-site visits (metadata.service_area) */
     serviceArea?: {
@@ -370,7 +373,7 @@ BUSINESS: ${config.businessName} | ${config.industry || 'General'} | ${config.se
 FEE: ${fee}
 ${hours}${complianceContext}
 
-STYLE: Sound like a competent human receptionist — calm, warm, unhurried. Speak naturally with contractions. Keep replies short (1-2 sentences). Ask one question at a time. Never be robotic, scripted, or overly formal. Do NOT enumerate options. Do NOT list things. Sound like a real person helping a caller.
+STYLE: Sound like a competent receptionist — calm, warm, unhurried. Speak naturally with contractions. Keep replies short (1-2 sentences). Ask one question at a time. Never be robotic, scripted, or overly formal. Do NOT enumerate options. Do NOT list things. Sound natural and helpful. If the caller sincerely asks, say plainly that you are an AI assistant; never claim to be human.
 
 CRITICAL RULES:
 - Never repeat your introduction or re-greet.
@@ -426,7 +429,7 @@ CALLER PAST: {callerMemory}`;
                 knowledge = await knowledgeService.searchRelevantKnowledge(lastUser, tenantConfig.tenantId);
                 logger.info('RAG Knowledge Retrieval', {
                     tenant_id: tenantConfig.tenantId,
-                    query: lastUser,
+                    query_chars: lastUser.length,
                     chunks_retrieved: knowledge.length
                 });
             } catch (error) {
@@ -657,7 +660,7 @@ CALLER PAST: {callerMemory}`;
                 knowledge = await knowledgeService.searchRelevantKnowledge(lastUser, tenantConfig.tenantId);
             } catch (error) {
                 logger.warn('RAG knowledge retrieval failed, continuing without it', {
-                    tenant_id: tenantConfig.tenantId, query: lastUser, error: String(error)
+                    tenant_id: tenantConfig.tenantId, query_chars: lastUser.length, error: scrubFreeText(error)
                 });
             }
         }

@@ -110,7 +110,7 @@ export class SmsService {
       // Update conversation
       await this.updateConversation(tenantId, to);
 
-      console.log(`[SMS] Sent message to ${to}: ${twilioMessage.sid}`);
+      console.log(`[SMS] Sent message: ${twilioMessage.sid}`);
 
       const { publishDashboardPushType } = await import('../dashboard/dashboard-events.js');
       publishDashboardPushType(tenantId, 'sms.outbound', [], { to, sid: twilioMessage.sid });
@@ -144,7 +144,7 @@ export class SmsService {
       // Update conversation
       await this.updateConversation(tenantId, from, true);
 
-      console.log(`[SMS] Received message from ${from}`);
+      console.log('[SMS] Received message');
 
       // Check for auto-reply
       await this.checkAutoReply(tenantId, from, body);
