@@ -19,7 +19,7 @@ import { randomUUID } from 'crypto';
 import pg from 'pg';
 import {
   loginRoleRunner, savepointRunner, seedFixture, cleanupFixture, isolationViolations, catalogViolations,
-  seedGenericRow, genericInsert, type Fixture, type Runner,
+  seedGenericRow, genericInsert, grantApiRolesOnBaseTables, type Fixture, type Runner,
 } from '../helpers/rls-audit.js';
 
 const DATABASE_URL = process.env.HALLA_TEST_DATABASE_URL;
@@ -43,10 +43,11 @@ describe.skipIf(!run)('tenant isolation under real RLS (non-superuser, non-BYPAS
     fx = await seedFixture(q, 'rlsiso');
 
     await q(`DROP ROLE IF EXISTS ${APP_ROLE}`);
-    await q(`CREATE ROLE ${APP_ROLE} LOGIN NOSUPERUSER NOBYPASSRLS NOCREATEROLE NOCREATEDB PASSWORD '${APP_PASSWORD}' IN ROLE authenticated`);
-    await q(`GRANT USAGE ON SCHEMA public TO anon, authenticated`);
-    await q(`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO anon, authenticated`);
-    await q(`GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated`);
+    // Member of BOTH API roles so the probes can really `SET ROLE anon` and `SET ROLE authenticated`. (With authenticated
+    // only, every anonymous probe failed to switch role and "access denied" results were vacuous.) Neither role is
+    // privileged: the first test below asserts it.
+    await q(`CREATE ROLE ${APP_ROLE} LOGIN NOSUPERUSER NOBYPASSRLS NOCREATEROLE NOCREATEDB PASSWORD '${APP_PASSWORD}' IN ROLE authenticated, anon`);
+    await grantApiRolesOnBaseTables(q); // base tables only: `ON ALL TABLES` would also re-grant the views that migration 074 locked down
 
     const url = new URL(DATABASE_URL!);
     url.username = APP_ROLE;
@@ -79,7 +80,15 @@ describe.skipIf(!run)('tenant isolation under real RLS (non-superuser, non-BYPAS
     ]);
     const asAuthenticated = await runner(fx.userA, `SELECT current_user AS u, (SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname = current_user) AS privileged`);
     expect(asAuthenticated.rows[0]).toEqual({ u: 'authenticated', privileged: false });
-    expect((await q(`SELECT rolsuper FROM pg_roles WHERE rolname = current_user`)).rows[0].rolsuper).toBe(true); // the seeding connection is a superuser: it is NOT what proves isolation
+    // positive control for every anonymous probe in this file: it genuinely executes AS anon, not as something that merely errors
+    const asAnon = await runner(null, `SELECT current_user AS u, (SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname = current_user) AS privileged`);
+    expect(asAnon.error).toBeNull();
+    expect(asAnon.rows[0]).toEqual({ u: 'anon', privileged: false });
+    // The seeding connection must bypass RLS (a superuser on local PostgreSQL; on hosted Supabase `postgres` is BYPASSRLS
+    // but NOT a superuser) so it can seed and run DDL. It is NOT what proves isolation, and it is a different role from the app role.
+    const seeding = (await q(`SELECT current_user AS u, rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user`)).rows[0];
+    expect(seeding.rolsuper || seeding.rolbypassrls).toBe(true);
+    expect(seeding.u).not.toBe(APP_ROLE);
   });
 
   describe('the four workforce/tenant tables', () => {
@@ -275,7 +284,7 @@ describe.skipIf(!run)('tenant isolation under real RLS (non-superuser, non-BYPAS
       expect(generic.filter((g) => !g.seeded).map((g) => `${g.table}: ${g.reason}`), 'tables that could not be seeded').toEqual([]);
       expect(seeded).toBe(tables.length);
       expect(tables.length).toBeGreaterThan(70); // and the audit really did find the tenant tables
-    }, 600_000);
+    }, Number(process.env.HALLA_RLS_AUDIT_TIMEOUT_MS ?? 600_000)); // 10 min locally; a hosted database over the network needs far longer (it is 80 tables of sequential round trips)
   });
 
   /**
@@ -327,6 +336,32 @@ describe.skipIf(!run)('tenant isolation under real RLS (non-superuser, non-BYPAS
       );
       expect(catalog.join('\n')).toMatch(/tenant table WITHOUT RLS: call_spam_log/);
       expect(catalog.join('\n')).toMatch(/open "true" policy .*audit_logs/);
+    });
+
+    it('Mutation D: grant EXECUTE on an RLS helper to PUBLIC -> catalog audit FAILS', async () => {
+      const catalog = await withMutation(
+        [`GRANT EXECUTE ON FUNCTION public.user_is_tenant_admin(uuid) TO PUBLIC`],
+        async (_r, sq) => catalogViolations((s) => sq(s))
+      );
+      expect(catalog.join('\n')).toMatch(/user_is_tenant_admin is executable by PUBLIC/);
+    });
+
+    it('Mutation E: grant EXECUTE on an RLS helper directly to anon (what Supabase default privileges do) -> catalog audit FAILS', async () => {
+      const catalog = await withMutation(
+        [`GRANT EXECUTE ON FUNCTION public.user_can_access_tenant(uuid) TO anon`, `GRANT EXECUTE ON FUNCTION public.user_is_tenant_owner(uuid) TO anon`],
+        async (_r, sq) => catalogViolations((s) => sq(s))
+      );
+      expect(catalog.join('\n')).toMatch(/user_can_access_tenant is executable by anon/);
+      expect(catalog.join('\n')).toMatch(/user_is_tenant_owner is executable by anon/);
+    });
+
+    it('Mutation F: revoke EXECUTE on a helper from authenticated -> catalog audit FAILS and legitimate access breaks', async () => {
+      const { violations, catalog } = await withMutation(
+        [`REVOKE EXECUTE ON FUNCTION public.user_is_tenant_owner(uuid) FROM authenticated`],
+        async (r, sq) => ({ violations: await isolationViolations(r, fx), catalog: await catalogViolations((s) => sq(s)) })
+      );
+      expect(catalog.join('\n')).toMatch(/user_is_tenant_owner is NOT executable by authenticated/);
+      expect(violations.length).toBeGreaterThan(0); // the policies call the helper as the signed-in user, so the owner's own access fails
     });
 
     it('the mutations were rolled back: the fixed state is intact afterwards', async () => {

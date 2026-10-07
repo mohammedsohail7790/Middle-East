@@ -17,3 +17,12 @@ create table if not exists storage.objects (id uuid primary key default gen_rand
 create or replace function storage.foldername(name text) returns text[] language sql as $$ select string_to_array(name,'/') $$;
 do $$ begin if not exists (select 1 from pg_publication where pubname='supabase_realtime') then create publication supabase_realtime; end if; end $$;
 grant usage on schema public, auth to anon, authenticated, service_role;
+-- Supabase's `postgres` role has these default privileges: EVERY function created later in `public` is executable by
+-- anon, authenticated and service_role, granted directly (not through PUBLIC). `REVOKE ... FROM PUBLIC` therefore does not
+-- remove anon's access. Without this line plain PostgreSQL hides that behaviour (it is how migration 072 shipped with
+-- anon-executable RLS helpers that only hosted Supabase revealed).
+alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
+-- Same for tables and views: Supabase grants ALL on every new table AND view in `public` to the three API roles ("Automatically
+-- expose new tables" is on by default), so RLS (and security_invoker for views) is the only barrier. This is how the three
+-- SECURITY DEFINER views became readable and writable by anon on the Halla staging project.
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;

@@ -86,6 +86,22 @@ describe('Klaros event contract: platform event -> outbound webhook step', () =>
     expect(JSON.stringify(steps)).not.toContain('rawTranscript');
   });
 
+  it.each(['qualified', 'not_qualified', 'needs_human_review'])(
+    'lead.qualified carries the outcome %s under BOTH `status` and `qualification` (the Klaros receiver reads `qualification`, so a non-qualified outcome is never defaulted to "qualified")',
+    async (status) => {
+      const event = createPlatformEvent(
+        PlatformEventTypes.CALL_ENDED as never,
+        { callSid: 'CA7', klarosLeadId: 'K1', qualificationStatus: status, qualificationEvent: { status, leadId: 'L1', klarosLeadId: 'K1', fields: {}, missingFields: [], reason: 'r', confidence: 0.5 } },
+        { tenantId: TENANT, callSid: 'CA7' }
+      );
+      await handleKlarosWebhookEvent(event);
+      const [qualified, completed] = dispatched[0].steps;
+      expect(qualified.data.status).toBe(status);
+      expect(qualified.data.qualification).toBe(status);
+      expect(completed.data.qualificationStatus).toBe(status); // call.completed already used a key the receiver reads
+    }
+  );
+
   it('an unknown/degraded qualification yields only call.completed (never a made-up lead.qualified)', async () => {
     const event = createPlatformEvent(
       PlatformEventTypes.CALL_ENDED as never,

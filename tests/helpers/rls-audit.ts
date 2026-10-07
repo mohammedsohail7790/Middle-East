@@ -19,12 +19,17 @@ export function loginRoleRunner(app: pg.Client): Runner {
   return async (sub, sql, params = []) => {
     await app.query('BEGIN');
     try {
+      // Becoming anon / authenticated MUST succeed. If it were refused and reported as an ordinary probe error, every
+      // "denied" or "empty" result below (anonymous access, tenant-less access, cross-tenant reads) would pass without the
+      // probe ever having run as that role. A failed role switch therefore throws and fails the test.
       await app.query(sub === null ? 'SET LOCAL ROLE anon' : 'SET LOCAL ROLE authenticated');
       await app.query(`SELECT set_config('request.jwt.claim.sub', $1, true)`, [sub ?? '']);
-      const r = await app.query(sql, params as never[]);
-      return { rows: r.rows as Row[], rowCount: r.rowCount ?? 0, error: null };
-    } catch (e) {
-      return { rows: [], rowCount: 0, error: (e as Error).message };
+      try {
+        const r = await app.query(sql, params as never[]);
+        return { rows: r.rows as Row[], rowCount: r.rowCount ?? 0, error: null };
+      } catch (e) {
+        return { rows: [], rowCount: 0, error: (e as Error).message };
+      }
     } finally {
       await app.query('ROLLBACK');
     }
@@ -40,12 +45,15 @@ export function savepointRunner(su: pg.Client): Runner {
   return async (sub, sql, params = []) => {
     await su.query('SAVEPOINT rls_probe');
     try {
+      // as in loginRoleRunner: a failed role switch must fail loudly, never look like "access denied"
       await su.query(sub === null ? 'SET LOCAL ROLE anon' : 'SET LOCAL ROLE authenticated');
       await su.query(`SELECT set_config('request.jwt.claim.sub', $1, true)`, [sub ?? '']);
-      const r = await su.query(sql, params as never[]);
-      return { rows: r.rows as Row[], rowCount: r.rowCount ?? 0, error: null };
-    } catch (e) {
-      return { rows: [], rowCount: 0, error: (e as Error).message };
+      try {
+        const r = await su.query(sql, params as never[]);
+        return { rows: r.rows as Row[], rowCount: r.rowCount ?? 0, error: null };
+      } catch (e) {
+        return { rows: [], rowCount: 0, error: (e as Error).message };
+      }
     } finally {
       await su.query('RESET ROLE').catch(() => {});
       await su.query('ROLLBACK TO SAVEPOINT rls_probe');
@@ -66,7 +74,9 @@ type Q = (sql: string, params?: unknown[]) => Promise<{ rows: Row[] }>;
  * a configuration row with governance columns, an escalation number, a webhook secret and an API-key hash per tenant.
  */
 export async function seedFixture(q: Q, label = 'rls'): Promise<Fixture> {
-  const user = async (n: string) => (await q(`INSERT INTO auth.users (email) VALUES ($1) RETURNING id`, [`${label}-${n}-${randomUUID()}@test.local`])).rows[0].id as string;
+  // Explicit ids: Supabase's real auth.users.id has no default (only the local shim does), so a fixture that relies on one
+  // cannot run against a hosted project.
+  const user = async (n: string) => (await q(`INSERT INTO auth.users (id, email) VALUES ($1, $2) RETURNING id`, [randomUUID(), `${label}-${n}-${randomUUID()}@test.local`])).rows[0].id as string;
   const [userA, userB, userC, userD, userE] = [await user('a'), await user('b'), await user('c'), await user('d'), await user('e')];
   const tenant = async (owner: string, name: string, transfer: string) =>
     (await q(`INSERT INTO public.voice_tenants (owner_user_id, company_name, phone_number, transfer_phone_number) VALUES ($1,$2,$3,$4) RETURNING id`, [owner, `${label} ${name}`, `+1555${Math.floor(Math.random() * 1e7)}`, transfer])).rows[0].id as string;
@@ -84,6 +94,28 @@ export async function seedFixture(q: Q, label = 'rls'): Promise<Fixture> {
     await q(`INSERT INTO public.custom_webhooks (tenant_id, name, url, events, secret) VALUES ($1,'hook','https://example.test/h',ARRAY['lead.created'], $2)`, [t, `whsec-${t === tenantA ? 'A' : 'B'}-${randomUUID()}`]);
   }
   return { userA, userB, userC, userD, userE, tenantA, tenantB };
+}
+
+/**
+ * Gives anon and authenticated table privileges the way Supabase does (RLS is then the only barrier), on BASE TABLES ONLY.
+ * Do not use `GRANT ... ON ALL TABLES IN SCHEMA public`: in PostgreSQL that also covers VIEWS, so every test run would
+ * silently re-grant access on integration_status / v_tenant_me_channels / known_feature_flags and undo migration 074 on the
+ * very database under test.
+ */
+export async function grantApiRolesOnBaseTables(q: Q): Promise<void> {
+  // One statement, one transaction, under an advisory lock: test files run in parallel against the same database and
+  // concurrent GRANTs on the same objects fail with "tuple concurrently updated".
+  await q(`
+    DO $$
+    DECLARE t record;
+    BEGIN
+      PERFORM pg_advisory_xact_lock(hashtext('halla_rls_grant_api_roles'));
+      EXECUTE 'GRANT USAGE ON SCHEMA public TO anon, authenticated';
+      FOR t IN SELECT c.relname FROM pg_class c WHERE c.relnamespace = 'public'::regnamespace AND c.relkind IN ('r', 'p') LOOP
+        EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON public.%I TO anon, authenticated', t.relname);
+      END LOOP;
+      EXECUTE 'GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated';
+    END $$`);
 }
 
 export async function cleanupFixture(q: Q, fx: Fixture): Promise<void> {
@@ -241,8 +273,43 @@ export async function catalogViolations(q: Q): Promise<string[]> {
   const definers = await q(`SELECT proname, proconfig::text AS cfg FROM pg_proc WHERE pronamespace = 'public'::regnamespace AND prosecdef`);
   for (const r of definers.rows) if (!String(r.cfg ?? '').includes('search_path')) v.push(`SECURITY DEFINER function without a pinned search_path: ${r.proname}`);
 
-  const exec = await q(`SELECT p.proname, has_function_privilege('anon', p.oid, 'EXECUTE') AS anon FROM pg_proc p WHERE p.proname IN ('user_is_tenant_owner','user_is_tenant_admin')`);
-  for (const r of exec.rows) if (r.anon) v.push(`RLS helper ${r.proname} is executable by anon`);
+  // The three RLS helpers: all must exist, must be callable by exactly the roles the policies run as (authenticated,
+  // service_role), and by neither anon nor PUBLIC. On Supabase, default privileges grant EXECUTE on new functions to anon
+  // directly, so `REVOKE ... FROM PUBLIC` alone is not enough; both are checked separately.
+  const helpers = ['user_can_access_tenant', 'user_is_tenant_owner', 'user_is_tenant_admin'];
+  const exec = await q(`
+    SELECT p.proname,
+           has_function_privilege('anon', p.oid, 'EXECUTE') AS anon,
+           has_function_privilege('public', p.oid, 'EXECUTE') AS pub,
+           has_function_privilege('authenticated', p.oid, 'EXECUTE') AS authenticated,
+           has_function_privilege('service_role', p.oid, 'EXECUTE') AS service_role
+      FROM pg_proc p WHERE p.pronamespace = 'public'::regnamespace
+       AND p.proname IN ('user_can_access_tenant', 'user_is_tenant_owner', 'user_is_tenant_admin')`);
+  for (const name of helpers) if (!exec.rows.some((r) => r.proname === name)) v.push(`RLS helper ${name} is missing`);
+  for (const r of exec.rows) {
+    if (r.anon) v.push(`RLS helper ${r.proname} is executable by anon`);
+    if (r.pub) v.push(`RLS helper ${r.proname} is executable by PUBLIC`);
+    if (!r.authenticated) v.push(`RLS helper ${r.proname} is NOT executable by authenticated (policies would fail)`);
+    if (!r.service_role) v.push(`RLS helper ${r.proname} is NOT executable by service_role`);
+  }
+
+  // Views and materialized views in `public`. A view owned by `postgres` runs with the owner's rights and bypasses RLS
+  // (unless security_invoker is on), and Supabase grants every new object in `public` to anon / authenticated by default.
+  // That is how integration_status and v_tenant_me_channels let an anonymous caller read, update and delete every tenant.
+  // None of the project's views is meant to be client-readable, so ANY API-role access to a public view is a violation;
+  // a view that must be exposed has to be added to an allow-list here on purpose.
+  const views = await q(`
+    SELECT c.relname,
+           has_table_privilege('anon', c.oid, 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS anon,
+           has_table_privilege('authenticated', c.oid, 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS authenticated,
+           has_table_privilege('public', c.oid, 'SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS pub
+      FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'public' AND c.relkind IN ('v', 'm') ORDER BY c.relname`);
+  for (const r of views.rows) {
+    if (r.anon) v.push(`view ${r.relname} is accessible to anon`);
+    if (r.authenticated) v.push(`view ${r.relname} is accessible to authenticated`);
+    if (r.pub) v.push(`view ${r.relname} is accessible to PUBLIC`);
+  }
   return v;
 }
 

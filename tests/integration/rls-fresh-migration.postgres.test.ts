@@ -18,7 +18,7 @@ import { readFileSync, readdirSync } from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
 import pg from 'pg';
-import { catalogViolations, isolationViolations, loginRoleRunner, seedFixture, type Fixture } from '../helpers/rls-audit.js';
+import { catalogViolations, grantApiRolesOnBaseTables, isolationViolations, loginRoleRunner, seedFixture, type Fixture } from '../helpers/rls-audit.js';
 
 const DATABASE_URL = process.env.HALLA_TEST_DATABASE_URL;
 const run = Boolean(DATABASE_URL);
@@ -26,6 +26,8 @@ const ROOT = path.resolve(__dirname, '../..');
 const MIGRATIONS_DIR = path.join(ROOT, 'supabase/migrations');
 const migrationFiles = readdirSync(MIGRATIONS_DIR).filter((f) => /^\d{3}_.*\.sql$/.test(f)).sort();
 const RLS_MIGRATION = migrationFiles.find((f) => f.startsWith('072_'))!;
+const HELPER_MIGRATION = migrationFiles.find((f) => f.startsWith('073_'))!;
+const VIEW_MIGRATION = migrationFiles.find((f) => f.startsWith('074_'))!;
 
 describe.skipIf(!run)('fresh database: schema + migrations 001..latest', () => {
   const dbName = `halla_rls_fresh_${randomUUID().slice(0, 8)}`;
@@ -55,9 +57,11 @@ describe.skipIf(!run)('fresh database: schema + migrations 001..latest', () => {
   });
 
   it('the migration set is what the repository says: contiguous 001..N, 072 present, forward-only', () => {
-    expect(migrationFiles.length).toBeGreaterThanOrEqual(72);
+    expect(migrationFiles.length).toBeGreaterThanOrEqual(74);
     migrationFiles.forEach((f, i) => expect(Number(f.slice(0, 3)), f).toBe(i + 1));
     expect(RLS_MIGRATION).toBe('072_halla_rls_hardening.sql');
+    expect(HELPER_MIGRATION).toBe('073_halla_rls_helper_execute_privileges.sql');
+    expect(VIEW_MIGRATION).toBe('074_harden_security_definer_views.sql');
     expect(migrationFiles.some((f) => /down|rollback/i.test(f))).toBe(false);
   });
 
@@ -97,17 +101,36 @@ describe.skipIf(!run)('fresh database: schema + migrations 001..latest', () => {
     await q(`DELETE FROM auth.users WHERE id = $1`, [user]);
   });
 
-  it('applying 072 fixes it: no open policy, no recursion, RLS everywhere', async () => {
+  it('applying 072 fixes the POLICIES; with Supabase-like default privileges only helper EXECUTE grants and view grants remain (what 073 and 074 close)', async () => {
     await applyFile(RLS_MIGRATION);
+    const v = await catalogViolations(q);
+    // These reproduce the findings from the Halla staging project. REVOKE ... FROM PUBLIC does not remove the grant that
+    // Supabase's default privileges give anon directly, and every public view is granted to anon/authenticated by default.
+    // Everything else (open policies, recursion, RLS) must already be clean.
+    expect(v).toContain('RLS helper user_is_tenant_admin is executable by anon');
+    expect(v).toContain('RLS helper user_is_tenant_owner is executable by anon');
+    expect(v).toContain('view integration_status is accessible to anon');
+    expect(v).toContain('view v_tenant_me_channels is accessible to anon');
+    for (const x of v) expect(x).toMatch(/^(RLS helper \w+ is executable by (anon|PUBLIC)|view \w+ is accessible to (anon|authenticated|PUBLIC))$/);
+  });
+
+  it('applying 073 closes the helper grants; only the view exposure remains (what 074 closes)', async () => {
+    await applyFile(HELPER_MIGRATION);
+    const v = await catalogViolations(q);
+    expect(v.length).toBeGreaterThan(0);
+    for (const x of v) expect(x).toMatch(/^view \w+ is accessible to (anon|authenticated|PUBLIC)$/);
+  });
+
+  it('applying 074 closes it: no open policy, no recursion, RLS everywhere, no helper or view reachable by anon, authenticated or PUBLIC', async () => {
+    await applyFile(VIEW_MIGRATION);
     expect(await catalogViolations(q)).toEqual([]);
   });
 
-  it('after 072, isolation holds for a non-bypass role on the freshly migrated schema', async () => {
-    await q(`GRANT USAGE ON SCHEMA public TO anon, authenticated`);
-    await q(`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO anon, authenticated`);
-    const role = `halla_rls_fresh_${randomUUID().slice(0, 8)}`;
+  it('after 072 + 073 + 074, isolation holds for a non-bypass role on the freshly migrated schema', async () => {
+    await grantApiRolesOnBaseTables(q as never); // base tables only: `ON ALL TABLES` would re-grant the views migration 074 locked down
+    const role =`halla_rls_fresh_${randomUUID().slice(0, 8)}`;
     const password = `p_${randomUUID()}`;
-    await q(`CREATE ROLE ${role} LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '${password}' IN ROLE authenticated`);
+    await q(`CREATE ROLE ${role} LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD '${password}' IN ROLE authenticated, anon`);
     const fx: Fixture = await seedFixture(q as never, 'fresh');
     const url = new URL(DATABASE_URL!);
     url.pathname = `/${dbName}`;
@@ -122,16 +145,47 @@ describe.skipIf(!run)('fresh database: schema + migrations 001..latest', () => {
     }
   }, 120_000);
 
-  it('072 is idempotent: re-applying it changes nothing', async () => {
-    const snapshot = async () => (await q(`SELECT tablename, policyname, roles::text, cmd, qual, with_check FROM pg_policies WHERE schemaname = 'public' ORDER BY 1, 2`)).rows;
+  it('072, 073 and 074 are idempotent: re-applying them changes no policy, no helper privilege and no view privilege or option', async () => {
+    const snapshot = async () => ({
+      viewAcls: (await q(`SELECT c.relname, c.relacl::text AS acl, c.reloptions::text AS opts FROM pg_class c WHERE c.relnamespace = 'public'::regnamespace AND c.relkind = 'v' ORDER BY 1`)).rows,
+      policies: (await q(`SELECT tablename, policyname, roles::text, cmd, qual, with_check FROM pg_policies WHERE schemaname = 'public' ORDER BY 1, 2`)).rows,
+      helperAcls: (await q(`SELECT proname, proacl::text AS acl, prosecdef, proconfig::text AS cfg FROM pg_proc WHERE pronamespace = 'public'::regnamespace AND proname IN ('user_can_access_tenant','user_is_tenant_owner','user_is_tenant_admin') ORDER BY 1`)).rows,
+    });
     const before = await snapshot();
     await applyFile(RLS_MIGRATION);
+    await applyFile(HELPER_MIGRATION);
+    await applyFile(VIEW_MIGRATION);
     expect(await snapshot()).toEqual(before);
     expect(await catalogViolations(q)).toEqual([]);
   });
 
-  it('every migration after 072 (none today) leaves the audit clean', async () => {
-    for (const f of migrationFiles.filter((m) => Number(m.slice(0, 3)) > 72)) {
+  it('073 only changes privileges: the helpers stay SECURITY DEFINER, STABLE, with the pinned search_path', async () => {
+    const rows = (await q(`SELECT proname, prosecdef, provolatile, proconfig::text AS cfg FROM pg_proc WHERE pronamespace = 'public'::regnamespace AND proname IN ('user_can_access_tenant','user_is_tenant_owner','user_is_tenant_admin') ORDER BY 1`)).rows;
+    expect(rows).toHaveLength(3);
+    for (const r of rows) {
+      expect(r.prosecdef).toBe(true);
+      expect(r.provolatile).toBe('s');
+      expect(String(r.cfg)).toContain('search_path=pg_catalog, public');
+    }
+  });
+
+  it('074 only changes view options and privileges: the definitions are untouched and service_role keeps SELECT only', async () => {
+    const opts = (await q(`SELECT c.relname, coalesce(c.reloptions::text, '') AS opts FROM pg_class c WHERE c.relnamespace = 'public'::regnamespace AND c.relkind = 'v' AND c.relname IN ('integration_status','v_tenant_me_channels','known_feature_flags') ORDER BY 1`)).rows;
+    expect(opts).toEqual([
+      { relname: 'integration_status', opts: '{security_invoker=true}' },
+      { relname: 'known_feature_flags', opts: '' },
+      { relname: 'v_tenant_me_channels', opts: '{security_invoker=true}' },
+    ]);
+    const svc = (await q(`SELECT c.relname, has_table_privilege('service_role', c.oid, 'SELECT') AS sel, has_table_privilege('service_role', c.oid, 'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') AS other FROM pg_class c WHERE c.relnamespace = 'public'::regnamespace AND c.relkind = 'v' AND c.relname IN ('integration_status','v_tenant_me_channels','known_feature_flags') ORDER BY 1`)).rows;
+    expect(svc).toHaveLength(3);
+    for (const r of svc) expect(r).toMatchObject({ sel: true, other: false });
+    const def = (await q(`SELECT pg_get_viewdef('public.integration_status'::regclass, true) AS d`)).rows[0].d as string;
+    expect(def).toMatch(/FROM voice_tenants/);
+    expect(def).not.toMatch(/WHERE/i); // the definition is unchanged: still every row, which is exactly why it must not be client-readable
+  });
+
+  it('every migration after 074 (none today) leaves the audit clean', async () => {
+    for (const f of migrationFiles.filter((m) => Number(m.slice(0, 3)) > 74)) {
       await applyFile(f);
       expect(await catalogViolations(q), `after ${f}`).toEqual([]);
     }
