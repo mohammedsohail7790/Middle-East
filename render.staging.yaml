@@ -5,7 +5,8 @@
 #
 # Isolated resources created here:
 #   halla-ai-gateway-staging  — gateway built from the `staging` branch
-#   halla-ai-redis-staging    — dedicated Valkey/Redis (NOT the production instance)
+# Redis is NOT created here (free-tier Key Value limit: one per workspace). Supply a dedicated STAGING Redis URL
+# (e.g. an Upstash free database, rediss://...) as the REDIS_URL prompt value — never the production instance.
 #
 # Secrets (sync: false) must point at a dedicated STAGING Supabase project and are entered
 # in the Render prompt — never committed. Apply supabase/migrations 001–071 to that database
@@ -39,11 +40,11 @@ services:
         sync: false
       - key: ALLOWED_ORIGINS
         value: http://localhost:3000
+      # Dedicated STAGING Redis, entered in the Render prompt (a rediss:// URL; the gateway enables TLS from the scheme).
+      # Not a Render Key Value: a Render workspace allows only one free Key Value instance, and that one is already used.
+      # NEVER point this at the production Redis.
       - key: REDIS_URL
-        fromService:
-          type: keyvalue
-          name: halla-ai-redis-staging
-          property: connectionString
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: GATEWAY_DATABASE_URL
@@ -66,9 +67,3 @@ services:
         generateValue: true
       - key: INTEGRATION_CREDENTIALS_KEY
         generateValue: true
-
-  - type: keyvalue
-    name: halla-ai-redis-staging
-    region: oregon
-    plan: free
-    ipAllowList: []
