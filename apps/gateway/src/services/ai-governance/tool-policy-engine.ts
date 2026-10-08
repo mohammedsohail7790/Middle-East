@@ -28,6 +28,13 @@ const DEFAULT_TOOL_POLICIES: Record<
   lookup_customer: { enabled: true, riskLevel: 'low' },
   update_customer: { enabled: true, riskLevel: 'low' },
   check_availability: { enabled: true, riskLevel: 'low' },
+  // Read-only order lookup (F9). A real call only ever reaches a provider when one is registered; today none is.
+  lookup_order: {
+    enabled: true,
+    riskLevel: 'medium',
+    maxExecutionsPerCall: 3,
+    constraints: { preventDuplicateExecution: false },
+  },
   create_lead: {
     enabled: true,
     riskLevel: 'low',

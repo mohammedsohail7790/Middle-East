@@ -13,6 +13,8 @@ export interface RealtimeSessionConfig {
   skipAiGreeting?: boolean;
   /** OpenAI Realtime audio.output.speed (0.82–1.05) */
   speechRate?: number;
+  /** The routed ai_agents row for this call, if any (recorded in the tool audit trail). */
+  agentId?: string;
 }
 
 export interface RealtimeTool {

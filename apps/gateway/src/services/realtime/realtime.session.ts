@@ -1,4 +1,5 @@
 import WebSocket from 'ws';
+import { redactToolArguments, safeErrorForLog } from '../../security/tool-arg-redaction.js';
 import { logger } from '../logger.js';
 import { RealtimeSession, RealtimeSessionConfig, RealtimeError, OpenAIServerEvent } from './realtime.types.js';
 import { RealtimeToolsManager, ToolResult } from './realtime.tools.js';
@@ -624,7 +625,7 @@ export class RealtimeSessionManager {
     logger.debug('REALTIME_TEXT_DELTA', {
       sessionId: session.id,
       tenantId: session.tenantId,
-      delta: event.delta?.substring(0, 100),
+      deltaChars: typeof event.delta === 'string' ? event.delta.length : 0, // model text can echo caller data: never logged
     });
   }
 
@@ -641,7 +642,7 @@ export class RealtimeSessionManager {
       tenantId: session.tenantId,
       name: event.name,
       callId: event.call_id,
-      arguments: parsedArgs,
+      redactedArguments: redactToolArguments(String(event.name ?? ''), parsedArgs),
     });
 
     // Track the tool call
@@ -652,7 +653,7 @@ export class RealtimeSessionManager {
         sessionId: session.id,
         tenantId: session.tenantId,
         toolName: event.name,
-        error: error instanceof Error ? error.message : String(error),
+        ...safeErrorForLog(error),
       });
     });
   }

@@ -11,6 +11,13 @@ import twilio from 'twilio';
 import { isP1RuntimeSessionEnabled } from './realtime-session.js';
 import { shouldExecuteTool } from './session-idempotency.js';
 import { aiGovernanceService } from '../ai-governance/ai-governance.service.js';
+import { lookupOrder, ORDER_LOOKUP_BLOCKED } from '../order-lookup/order-lookup.service.js';
+import { redactToolArguments, summarizeToolArguments, safeErrorForLog, scrubFreeText, REDACTED } from '../../security/tool-arg-redaction.js';
+
+/** A reason is logged only if it is one of the platform's own codes; free text becomes a marker. */
+function safeReason(reason: unknown): string {
+  return typeof reason === 'string' ? redactToolArguments('', { reason }).reason as string : REDACTED.text;
+}
 
 export interface ToolResult {
   success: boolean;
@@ -46,7 +53,9 @@ export class RealtimeToolsManager {
       sessionId: session.id,
       tenantId: session.tenantId,
       toolName,
-      parameters,
+      // Values are never logged: only the redacted structure of the arguments.
+      redactedArguments: redactToolArguments(toolName, parameters),
+      argumentSummary: summarizeToolArguments(parameters),
     });
 
     if (isP1RuntimeSessionEnabled()) {
@@ -110,6 +119,10 @@ export class RealtimeToolsManager {
           result = await this.searchKnowledgeBase(session, parameters);
           break;
 
+        case 'lookup_order':
+          result = await this.lookupOrderTool(session, parameters);
+          break;
+
         case 'send_sms':
           result = await this.sendSMS(session, parameters);
           break;
@@ -150,7 +163,7 @@ export class RealtimeToolsManager {
         tenantId: session.tenantId,
         toolName,
         success: result.success,
-        error: result.error,
+        error: result.error === undefined ? undefined : scrubFreeText(result.error),
       });
 
       void import('../../events/event-publisher.js')
@@ -175,12 +188,12 @@ export class RealtimeToolsManager {
         sessionId: session.id,
         tenantId: session.tenantId,
         toolName,
-        error: error instanceof Error ? error.message : String(error),
+        ...safeErrorForLog(error),
       });
 
       return {
         success: false,
-        error: `Tool execution failed: ${error instanceof Error ? error.message : String(error)}`
+        error: `Tool execution failed: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
   }
@@ -237,11 +250,11 @@ export class RealtimeToolsManager {
     logger.info('REALTIME_TOOL_CREATE_APPOINTMENT', {
       sessionId: session.id,
       tenantId: session.tenantId,
-      customerName: params.customer_name,
-      phone: params.phone,
+      hasName: Boolean(params.customer_name),
+      hasPhone: Boolean(params.phone),
       hasEmail: Boolean(params.email),
       hasAddress: Boolean(address),
-      preferredTime,
+      hasPreferredTime: Boolean(preferredTime),
     });
 
     try {
@@ -356,7 +369,7 @@ export class RealtimeToolsManager {
     } catch (error) {
       return {
         success: false,
-        error: `Failed to create appointment: ${error instanceof Error ? error.message : String(error)}`
+        error: `Failed to create appointment: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
   }
@@ -393,7 +406,7 @@ export class RealtimeToolsManager {
     } catch (error) {
       return {
         success: false,
-        error: `Reschedule failed: ${error instanceof Error ? error.message : String(error)}`
+        error: `Reschedule failed: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
   }
@@ -416,7 +429,7 @@ export class RealtimeToolsManager {
     } catch (error) {
       return {
         success: false,
-        error: `Cancellation failed: ${error instanceof Error ? error.message : String(error)}`
+        error: `Cancellation failed: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
   }
@@ -428,8 +441,8 @@ export class RealtimeToolsManager {
     logger.info('REALTIME_TOOL_TRANSFER_CALL', {
       sessionId: session.id,
       tenantId: session.tenantId,
-      reason: params.reason,
-      department: params.department,
+      reason: safeReason(params.reason),
+      hasDepartment: Boolean(params.department),
     });
 
     try {
@@ -472,13 +485,13 @@ export class RealtimeToolsManager {
       return {
         success: true,
         data: { target: targetNumber },
-        message: `Transferring call to ${params.department || 'an agent'}.`,
+        message: 'Transferring the call to a team member.',
       };
 
     } catch (error) {
       return {
         success: false,
-        error: `Transfer failed: ${error instanceof Error ? error.message : String(error)}`
+        error: `Transfer failed: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
   }
@@ -497,7 +510,7 @@ export class RealtimeToolsManager {
     logger.info('REALTIME_TOOL_END_CALL', {
       sessionId: session.id,
       tenantId: session.tenantId,
-      reason: params.reason,
+      reason: safeReason(params.reason),
     });
 
     session.callOutcome = session.callOutcome ?? 'completed';
@@ -578,8 +591,8 @@ export class RealtimeToolsManager {
     logger.info('REALTIME_TOOL_CREATE_LEAD', {
       sessionId: session.id,
       tenantId: session.tenantId,
-      name: params.name,
-      phone: params.phone,
+      hasName: Boolean(params.name),
+      hasPhone: Boolean(params.phone),
       hasAddress: Boolean(params.address),
     });
 
@@ -633,15 +646,32 @@ export class RealtimeToolsManager {
 
       return {
         success: true,
-        message: `Information saved for ${params.name}.`,
+        message: 'Information saved.',
       };
 
     } catch (error) {
       return {
         success: false,
-        error: `Failed to save lead: ${error instanceof Error ? error.message : String(error)}`
+        error: `Failed to save lead: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
+  }
+
+  /**
+   * Read-only order lookup. The tenant is the session's tenant, never a parameter. With no provider (today) it
+   * returns a structured "blocked" result and the agent escalates; it never returns an invented status.
+   */
+  private async lookupOrderTool(session: RealtimeSession, params: { order_reference?: string }): Promise<ToolResult> {
+    const outcome = await lookupOrder(session.tenantId, params?.order_reference);
+    if (outcome.ok) {
+      return { success: true, data: outcome.order, message: 'Order record found. State only these recorded values.' };
+    }
+    logger.info('REALTIME_TOOL_LOOKUP_ORDER_UNAVAILABLE', { sessionId: session.id, tenantId: session.tenantId, code: outcome.code });
+    return {
+      success: false,
+      error: outcome.code === ORDER_LOOKUP_BLOCKED ? ORDER_LOOKUP_BLOCKED : outcome.code,
+      message: `${outcome.message} Do not state any order, payment, refund or tracking status. Take the caller's callback number and escalate.`,
+    };
   }
 
   private async searchKnowledgeBase(
@@ -651,7 +681,7 @@ export class RealtimeToolsManager {
     logger.info('REALTIME_TOOL_SEARCH_KB', {
       sessionId: session.id,
       tenantId: session.tenantId,
-      query: params.query,
+      queryChars: typeof params.query === 'string' ? params.query.length : 0,
     });
 
     try {
@@ -679,7 +709,7 @@ export class RealtimeToolsManager {
     } catch (error) {
       return {
         success: false,
-        error: `Knowledge search failed: ${error instanceof Error ? error.message : String(error)}`
+        error: `Knowledge search failed: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
   }
@@ -704,13 +734,13 @@ export class RealtimeToolsManager {
 
       return {
         success: true,
-        message: `SMS sent to ${params.phone}.`,
+        message: 'SMS sent.',
       };
 
     } catch (error) {
       return {
         success: false,
-        error: `SMS failed: ${error instanceof Error ? error.message : String(error)}`
+        error: `SMS failed: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
   }
@@ -807,7 +837,7 @@ export class RealtimeToolsManager {
     } catch (error) {
       return {
         success: false,
-        error: `Customer update failed: ${error instanceof Error ? error.message : String(error)}`
+        error: `Customer update failed: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
   }
@@ -864,7 +894,7 @@ export class RealtimeToolsManager {
     } catch (error) {
       return {
         success: false,
-        error: `Customer lookup failed: ${error instanceof Error ? error.message : String(error)}`
+        error: `Customer lookup failed: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
   }

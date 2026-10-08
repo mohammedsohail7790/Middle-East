@@ -94,6 +94,7 @@ const EXPECTED_ALLOWED = [
   'PUT /api/v1/integrations/klaros/workforce',
   'GET /api/v1/integrations/klaros/agents',
   'GET /api/v1/integrations/klaros/health',
+  'GET /api/v1/integrations/klaros/orders/:reference', // read-only order status (F9), dedicated `orders.read` scope; BLOCKED_PENDING_KLAROS_READ_API until a provider exists
   'POST /api/v1/leads',
   'PUT /api/v1/leads/:leadId',
   'GET /api/v1/leads',

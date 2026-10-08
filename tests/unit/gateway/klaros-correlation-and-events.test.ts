@@ -132,7 +132,7 @@ describe('Klaros event data (camelCase) — exactly what is emitted per event', 
     );
     expect(out).toMatchObject({ tenantId: 'tenant-1', type: 'lead.qualified', eventId: 'evt-1' });
     expect(out.data).toEqual({
-      leadId: 'lead-1', callId: 'CA1', klarosLeadId: 'kl-1', status: 'qualified',
+      leadId: 'lead-1', callId: 'CA1', klarosLeadId: 'kl-1', status: 'qualified', qualification: 'qualified',
       fields: { name: 'Ada' }, missingFields: [], reason: 'ok', confidence: 0.9,
     });
   });
@@ -191,7 +191,7 @@ describe('Klaros event data (camelCase) — exactly what is emitted per event', 
       expect(stepsOf().map((s) => s.type)).toEqual(['lead.qualified', 'call.completed']);
       expect(stepsOf().map((s) => s.eventId)).toEqual(['evt-1:lead.qualified', 'evt-1']);
       expect(JSON.parse(JSON.stringify(stepsOf()[0].data))).toEqual({
-        leadId: 'lead-1', callId: 'CA1', klarosLeadId: 'kl-1', status: 'qualified',
+        leadId: 'lead-1', callId: 'CA1', klarosLeadId: 'kl-1', status: 'qualified', qualification: 'qualified',
         fields: { name: 'Ada' }, missingFields: [], reason: 'Booked', confidence: 0.9,
       });
       expect(stepsOf()[1].data.qualificationStatus).toBe('qualified');

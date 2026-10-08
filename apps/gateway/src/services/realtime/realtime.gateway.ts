@@ -728,6 +728,7 @@ export class RealtimeGateway {
       greeting: greetingWithDisclosure,
       skipAiGreeting: false,
       speechRate: bundle.speechRate,
+      agentId: state.tenantConfig?.routedAgentId,
     };
 
     try {

@@ -24,6 +24,8 @@ export const API_KEY_ROUTE_POLICY: ReadonlyArray<ApiKeyRoutePolicy> = [
   { method: 'PUT', pattern: /^\/integrations\/klaros\/workforce$/i, scope: 'workforce.write' },
   { method: 'GET', pattern: /^\/integrations\/klaros\/agents$/i, scope: 'workforce.read' },
   { method: 'GET', pattern: /^\/integrations\/klaros\/health$/i, scope: 'workforce.read' },
+  // Read-only order status (dropshipping). A dedicated scope: workforce.read never implies it.
+  { method: 'GET', pattern: /^\/integrations\/klaros\/orders\/[A-Za-z0-9][A-Za-z0-9_-]{2,39}$/i, scope: 'orders.read' },
 
   // Leads
   { method: 'POST', pattern: /^\/leads$/i, scope: 'leads.write' },

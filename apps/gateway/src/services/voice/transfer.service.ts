@@ -1,4 +1,5 @@
 import { logger } from '../logger.js';
+import { scrubFreeText } from '../../security/tool-arg-redaction.js';
 
 export class TransferService {
     async transferCall(callSid: string, phoneNumber: string): Promise<void> {
@@ -26,7 +27,7 @@ export class TransferService {
         });
         if (!response.ok) {
             const body = await response.text();
-            logger.error('Twilio transfer failed', { callSid, status: response.status, body });
+            logger.error('Twilio transfer failed', { callSid, status: response.status, body: scrubFreeText(body, 200) });
             throw new Error(`Twilio transfer failed (${response.status})`);
         }
     }
@@ -50,7 +51,7 @@ export class TransferService {
         });
         if (!response.ok) {
             const body = await response.text();
-            logger.error('Twilio end-call failed', { callSid, status: response.status, body });
+            logger.error('Twilio end-call failed', { callSid, status: response.status, body: scrubFreeText(body, 200) });
             throw new Error(`Twilio end-call failed (${response.status})`);
         }
     }

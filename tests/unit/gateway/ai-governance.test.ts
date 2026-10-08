@@ -91,4 +91,44 @@ describe('AiGovernanceService mediation', () => {
     expect(result.success).toBe(false);
     expect(executor).not.toHaveBeenCalled();
   });
+
+  describe('per-tool limits count that tool only (regression: transfer_call was denied after any other tool ran)', () => {
+    const run = async (sessionId: string, toolName: string) => {
+      const { aiGovernanceService } = await import('../../../apps/gateway/src/services/ai-governance/ai-governance.service.js');
+      const executor = vi.fn(async () => ({ success: true, message: 'ran' }));
+      const result = await aiGovernanceService.executeMediatedTool(
+        executor, { id: sessionId, tenantId: 't-quota', callSid: 'CAQ' } as any, toolName,
+        toolName === 'transfer_call' ? { phone: '+15551234567' } : { query: toolName }
+      );
+      return { result, executor };
+    };
+
+    it('transfer_call still runs after search_knowledge_base and other tools have run in the same call', async () => {
+      for (const tool of ['search_knowledge_base', 'lookup_customer', 'check_availability']) {
+        expect((await run('sess_quota_1', tool)).result.success).toBe(true);
+      }
+      const t = await run('sess_quota_1', 'transfer_call');
+      expect(t.result).toMatchObject({ success: true, message: 'ran' });
+      expect(t.executor).toHaveBeenCalledTimes(1);
+    });
+
+    it("transfer_call's own limit (1 per call) still holds: a second transfer in the same call is denied", async () => {
+      expect((await run('sess_quota_2', 'transfer_call')).result.success).toBe(true);
+      const second = await run('sess_quota_2', 'transfer_call');
+      expect(second.result.success).toBe(false);
+      expect(second.result.message).toMatch(/Max tool executions per call exceeded/);
+      expect(second.executor).not.toHaveBeenCalled();
+    });
+
+    it('the tenant-wide ceiling still counts every tool together', async () => {
+      // default tenant limit is 25 executions per call across all tools; distinct read-only tools are not per-tool capped
+      let ran = 0;
+      for (let i = 0; i < 30; i++) {
+        const r = await run('sess_quota_3', i % 2 ? 'lookup_customer' : 'check_availability');
+        if (r.result.success) ran++;
+        else expect(r.result.message).toMatch(/exceeded|Duplicate|rate limit/i);
+      }
+      expect(ran).toBeLessThanOrEqual(25);
+    });
+  });
 });

@@ -19,11 +19,17 @@ import {
   snapshotMetrics,
 } from './ai-governance-metrics.js';
 import { getCorrelation } from '../observability/correlation-context.js';
+import { safeResultSummary, safeErrorForLog } from '../../security/tool-arg-redaction.js';
 
 type SessionExecutionState = {
+  /** Executions of ALL tools in this call (compared with the tenant-wide limit). */
   perCall: number;
+  /** Executions per tool name in this call (compared with that tool's own maxExecutionsPerCall). */
+  perTool: Record<string, number>;
   minuteWindowStart: number;
   perMinute: number;
+  /** Executions per tool name in the current minute window (compared with that tool's own maxExecutionsPerMinute). */
+  perToolMinute: Record<string, number>;
   recentHashes: { hash: string; at: number }[];
   depth: number;
 };
@@ -35,8 +41,10 @@ function stateFor(sessionId: string): SessionExecutionState {
   if (!s) {
     s = {
       perCall: 0,
+      perTool: {},
       minuteWindowStart: Date.now(),
       perMinute: 0,
+      perToolMinute: {},
       recentHashes: [],
       depth: 0,
     };
@@ -131,19 +139,29 @@ export class AiGovernanceService {
   ): { ok: boolean; reason?: string; trigger?: string } {
     const st = stateFor(sessionId);
     const limits = config.executionLimits;
-    const maxCall = policy.maxExecutionsPerCall ?? limits.maxExecutionsPerCall ?? 25;
-    const maxMin = policy.maxExecutionsPerMinute ?? limits.maxExecutionsPerMinute ?? 40;
+    // Two separate ceilings. The tenant-wide limits count every tool; a tool's own policy limit counts only that
+    // tool. (They used to be one comparison against the all-tools counter, so transfer_call, whose policy allows
+    // 1 per call, was denied as soon as ANY other tool such as search_knowledge_base had run in the call.)
+    const maxCallAll = limits.maxExecutionsPerCall ?? 25;
+    const maxMinAll = limits.maxExecutionsPerMinute ?? 40;
     const maxDepth = limits.maxToolDepth ?? 12;
 
-    if (st.perCall >= maxCall) {
+    if (st.perCall >= maxCallAll) {
+      return { ok: false, reason: 'Max tool executions per call exceeded', trigger: 'quota_per_call' };
+    }
+    if (policy.maxExecutionsPerCall !== undefined && (st.perTool[toolName] ?? 0) >= policy.maxExecutionsPerCall) {
       return { ok: false, reason: 'Max tool executions per call exceeded', trigger: 'quota_per_call' };
     }
     const now = Date.now();
     if (now - st.minuteWindowStart > 60_000) {
       st.minuteWindowStart = now;
       st.perMinute = 0;
+      st.perToolMinute = {};
     }
-    if (st.perMinute >= maxMin) {
+    if (st.perMinute >= maxMinAll) {
+      return { ok: false, reason: 'Tool rate limit exceeded', trigger: 'quota_per_minute' };
+    }
+    if (policy.maxExecutionsPerMinute !== undefined && (st.perToolMinute[toolName] ?? 0) >= policy.maxExecutionsPerMinute) {
       return { ok: false, reason: 'Tool rate limit exceeded', trigger: 'quota_per_minute' };
     }
     if (st.depth >= maxDepth) {
@@ -218,6 +236,7 @@ export class AiGovernanceService {
       });
       await persistExecutionAudit({
         tenantId: session.tenantId,
+        agentId: session.config?.agentId,
         sessionId: session.id,
         callSid: session.callSid,
         eventId: corr.requestId,
@@ -284,6 +303,7 @@ export class AiGovernanceService {
       );
       await persistExecutionAudit({
         tenantId: session.tenantId,
+        agentId: session.config?.agentId,
         sessionId: session.id,
         callSid: session.callSid,
         toolName,
@@ -311,6 +331,8 @@ export class AiGovernanceService {
     const st = stateFor(session.id);
     st.perCall++;
     st.perMinute++;
+    st.perTool[toolName] = (st.perTool[toolName] ?? 0) + 1;
+    st.perToolMinute[toolName] = (st.perToolMinute[toolName] ?? 0) + 1;
     st.depth++;
 
     try {
@@ -321,6 +343,7 @@ export class AiGovernanceService {
 
       await persistExecutionAudit({
         tenantId: session.tenantId,
+        agentId: session.config?.agentId,
         sessionId: session.id,
         callSid: session.callSid,
         toolName,
@@ -344,9 +367,9 @@ export class AiGovernanceService {
         logger.warn('AI_EXECUTION_FAILURE', {
           tenantId: session.tenantId,
           toolName,
-          error: result.error,
+          error: safeResultSummary(result.error),
         });
-        this.emitAiEvent('AI_TOOL_FAILED', { toolName, error: result.error }, session);
+        this.emitAiEvent('AI_TOOL_FAILED', { toolName, error: safeResultSummary(result.error) }, session);
       }
 
       return result;
@@ -357,11 +380,12 @@ export class AiGovernanceService {
       logger.error('AI_EXECUTION_FAILURE', {
         tenantId: session.tenantId,
         toolName,
-        error: message,
+        ...safeErrorForLog(err),
       });
-      this.emitAiEvent('AI_TOOL_FAILED', { toolName, error: message }, session);
+      this.emitAiEvent('AI_TOOL_FAILED', { toolName, error: safeErrorForLog(err).errorCode ?? safeErrorForLog(err).errorName }, session);
       await persistExecutionAudit({
         tenantId: session.tenantId,
+        agentId: session.config?.agentId,
         sessionId: session.id,
         callSid: session.callSid,
         toolName,
@@ -371,7 +395,7 @@ export class AiGovernanceService {
         outcome: 'failure',
         resultSummary: message,
       });
-      return { success: false, error: message };
+      return { success: false, error: safeErrorForLog(err).errorMessage };
     }
     } finally {
       const latencyMs = Date.now() - started;

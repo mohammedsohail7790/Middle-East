@@ -33,7 +33,7 @@ export async function buildFullPrompt(
 
   const language =
     resolvedAiConfig?.language || tenantConfig.defaultLanguage || 'en';
-  let prompt = await buildSystemPrompt(tenantConfig, language);
+  let prompt = await buildSystemPrompt(tenantConfig, language, { requiredFields: resolvedAiConfig?.requiredFields });
 
   if (resolvedAiConfig) {
 
@@ -117,7 +117,16 @@ export async function buildFullPrompt(
 /**
  * Build the base system prompt (without AI config overrides or knowledge base).
  */
-export async function buildSystemPrompt(tenantConfig: TenantVoiceConfig, language = 'en'): Promise<string> {
+export async function buildSystemPrompt(
+  tenantConfig: TenantVoiceConfig,
+  language = 'en',
+  opts: { requiredFields?: string[] } = {}
+): Promise<string> {
+  // The base prompt never mandates an email or a street address: it asks only when the business has listed it as
+  // required information (ai_agent_configs.requiredFields) or has enabled a service-area check.
+  const required = new Set((opts.requiredFields ?? []).map((f) => String(f).toLowerCase()));
+  const needsEmail = required.has('email');
+  const needsAddress = ['address', 'service_address', 'location'].some((k) => required.has(k));
   const agentName = tenantConfig.agentName || 'Sarah';
   const businessName = tenantConfig.businessName;
   const industry = tenantConfig.industry || 'general';
@@ -198,9 +207,16 @@ export async function buildSystemPrompt(tenantConfig: TenantVoiceConfig, languag
     prompt += `\n\nIMPORTANT — It's currently after business hours. Let the caller know that the office is closed right now but you can still help them. Take their info and let them know someone will call back during business hours. Be extra helpful since they're calling outside normal hours.`;
   }
 
-  prompt += `\n\nLanguage: Default to natural New York English. If the caller uses Arabic (Gulf), Spanish, French, Hindi, or Mandarin, match them; otherwise stay in NY English.`;
+  const langName = language && language !== 'en' ? ` (the business default is ${language})` : '';
+  prompt += `\n\nLanguage: reply in the language the caller uses${langName}. Do not assume the caller's country, city or accent.`;
 
-  prompt += `\n\nOn the call: Bookings — collect name, phone, issue, and time one at a time, then use scheduling tools. Phone number — digits are easy to mishear over the phone, so read the full number back once before you submit anything and let them correct it; phrase it however feels natural in the moment (digit by digit, in pairs, whatever's clearest), there's no fixed script. Email — always ask for the caller's email (for leads and bookings alike) so confirmations, reschedule notices, and reminders reach them; email addresses are easy to mishear too, so read it back once in your own words and let them correct it before you submit anything — only proceed without one if they decline. Service address — for any job, visit, quote, or on-site service, always ask for the full service address (street and city); the business needs to know where the work is. Read it back once to confirm before submitting. Reschedules — use reschedule_appointment with phone or appointment id plus new_time in ISO format; confirm the new slot aloud. Cancellations — use cancel_appointment when they want to cancel. After any change, confirm details and close warmly (see call-ending rules). Uncertain answers — use search_knowledge_base before guessing. Stay brief; this is voice, not email.`;
+  const emailRule = needsEmail
+    ? "Email — the business needs an email address for confirmations, so ask for it, read it back once in your own words, and let them correct it before you submit anything."
+    : "Email — do not ask for one unless the caller offers it or the business has said it needs one.";
+  const addressRule = needsAddress
+    ? "Address — the business needs an address for this kind of request, so ask for it, read it back once, and let them correct it."
+    : "Address — do not ask for a street address unless the business has said it needs one.";
+  prompt += `\n\nOn the call: Bookings — collect the details the business needs (for example name, phone, the service and the preferred time) one at a time, then use the scheduling tools if they are available. Phone number — digits are easy to mishear over the phone, so read the full number back once before you submit anything and let them correct it. ${emailRule} ${addressRule} Reschedules — use reschedule_appointment with phone or appointment id plus new_time in ISO format; confirm the new slot aloud. Cancellations — use cancel_appointment when they want to cancel. After any change, confirm details and close warmly (see call-ending rules). Uncertain answers — use search_knowledge_base before guessing. Stay brief; this is voice, not email.`;
 
   const area = tenantConfig.serviceArea;
   if (area?.enabled) {

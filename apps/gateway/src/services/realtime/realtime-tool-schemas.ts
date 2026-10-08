@@ -1,5 +1,6 @@
 import { PLAN_FEATURES } from '../../config/plan-config.js';
 import type { TenantVoiceConfig } from '../voice/ai.service.js';
+import { isOrderLookupAvailable } from '../order-lookup/order-lookup.service.js';
 
 /**
  * Builds the OpenAI function-calling tool schema list for a tenant.
@@ -18,7 +19,7 @@ export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'es
       type: 'function',
       name: 'create_lead',
       description:
-        'Capture a new lead with customer information. Always ask for the best email address so we can send helpful follow-ups; if they decline or do not have one, capture the lead without it. For any job, visit, quote, or on-site service, always ask for the full service address too.',
+        'Capture a new lead with customer information. Only include an email address or a service address if the caller offered it or the business has said it needs one; otherwise capture the lead without them.',
       parameters: {
         type: 'object',
         properties: {
@@ -27,12 +28,12 @@ export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'es
           email: {
             type: 'string',
             description:
-              'Customer email for follow-up. Ask for it; since email addresses are easy to mishear over the phone, read it back once to confirm spelling before submitting. Leave blank if the caller declines.',
+              'Customer email for follow-up. Include it only if the caller offered it or the business requires it; email addresses are easy to mishear over the phone, so read it back once to confirm spelling before submitting. Leave blank otherwise.',
           },
           address: {
             type: 'string',
             description:
-              'Full service address (street, city). Always ask for it when the inquiry involves a visit, job, or quote; read it back once to confirm before submitting.',
+              'Service address (street, city). Include it only if the caller gave it or the business requires it for this request; if you ask, read it back once to confirm before submitting.',
           },
           interest: { type: 'string', description: 'Service or product of interest' }
         },
@@ -87,7 +88,7 @@ export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'es
       type: 'function',
       name: 'create_appointment',
       description:
-        'Book a new appointment for the customer. Always ask for the best email address for their confirmation before booking; if they decline or do not have one, book without it.',
+        'Book a new appointment for the customer. Include an email address only if the caller offered it or the business has said it needs one; otherwise book without it.',
       parameters: {
         type: 'object',
         properties: {
@@ -96,12 +97,12 @@ export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'es
           email: {
             type: 'string',
             description:
-              'Customer email address for the confirmation email. Ask for it; since email addresses are easy to mishear over the phone, read it back once to confirm spelling before booking. Omit if the caller declines.',
+              'Customer email address for the confirmation email. Include it only if the caller offered it or the business requires it; email addresses are easy to mishear over the phone, so read it back once to confirm spelling before booking. Omit it otherwise.',
           },
           address: {
             type: 'string',
             description:
-              'Full service address where the visit will take place (street, city). Always ask before booking any on-site appointment; read it back once to confirm.',
+              'Service address where the visit will take place (street, city). Needed only for on-site appointments where the business requires it; if you ask, read it back once to confirm.',
           },
           issue: { type: 'string', description: 'Description of the issue or service needed' },
           preferred_time: {
@@ -191,6 +192,24 @@ export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'es
         },
         required: ['query']
       }
+    });
+  }
+
+  // Read-only order lookup (F9): never offered while ORDER_LOOKUP is BLOCKED_PENDING_KLAROS_READ_API, and never
+  // offered to a tenant that has not opted in (Medical Tourism does not).
+  if (caps.orderLookup === true && isOrderLookupAvailable()) {
+    tools.push({
+      type: 'function',
+      name: 'lookup_order',
+      description:
+        'Read the recorded status of ONE order by its order reference. Read-only: it cannot change an order, take a payment, issue a refund or contact a carrier. State only what it returns; anything it does not return is unknown.',
+      parameters: {
+        type: 'object',
+        properties: {
+          order_reference: { type: 'string', description: 'The order reference the caller read out (letters, digits, - and _ only). Do not guess one.' },
+        },
+        required: ['order_reference'],
+      },
     });
   }
 

@@ -258,7 +258,7 @@ export class WorkflowEngine {
                     execute: async (event) => {
                         logger.info('WORKFLOW_MISSED_CALL_SMS', {
                             tenantId: event.tenantId,
-                            callerPhone: event.data.callerPhone,
+                            hasCallerPhone: Boolean(event.data.callerPhone),
                         });
                     },
                 },

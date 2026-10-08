@@ -659,8 +659,8 @@ export function createVoiceRouter(): express.Router {
             const callSid = String(req.body.CallSid || '');
 
             logger.info('Incoming call webhook received', {
-                to: toNumber,
-                from: fromNumber,
+                to: toNumber, // the business's own line, not caller data
+                hasCallerNumber: Boolean(fromNumber), // the caller's number is personal data: never logged
                 callSid,
             });
 
@@ -707,7 +707,7 @@ export function createVoiceRouter(): express.Router {
                 logger.info('Incoming call rejected as spam', {
                     tenantId: tenant.id,
                     callSid,
-                    from: fromNumber,
+                    hasCallerNumber: Boolean(fromNumber),
                     reason: spamResult.reason,
                 });
                 await ensureCallRecord(tenant.id, callSid);

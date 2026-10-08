@@ -3,11 +3,11 @@
  * Manages user-defined webhooks for event-driven integrations.
  */
 
-import { createHmac, randomBytes } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import { logger } from '../logger.js';
 import { pool } from '../db/pool.js';
 import { assertSafeWebhookUrl, HostResolutionError } from '../../security/ssrf-guard.js';
-import { safePostJson } from '../../security/safe-http.js';
+import { safePostJson, WEBHOOK_USER_AGENT, diagnoseRejectionLayer } from '../../security/safe-http.js';
 import { signWebhookPayload } from '../../security/webhook-signing.js';
 import { assertValidKlarosEvents, type KlarosEventType } from '../../security/klaros-event-types.js';
 
@@ -127,67 +127,27 @@ export class CustomWebhooksService {
   }
 
   /**
-   * Dispatch an event to all matching webhooks.
+   * Dispatch an event to all matching webhooks (used by the "send a test event" endpoint).
+   *
+   * This used to be a second, weaker delivery path: a raw `fetch` that followed redirects, skipped the SSRF re-check at
+   * dispatch time and sent UNSIGNED when a webhook had no secret. It now goes through exactly the same guarded path as
+   * Klaros events (validated on every call, no redirects, signed, never unsigned, outcome recorded).
    */
   async dispatchEvent(tenantId: string, eventType: string, payload: Record<string, any>): Promise<void> {
     const result = await pool.query(
-      `SELECT id, url, secret, headers FROM public.custom_webhooks
+      `SELECT id, url, secret FROM public.custom_webhooks
        WHERE tenant_id = $1 AND active = true AND events @> ARRAY[$2]::TEXT[]`,
       [tenantId, eventType]
     );
-
     for (const webhook of result.rows) {
       try {
-        const body = JSON.stringify({ event: eventType, timestamp: new Date().toISOString(), data: payload });
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          ...(webhook.headers || {}),
-        };
-
-        // Sign payload if secret exists
-        if (webhook.secret) {
-          const signature = createHmac('sha256', webhook.secret).update(body).digest('hex');
-          headers['X-HallaAI-Signature'] = `sha256=${signature}`;
-        }
-
-        const response = await fetch(webhook.url, {
-          method: 'POST',
-          headers,
-          body,
-          signal: AbortSignal.timeout(10000),
-        });
-
-        const responseBody = await response.text();
-
-        // Log delivery
-        await pool.query(
-          `INSERT INTO public.webhook_deliveries (webhook_id, tenant_id, event_type, payload, response_status, response_body, delivered)
-           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-          [webhook.id, tenantId, eventType, JSON.stringify(payload), response.status, responseBody, response.ok]
-        );
-
-        // Update webhook status
-        await pool.query(
-          `UPDATE public.custom_webhooks 
-           SET last_triggered_at = NOW(), last_error = NULL, failure_count = 0
-           WHERE id = $1`,
-          [webhook.id]
-        );
-      } catch (error: any) {
-        logger.error('Webhook delivery failed', { webhookId: webhook.id, error: error instanceof Error ? error instanceof Error ? error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error) : String(error) : String(error) : String(error) });
-
-        await pool.query(
-          `INSERT INTO public.webhook_deliveries (webhook_id, tenant_id, event_type, payload, response_status, response_body, delivered)
-           VALUES ($1, $2, $3, $4, $5, $6, false)`,
-          [webhook.id, tenantId, eventType, JSON.stringify(payload), null, error instanceof Error ? error instanceof Error ? error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error) : String(error) : String(error) : String(error), false]
-        );
-
-        await pool.query(
-          `UPDATE public.custom_webhooks 
-           SET last_error = $1, failure_count = failure_count + 1
-           WHERE id = $2`,
-          [error instanceof Error ? error instanceof Error ? error instanceof Error ? error instanceof Error ? error instanceof Error ? error.message : String(error) : String(error) : String(error) : String(error) : String(error), webhook.id]
-        );
+        const target = await assertSafeWebhookUrl(webhook.url);
+        await this.deliverStep(webhook, tenantId, { type: eventType as KlarosEventType, eventId: randomUUID(), data: payload }, target);
+      } catch (err: unknown) {
+        // Blocked or unresolvable destination: recorded as a failed delivery, never fetched.
+        const reason = err instanceof Error ? err.message : String(err);
+        await this.recordDelivery(webhook.id, tenantId, eventType, randomUUID(), payload, null, reason, false).catch(() => {});
+        logger.warn('WEBHOOK_TEST_DISPATCH_BLOCKED', { webhookId: webhook.id, reason: reason.slice(0, 120) });
       }
     }
   }
@@ -300,6 +260,14 @@ export class CustomWebhooksService {
     target: Awaited<ReturnType<typeof assertSafeWebhookUrl>>
   ): Promise<Error | null> {
     try {
+      if (!webhook.secret) {
+        // Every webhook is created with a signing secret. A NULL one (a damaged row) must never degrade to an UNSIGNED
+        // delivery of lead/call data: fail closed, record it, and let the bus retry once the row is repaired.
+        const reason = 'Webhook has no signing secret; refusing to send an unsigned delivery';
+        logger.error('WEBHOOK_MISSING_SIGNING_SECRET', { webhookId: webhook.id });
+        await this.recordDelivery(webhook.id, tenantId, step.type, step.eventId, step.data, null, reason, false);
+        return new Error(`Webhook ${webhook.id} has no signing secret`);
+      }
       const body = JSON.stringify({
         id: step.eventId,
         type: step.type,
@@ -312,14 +280,23 @@ export class CustomWebhooksService {
         'Content-Type': 'application/json',
         'X-HallaAI-Timestamp': timestamp,
       };
-      if (webhook.secret) {
-        headers['X-HallaAI-Signature'] = `sha256=${signWebhookPayload(webhook.secret, timestamp, body)}`;
-      }
+      headers['X-HallaAI-Signature'] = `sha256=${signWebhookPayload(webhook.secret, timestamp, body)}`;
 
       // Connects only to the addresses validated by the caller and never follows
       // redirects — a 3xx is recorded as a failed delivery, not chased.
       const response = await safePostJson(target.url, target.addresses, { headers, body, timeoutMs: 10_000 });
       const ok = response.status >= 200 && response.status < 300;
+      if (!ok) {
+        // Which layer answered a rejection (edge, platform router or application) and any rate-limit hint. Headers are
+        // allow-listed in safe-http.ts and carry no caller data; the response BODY is not logged.
+        logger.warn('KLAROS_WEBHOOK_NON_SUCCESS_RESPONSE', {
+          webhookId: webhook.id,
+          status: response.status,
+          requestUserAgent: WEBHOOK_USER_AGENT,
+          responseHeaders: response.headers ?? {},
+          layerHint: diagnoseRejectionLayer(response.status, response.headers),
+        });
+      }
       await this.recordDelivery(webhook.id, tenantId, step.type, step.eventId, step.data, response.status, response.body, ok);
       return ok ? null : new Error(`Webhook ${webhook.id} responded ${response.status}`);
     } catch (err: any) {

@@ -1,0 +1,28 @@
+-- TEST-ONLY shim for the Supabase platform objects the migrations expect (roles, auth schema, storage stubs, realtime publication).
+-- Used by tests/integration/rls-* to build a throwaway PostgreSQL that behaves like Supabase for RLS purposes. Never apply to a real database.
+create extension if not exists pgcrypto; create extension if not exists "uuid-ossp"; create extension if not exists vector;
+do $$ begin
+  if not exists (select 1 from pg_roles where rolname='anon') then create role anon nologin; end if;
+  if not exists (select 1 from pg_roles where rolname='authenticated') then create role authenticated nologin; end if;
+  if not exists (select 1 from pg_roles where rolname='service_role') then create role service_role nologin bypassrls; end if;
+end $$;
+create schema if not exists auth;
+create table if not exists auth.users (id uuid primary key default gen_random_uuid(), email text, raw_user_meta_data jsonb default '{}'::jsonb, created_at timestamptz default now());
+create or replace function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true),'')::uuid $$;
+create or replace function auth.role() returns text language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claim.role', true),''),'anon') $$;
+create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
+create schema if not exists storage;
+create table if not exists storage.buckets (id text primary key, name text, public boolean default false);
+create table if not exists storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text, name text, owner uuid, metadata jsonb);
+create or replace function storage.foldername(name text) returns text[] language sql as $$ select string_to_array(name,'/') $$;
+do $$ begin if not exists (select 1 from pg_publication where pubname='supabase_realtime') then create publication supabase_realtime; end if; end $$;
+grant usage on schema public, auth to anon, authenticated, service_role;
+-- Supabase's `postgres` role has these default privileges: EVERY function created later in `public` is executable by
+-- anon, authenticated and service_role, granted directly (not through PUBLIC). `REVOKE ... FROM PUBLIC` therefore does not
+-- remove anon's access. Without this line plain PostgreSQL hides that behaviour (it is how migration 072 shipped with
+-- anon-executable RLS helpers that only hosted Supabase revealed).
+alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;
+-- Same for tables and views: Supabase grants ALL on every new table AND view in `public` to the three API roles ("Automatically
+-- expose new tables" is on by default), so RLS (and security_invoker for views) is the only barrier. This is how the three
+-- SECURITY DEFINER views became readable and writable by anon on the Halla staging project.
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;

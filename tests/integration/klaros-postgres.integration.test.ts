@@ -40,7 +40,7 @@ vi.mock('node:dns/promises', () => ({
   lookup: vi.fn(async () => [{ address: '93.184.216.34', family: 4 }]),
 }));
 const transportCalls: Array<{ url: string; body: string; headers: Record<string, string> }> = [];
-vi.mock('../../apps/gateway/src/security/safe-http.js', () => ({
+vi.mock('../../apps/gateway/src/security/safe-http.js', async (importOriginal) => ({ ...(await importOriginal<typeof import('../../apps/gateway/src/security/safe-http.js')>()),
   safePostJson: vi.fn(async (url: URL, _addresses: string[], opts: any) => {
     transportCalls.push({ url: url.toString(), body: opts.body, headers: opts.headers });
     return { status: 200, body: 'ok' };
@@ -465,11 +465,19 @@ describe.skipIf(!run)('Klaros contract against REAL PostgreSQL', () => {
       expect(await mods.ivr.listAgents(tenantB)).toEqual([]);
     });
 
-    // KNOWN PRE-EXISTING DEFECT, outside the Klaros work: ai_agents.services is TEXT[] (migrations 012/021)
-    // but IVRService.createAgent/updateAgent bind JSON.stringify(services) — the same invalid-array-literal
-    // bug fixed for api keys and webhooks. it.fails passes while the defect exists and turns red once fixed.
-    it.fails('KNOWN DEFECT: ivrService.createAgent binds services as a JSON string and Postgres rejects it', async () => {
-      await mods.ivr.createAgent(tenantA, { name: 'Broken', role: 'x', systemPrompt: 'y' });
+    // REGRESSION (was a KNOWN DEFECT, it.fails): ai_agents.services is TEXT[] (migrations 012/021) but
+    // IVRService.createAgent/updateAgent bound JSON.stringify(services) — the same invalid-array-literal bug
+    // already fixed for api keys and webhooks — so every agent insert/update that touched services failed.
+    it('ivrService.createAgent / updateAgent bind services as a real TEXT[] (regression for the former known defect)', async () => {
+      // createAgent enforces the plan's agent limit (1 on 'essential'); tenant A already has the seeded agent above.
+      await q(`INSERT INTO public.subscriptions (tenant_id, plan, status, currency, current_period_start, current_period_end)
+               VALUES ($1, 'professional', 'active', 'usd', NOW(), NOW() + INTERVAL '30 days') ON CONFLICT (tenant_id) DO NOTHING`, [tenantA]);
+      const created = await mods.ivr.createAgent(tenantA, { name: 'Regression', role: 'x', systemPrompt: 'y' });
+      expect(created.services).toEqual([]);
+      const updated = await mods.ivr.updateAgent(tenantA, created.id, { services: ['a', 'b'] });
+      expect(updated.services).toEqual(['a', 'b']);
+      expect(await mods.ivr.listAgents(tenantB)).toEqual([]); // still tenant-scoped
+      await mods.ivr.deleteAgent(tenantA, created.id);
     });
 
     it('the health check inputs are real: tenant row exists and config is readable', async () => {

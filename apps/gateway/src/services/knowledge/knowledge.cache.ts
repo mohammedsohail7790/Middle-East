@@ -45,7 +45,7 @@ export class KnowledgeCache {
 
             logger.debug('KNOWLEDGE_CACHE_HIT', {
                 tenantId,
-                query: query.slice(0, 50),
+                queryChars: query.length,
                 hitCount: parsed.hitCount,
             });
 

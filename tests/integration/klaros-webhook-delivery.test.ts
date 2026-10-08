@@ -106,7 +106,7 @@ let receiverPort = 0;
 const transportCalls: Array<{ url: string; addresses: string[] }> = [];
 let transportOverride: ((...a: any[]) => Promise<{ status: number; body: string }>) | null = null;
 
-vi.mock('../../apps/gateway/src/security/safe-http.js', () => ({
+vi.mock('../../apps/gateway/src/security/safe-http.js', async (importOriginal) => ({ ...(await importOriginal<typeof import('../../apps/gateway/src/security/safe-http.js')>()),
   safePostJson: vi.fn(async (url: URL, addresses: string[], opts: { headers: Record<string, string>; body: string }) => {
     transportCalls.push({ url: url.toString(), addresses });
     if (transportOverride) return transportOverride(url, addresses, opts);

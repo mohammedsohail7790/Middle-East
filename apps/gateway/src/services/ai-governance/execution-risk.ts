@@ -12,6 +12,7 @@ export interface RiskAssessment {
 const SIDE_EFFECT: Record<string, RiskAssessment['sideEffectClass']> = {
   search_knowledge_base: 'read',
   lookup_customer: 'read',
+  lookup_order: 'read',
   check_availability: 'read',
   create_lead: 'write',
   create_appointment: 'write',

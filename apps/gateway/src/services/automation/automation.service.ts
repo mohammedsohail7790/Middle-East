@@ -458,7 +458,7 @@ export class AutomationService {
         text: stripToPlainText(html),
       });
 
-      console.log(`[Automation] Email sent to ${to}`);
+      console.log('[Automation] Email sent');
     } catch (error) {
       console.error('[Automation] Error sending email:', error);
     }

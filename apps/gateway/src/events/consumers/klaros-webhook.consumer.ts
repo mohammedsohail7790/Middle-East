@@ -119,6 +119,10 @@ function buildEventData(klarosType: KlarosEventType, event: PlatformEvent): Reco
         callId: event.callSid ?? payload.callId,
         klarosLeadId: payload.klarosLeadId,
         status: payload.status,
+        // Same value under the key the Klaros receiver reads (it looks for `qualification` / `qualification_status` /
+        // `qualificationStatus`, never `status`; without this a not_qualified outcome would default to "qualified" there).
+        // Additive: receivers that read `status` are unaffected.
+        qualification: payload.status,
         fields: payload.fields,
         missingFields: payload.missingFields,
         reason: payload.reason,

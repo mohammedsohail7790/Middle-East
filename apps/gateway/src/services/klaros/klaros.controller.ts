@@ -17,6 +17,7 @@ import { aiConfigService } from '../ai-config/ai-config.service.js';
 import { ivrService, type AIAgent } from '../ivr/ivr.service.js';
 import { pool } from '../db/pool.js';
 import { clientErrorMessage } from '../../security/safe-error.js';
+import { lookupOrder, isValidOrderReference, ORDER_LOOKUP_BLOCKED } from '../order-lookup/order-lookup.service.js';
 import { logger } from '../logger.js';
 
 /** Klaros's business-context shape -> Halla's ai_agent_configs fields. Exported for unit testing. */
@@ -112,6 +113,27 @@ export function createKlarosRouter(): express.Router {
       res.json({ success: true, data: agents.map(toKlarosAgentOutput) });
     } catch (error) {
       res.status(400).json({ success: false, error: clientErrorMessage(error, 'Failed to list agents') });
+    }
+  });
+
+  // GET /api/v1/integrations/klaros/orders/:reference — READ-ONLY order status for the key's own tenant.
+  // The tenant comes from the API key (never from the URL or body). Until Klaros publishes a read API there is no
+  // provider, and this answers 501 ORDER_LOOKUP_BLOCKED_PENDING_KLAROS_READ_API rather than inventing data.
+  router.get('/orders/:reference', requireScope('orders.read'), async (req, res) => {
+    const tenantId = getTenantId(req);
+    if (!isValidOrderReference(req.params.reference)) {
+      res.status(400).json({ success: false, code: 'INVALID_REFERENCE', error: 'The order reference is not in a valid format.' });
+      return;
+    }
+    const outcome = await lookupOrder(tenantId, req.params.reference);
+    if (outcome.ok) {
+      res.json({ success: true, data: outcome.order });
+    } else if (outcome.code === ORDER_LOOKUP_BLOCKED) {
+      res.status(501).json({ success: false, code: outcome.code, error: outcome.message });
+    } else if (outcome.code === 'NOT_FOUND') {
+      res.status(404).json({ success: false, code: outcome.code, error: outcome.message });
+    } else {
+      res.status(502).json({ success: false, code: outcome.code, error: outcome.message });
     }
   });
 
