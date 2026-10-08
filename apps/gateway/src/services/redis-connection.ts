@@ -19,6 +19,11 @@ export function redisEndpointForLog(url: string): string {
     }
 }
 
+/** Redis URLs can carry the password (redis://user:PASSWORD@host). Never let one reach a log line. */
+export function redactRedisUrls(text: string): string {
+    return text.replace(/rediss?:\/\/\S+/gi, 'redis://<redacted>');
+}
+
 export type CreateRedisOptions = {
     /** BullMQ requires maxRetriesPerRequest: null */
     bullmq?: boolean;
@@ -108,13 +113,23 @@ export function createRedisClient(
     }
 
     const label = opts.label ?? 'redis';
-    const client = new Redis(redisUrl, redisConnectionOptions(redisUrl, opts));
+    let client: Redis;
+    try {
+        client = new Redis(redisUrl, redisConnectionOptions(redisUrl, opts));
+    } catch {
+        // A malformed URL makes Node throw an ERR_INVALID_URL TypeError that carries the raw value (`input`), which
+        // Node then prints on an uncaught exception. Rethrow without the value (and without `cause`).
+        throw new Error(
+            `Invalid Redis URL for client "${label}" (value redacted). Expected redis://... or rediss://... ` +
+                'with no extra text (e.g. not a "redis-cli ..." command).'
+        );
+    }
 
     client.on('error', (err) => {
         logger.warn('REDIS_CLIENT_ERROR', {
             label,
             endpoint: redisEndpointForLog(redisUrl),
-            error: String(err),
+            error: redactRedisUrls(String(err)),
         });
     });
 
