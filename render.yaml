@@ -7,9 +7,8 @@
 #   halla-ai-gateway  — API + Twilio webhooks + WebSocket voice (Render, FREE plan: sleeps after ~15 min idle,
 #                       first request then takes ~50 s; keep it awake with an uptime pinger on /ready or move to
 #                       the `starter` plan before taking real calls)
-# Redis is NOT created here (free-tier Key Value limit: one per workspace, already used by other services).
-# Supply a dedicated PRODUCTION Redis URL (rediss://, TLS) as the REDIS_URL prompt value, e.g. an Upstash free
-# database. Never reuse the staging Redis.
+# halla-ai-redis    — FREE Render Key Value (one free Key Value per workspace; keep staging on its external Upstash
+#                       Redis, never share a Redis between staging and production). Internal URL, not persistent.
 #
 # Dashboard (app): deploy on Vercel → app.hallaai.com
 # Marketing site:  deploy on Netlify → www.hallaai.com
@@ -68,10 +67,11 @@ services:
         value: https://app.hallaai.com
       - key: GATEWAY_PUBLIC_URL
         value: https://gateway.hallaai.com
-      # External production Redis, entered in the Render prompt. Must be rediss:// (TLS) and a bare URL, not a
-      # `redis-cli ...` command.
       - key: REDIS_URL
-        sync: false
+        fromService:
+          type: keyvalue
+          name: halla-ai-redis
+          property: connectionString
       # RENDER_EXTERNAL_URL is auto-injected by Render on gateway (Twilio webhooks / WSS)
       # TWILIO_STREAM_WSS_URL auto-derived from RENDER_EXTERNAL_URL if not set (see env.ts)
       - key: DATABASE_URL
@@ -259,3 +259,12 @@ services:
         value: AED
       - key: DEFAULT_LANGUAGE
         value: ar-SA
+
+  # Free Key Value (one per workspace; none exists yet). Internal URL, same region as the gateway. Not persistent
+  # (free tier): queued jobs are lost on restart.
+  - type: keyvalue
+    name: halla-ai-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
