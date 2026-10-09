@@ -44,14 +44,20 @@ export const KLAROS_WEBHOOK_DELIVERY: Readiness = 'BLOCKED';
  */
 export const ROW_LEVEL_SECURITY: Readiness = 'READY';
 
-/** Migration 072 has not been applied to the staging database. It must be, and the RLS suite re-run against it. */
-export const RLS_APPLIED_TO_STAGING: Readiness = 'NOT_TESTED';
+/**
+ * Migrations 072 + 073 (and 074 for the views) are applied to the Halla staging database (ref moqygchqrwrkbpezjnvg),
+ * with the RLS suite re-run against it (18/18 tenant isolation, 12/12 view security, catalog audit 0 violations).
+ */
+export const RLS_APPLIED_TO_STAGING: Readiness = 'READY';
 
 /**
- * The production policy state has not been inspected (that needs a connection to production, which was not authorised)
- * and 072 has not been applied there. Until it is applied and verified, production keeps whatever policies it has.
+ * Migrations 072 + 073 were applied to the Halla production database (ref xzhxnxxlbiiidipcgfrv) on 2026-10-08 from
+ * byte-identical, hash-checked files, and the read-only checks measured exactly the expected post-state: 157 policies,
+ * 17 open `true` (16 service_role-only + 1 allow-listed), 1 open to a non-service role, 3 helpers (anon and PUBLIC
+ * cannot execute them), 3 anon-executable definers, 0 tenant tables without RLS, 0 recursive tables. This does NOT
+ * mean production is ready: the other blockers below remain.
  */
-export const RLS_APPLIED_TO_PRODUCTION: Readiness = 'NOT_TESTED';
+export const RLS_APPLIED_TO_PRODUCTION: Readiness = 'READY';
 
 export interface WorkforceReadiness {
   WORKFORCE_DEFINED: Readiness;
