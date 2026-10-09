@@ -34,6 +34,7 @@ import { createVoiceCloningRouter } from '../services/voice-cloning/voiceCloning
 import { createSpamRouter } from '../services/spam/spam.controller.js';
 import { createOnboardingRouter } from '../services/onboarding/onboarding.controller.js';
 import { createOrganizationsRouter } from '../services/organizations/organization.controller.js';
+import { createWorkforceOwnerRouter } from '../services/workforce-templates/workforce-owner.controller.js';
 import { createCrmRouter } from '../services/crm/crm.controller.js';
 import { createChannelsRouter } from '../services/channels/channels.controller.js';
 import { createIntegrationRouter } from '../services/integrations/integration.controller.js';
@@ -67,6 +68,8 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/voice', createVoiceRouter());
     apiRouter.use('/tenants', createTenantsRouter());
     apiRouter.use('/organizations', createOrganizationsRouter());
+    // Owner-only workforce template apply; answers 404 unless HALLA_OWNER_WORKFORCE_APPLY=true.
+    apiRouter.use('/organizations', createWorkforceOwnerRouter());
     apiRouter.use('/crm', createCrmRouter());
     apiRouter.use('/channels', createChannelsRouter());
     apiRouter.use('/integrations', createIntegrationOAuthRouter());

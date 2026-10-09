@@ -58,19 +58,44 @@ function sandboxAllowList(): Set<string> {
   );
 }
 
+/** SANDBOX entry point: unchanged guards (explicit non-production HALLA_ENVIRONMENT + tenant allow-list). */
 export async function applyWorkforceTemplate(
   tenantId: string,
   template: WorkforceTemplate,
   opts: { dryRun?: boolean } = {}
 ): Promise<ProvisionResult> {
-  const dryRun = Boolean(opts.dryRun);
-
   assertSandboxEnvironment();
   if (!sandboxAllowList().has(tenantId.toLowerCase())) {
     throw new WorkforceProvisioningError(
       'Refusing to provision: the tenant is not in HALLA_WORKFORCE_SANDBOX_TENANT_IDS (sandbox tenants only).'
     );
   }
+  return applyValidatedTemplate(tenantId, template, opts);
+}
+
+/**
+ * OWNER entry point for a REAL tenant. It performs NO sandbox/allow-list check, so it must only ever be called by code that
+ * has already (1) authenticated the caller, (2) verified that the caller is an `owner` of exactly this organization, and
+ * (3) confirmed the operator meant this organization. The only caller is the owner-only route in
+ * services/workforce-templates/workforce-owner.controller.ts, which is itself disabled unless
+ * HALLA_OWNER_WORKFORCE_APPLY=true. It shares every other safeguard with the sandbox path (template validation, a valid
+ * E.164 transfer number for escalation, the plan's agent limit, pre-flight before any write).
+ */
+export async function applyWorkforceTemplateForOwner(
+  organizationId: string,
+  template: WorkforceTemplate,
+  opts: { dryRun?: boolean } = {}
+): Promise<ProvisionResult> {
+  return applyValidatedTemplate(organizationId, template, opts);
+}
+
+async function applyValidatedTemplate(
+  tenantId: string,
+  template: WorkforceTemplate,
+  opts: { dryRun?: boolean }
+): Promise<ProvisionResult> {
+  const dryRun = Boolean(opts.dryRun);
+
   const problems = validateWorkforceTemplate(template);
   if (problems.length > 0) {
     throw new WorkforceProvisioningError(`Refusing to provision an invalid template: ${problems.slice(0, 5).join('; ')}`);
