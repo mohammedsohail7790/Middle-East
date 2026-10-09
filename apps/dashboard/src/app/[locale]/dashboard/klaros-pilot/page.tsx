@@ -57,6 +57,17 @@ export default function KlarosPilotPage() {
   // Never keep a one-time value after the page is left or the pilot is changed.
   useEffect(() => clearSecrets, [clearSecrets]);
 
+  // A value that is on screen can never be shown again: warn before the tab is closed or reloaded.
+  useEffect(() => {
+    if (!oneTime) return undefined;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [oneTime]);
+
   const run = useCallback(async (action: () => Promise<void>) => {
     setBusy(true);
     setError(null);
@@ -105,6 +116,23 @@ export default function KlarosPilotPage() {
       else await discardWebhook(api, oneTime.id, confirmation);
       clearSecrets();
       setNote("The value was discarded and removed from the gateway. You can create it again.");
+      setPlan(await buildPlan(api, pilot));
+    });
+
+  // Recovery for a one-time value that was lost (tab closed, never stored): remove the old object so a new one can be created.
+  const removeExistingKey = () =>
+    run(async () => {
+      if (!plan?.keyExists) return;
+      await discardKey(api, plan.keyExists.id, confirmation);
+      setNote("The existing key was revoked. You can create a new one.");
+      setPlan(await buildPlan(api, pilot));
+    });
+
+  const removeExistingWebhook = () =>
+    run(async () => {
+      if (!plan?.webhookExists) return;
+      await discardWebhook(api, plan.webhookExists.id, confirmation);
+      setNote("The existing webhook was deleted. You can register it again.");
       setPlan(await buildPlan(api, pilot));
     });
 
@@ -229,6 +257,23 @@ export default function KlarosPilotPage() {
                 2. Register webhook
               </button>
             </div>
+            {(plan.keyExists || plan.webhookExists) && (
+              <div className="flex flex-wrap gap-2 border-t pt-2">
+                <span className="w-full text-xs text-muted-foreground">
+                  If an existing value was lost, remove it here (same confirmation) and create it again.
+                </span>
+                {plan.keyExists && (
+                  <button type="button" className="rounded border border-red-500 px-3 py-2 text-red-600" disabled={busy || !confirmed || !!oneTime} onClick={removeExistingKey}>
+                    Revoke existing key
+                  </button>
+                )}
+                {plan.webhookExists && (
+                  <button type="button" className="rounded border border-red-500 px-3 py-2 text-red-600" disabled={busy || !confirmed || !!oneTime} onClick={removeExistingWebhook}>
+                    Delete existing webhook
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -246,6 +291,10 @@ export default function KlarosPilotPage() {
             className="w-full rounded border bg-transparent p-2 font-mono"
             type={shown ? "text" : "password"}
             value={oneTime.value}
+            autoComplete="off"
+            spellCheck={false}
+            data-1p-ignore="true"
+            data-lpignore="true"
           />
           <div className="flex flex-wrap gap-2">
             <button type="button" className="rounded border px-3 py-2" onClick={() => setShown((s) => !s)}>
