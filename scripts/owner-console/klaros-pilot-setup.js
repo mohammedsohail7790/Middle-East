@@ -75,10 +75,23 @@
     return session.access_token;
   }
 
+  // The gateway requires an X-CSRF-Token for every mutating Bearer request except paths containing "/webhook" (middleware/csrf.ts).
+  // The token comes from the same endpoint the dashboard itself uses, is held only for this one request, and is never shown.
+  async function csrfToken() {
+    const r = await fetch(`${API}/dashboard/csrf-token`, { method: 'GET', headers: { Authorization: `Bearer ${accessToken()}`, Accept: 'application/json' }, credentials: 'omit', redirect: 'error' });
+    let json = null;
+    try { json = await r.json(); } catch { /* empty */ }
+    const t = json && json.data && json.data.csrfToken;
+    if (r.status !== 200 || typeof t !== 'string' || !t) fail(`Could not obtain a CSRF token (status ${r.status}). Reload the dashboard page and try again.`);
+    return t;
+  }
+  const needsCsrf = (method, path) => method !== 'GET' && !path.includes('/webhook');
+
   async function api(method, path, body, tenantId) {
     const headers = { Authorization: `Bearer ${accessToken()}`, Accept: 'application/json' };
     if (body !== undefined) headers['Content-Type'] = 'application/json';
     if (tenantId) headers['x-tenant-id'] = tenantId;
+    if (needsCsrf(method, path)) headers['X-CSRF-Token'] = await csrfToken();
     const res = await fetch(`${API}${path}`, {
       method, headers, credentials: 'omit', redirect: 'error',
       body: body === undefined ? undefined : JSON.stringify(body),
@@ -108,6 +121,33 @@
     if (!c || c.tenantId !== me.id || c.tenantName !== me.name || c.acknowledge !== ACK) {
       fail(`Not confirmed. Pass { tenantId: "${me.id}", tenantName: ${JSON.stringify(me.name)}, acknowledge: "${ACK}" } after running preview(), exactly as shown.`);
     }
+  }
+  // Undo + recovery. Every claim made to the owner is checked: "revoked" is only said when the server answered 200.
+  async function undoKey(id, prefix, me, why) {
+    let ok = false;
+    try { ok = (await api('POST', `/api-keys/${encodeURIComponent(String(id))}/revoke`, undefined, me.id)).status === 200; } catch { ok = false; }
+    if (!ok) fail(`${why} AND THE REVOKE FAILED: key id ${id} (prefix ${prefix || 'unknown'}) may still be valid. Run revokeKey("${id}", <confirmation>) now.`);
+    fail(`${why} The key was revoked, so nothing valid is left behind.`);
+  }
+  async function undoWebhook(id, me, why) {
+    let ok = false;
+    try { ok = (await api('DELETE', `/webhooks/${encodeURIComponent(String(id))}`, undefined, me.id)).status === 200; } catch { ok = false; }
+    if (!ok) fail(`${why} AND THE DELETE FAILED: webhook id ${id} may still exist. Run deleteWebhook("${id}", <confirmation>) now.`);
+    fail(`${why} The webhook was deleted, so nothing is left behind.`);
+  }
+  // The server may have processed a create even though we never saw the answer (dropped connection, unreadable body).
+  // Find what it made by its unique name/URL and remove it, so a value nobody saw can never stay valid.
+  async function recoverKey(p, me, why) {
+    let found = null;
+    try { const l = await api('GET', '/api-keys', undefined, me.id); found = ((l.json && l.json.data) || []).find((k) => activeKey(k, p.keyName)) || null; } catch { found = null; }
+    if (!found) fail(`${why} No key named ${JSON.stringify(p.keyName)} could be found afterwards; run preview() to confirm nothing was created.`);
+    return undoKey(found.id, found.keyPrefix, me, why);
+  }
+  async function recoverWebhook(p, me, why) {
+    let found = null;
+    try { const l = await api('GET', '/webhooks', undefined, me.id); found = ((l.json && l.json.data) || []).find((h) => h.url === hookUrl(p)) || null; } catch { found = null; }
+    if (!found) fail(`${why} No webhook for ${hookUrl(p)} could be found afterwards; run preview() to confirm nothing was created.`);
+    return undoWebhook(found.id, me, why);
   }
   const activeKey = (k, name) => k.name === name && !k.revokedAt && (!k.expiresAt || new Date(k.expiresAt) > new Date());
 
@@ -147,20 +187,24 @@
     const existing = (list.json.data || []).find((k) => activeKey(k, p.keyName));
     if (existing) { say(`A key named ${JSON.stringify(p.keyName)} already exists (id ${existing.id}, prefix ${existing.keyPrefix}). Nothing created. If you lost its value, run revokeKey("${existing.id}", ...) and then createKey again.`); return; }
     const expiresAt = new Date(Date.now() + KEY_LIFETIME_DAYS * 86400000).toISOString();
-    const r = await api('POST', '/api-keys', { name: p.keyName, scopes: [...SCOPES], expiresAt }, me.id);
-    if (r.status !== 201 || !r.json || !r.json.data) fail(`Key was NOT created (status ${r.status}: ${errText(r)}). Only an owner can create keys.`);
-    const { id, keyPrefix } = r.json.data;
-    let raw = r.json.data.key;
+    let r;
+    try { r = await api('POST', '/api-keys', { name: p.keyName, scopes: [...SCOPES], expiresAt }, me.id); } catch (e) {
+      if (e && String(e.message).startsWith('[halla-setup]')) throw e; // our own refusal (e.g. no CSRF token): nothing was sent
+      return recoverKey(p, me, 'The create request did not complete cleanly.');
+    }
+    if (r.status !== 201) fail(`Key was NOT created (status ${r.status}: ${errText(r)}). Only an owner can create keys.`);
+    const d = r.json && r.json.data;
+    if (!d || typeof d.id !== 'string') return recoverKey(p, me, 'The server created a key but its response was unusable.');
+    const { id, keyPrefix } = d;
+    let raw = d.key;
     r.json = null;
-    if (typeof raw !== 'string' || !raw.startsWith('sk_calliq_')) { await api('POST', `/api-keys/${id}/revoke`, undefined, me.id); fail('Unexpected key format; the new key was revoked. Nothing was kept.'); }
+    if (typeof raw !== 'string' || !raw.startsWith('sk_calliq_')) return undoKey(id, keyPrefix, me, 'Unexpected key format.');
     const ok = await toClipboard(raw);
     raw = null;
-    if (!ok) {
-      await api('POST', `/api-keys/${id}/revoke`, undefined, me.id);
-      fail('The key could not be copied to your clipboard, so it was REVOKED (a value you never saw must not stay valid). Run this in the Chrome DevTools Console tab and try again.');
-    }
+    if (!ok) return undoKey(id, keyPrefix, me, 'The key could not be copied to your clipboard (run this in the Chrome DevTools Console tab).');
     say(`Key created (id ${id}, prefix ${keyPrefix}). Its value is on your clipboard and was NOT shown.`);
-    say(`Paste it NOW into the protected Klaros environment variable ${p.keyEnv} (Render -> klaros-halla-pilot -> Environment). Then copy anything else to clear the clipboard.`);
+    say(`Paste it NOW into the protected Klaros environment variable ${p.keyEnv} (Render -> klaros-halla-pilot -> Environment).`);
+    say('Then clear the clipboard: copy any other text, and on Windows also delete the entry from clipboard history (Win+V) or turn history off.');
     say(`Next: registerWebhook("${pilot}", { tenantId: "${me.id}", tenantName: ${JSON.stringify(me.name)}, acknowledge: "${ACK}" })`);
   }
 
@@ -171,22 +215,29 @@
     const list = await api('GET', '/webhooks', undefined, me.id);
     if (list.status !== 200) fail(`Could not list webhooks (status ${list.status}: ${errText(list)}).`);
     const url = hookUrl(p);
+    // The gateway does not role-check webhook registration, so tie it to the owner-gated step: the runtime key must exist first.
+    const keys = await api('GET', '/api-keys', undefined, me.id);
+    if (keys.status !== 200 || !(keys.json.data || []).some((k) => activeKey(k, p.keyName))) fail(`Run createKey("${pilot}", ...) first: the webhook is only registered after the tenant's runtime key exists.`);
     const existing = (list.json.data || []).find((h) => h.url === url);
     if (existing) { say(`A webhook for ${url} already exists (id ${existing.id}). Nothing created. Its secret cannot be shown again; to rotate, run deleteWebhook("${existing.id}", ...) and registerWebhook again.`); return; }
-    const r = await api('POST', '/webhooks', { name: p.webhookName, url, events: [...EVENTS] }, me.id);
-    if (r.status !== 201 || !r.json || !r.json.data) fail(`Webhook was NOT registered (status ${r.status}: ${errText(r)}).`);
-    const { id } = r.json.data;
-    let secret = r.json.data.secret;
+    let r;
+    try { r = await api('POST', '/webhooks', { name: p.webhookName, url, events: [...EVENTS] }, me.id); } catch (e) {
+      if (e && String(e.message).startsWith('[halla-setup]')) throw e;
+      return recoverWebhook(p, me, 'The register request did not complete cleanly.');
+    }
+    if (r.status !== 201) fail(`Webhook was NOT registered (status ${r.status}: ${errText(r)}).`);
+    const d = r.json && r.json.data;
+    if (!d || typeof d.id !== 'string') return recoverWebhook(p, me, 'The server created a webhook but its response was unusable.');
+    const { id } = d;
+    let secret = d.secret;
     r.json = null;
-    if (typeof secret !== 'string' || secret.length < 16) { await api('DELETE', `/webhooks/${id}`, undefined, me.id); fail('Unexpected response; the new webhook was deleted. Nothing was kept.'); }
+    if (typeof secret !== 'string' || secret.length < 16) return undoWebhook(id, me, 'Unexpected response.');
     const ok = await toClipboard(secret);
     secret = null;
-    if (!ok) {
-      await api('DELETE', `/webhooks/${id}`, undefined, me.id);
-      fail('The signing secret could not be copied, so the webhook was DELETED (a secret you never saw is useless). Run this in the Chrome DevTools Console tab and try again.');
-    }
+    if (!ok) return undoWebhook(id, me, 'The signing secret could not be copied (run this in the Chrome DevTools Console tab).');
     say(`Webhook registered (id ${id}) for ${url}. Its signing secret is on your clipboard and was NOT shown.`);
-    say(`Paste it NOW into the protected Klaros environment variable ${p.secretEnv} (Render -> klaros-halla-pilot -> Environment). Then copy anything else to clear the clipboard.`);
+    say(`Paste it NOW into the protected Klaros environment variable ${p.secretEnv} (Render -> klaros-halla-pilot -> Environment).`);
+    say('Then clear the clipboard: copy any other text, and on Windows also delete the entry from clipboard history (Win+V) or turn history off.');
   }
 
   async function revokeKey(id, c) {
