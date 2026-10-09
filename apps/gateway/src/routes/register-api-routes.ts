@@ -69,7 +69,7 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/tenants', createTenantsRouter());
     apiRouter.use('/organizations', createOrganizationsRouter());
     // Owner-only workforce template apply; answers 404 unless HALLA_OWNER_WORKFORCE_APPLY=true.
-    apiRouter.use('/organizations', createWorkforceOwnerRouter());
+    apiRouter.use('/tenants', createWorkforceOwnerRouter());
     apiRouter.use('/crm', createCrmRouter());
     apiRouter.use('/channels', createChannelsRouter());
     apiRouter.use('/integrations', createIntegrationOAuthRouter());
