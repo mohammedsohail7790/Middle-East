@@ -3,6 +3,7 @@ import { PlatformEventTypes } from '../../../../../infrastructure/events/event-t
 import { customWebhooksService, type KlarosSequenceStep } from '../../services/webhooks/webhooks.service.js';
 import { isKlarosEventType, type KlarosEventType } from '../../security/klaros-event-types.js';
 import { logger } from '../../services/logger.js';
+import { sanitizeConsentEvidence } from '../../services/consent/consent-evidence.js';
 
 /** Internal platform event type -> external Klaros contract event name. */
 const EVENT_TYPE_MAP: Partial<Record<string, KlarosEventType>> = {
@@ -105,14 +106,18 @@ function buildEventData(klarosType: KlarosEventType, event: PlatformEvent): Reco
         appointmentId: payload.appointmentId,
       };
     case 'lead.created':
-    case 'lead.updated':
+    case 'lead.updated': {
+      // Optional consent evidence: rebuilt field by field from a validated shape, or omitted. Never defaulted, never inferred.
+      const consent = sanitizeConsentEvidence(payload.consent);
       return {
         leadId: payload.leadId,
         phone: payload.phone,
         name: payload.name,
         callId: payload.callId ?? event.callSid,
         klarosLeadId: payload.klarosLeadId,
+        ...(consent ? { consent } : {}),
       };
+    }
     case 'lead.qualified':
       return {
         leadId: payload.leadId,

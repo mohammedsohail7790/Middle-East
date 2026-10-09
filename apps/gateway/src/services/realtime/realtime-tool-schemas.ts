@@ -213,6 +213,30 @@ export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'es
     });
   }
 
+  // Explicit consent capture: offered ONLY to a tenant that configured a consent wording version (Medical Tourism opt-in).
+  // The model supplies the decision and scopes; the wording version, method and timestamp are set by the server, never by the model.
+  if (tenantConfig.consentCapture?.wordingVersion) {
+    tools.push({
+      type: 'function',
+      name: 'record_consent',
+      description:
+        "Record the caller's explicit answer to a specific consent question you have just asked. Call it ONLY after the caller clearly said yes or no (or took back an earlier yes) to that exact question. Never call it for silence, 'maybe', an unclear or off-topic reply, a keypress, or because the caller is simply continuing the call; in those cases ask again or treat it as no and do not call it. Each scope is independent: record only the scopes the caller was actually asked about and answered. Consent to be contacted is NOT consent to store personal data, and neither is consent to collect or store medical information.",
+      parameters: {
+        type: 'object',
+        properties: {
+          decision: { type: 'string', enum: ['granted', 'declined', 'withdrawn'], description: 'granted = clear yes; declined = clear no; withdrawn = the caller took back an earlier yes.' },
+          scopes: {
+            type: 'array',
+            minItems: 1,
+            items: { type: 'string', enum: ['contact', 'store_personal_data', 'store_medical_information'] },
+            description: 'Only the scopes the caller explicitly answered for. contact = may be contacted about the enquiry; store_personal_data = may keep their contact details and enquiry; store_medical_information = may collect and keep medical information.',
+          },
+        },
+        required: ['decision', 'scopes'],
+      },
+    });
+  }
+
   if (tenantConfig.serviceArea?.enabled) {
     tools.push({
       type: 'function',

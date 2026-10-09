@@ -58,7 +58,9 @@ export class RealtimeToolsManager {
       argumentSummary: summarizeToolArguments(parameters),
     });
 
-    if (isP1RuntimeSessionEnabled()) {
+    // record_consent is deliberately exempt from the 30s same-key skip: a caller may grant, withdraw and re-grant the same scope in
+    // one call, and a silently skipped decision would leave the stored state different from what the caller said.
+    if (isP1RuntimeSessionEnabled() && toolName !== 'record_consent') {
       const idempotencyKey =
         parameters?.idempotency_key ||
         parameters?.idempotencyKey ||
@@ -113,6 +115,10 @@ export class RealtimeToolsManager {
 
         case 'create_lead':
           result = await this.createLead(session, parameters);
+          break;
+
+        case 'record_consent':
+          result = await this.recordConsent(session, parameters);
           break;
 
         case 'search_knowledge_base':
@@ -607,6 +613,7 @@ export class RealtimeToolsManager {
           .filter(Boolean)
           .join(' — ') || undefined,
         callId: callId ?? undefined,
+        consentCallSid: session.callSid,
         metadata: { interest: params.interest, address },
       });
 
@@ -655,6 +662,34 @@ export class RealtimeToolsManager {
         error: `Failed to save lead: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
+  }
+
+  /**
+   * Stores one explicit consent decision. The tenant and call come from the session; the wording version comes from tenant
+   * configuration and the timestamp from the database. A tenant without a configured wording version, or any decision/scope
+   * outside the enumerations, stores nothing and tells the agent so. Nothing about the decision is logged beyond its outcome.
+   */
+  private async recordConsent(
+    session: RealtimeSession,
+    params: { decision?: unknown; scopes?: unknown }
+  ): Promise<ToolResult> {
+    const { recordConsentDecision } = await import('../consent/consent-evidence.js');
+    const r = await recordConsentDecision(session.tenantId, session.callSid, { decision: params?.decision, scopes: params?.scopes });
+    logger.info('REALTIME_TOOL_RECORD_CONSENT', { sessionId: session.id, tenantId: session.tenantId, outcome: r.ok ? 'recorded' : r.reason });
+    if (!r.ok) {
+      return {
+        success: false,
+        error: `Consent was not recorded (${r.reason}).`,
+        message: 'Nothing was recorded. Do not tell the caller it was. Treat the answer as not given, do not save their details, and offer a person.',
+      };
+    }
+    const declined = params?.decision !== 'granted';
+    return {
+      success: true,
+      message: declined
+        ? 'Their answer is recorded as not given. Do not save or use the details for that purpose, and offer a person.'
+        : 'Their answer is recorded.',
+    };
   }
 
   /**

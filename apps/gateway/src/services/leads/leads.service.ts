@@ -5,6 +5,7 @@
 
 import { voiceDb } from '../voice/tenant-scope.js';
 import { getLeadSelectList } from './leads-schema.js';
+import { resolveConsentForLeadEvent } from '../consent/consent-evidence.js';
 
 let cachedLeadSelect: string | null = null;
 async function leadSelect(): Promise<string> {
@@ -132,6 +133,8 @@ export class LeadsService {
       service?: string;
       preferred_time?: string;
       klarosLeadId?: string;
+      /** The call whose recorded consent decisions belong to this lead (never used as a source of consent by itself). */
+      consentCallSid?: string;
     }
   ): Promise<Lead> {
     try {
@@ -180,9 +183,10 @@ export class LeadsService {
           void import('../../events/event-publisher.js')
             .then(async ({ publishPlatformEvent }) => {
               const { PlatformEventTypes } = await import('../../events/event-types.js');
+              const consent = await resolveConsentForLeadEvent(tenantId, leadId, data?.consentCallSid);
               publishPlatformEvent(
                 PlatformEventTypes.LEAD_UPDATED,
-                { leadId, phone: phoneNumber, name: data?.name, callId: data?.callId },
+                { leadId, phone: phoneNumber, name: data?.name, callId: data?.callId, ...(consent ? { consent } : {}) },
                 { tenantId }
               );
             })
@@ -231,6 +235,7 @@ export class LeadsService {
       void import('../../events/event-publisher.js')
         .then(async ({ publishPlatformEvent }) => {
           const { PlatformEventTypes } = await import('../../events/event-types.js');
+          const consent = await resolveConsentForLeadEvent(tenantId, lead.id, data?.consentCallSid);
           publishPlatformEvent(
             PlatformEventTypes.LEAD_CREATED,
             {
@@ -239,6 +244,7 @@ export class LeadsService {
               name: data?.name,
               callId: data?.callId,
               klarosLeadId: data?.klarosLeadId,
+              ...(consent ? { consent } : {}),
             },
             { tenantId }
           );
@@ -509,9 +515,10 @@ export class LeadsService {
       void import('../../events/event-publisher.js')
         .then(async ({ publishPlatformEvent }) => {
           const { PlatformEventTypes } = await import('../../events/event-types.js');
+          const consent = await resolveConsentForLeadEvent(tenantId, leadId);
           publishPlatformEvent(
             PlatformEventTypes.LEAD_UPDATED,
-            { leadId, klarosLeadId: updates.klarosLeadId },
+            { leadId, klarosLeadId: updates.klarosLeadId, ...(consent ? { consent } : {}) },
             { tenantId }
           );
         })
