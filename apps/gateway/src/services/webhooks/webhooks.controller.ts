@@ -6,12 +6,39 @@
 import { customWebhooksService } from './webhooks.service.js';
 import { asyncHandler } from '../../middleware/index.js';
 import { requireProfessionalOrHigher } from '../../middleware/plan-gating.js';
-import { getTenantId } from '../auth/tenant-context.js';
+import { getTenantId, type CallIqAuthenticatedRequest } from '../auth/tenant-context.js';
+import { resolveUserRole, requirePermission } from '../enterprise/rbac.service.js';
 import express from 'express';
 
 /** Verified tenant from the authenticated JWT/internal-key context, not the raw header. */
 function getTenantScope(req: Request): string {
   return getTenantId(req);
+}
+
+/**
+ * Creating, changing, deleting or test-firing a webhook decides where a tenant's lead and call data is sent, so it needs the same
+ * permission as API-key management (`governance:write`: owner and admin). Before this check any signed-in team member of a tenant
+ * could register a webhook to an arbitrary HTTPS address.
+ *
+ * Only USER sessions are role-checked. Tenant API keys are already limited by the default-deny route policy (they need the
+ * dedicated `webhooks.manage` scope, see security/api-key-scope-policy.ts) and internal-service calls are trusted, so neither is
+ * affected. Fails closed: no tenant context, a user session without a user id (e.g. a stream token) or a lookup error is refused.
+ */
+export async function requireWebhookManager(req: any, res: any, next: any): Promise<void> {
+  try {
+    const r = req as CallIqAuthenticatedRequest;
+    if (!r.tenant) return res.status(403).json({ success: false, error: 'Forbidden' });
+    // Every kind of USER session (user_jwt, legacy_jwt) is role-checked; only machine credentials are exempt.
+    if (r.tenant.source === 'tenant_api_key' || r.tenant.source === 'internal_service') return next();
+    const role = await resolveUserRole(r.tenant.id, r.tenant.userId);
+    const perm = requirePermission(role, 'governance:write');
+    if (!perm.ok) {
+      return res.status(403).json({ success: false, error: perm.reason ?? 'Forbidden' });
+    }
+    return next();
+  } catch {
+    return res.status(403).json({ success: false, error: 'Forbidden' });
+  }
 }
 
 export function createWebhooksRouter(): express.Router {
@@ -31,6 +58,7 @@ export function createWebhooksRouter(): express.Router {
   router.post(
     '/',
     gate,
+    requireWebhookManager,
     asyncHandler(async (req: any, res: any) => {
       const tenantId = getTenantScope(req);
       const { name, url, events, headers } = req.body;
@@ -47,6 +75,7 @@ export function createWebhooksRouter(): express.Router {
   router.put(
     '/:id',
     gate,
+    requireWebhookManager,
     asyncHandler(async (req: any, res: any) => {
       const tenantId = getTenantScope(req);
       const { id } = req.params;
@@ -58,6 +87,7 @@ export function createWebhooksRouter(): express.Router {
   router.delete(
     '/:id',
     gate,
+    requireWebhookManager,
     asyncHandler(async (req: any, res: any) => {
       const tenantId = getTenantScope(req);
       const { id } = req.params;
@@ -81,6 +111,7 @@ export function createWebhooksRouter(): express.Router {
   router.post(
     '/:id/test',
     gate,
+    requireWebhookManager,
     asyncHandler(async (req: any, res: any) => {
       const tenantId = getTenantScope(req);
       await customWebhooksService.dispatchEvent(tenantId, 'test.ping', { message: 'This is a test webhook from Halla AI' });
