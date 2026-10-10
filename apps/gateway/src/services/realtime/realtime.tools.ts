@@ -19,6 +19,24 @@ function safeReason(reason: unknown): string {
   return typeof reason === 'string' ? redactToolArguments('', { reason }).reason as string : REDACTED.text;
 }
 
+const ESCALATION_REASON_CODES = new Set(['emergency', 'urgent', 'human_requested', 'complaint', 'clinical_question', 'billing', 'other']);
+
+/**
+ * The reason that leaves Halla on a Medical Tourism escalation is ONE code from a closed list, never the model's own words: the model
+ * writes this field, and free text there could carry a caller's name or a health detail into an event that is delivered to Klaros.
+ * Known codes pass; anything else is bucketed by keyword and the text itself is dropped.
+ */
+export function escalationReasonCode(reason: unknown): string {
+  const r = typeof reason === 'string' ? reason.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') : '';
+  if (ESCALATION_REASON_CODES.has(r)) return r;
+  if (/emergenc|urgent|chest|breath|bleed|unconscious|suicid/.test(r)) return 'urgent';
+  if (/human|person|agent|represent|speak|call_?back|team/.test(r)) return 'human_requested';
+  if (/complain|upset|angry/.test(r)) return 'complaint';
+  if (/clinic|medic|diagnos|treat|surgery|symptom|doctor/.test(r)) return 'clinical_question';
+  if (/bill|price|cost|pay|invoice/.test(r)) return 'billing';
+  return 'other';
+}
+
 export interface ToolResult {
   success: boolean;
   data?: any;
@@ -488,7 +506,10 @@ export class RealtimeToolsManager {
             {
               callId: session.callSid,
               target: targetNumber,
-              reason: params.reason,
+              // Medical Tourism (consent capture opted in): a closed reason code, never the model's own words. Other tenants unchanged.
+              reason: (await import('../consent/consent-evidence.js').then((m) => m.getTenantConsentWordingVersion(session.tenantId)))
+                ? escalationReasonCode(params.reason)
+                : params.reason,
               ...correlation,
             },
             { tenantId: session.tenantId, callSid: session.callSid, sessionId: session.id }
@@ -525,7 +546,7 @@ export class RealtimeToolsManager {
         const correlation = await resolveCallCorrelation(session.tenantId, session.callSid);
         publishPlatformEvent(
           PlatformEventTypes.LEAD_ESCALATED,
-          { callId: session.callSid, target: 'human_callback', reason: String(reason ?? '').slice(0, 60), ...correlation },
+          { callId: session.callSid, target: 'human_callback', reason: escalationReasonCode(reason), ...correlation },
           { tenantId: session.tenantId, callSid: session.callSid, sessionId: session.id }
         );
       })
@@ -533,7 +554,7 @@ export class RealtimeToolsManager {
     return {
       success: true,
       data: { mode: 'callback' },
-      message: 'There is no live transfer available. Tell the caller, in one short calm sentence, that a member of the team will call them back as soon as possible. If it is an emergency, also tell them to contact their local emergency services now. Do not say they are being transferred. Then close politely.',
+      message: 'There is no live transfer available, and a call-back has only been REQUESTED, not arranged. Tell the caller, in one short calm sentence, that you have passed their request to the team to review and cannot promise when or whether someone will call them back. If it is an emergency, also tell them to contact their local emergency services now. Do not say they are being transferred and do not promise a call-back or a time. Then close politely.',
     };
   }
 

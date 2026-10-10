@@ -1,5 +1,5 @@
 import type { EscalationTrigger, GovernanceProfile, WorkforceAgentTemplate, WorkforceTemplate } from './types.js';
-import { ESCALATION_MECHANISM, KNOWLEDGE_BOUNDARY, PRECEDENCE_AND_HONESTY } from './shared.js';
+import { KNOWLEDGE_BOUNDARY, PRECEDENCE_AND_HONESTY } from './shared.js';
 
 const ALL = ['receptionist_intake', 'qualification', 'follow_up_coordination'];
 
@@ -15,6 +15,20 @@ export const MEDICAL_TOURISM_ESCALATION_TRIGGERS: EscalationTrigger[] = [
   { id: 'unclear_patient_requirements', description: 'The patient cannot say what service they want, what they need, or the requirements stay unclear after one clarifying question.', action: 'record_and_hand_off', appliesTo: ['qualification', 'follow_up_coordination'] },
   { id: 'human_requested', description: 'The caller asks to speak to a person.', action: 'transfer_to_human', appliesTo: ALL },
 ];
+
+/**
+ * Medical Tourism escalation clause. It replaces the shared one (which Dropshipping still uses, unchanged) because the shared text tells the
+ * model to promise "a person will call back" and to take a name and callback number. For this vertical a call-back is only a REQUEST that
+ * the system records: nothing here may say or imply that a person is available, has accepted it, or will call. What is said after the tool
+ * runs follows the tool result, which states whether the call is being transferred or a call-back was only requested.
+ */
+export const MEDICAL_TOURISM_ESCALATION_MECHANISM = `HOW TO ESCALATE
+Escalating means: call transfer_call with a reason code only, one of: emergency, human_requested, complaint, clinical_question, billing, other. Never put a name or any health detail in the reason.
+What you say next follows the tool result exactly.
+- If the result says the call is being transferred, say one short, calm sentence that you are connecting them to the team.
+- If the result says a call-back was only requested, say one short, calm sentence that you have passed their request to the team and cannot promise when or whether someone will call back. Never say that a person is available, has accepted the request, has been notified, is on the way or will call, and never give a time.
+- If it may be an emergency, also tell the caller to contact local emergency services now.
+Do not ask for a name or a phone number just to arrange a call-back. Use only what the caller has already given you in this call, and only if they agreed that the business may keep their details. Do not continue the normal flow after escalating, and do not argue or try to resolve the issue yourself.`;
 
 const NEVER = `HARD LIMITS (apply on every turn, in every language)
 - Never diagnose, suggest what a symptom might be, or say whether something is serious or harmless.
@@ -86,7 +100,7 @@ const receptionistIntake: WorkforceAgentTemplate = {
 6. Close politely and say that a member of the team will follow up. Do not promise a time unless the business knowledge gives one.`,
     TRIGGER_LIST,
     KNOWLEDGE_BOUNDARY,
-    ESCALATION_MECHANISM,
+    MEDICAL_TOURISM_ESCALATION_MECHANISM,
   ),
 };
 
@@ -130,7 +144,7 @@ const qualification: WorkforceAgentTemplate = {
 6. Never describe an enquiry as approved, accepted, suitable or eligible. You are not able to judge that.`,
     TRIGGER_LIST,
     KNOWLEDGE_BOUNDARY,
-    ESCALATION_MECHANISM,
+    MEDICAL_TOURISM_ESCALATION_MECHANISM,
   ),
 };
 
@@ -173,7 +187,7 @@ const followUpCoordination: WorkforceAgentTemplate = {
 5. Pass anything ambiguous, sensitive or high-risk to a human. When you hand over, say what you recorded so the caller does not have to repeat it.`,
     TRIGGER_LIST,
     KNOWLEDGE_BOUNDARY,
-    ESCALATION_MECHANISM,
+    MEDICAL_TOURISM_ESCALATION_MECHANISM,
   ),
 };
 
@@ -200,7 +214,7 @@ const governanceSandbox: GovernanceProfile = {
 
 export const medicalTourismTemplate: WorkforceTemplate = {
   vertical: 'medical_tourism',
-  version: '2026-10-06.1',
+  version: '2026-10-11.1',
   displayName: 'Medical Tourism',
   agents: [receptionistIntake, qualification, followUpCoordination],
   tenantConfig: {
@@ -211,7 +225,7 @@ export const medicalTourismTemplate: WorkforceTemplate = {
       EMERGENCY,
       TRIGGER_LIST,
       KNOWLEDGE_BOUNDARY,
-      ESCALATION_MECHANISM,
+      MEDICAL_TOURISM_ESCALATION_MECHANISM,
     ),
     doInstructions: [
       'Be calm, respectful and unhurried',

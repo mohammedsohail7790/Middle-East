@@ -19,6 +19,8 @@ import {
   type WorkforceVertical,
 } from '../../../apps/gateway/src/services/workforce-templates/index.js';
 import { fromKlarosWorkforceInput, toKlarosAgentOutput } from '../../../apps/gateway/src/services/klaros/klaros.controller.js';
+import { ESCALATION_MECHANISM } from '../../../apps/gateway/src/services/workforce-templates/shared.js';
+import { MEDICAL_TOURISM_ESCALATION_MECHANISM } from '../../../apps/gateway/src/services/workforce-templates/medical-tourism.js';
 import { evaluateRuntimePermissions } from '../../../apps/gateway/src/services/ai-governance/runtime-permissions.js';
 import { assessExecutionRisk } from '../../../apps/gateway/src/services/ai-governance/execution-risk.js';
 import type { TenantAiRuntimeConfig } from '../../../apps/gateway/src/services/ai-governance/ai-runtime-config.js';
@@ -387,5 +389,48 @@ describe.each(verticals)('%s: sandbox governance is enforced by the real tool-po
     const policy = evaluateRuntimePermissions(config, 'transfer_call').policy;
     expect(assessExecutionRisk(policy, 'standard').requiresEscalation).toBe(true); // critical => requiresEscalation
     expect(config.safetyMode).toBe('standard'); // ai-governance.service.ts denies requiresEscalation tools only when safetyMode === 'strict'
+  });
+});
+
+describe('escalation wording: Medical Tourism never promises an unverified call-back; Dropshipping is unchanged', () => {
+  const mt = WORKFORCE_TEMPLATES.medical_tourism;
+  const ds = WORKFORCE_TEMPLATES.dropshipping;
+  const mtPrompts = [mt.tenantConfig.systemInstructions, ...mt.agents.map((a) => a.systemPrompt)];
+  const dsPrompts = [ds.tenantConfig.systemInstructions, ...ds.agents.map((a) => a.systemPrompt)];
+
+  it('every Medical Tourism prompt carries the Medical Tourism escalation clause and NOT the shared one', () => {
+    for (const p of mtPrompts) {
+      expect(p).toContain(MEDICAL_TOURISM_ESCALATION_MECHANISM);
+      expect(p).not.toContain(ESCALATION_MECHANISM);
+    }
+  });
+
+  it('no Medical Tourism prompt promises that a person will call back, or asks for a name and callback number to arrange one', () => {
+    for (const p of mtPrompts) {
+      expect(p).not.toMatch(/a person will call back/i);
+      expect(p).not.toMatch(/take the caller's first name and callback number/i);
+      expect(p).not.toMatch(/will call (you|them) back/i);
+    }
+  });
+
+  it('the clause separates a transfer, a requested call-back and a completed human interaction, and forbids claiming availability or acceptance', () => {
+    const c = MEDICAL_TOURISM_ESCALATION_MECHANISM;
+    expect(c).toMatch(/HOW TO ESCALATE/);
+    expect(c).toMatch(/transfer_call/);
+    expect(c).toMatch(/If the result says the call is being transferred/);
+    expect(c).toMatch(/call-back was only requested/);
+    expect(c).toMatch(/cannot promise when or whether someone will call back/);
+    expect(c).toMatch(/Never say that a person is available, has accepted the request, has been notified, is on the way or will call, and never give a time/);
+    expect(c).toMatch(/Do not ask for a name or a phone number just to arrange a call-back/);
+    expect(c).toMatch(/emergency, human_requested, complaint, clinical_question, billing, other/);
+    expect(c).toMatch(/Never put a name or any health detail in the reason/);
+  });
+
+  it('Dropshipping keeps the shared escalation text exactly (including its call-back sentence) and gets none of the Medical Tourism wording', () => {
+    for (const p of dsPrompts) {
+      expect(p).toContain(ESCALATION_MECHANISM);
+      expect(p).not.toContain(MEDICAL_TOURISM_ESCALATION_MECHANISM);
+    }
+    expect(ESCALATION_MECHANISM).toContain("take the caller's first name and callback number, tell them a person will call back");
   });
 });

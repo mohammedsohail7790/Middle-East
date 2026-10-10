@@ -181,7 +181,14 @@ export async function buildSystemPrompt(
   prompt += `\n\n${CALL_CLOSING_RULES}`;
   prompt += `\n\n${buildHumanSpeechAppendix()}`;
 
-  if (callHandling === 'transfer' && transferNumber) {
+  if (tenantConfig.consentCapture) {
+    // Medical Tourism (consent capture opted in): a call-back is only a REQUEST the system records. The generic rules below promise one and
+    // collect a name and number, so they are replaced for this tenant only.
+    prompt += `\n\nEscalation rules:
+- If someone asks for a person, or the situation needs one, use transfer_call with a short reason code and follow its result exactly.
+- A call-back is only a request that the system records. Never promise that a person will call, never give a time, and never say a person is available or has accepted the request.
+- Do not ask for a name or phone number just to arrange a call-back; use only what the caller has already given you and agreed the business may keep.`;
+  } else if (callHandling === 'transfer' && transferNumber) {
     prompt += `\n\nTransfer rules:
 - If someone asks for a person, say "Sure, one moment" and use transfer_call
 - You can transfer if the issue is complex`;
@@ -203,7 +210,9 @@ export async function buildSystemPrompt(
     isAfterHours = !currentlyOpen;
   } catch { /* business hours not available — treat as open */ }
 
-  if (isAfterHours) {
+  if (isAfterHours && tenantConfig.consentCapture) {
+    prompt += `\n\nIMPORTANT — It's currently after business hours. Say the office is closed right now. Do not promise a call-back or a time; follow the escalation rules above if the caller needs a person.`;
+  } else if (isAfterHours) {
     prompt += `\n\nIMPORTANT — It's currently after business hours. Let the caller know that the office is closed right now but you can still help them. Take their info and let them know someone will call back during business hours. Be extra helpful since they're calling outside normal hours.`;
   }
 

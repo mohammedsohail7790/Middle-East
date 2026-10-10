@@ -173,7 +173,7 @@ export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'es
       parameters: {
         type: 'object',
         properties: {
-          reason: { type: 'string', description: 'Reason for transfer' },
+          reason: { type: 'string', description: 'Short reason code only (for example: emergency, human_requested, complaint, clinical_question, billing). Never a name or any health detail.' },
           department: { type: 'string', description: 'Target department (e.g. sales, support, billing)' }
         },
         required: ['reason']

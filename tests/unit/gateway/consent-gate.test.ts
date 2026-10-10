@@ -66,7 +66,7 @@ vi.mock('../../../apps/gateway/src/services/voice/transfer.service.js', () => ({
 }));
 
 import { getCallConsentGate, assertOutboundContactConsent, ConsentRequiredError, grantedScopesFromRows } from '../../../apps/gateway/src/services/consent/consent-gate.js';
-import { RealtimeToolsManager } from '../../../apps/gateway/src/services/realtime/realtime.tools.js';
+import { RealtimeToolsManager, escalationReasonCode } from '../../../apps/gateway/src/services/realtime/realtime.tools.js';
 import { initiateOutboundCall } from '../../../apps/gateway/src/services/voice/outbound.service.js';
 import { buildToolsList } from '../../../apps/gateway/src/services/realtime/realtime-tool-schemas.js';
 
@@ -241,6 +241,46 @@ describe('escalation always has a destination for opted-in tenants', () => {
     const r = await new RealtimeToolsManager().executeToolDirect(session(OPT_IN, sid), 'transfer_call', { reason: 'human_requested' });
     expect(r).toMatchObject({ success: true, data: { mode: 'callback' } });
     await vi.waitFor(() => expect(escalations()[0]?.payload.target).toBe('human_callback'));
+  });
+
+  it('a recorded call-back is only a REQUEST: not a transfer, no promise of a call-back, and the session is flagged for a person', async () => {
+    const s: any = session(OPT_IN, sid);
+    const r = await new RealtimeToolsManager().executeToolDirect(s, 'transfer_call', { reason: 'human_requested' });
+    expect(r.message).toMatch(/REQUESTED, not arranged/);
+    expect(r.message).toMatch(/cannot promise/);
+    expect(r.message).not.toMatch(/will call them back as soon as possible/i);
+    expect(r.data).toEqual({ mode: 'callback' });
+    expect(s.callOutcome).not.toBe('transferred');
+    expect(s.transferTarget).toBeUndefined();
+    expect(s.humanCallbackRequested).toBe(true);
+    await vi.waitFor(() => expect(escalations()).toHaveLength(1));
+    expect(JSON.stringify(escalations()[0].payload)).not.toMatch(/complete|completed|called_back|callback_done/i);
+  });
+
+  it('the escalation reason is a closed code: the model\'s own words (a name, a health detail) never leave Halla', async () => {
+    await new RealtimeToolsManager().executeToolDirect(session(OPT_IN, sid), 'transfer_call', { reason: 'Maria Test has crushing chest pain and takes warfarin' });
+    await vi.waitFor(() => expect(escalations()).toHaveLength(1));
+    expect(escalations()[0].payload.reason).toBe('urgent');
+    expect(JSON.stringify(escalations()[0].payload)).not.toMatch(/Maria|warfarin|chest/i);
+  });
+
+  it('the same closed code applies to a working live transfer of an opted-in tenant, but not to other tenants (unchanged)', async () => {
+    db.transferNumber = '+15550100000';
+    await new RealtimeToolsManager().executeToolDirect(session(OPT_IN, sid), 'transfer_call', { reason: 'patient John Test asked about knee surgery pricing' });
+    await vi.waitFor(() => expect(escalations()).toHaveLength(1));
+    expect(escalations()[0].payload.reason).toBe('clinical_question');
+    expect(JSON.stringify(escalations()[0].payload)).not.toMatch(/John|knee|pricing/i);
+    published.length = 0;
+    await new RealtimeToolsManager().executeToolDirect(session(PLAIN, freshSid()), 'transfer_call', { reason: 'free text stays as before' });
+    await vi.waitFor(() => expect(escalations()).toHaveLength(1));
+    expect(escalations()[0].payload.reason).toBe('free text stays as before');
+  });
+
+  it.each([
+    ['emergency', 'emergency'], ['Human Requested', 'human_requested'], ['chest pain', 'urgent'], ['wants to speak to a person', 'human_requested'],
+    ['very upset', 'complaint'], ['asked about surgery', 'clinical_question'], ['invoice question', 'billing'], ['whatever', 'other'], ['', 'other'], [undefined, 'other'], [42, 'other'],
+  ])('escalationReasonCode(%j) = %s', (input, expected) => {
+    expect(escalationReasonCode(input)).toBe(expected);
   });
 
   it('a working transfer is unchanged: real transfer, lead.escalated carries the transfer target', async () => {
