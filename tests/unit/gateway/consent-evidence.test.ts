@@ -20,6 +20,7 @@ vi.mock('../../../apps/gateway/src/services/voice/tenant-scope.js', () => ({
       if (text.startsWith("SELECT metadata->'consent_capture'")) {
         return { rows: db.wording === undefined ? [] : [{ consent_capture: db.wording === null ? null : { wording_version: db.wording } }] };
       }
+      if (text.startsWith('INSERT INTO public.lead_consent_outbox')) return { rows: [] };
       if (text.startsWith('INSERT INTO public.lead_consents')) {
         inserts.push(params);
         const [tenant_id, call_sid, scope, granted, method, wording_version] = params;

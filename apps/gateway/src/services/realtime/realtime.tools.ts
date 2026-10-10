@@ -683,6 +683,8 @@ export class RealtimeToolsManager {
         message: 'Nothing was recorded. Do not tell the caller it was. Treat the answer as not given, do not save their details, and offer a person.',
       };
     }
+    // Tell Klaros about the stored change (grant, decline or withdrawal). Fire-and-forget: it never delays or fails the tool result.
+    void import('../consent/consent-evidence.js').then(({ flushConsentOutbox }) => flushConsentOutbox(10, { tenantId: session.tenantId, callSid: session.callSid })).catch(() => {});
     const declined = params?.decision !== 'granted';
     return {
       success: true,

@@ -100,7 +100,10 @@ export function deriveConsentEvidence(rows: ConsentRow[]): ConsentEvidence | und
       scope: same.map((r) => r.scope).sort((a, b) => CONSENT_SCOPES.indexOf(a) - CONSENT_SCOPES.indexOf(b)),
       method: ref.method,
       wording_version: ref.wording,
-      recorded_at: same.map((r) => r.at).reduce((a, b) => (a > b ? a : b)),
+      // As-of time of the newest decision about ANY scope, granted or not. It must never move backwards: after "contact granted at t2, then
+      // withdrawn at t3" the object lists only the scopes still granted, and a receiver that orders evidence by this time would otherwise
+      // see t1 < t2 and discard the withdrawal as stale.
+      recorded_at: all.map((r) => r.at).reduce((a, b) => (a > b ? a : b)),
     };
   };
   return pick(true) ?? pick(false);
@@ -165,6 +168,9 @@ export async function recordConsentDecision(
   if (!wording) return { ok: false, reason: 'not_enabled' };
   const granted = input.decision === 'granted';
   try {
+    // Notification intent is stored BEFORE the decision, so a stored decision can never exist without a pending notification. If the
+    // outbox write fails nothing is recorded (the tool reports "not recorded" and the agent treats the answer as not given).
+    await voiceDb.query(`INSERT INTO public.lead_consent_outbox (tenant_id, call_sid) VALUES ($1, $2)`, [tenantId, callSid]);
     for (const scope of scopes) {
       await voiceDb.query(
         `INSERT INTO public.lead_consents (tenant_id, call_sid, scope, granted, method, wording_version)
@@ -213,4 +219,91 @@ export async function getConsentEvidenceForLead(tenantId: string, leadId: string
 export async function resolveConsentForLeadEvent(tenantId: string, leadId: string, callSid?: string): Promise<ConsentEvidence | undefined> {
   await linkCallConsentToLead(tenantId, callSid, leadId);
   return getConsentEvidenceForLead(tenantId, leadId);
+}
+
+export type DeliverConsentOutcome = 'published' | 'no_lead_yet' | 'ambiguous_lead' | 'no_evidence' | 'bus_unavailable' | 'failed';
+
+/**
+ * ONE delivery attempt: enqueue a `lead.updated` carrying freshly derived evidence for the lead of this call.
+ *  - Derived from the database when called, so it can only describe stored state.
+ *  - Tenant-scoped: every query filters on tenant_id and the event carries that tenant.
+ *  - Only when exactly one lead is already linked to this call. No lead yet => the lead's own creation event carries the evidence; two
+ *    leads => the new rows cannot be attributed safely, so nothing is published.
+ *  - Payload is { leadId, consent } only: no name, phone or free text. Never throws.
+ *  - `published` means the event was ADDED to the Redis stream (the bus returned it). A disabled bus or a Redis failure returns
+ *    `bus_unavailable` so the outbox keeps the entry and retries; the stream's own consumer retry/DLQ then covers delivery to Klaros.
+ */
+export async function deliverConsentChange(tenantId: string, callSid: string | undefined): Promise<DeliverConsentOutcome> {
+  if (!callSid) return 'no_lead_yet';
+  try {
+    const r = await voiceDb.query(
+      `SELECT DISTINCT lead_id FROM public.lead_consents WHERE tenant_id = $1 AND call_sid = $2 AND lead_id IS NOT NULL`,
+      [tenantId, callSid]
+    );
+    if (r.rows.length === 0) return 'no_lead_yet';
+    if (r.rows.length > 1) {
+      logger.warn('CONSENT_CHANGE_AMBIGUOUS_LEAD', { tenantId });
+      return 'ambiguous_lead';
+    }
+    const leadId = String(r.rows[0].lead_id);
+    await linkCallConsentToLead(tenantId, callSid, leadId);
+    const consent = await getConsentEvidenceForLead(tenantId, leadId);
+    if (!consent) return 'no_evidence';
+    const { getPlatformEventBus } = await import('../../events/platform-event-bus.js');
+    const { PlatformEventTypes } = await import('../../events/event-types.js');
+    const bus = getPlatformEventBus();
+    if (!bus) return 'bus_unavailable';
+    const event = await bus.publish(PlatformEventTypes.LEAD_UPDATED, { leadId, consent }, { tenantId, callSid, producedBy: 'halla-ai-gateway' });
+    return event ? 'published' : 'bus_unavailable';
+  } catch (err) {
+    logger.warn('CONSENT_CHANGE_PUBLISH_FAILED', { tenantId, error: err instanceof Error ? err.name : 'error' });
+    return 'failed';
+  }
+}
+
+/** How long a notification waits for a lead to appear on its call before it is closed (the lead's creation event carries the evidence). */
+export const CONSENT_OUTBOX_NO_LEAD_TTL_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Works through pending outbox entries (oldest first). Safe to run concurrently and repeatedly: a duplicate publish repeats the same
+ * evidence and the receiver treats it idempotently. Returns counts for monitoring. Never throws.
+ */
+export async function flushConsentOutbox(limit = 50, opts: { tenantId?: string; callSid?: string } = {}): Promise<{ delivered: number; pending: number }> {
+  let delivered = 0;
+  let pending = 0;
+  try {
+    const where = opts.tenantId && opts.callSid ? 'AND tenant_id = $2 AND call_sid = $3' : '';
+    const params: unknown[] = [limit, ...(where ? [opts.tenantId, opts.callSid] : [])];
+    const rows = await voiceDb.query(
+      `SELECT id, tenant_id, call_sid, created_at FROM public.lead_consent_outbox WHERE delivered_at IS NULL ${where} ORDER BY id LIMIT $1`,
+      params
+    );
+    for (const row of rows.rows) {
+      const outcome = await deliverConsentChange(String(row.tenant_id), String(row.call_sid));
+      const age = Date.now() - new Date(row.created_at).getTime();
+      const done = outcome === 'published' || outcome === 'ambiguous_lead' || outcome === 'no_evidence' || (outcome === 'no_lead_yet' && age > CONSENT_OUTBOX_NO_LEAD_TTL_MS);
+      if (done) {
+        await voiceDb.query(`UPDATE public.lead_consent_outbox SET delivered_at = NOW(), attempts = attempts + 1, last_outcome = $2 WHERE id = $1`, [row.id, outcome]);
+        delivered++;
+      } else {
+        await voiceDb.query(`UPDATE public.lead_consent_outbox SET attempts = attempts + 1, last_outcome = $2 WHERE id = $1`, [row.id, outcome]);
+        pending++;
+      }
+    }
+  } catch (err) {
+    logger.warn('CONSENT_OUTBOX_FLUSH_FAILED', { error: err instanceof Error ? err.name : 'error' });
+  }
+  return { delivered, pending };
+}
+
+let sweeper: ReturnType<typeof setInterval> | null = null;
+/** Periodic retry of undelivered consent notifications (bus down at the time, process restarted, ...). Idempotent start; the timer never keeps the process alive. */
+export function startConsentOutboxSweeper(intervalMs = 60_000): void {
+  if (sweeper) return;
+  sweeper = setInterval(() => { void flushConsentOutbox(); }, intervalMs);
+  sweeper.unref?.();
+}
+export function stopConsentOutboxSweeper(): void {
+  if (sweeper) clearInterval(sweeper);
+  sweeper = null;
 }

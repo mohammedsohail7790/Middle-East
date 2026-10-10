@@ -91,6 +91,13 @@ import('./events/platform-event-bus.js')
     logger.warn('PLATFORM_EVENT_BUS_START_FAILED', { error: String(err) });
   });
 
+// Retry undelivered Medical Tourism consent-change notifications (no-op when none are pending or the table does not exist yet).
+import('./services/consent/consent-evidence.js')
+  .then(({ startConsentOutboxSweeper }) => startConsentOutboxSweeper())
+  .catch((err) => {
+    logger.warn('CONSENT_OUTBOX_SWEEPER_START_FAILED', { error: String(err) });
+  });
+
 if ((process.env.ENABLE_KNOWLEDGE_INGESTION || 'true').toLowerCase() === 'true') {
     knowledgeService.ingestFromFileOnce().catch((error) => {
         logger.error('Knowledge ingestion failed', { error: String(error) });
