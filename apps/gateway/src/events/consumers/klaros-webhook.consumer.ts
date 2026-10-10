@@ -3,7 +3,7 @@ import { PlatformEventTypes } from '../../../../../infrastructure/events/event-t
 import { customWebhooksService, type KlarosSequenceStep } from '../../services/webhooks/webhooks.service.js';
 import { isKlarosEventType, type KlarosEventType } from '../../security/klaros-event-types.js';
 import { logger } from '../../services/logger.js';
-import { sanitizeConsentEvidence } from '../../services/consent/consent-evidence.js';
+import { sanitizeConsentEvidence, withFreshConsent } from '../../services/consent/consent-evidence.js';
 
 /** Internal platform event type -> external Klaros contract event name. */
 const EVENT_TYPE_MAP: Partial<Record<string, KlarosEventType>> = {
@@ -41,12 +41,20 @@ export async function handleKlarosWebhookEvent(
   const klarosType = EVENT_TYPE_MAP[event.eventType];
   if (!klarosType || !isKlarosEventType(klarosType)) return;
 
-  const steps =
-    event.eventType === PlatformEventTypes.CALL_ENDED
-      ? buildCallFinalizationSequence(event)
-      : [{ type: klarosType, eventId: event.eventId, data: buildEventData(klarosType, event) }];
-
+  let steps: KlarosSequenceStep[] = [];
   try {
+    // A lead event that carries consent is delivered with the evidence as it is stored NOW, not as it was when the event was
+    // published, so a retried or delayed event cannot deliver an older state. A database error here throws: the bus retries
+    // (bounded, then DLQ) rather than sending stale evidence or dropping a withdrawal.
+    const delivered =
+      klarosType === 'lead.created' || klarosType === 'lead.updated'
+        ? { ...event, payload: await withFreshConsent(event.tenantId, event.payload as Record<string, unknown>) }
+        : event;
+    steps =
+      event.eventType === PlatformEventTypes.CALL_ENDED
+        ? buildCallFinalizationSequence(delivered)
+        : [{ type: klarosType, eventId: event.eventId, data: buildEventData(klarosType, delivered) }];
+
     await customWebhooksService.dispatchKlarosSequence(event.tenantId, steps, {
       finalAttempt: meta?.finalAttempt,
     });

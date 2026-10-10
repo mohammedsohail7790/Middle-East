@@ -3,8 +3,12 @@
  * a REAL local HTTP receiver that verifies the signature over the exact bytes it received (the same algorithm Klaros uses;
  * see docs/HALLA_KLAROS_INTEGRATION_CONTRACT.md section 4).
  *
- * Substituted, as in klaros-webhook-delivery.test.ts: Postgres (`pool.query` is an in-memory fake), DNS, and the TLS transport
- * (forwarded to the local receiver). Not covered here: the Klaros Python receiver itself (not run in this task).
+ * The consent shown in a delivered lead.created / lead.updated is re-read from the stored decisions at delivery time (the platform
+ * event's own `consent` is only a trigger and is never forwarded as-is), so the tests seed the decisions the event refers to.
+ *
+ * Substituted, as in klaros-webhook-delivery.test.ts: Postgres (`pool.query` is an in-memory fake; the one consent SELECT is
+ * emulated, NOT run against PostgreSQL), DNS, and the TLS transport (forwarded to the local receiver). Not covered here: the Klaros
+ * Python receiver itself.
  */
 import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
 import http from 'http';
@@ -15,11 +19,16 @@ const TENANT = '11111111-1111-4111-8111-111111111111';
 const URL_OK = 'https://klaros.integration-test.example.com/api/v1/webhooks/halla/c14d42d1-4c63-46c1-bdc3-89d4dc2b7b7b';
 const deliveries = new Map<string, boolean>();
 let receiverPort = 0;
+interface StoredConsent { tenant_id: string; lead_id: string; scope: string; granted: boolean; method: string; wording_version: string; recorded_at: Date; seq: number }
+const storedConsents: StoredConsent[] = [];
 
 vi.mock('../../apps/gateway/src/services/db/pool.js', () => ({
   pool: {
     query: vi.fn(async (sql: string, params: any[]) => {
       const t = sql.replace(/\s+/g, ' ').trim();
+      if (t.startsWith('SELECT scope, granted, method, wording_version, recorded_at FROM public.lead_consents')) {
+        return { rows: storedConsents.filter((r) => r.tenant_id === params[0] && r.lead_id === params[1]).sort((a, b) => a.recorded_at.getTime() - b.recorded_at.getTime() || a.seq - b.seq) };
+      }
       if (t.startsWith('SELECT id, url, secret, events FROM public.custom_webhooks')) {
         return { rows: [{ id: 'wh-1', tenant_id: TENANT, url: URL_OK, secret: SECRET, active: true, events: ['lead.created', 'lead.updated'] }] };
       }
@@ -66,7 +75,15 @@ describe('consent evidence on lead events: delivered, signed, verified', () => {
     receiverPort = (server.address() as AddressInfo).port;
   });
   afterAll(() => new Promise<void>((r) => server.close(() => r())));
-  beforeEach(() => { received = []; deliveries.clear(); });
+  beforeEach(() => { received = []; deliveries.clear(); storedConsents.length = 0; });
+
+  /** Stored decisions for lead L1 of this tenant: the scopes decided at the given time (granted or declined). */
+  const seed = (scopes: string[], atMs: number, granted = true, wording = 'MT-CONSENT-v1', tenant = TENANT) => {
+    for (const scope of scopes) {
+      storedConsents.push({ tenant_id: tenant, lead_id: 'L1', scope, granted, method: 'voice_ai_verbal', wording_version: wording, recorded_at: new Date(atMs), seq: storedConsents.length });
+    }
+  };
+  const T2 = Date.parse('2026-10-09T10:00:02.000Z');
 
   const send = async (type: 'LEAD_CREATED' | 'LEAD_UPDATED', payload: Record<string, unknown>) => {
     const event = createPlatformEvent(PlatformEventTypes[type] as never, payload, { tenantId: TENANT, callSid: 'CA1' });
@@ -77,6 +94,7 @@ describe('consent evidence on lead events: delivered, signed, verified', () => {
     verifyWebhookSignature({ secret, timestamp: String(r.headers['x-hallaai-timestamp']), rawBody: r.body, signatureHeader: String(r.headers['x-hallaai-signature']) });
 
   it.each([['LEAD_CREATED', 'lead.created'], ['LEAD_UPDATED', 'lead.updated']] as const)('%s: the consent object arrives exactly as recorded, inside a correctly signed body', async (type, name) => {
+    seed(['contact', 'store_personal_data'], T2);
     const event = await send(type, { leadId: 'L1', phone: '+971500000001', name: 'Test Person', klarosLeadId: 'K1', consent: GOOD });
     expect(received).toHaveLength(1);
     expect(verify(received[0])).toEqual({ valid: true });
@@ -88,6 +106,7 @@ describe('consent evidence on lead events: delivered, signed, verified', () => {
   });
 
   it('the signature covers the consent: changing granted:false -> true after signing, or the scope, fails verification', async () => {
+    seed(['store_personal_data'], T2, false);
     await send('LEAD_CREATED', { leadId: 'L1', phone: 'p', name: 'n', consent: { ...GOOD, granted: false, scope: ['store_personal_data'] } });
     const r = received[0];
     expect(verify(r).valid).toBe(true);
@@ -113,18 +132,43 @@ describe('consent evidence on lead events: delivered, signed, verified', () => {
     ['no wording version', { ...GOOD, wording_version: '' }],
     ['no timestamp', { ...GOOD, recorded_at: undefined }],
     ['unknown method', { ...GOOD, method: 'phone_press_1' }],
-  ])('invalid evidence (%s) is dropped, never delivered or repaired', async (_n, consent) => {
+  ])('an unusable snapshot on the event (%s) is never forwarded or repaired: with no stored decision, no consent is sent', async (_n, consent) => {
     await send('LEAD_CREATED', { leadId: 'L1', phone: 'p', name: 'n', consent });
     expect('consent' in JSON.parse(received[0].body).data).toBe(false);
   });
 
+  it('what is delivered is what is STORED now, not what the event claimed: a snapshot saying granted is replaced by a later withdrawal', async () => {
+    seed(['contact'], T2, true);
+    seed(['contact'], T2 + 5000, false);
+    await send('LEAD_UPDATED', { leadId: 'L1', consent: { ...GOOD, scope: ['contact'] } });
+    expect(JSON.parse(received[0].body).data.consent).toMatchObject({ granted: false, scope: ['contact'], recorded_at: '2026-10-09T10:00:07.000Z' });
+  });
+
+  it('another tenant\'s stored decisions for the same lead id are never delivered', async () => {
+    seed(['contact'], T2, true, 'MT-CONSENT-v1', '99999999-9999-4999-8999-999999999999');
+    await send('LEAD_UPDATED', { leadId: 'L1', consent: GOOD });
+    expect('consent' in JSON.parse(received[0].body).data).toBe(false);
+  });
+
+  it('a database error while reading the stored decisions makes the handler throw (so the bus retries) and nothing is sent', async () => {
+    (storedConsents as any).filter = () => { throw new Error('connection terminated unexpectedly'); };
+    try {
+      await expect(send('LEAD_UPDATED', { leadId: 'L1', consent: GOOD })).rejects.toThrow(/connection terminated/);
+    } finally {
+      delete (storedConsents as any).filter;
+    }
+    expect(received).toHaveLength(0);
+  });
+
   it('extra fields smuggled into the consent object (wording text, transcript, medical content) never leave Halla', async () => {
+    seed(['contact', 'store_personal_data'], T2);
     await send('LEAD_CREATED', { leadId: 'L1', phone: 'p', name: 'n', consent: { ...GOOD, wording_text: 'I agree to ...', transcript: 'I have diabetes', diagnosis: 'x' } });
     expect(received[0].body).not.toMatch(/wording_text|I agree|transcript|diabetes|diagnosis/);
     expect(JSON.parse(received[0].body).data.consent).toEqual(GOOD);
   });
 
   it('a replay of the same event id is delivered once (existing idempotency is unchanged)', async () => {
+    seed(['contact', 'store_personal_data'], T2);
     const event = createPlatformEvent(PlatformEventTypes.LEAD_CREATED as never, { leadId: 'L1', phone: 'p', name: 'n', consent: GOOD }, { tenantId: TENANT, callSid: 'CA1' });
     await handleKlarosWebhookEvent(event, { finalAttempt: false });
     await handleKlarosWebhookEvent(event, { finalAttempt: false });

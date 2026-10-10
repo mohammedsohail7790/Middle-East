@@ -227,18 +227,40 @@ async function spreadUnlinkedRefusalsToLeads(tenantId: string, callSid: string, 
   }
 }
 
+/**
+ * Evidence for a lead, from rows linked to that lead in that tenant. THROWS on a database error (including a missing table) so a
+ * caller that must not lose a withdrawal can retry; `undefined` means "read fine, no valid decision".
+ */
+export async function readConsentEvidenceForLead(tenantId: string, leadId: string): Promise<ConsentEvidence | undefined> {
+  const r = await voiceDb.query(
+    `SELECT scope, granted, method, wording_version, recorded_at
+       FROM public.lead_consents WHERE tenant_id = $1 AND lead_id = $2 ORDER BY recorded_at, seq`,
+    [tenantId, leadId]
+  );
+  return deriveConsentEvidence(r.rows as ConsentRow[]);
+}
+
 /** Evidence for a lead event, from rows linked to that lead in that tenant. Any error (including a missing table) => undefined. */
 export async function getConsentEvidenceForLead(tenantId: string, leadId: string): Promise<ConsentEvidence | undefined> {
   try {
-    const r = await voiceDb.query(
-      `SELECT scope, granted, method, wording_version, recorded_at
-         FROM public.lead_consents WHERE tenant_id = $1 AND lead_id = $2 ORDER BY recorded_at, seq`,
-      [tenantId, leadId]
-    );
-    return deriveConsentEvidence(r.rows as ConsentRow[]);
+    return await readConsentEvidenceForLead(tenantId, leadId);
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Delivery-time refresh used by the Klaros webhook consumer for lead.created / lead.updated events that carry (or announce) consent.
+ * The evidence is re-read from the database for THIS tenant and lead at the moment of delivery, so a retried or delayed event can never
+ * deliver an older state than the one stored now (the platform bus retries a failed delivery after later events have already been sent,
+ * and every publish has its own event id, so nothing else orders them). THROWS on a database error: the bus then retries (bounded, then
+ * DLQ) instead of delivering stale evidence or dropping the change. Events that have nothing to do with consent pass through unchanged.
+ */
+export async function withFreshConsent(tenantId: string, payload: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const leadId = payload.leadId;
+  if (payload.consent === undefined || typeof leadId !== 'string' || !leadId) return payload;
+  const fresh = await readConsentEvidenceForLead(tenantId, leadId);
+  return { ...payload, consent: fresh };
 }
 
 /** Link the call's decisions to the lead, then read the lead's evidence. For the lead.created / lead.updated publishers. */
