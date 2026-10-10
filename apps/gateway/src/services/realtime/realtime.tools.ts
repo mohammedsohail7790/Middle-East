@@ -517,6 +517,7 @@ export class RealtimeToolsManager {
    */
   private async recordHumanCallback(session: RealtimeSession, reason: string, why: 'no_transfer_number' | 'transfer_failed'): Promise<ToolResult> {
     logger.warn('REALTIME_ESCALATION_CALLBACK_RECORDED', { sessionId: session.id, tenantId: session.tenantId, why, reason: safeReason(reason) });
+    session.humanCallbackRequested = true;
     void import('../../events/event-publisher.js')
       .then(async ({ publishPlatformEvent }) => {
         const { PlatformEventTypes } = await import('../../events/event-types.js');

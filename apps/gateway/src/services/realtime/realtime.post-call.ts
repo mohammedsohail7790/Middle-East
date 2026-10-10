@@ -254,8 +254,20 @@ export async function finalizeRuntimeSession(
             // Derived entirely from the real evaluation plus ai_agent_configs.requiredFields
             // - never invented. See qualification-mapper.ts for the mapping rules.
             const { aiConfigService } = await import('../ai-config/ai-config.service.js');
-            const { computeMissingFields, mapEvaluationToQualification } = await import('./qualification-mapper.js');
+            const { computeMissingFields, mapEvaluationToQualification, mapMedicalTourismQualification } = await import('./qualification-mapper.js');
             const agentConfig = await aiConfigService.getConfig(state.tenantId!);
+            if (consentGate.enforced) {
+              // Medical Tourism: administrative completeness only; the generic sales evaluation is NOT used as qualification.
+              return mapMedicalTourismQualification({
+                missingFields: computeMissingFields(agentConfig.requiredFields, leadForEval),
+                needsHuman:
+                  callOutcome === 'transferred' ||
+                  Boolean(session.humanCallbackRequested) ||
+                  Boolean(session.safety?.emergencyHandled) ||
+                  (session.safety?.corrections ?? 0) > 0,
+                personalDataConsent: consentGate.allows('store_personal_data'),
+              });
+            }
             return mapEvaluationToQualification(evaluation, {
               missingFields: computeMissingFields(agentConfig.requiredFields, leadForEval),
               escalated: callOutcome === 'transferred',

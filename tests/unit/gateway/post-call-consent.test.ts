@@ -170,3 +170,66 @@ describe('an opted-in tenant: nothing without the matching decision', () => {
     expect(calls.storeCall[0].transcript).toMatch(/Not recorded/);
   });
 });
+
+describe('Medical Tourism qualification is administrative completeness, not the generic sales evaluation', () => {
+  const qualification = () => calls.published.find((p) => p.type === 'CALL_ENDED')?.payload.qualificationEvent;
+  const full = [
+    { type: 'customer_info', key: 'name', value: 'Test Person' },
+    { type: 'customer_info', key: 'phone', value: '+971500000001' },
+    { type: 'intent', key: 'primary', value: { intent: 'knee consultation' } },
+  ];
+  /** one finished call; `evaluation` is what the generic AI evaluation would say; `sessionExtras` are flags on the live session */
+  const finish = async (tenant: string, sid: string, opts: { memories?: any[]; evaluation?: any; sessionExtras?: Record<string, unknown> } = {}) => {
+    const session: any = {
+      id: `s-${sid}`, tenantId: tenant, callSid: sid, config: { instructions: 'x', language: 'en' }, transcriptLines: [{ role: 'caller', text: TRANSCRIPT }], ...opts.sessionExtras,
+    };
+    const state: any = { sessionId: session.id, tenantId: tenant, callSid: sid, callerPhone: '+971500000001', tenantConfig: { industry: 'x' }, sessionManager: { getSession: () => session, closeSession: () => undefined } };
+    const evaluation = opts.evaluation ?? { sentiment: 'positive', sentimentScore: 1, frustrationLevel: 0, callSuccess: true, leadQuality: 'high', summary: 'Patient described knee surgery and diabetes medication' };
+    const deps: any = {
+      eventManager: { getSessionMetrics: () => ({ startTime: new Date(Date.now() - 60_000), toolCallCount: 0 }), sessionHadToolCall: () => false },
+      memoryManager: { getAllSessionMemory: async () => opts.memories ?? full, saveConversationSummary: vi.fn(async () => undefined) },
+      analyticsManager: { trackEvent: vi.fn(async () => undefined) },
+      aiService: { validateLeadExtraction: vi.fn(async () => ({})), evaluateCall: vi.fn(async () => evaluation) },
+    };
+    await finalizeRuntimeSession(state, { terminate: () => undefined } as any, deps);
+    await new Promise((r) => setTimeout(r, 60));
+  };
+
+  it('everything present, consent recorded, no escalation => qualified, with a fixed administrative reason (no model summary, nothing medical)', async () => {
+    const sid = `CA-${++n}`; decide(OPT_IN, sid, 'store_personal_data');
+    await finish(OPT_IN, sid);
+    expect(qualification()).toMatchObject({ status: 'qualified', missingFields: [] });
+    expect(qualification().reason).toMatch(/Administrative completeness only/);
+    expect(JSON.stringify(qualification())).not.toMatch(/diabetes|surgery|medication/i);
+  });
+
+  it('the generic evaluation says high quality but a required field is missing => needs_human_review', async () => {
+    const sid = `CA-${++n}`; decide(OPT_IN, sid, 'store_personal_data');
+    await finish(OPT_IN, sid, { memories: full.slice(0, 2) });
+    expect(qualification()).toMatchObject({ status: 'needs_human_review', missingFields: ['service'] });
+  });
+
+  it('a recorded human call-back request => needs_human_review even though everything else is complete', async () => {
+    const sid = `CA-${++n}`; decide(OPT_IN, sid, 'store_personal_data');
+    await finish(OPT_IN, sid, { sessionExtras: { humanCallbackRequested: true } });
+    expect(qualification().status).toBe('needs_human_review');
+  });
+
+  it.each([[{ emergencyHandled: true, corrections: 0 }], [{ emergencyHandled: false, corrections: 1 }]])('a safety flag on the call (%j) => needs_human_review', async (flag) => {
+    const sid = `CA-${++n}`; decide(OPT_IN, sid, 'store_personal_data');
+    await finish(OPT_IN, sid, { sessionExtras: { safety: flag } });
+    expect(qualification().status).toBe('needs_human_review');
+  });
+
+  it('never "not_qualified": a failed generic evaluation cannot reject a Medical Tourism enquiry', async () => {
+    const sid = `CA-${++n}`; decide(OPT_IN, sid, 'store_personal_data');
+    await finish(OPT_IN, sid, { evaluation: { sentiment: 'negative', sentimentScore: -1, frustrationLevel: 1, callSuccess: false, leadQuality: 'low', summary: 'bad call' } });
+    expect(qualification().status).toBe('qualified');
+  });
+
+  it('a tenant that did NOT opt in keeps the generic mapping (failed evaluation => not_qualified)', async () => {
+    const sid = `CA-${++n}`;
+    await finish(PLAIN, sid, { evaluation: { sentiment: 'negative', sentimentScore: -1, frustrationLevel: 1, callSuccess: false, leadQuality: 'low', summary: 'bad call' } });
+    expect(qualification().status).toBe('not_qualified');
+  });
+});

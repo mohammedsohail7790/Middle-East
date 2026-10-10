@@ -43,6 +43,8 @@ export interface RealtimeSession {
   config: RealtimeSessionConfig;
   nodeId?: string;
   reconnectCount?: number;
+  /** A human call-back was recorded instead of a live transfer (see RealtimeToolsManager.recordHumanCallback). */
+  humanCallbackRequested?: boolean;
   /** Safety supervisor bookkeeping for this call (emergency already handled, corrections issued). */
   safety?: { emergencyHandled: boolean; corrections: number };
   /** Persisted on call row when session ends */
