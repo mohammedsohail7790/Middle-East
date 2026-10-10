@@ -170,14 +170,17 @@ export async function recordConsentDecision(
   try {
     // Notification intent is stored BEFORE the decision, so a stored decision can never exist without a pending notification. If the
     // outbox write fails nothing is recorded (the tool reports "not recorded" and the agent treats the answer as not given).
-    await voiceDb.query(`INSERT INTO public.lead_consent_outbox (tenant_id, call_sid) VALUES ($1, $2)`, [tenantId, callSid]);
-    for (const scope of scopes) {
-      await voiceDb.query(
-        `INSERT INTO public.lead_consents (tenant_id, call_sid, scope, granted, method, wording_version)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [tenantId, callSid, scope, granted, 'voice_ai_verbal', wording]
-      );
-    }
+    // ONE statement, so ONE implicit transaction: the outbox entry and every scope row of this decision are stored together or not at all
+    // (a partial withdrawal can never leave one scope withdrawn and another silently untouched). `clock_timestamp()` (not NOW(), which is the
+    // transaction start) gives each decision its real wall-clock time; `seq` (migration 077) breaks any remaining tie in storage order.
+    await voiceDb.query(
+      `WITH notify AS (
+         INSERT INTO public.lead_consent_outbox (tenant_id, call_sid) VALUES ($1, $2) RETURNING id
+       )
+       INSERT INTO public.lead_consents (tenant_id, call_sid, scope, granted, method, wording_version, recorded_at)
+       SELECT $1, $2, s, $4, $5, $6, clock_timestamp() FROM unnest($3::text[]) AS s, notify`,
+      [tenantId, callSid, scopes, granted, 'voice_ai_verbal', wording]
+    );
     return { ok: true, recorded: scopes.length };
   } catch (err) {
     logger.warn('CONSENT_RECORD_FAILED', { tenantId, error: err instanceof Error ? err.name : 'error' });
@@ -201,12 +204,35 @@ export async function linkCallConsentToLead(tenantId: string, callSid: string | 
   }
 }
 
+/**
+ * Spreads this call's still-unlinked DECLINED / WITHDRAWN rows over every lead of the call: copies go to leads 2..n, the originals are
+ * linked to lead 1, so a repeated sweep finds nothing left to spread (idempotent). Unlinked GRANT rows are left untouched on purpose.
+ */
+async function spreadUnlinkedRefusalsToLeads(tenantId: string, callSid: string, leadIds: string[]): Promise<void> {
+  try {
+    for (const leadId of leadIds.slice(1)) {
+      await voiceDb.query(
+        `INSERT INTO public.lead_consents (tenant_id, lead_id, call_sid, scope, granted, method, wording_version, recorded_at)
+         SELECT tenant_id, $3, call_sid, scope, granted, method, wording_version, recorded_at
+           FROM public.lead_consents WHERE tenant_id = $1 AND call_sid = $2 AND lead_id IS NULL AND granted = FALSE`,
+        [tenantId, callSid, leadId]
+      );
+    }
+    await voiceDb.query(
+      `UPDATE public.lead_consents SET lead_id = $3 WHERE tenant_id = $1 AND call_sid = $2 AND lead_id IS NULL AND granted = FALSE`,
+      [tenantId, callSid, leadIds[0]]
+    );
+  } catch (err) {
+    logger.warn('CONSENT_SPREAD_FAILED', { tenantId, error: err instanceof Error ? err.name : 'error' });
+  }
+}
+
 /** Evidence for a lead event, from rows linked to that lead in that tenant. Any error (including a missing table) => undefined. */
 export async function getConsentEvidenceForLead(tenantId: string, leadId: string): Promise<ConsentEvidence | undefined> {
   try {
     const r = await voiceDb.query(
       `SELECT scope, granted, method, wording_version, recorded_at
-         FROM public.lead_consents WHERE tenant_id = $1 AND lead_id = $2`,
+         FROM public.lead_consents WHERE tenant_id = $1 AND lead_id = $2 ORDER BY recorded_at, seq`,
       [tenantId, leadId]
     );
     return deriveConsentEvidence(r.rows as ConsentRow[]);
@@ -241,20 +267,31 @@ export async function deliverConsentChange(tenantId: string, callSid: string | u
       [tenantId, callSid]
     );
     if (r.rows.length === 0) return 'no_lead_yet';
-    if (r.rows.length > 1) {
+    const leadIds = r.rows.map((x: { lead_id: unknown }) => String(x.lead_id));
+    if (leadIds.length > 1) {
+      // Two leads on one call: a NEW decision cannot be attributed to one of them. A grant is therefore never applied (no broader processing),
+      // but a decline / withdrawal is copied to every lead of the call (narrower processing is always safe), so a withdrawal is never lost.
       logger.warn('CONSENT_CHANGE_AMBIGUOUS_LEAD', { tenantId });
-      return 'ambiguous_lead';
+      await spreadUnlinkedRefusalsToLeads(tenantId, callSid, leadIds);
+    } else {
+      await linkCallConsentToLead(tenantId, callSid, leadIds[0]);
     }
-    const leadId = String(r.rows[0].lead_id);
-    await linkCallConsentToLead(tenantId, callSid, leadId);
-    const consent = await getConsentEvidenceForLead(tenantId, leadId);
-    if (!consent) return 'no_evidence';
     const { getPlatformEventBus } = await import('../../events/platform-event-bus.js');
     const { PlatformEventTypes } = await import('../../events/event-types.js');
     const bus = getPlatformEventBus();
-    if (!bus) return 'bus_unavailable';
-    const event = await bus.publish(PlatformEventTypes.LEAD_UPDATED, { leadId, consent }, { tenantId, callSid, producedBy: 'halla-ai-gateway' });
-    return event ? 'published' : 'bus_unavailable';
+    let published = 0;
+    let anyEvidence = false;
+    for (const leadId of leadIds) {
+      const consent = await getConsentEvidenceForLead(tenantId, leadId);
+      if (!consent) continue;
+      anyEvidence = true;
+      if (!bus) return 'bus_unavailable';
+      const event = await bus.publish(PlatformEventTypes.LEAD_UPDATED, { leadId, consent }, { tenantId, callSid, producedBy: 'halla-ai-gateway' });
+      if (!event) return 'bus_unavailable';
+      published++;
+    }
+    if (!anyEvidence) return 'no_evidence';
+    return published > 0 ? 'published' : 'no_evidence';
   } catch (err) {
     logger.warn('CONSENT_CHANGE_PUBLISH_FAILED', { tenantId, error: err instanceof Error ? err.name : 'error' });
     return 'failed';

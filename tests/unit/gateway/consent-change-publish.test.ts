@@ -28,6 +28,16 @@ vi.mock('../../../apps/gateway/src/services/voice/tenant-scope.js', () => ({
       }
       if (t.startsWith('UPDATE public.lead_consent_outbox SET delivered_at')) { const b = db.box.find((x) => x.id === p[0])!; b.delivered_at = new Date(); b.attempts++; b.last_outcome = p[1]; return { rows: [] }; }
       if (t.startsWith('UPDATE public.lead_consent_outbox SET attempts')) { const b = db.box.find((x) => x.id === p[0])!; b.attempts++; b.last_outcome = p[1]; return { rows: [] }; }
+      if (t.startsWith('WITH notify AS ( INSERT INTO public.lead_consent_outbox')) {
+        if (db.failOutbox) throw new Error('outbox down');   // atomic: nothing at all is stored when the outbox part fails
+        db.box.push({ id: db.box.length + 1, tenant_id: p[0], call_sid: p[1], created_at: new Date(), delivered_at: null, attempts: 0, last_outcome: null });
+        for (const scope of p[2] as string[]) db.rows.push({ tenant_id: p[0], call_sid: p[1], lead_id: null, scope, granted: p[3], method: p[4], wording_version: p[5], recorded_at: new Date((db.clock += 1000)) });
+        return { rows: [] };
+      }
+      if (t.startsWith('INSERT INTO public.lead_consents (tenant_id, lead_id, call_sid')) {
+        for (const r of db.rows.filter((x) => x.tenant_id === p[0] && x.call_sid === p[1] && x.lead_id === null && !x.granted)) db.rows.push({ ...r, lead_id: p[2] });
+        return { rows: [] };
+      }
       if (t.startsWith('INSERT INTO public.lead_consents')) {
         db.rows.push({ tenant_id: p[0], call_sid: p[1], lead_id: null, scope: p[2], granted: p[3], method: p[4], wording_version: p[5], recorded_at: new Date((db.clock += 1000)) });
         return { rows: [] };
@@ -38,7 +48,8 @@ vi.mock('../../../apps/gateway/src/services/voice/tenant-scope.js', () => ({
         return { rows: ids.map((lead_id) => ({ lead_id })) };
       }
       if (t.startsWith('UPDATE public.lead_consents SET lead_id')) {
-        for (const r of db.rows) if (r.tenant_id === p[0] && r.call_sid === p[1] && r.lead_id === null) r.lead_id = p[2];
+        const refusalsOnly = t.includes('granted = FALSE');
+        for (const r of db.rows) if (r.tenant_id === p[0] && r.call_sid === p[1] && r.lead_id === null && (!refusalsOnly || !r.granted)) r.lead_id = p[2];
         return { rows: [] };
       }
       if (t.startsWith('SELECT scope, granted, method, wording_version, recorded_at FROM public.lead_consents')) return { rows: db.rows.filter((r) => r.tenant_id === p[0] && r.lead_id === p[1]) };
@@ -152,11 +163,25 @@ describe('what is NOT published', () => {
     expect(published).toHaveLength(0);
     expect(db.rows.find((r) => r.tenant_id === OTHER)!.lead_id).toBe('lead-x');
   });
-  it('rows linked to two different leads cannot be attributed: nothing is published', async () => {
-    for (const lead of ['lead-1', 'lead-2']) db.rows.push({ tenant_id: T, call_sid: 'CA1', lead_id: lead, scope: 'contact', granted: true, method: 'voice_ai_verbal', wording_version: 'MT-CONSENT-v1', recorded_at: new Date(db.clock += 1000) });
+  const twoLeads = () => { for (const lead of ['lead-1', 'lead-2']) db.rows.push({ tenant_id: T, call_sid: 'CA1', lead_id: lead, scope: 'contact', granted: true, method: 'voice_ai_verbal', wording_version: 'MT-CONSENT-v1', recorded_at: new Date(db.clock += 1000) }); };
+  it('two leads on one call: a WITHDRAWAL cannot be attributed to one lead, so it is applied to both and published for both (never lost)', async () => {
+    twoLeads();
     await decide('withdrawn', ['contact']);
-    expect(await deliverConsentChange(T, 'CA1')).toBe('ambiguous_lead');
-    expect(published).toHaveLength(0);
+    expect(await deliverConsentChange(T, 'CA1')).toBe('published');
+    expect(published.map((x) => x.payload.leadId).sort()).toEqual(['lead-1', 'lead-2']);
+    for (const x of published) expect(x.payload.consent).toMatchObject({ granted: false, scope: ['contact'] });
+    // idempotent: a second sweep finds nothing left to spread and derives the same evidence
+    published.length = 0;
+    expect(await deliverConsentChange(T, 'CA1')).toBe('published');
+    expect(published.map((x) => x.payload.consent.scope)).toEqual([['contact'], ['contact']]);
+    expect(db.rows.filter((r) => !r.granted)).toHaveLength(2);
+  });
+  it('two leads on one call: a GRANT cannot be attributed, so it is applied to neither', async () => {
+    twoLeads();
+    await decide('granted', ['store_medical_information']);
+    await deliverConsentChange(T, 'CA1');
+    for (const x of published) expect(x.payload.consent.scope).not.toContain('store_medical_information');
+    expect(db.rows.filter((r) => r.scope === 'store_medical_information' && r.lead_id !== null)).toHaveLength(0);
   });
   it('a database failure publishes nothing and never throws', async () => {
     linkLead(); db.rows.push({ tenant_id: T, call_sid: 'CA1', lead_id: 'lead-1', scope: 'contact', granted: true, method: 'voice_ai_verbal', wording_version: 'MT-CONSENT-v1', recorded_at: new Date(db.clock) });

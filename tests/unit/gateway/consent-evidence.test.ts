@@ -21,6 +21,15 @@ vi.mock('../../../apps/gateway/src/services/voice/tenant-scope.js', () => ({
         return { rows: db.wording === undefined ? [] : [{ consent_capture: db.wording === null ? null : { wording_version: db.wording } }] };
       }
       if (text.startsWith('INSERT INTO public.lead_consent_outbox')) return { rows: [] };
+      if (text.startsWith('WITH notify AS ( INSERT INTO public.lead_consent_outbox')) {
+        // The real statement is ONE atomic statement: the outbox row and every scope row. The fake mirrors that all-or-nothing behaviour.
+        const [tenant_id, call_sid, scopes, granted, method, wording_version] = params;
+        for (const scope of scopes as string[]) {
+          inserts.push([tenant_id, call_sid, scope, granted, method, wording_version]);
+          db.rows.push({ tenant_id, call_sid, lead_id: null, scope, granted, method, wording_version, recorded_at: new Date((db.clock += 1000)) });
+        }
+        return { rows: [] };
+      }
       if (text.startsWith('INSERT INTO public.lead_consents')) {
         inserts.push(params);
         const [tenant_id, call_sid, scope, granted, method, wording_version] = params;
@@ -29,7 +38,8 @@ vi.mock('../../../apps/gateway/src/services/voice/tenant-scope.js', () => ({
       }
       if (text.startsWith('UPDATE public.lead_consents SET lead_id')) {
         const [tenant, call, lead] = params;
-        for (const r of db.rows) if (r.tenant_id === tenant && r.call_sid === call && r.lead_id === null) r.lead_id = lead;
+        const refusalsOnly = text.includes('granted = FALSE');
+        for (const r of db.rows) if (r.tenant_id === tenant && r.call_sid === call && r.lead_id === null && (!refusalsOnly || !r.granted)) r.lead_id = lead;
         return { rows: [] };
       }
       if (text.startsWith('SELECT scope, granted, method, wording_version, recorded_at FROM public.lead_consents')) {

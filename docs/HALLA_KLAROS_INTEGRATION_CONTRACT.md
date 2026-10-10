@@ -113,3 +113,10 @@ deployed gateway's sender).
 - The deployed gateway's own sender has not been run against `klaros-halla-pilot` (real delivery over HTTP is unproven for that URL).
 - Consent evidence (section 3.1) is proven only with an in-memory fake database and a local HTTP receiver. Migration 075 has not been applied, no tenant has a wording version configured, and the Klaros receiver has not been taught to read `consent`.
 - The free Render instance sleeps (about 50 s cold start); a webhook delivery that hits a cold gateway or receiver is retried by the bus.
+
+### Consent evidence: migrations and delivery guarantees (hardening)
+- Migrations, in order: `075_lead_consents.sql`, `076_lead_consent_outbox.sql`, `077_lead_consents_ordering.sql` (adds `seq`, real-clock default). All additive and idempotent; **none has been applied by this change**. Deploy the gateway code only after all three are applied (the evidence query orders by `seq`; without 077 evidence reads fail closed to "no evidence").
+- A recorded decision is ONE SQL statement: the outbox entry and every scope row are stored together or not at all.
+- Order of decisions is `recorded_at` (database wall clock) then `seq`; a same-instant withdrawal stored after a grant wins.
+- If one call produced two leads, a new grant is attributed to neither; a decline or withdrawal is copied to both and published for both.
+- Delivery: the outbox entry is retried by the sweeper until the event is added to the Redis stream; Klaros de-duplicates on the event id and orders evidence by `recorded_at`.
