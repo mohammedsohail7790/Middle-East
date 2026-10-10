@@ -63,3 +63,53 @@ export async function probeOpenAiKey({ key, model = 'gpt-realtime', fetchImpl = 
     clearTimeout(timer);
   }
 }
+
+/**
+ * One minimal BILLABLE model request: opens a Realtime session (text output only, no audio, no customer data), asks for one word and
+ * waits for the model to finish. Unlike `probeOpenAiKey`, this proves the model actually answers and that credit/quota is usable.
+ * Returns `{ status, httpStatus, responded }` only: never the key, a header or the model's text (`responded` = a completed response
+ * with some text came back). A handshake rejection is classified by its HTTP status; an in-session error by its provider code.
+ * `wsFactory(url, options)` is injectable for tests; the default uses the `ws` package.
+ */
+export async function probeRealtimeResponse({ key, model = 'gpt-realtime', wsFactory, timeoutMs = 30000, baseUrl = 'wss://api.openai.com' } = {}) {
+  if (!key || !String(key).trim()) return { status: PROBE_STATUS.NO_KEY, httpStatus: 0, responded: false };
+  const make = wsFactory ?? (async (url, options) => new (await import('ws')).default(url, options));
+  const ws = await make(`${baseUrl}/v1/realtime?model=${encodeURIComponent(model)}`, { headers: { Authorization: `Bearer ${String(key).trim()}` } });
+  return await new Promise((resolve) => {
+    let done = false;
+    let sawText = false;
+    const finish = (status, httpStatus = 0) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      try { ws.close(); } catch { /* already closed */ }
+      resolve({ status, httpStatus, responded: status === PROBE_STATUS.OK && sawText });
+    };
+    const timer = setTimeout(() => finish(PROBE_STATUS.PROVIDER_UNAVAILABLE), timeoutMs);
+    const send = (m) => ws.send(JSON.stringify(m));
+    ws.on('unexpected-response', (_req, res) => finish(classifyOpenAiResponse(res?.statusCode ?? 0, ''), res?.statusCode ?? 0));
+    ws.on('error', () => finish(PROBE_STATUS.PROVIDER_UNAVAILABLE));
+    ws.on('close', () => finish(PROBE_STATUS.PROVIDER_UNAVAILABLE));
+    ws.on('message', (raw) => {
+      let ev;
+      try { ev = JSON.parse(String(raw)); } catch { return; }
+      if (ev.type === 'session.created') {
+        send({ type: 'response.create', response: { output_modalities: ['text'], instructions: 'Reply with the single word OK.' } });
+      } else if (ev.type === 'response.output_text.delta' || ev.type === 'response.text.delta') {
+        sawText = true;
+      } else if (ev.type === 'response.done') {
+        const r = ev.response ?? {};
+        if (r.status === 'completed') {
+          if (!sawText && JSON.stringify(r.output ?? []).includes('"text"')) sawText = true;
+          finish(sawText ? PROBE_STATUS.OK : PROBE_STATUS.UNEXPECTED, 200);
+        } else {
+          finish(classifyOpenAiResponse(0, JSON.stringify({ error: r.status_details?.error ?? {} })).replace(PROBE_STATUS.PROVIDER_UNAVAILABLE, PROBE_STATUS.UNEXPECTED));
+        }
+      } else if (ev.type === 'error') {
+        const code = String(ev.error?.code ?? ev.error?.type ?? '');
+        const s = classifyOpenAiResponse(0, JSON.stringify({ error: { code } }));
+        finish(s === PROBE_STATUS.PROVIDER_UNAVAILABLE ? PROBE_STATUS.UNEXPECTED : s);
+      }
+    });
+  });
+}

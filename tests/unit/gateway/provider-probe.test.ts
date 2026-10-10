@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, vi } from 'vitest';
 // @ts-expect-error plain ES module without type declarations
-import { classifyOpenAiResponse, probeOpenAiKey, PROBE_STATUS } from '../../../scripts/lib/provider-probe.mjs';
+import { classifyOpenAiResponse, probeOpenAiKey, probeRealtimeResponse, PROBE_STATUS } from '../../../scripts/lib/provider-probe.mjs';
 
 const body = (code: string) => JSON.stringify({ error: { code, message: 'x' } });
 
@@ -63,7 +63,76 @@ describe('probeOpenAiKey', () => {
   it('the script prints no key: its output line is built from the result only', async () => {
     const { readFileSync } = await import('node:fs');
     const src = readFileSync('scripts/check-provider-key.mjs', 'utf8');
-    expect(src).toMatch(/console\.log\(JSON\.stringify\(\{ provider: 'openai', model, \.\.\.result/);
+    expect(src).toMatch(/console\.log\(JSON\.stringify\(\{ check: 'key', provider: 'openai', model, \.\.\.result/);
+    expect(src).toMatch(/console\.log\(JSON\.stringify\(\{ check: 'model_response', provider: 'openai', model, \.\.\.r \}\)\)/);
     expect(src).not.toMatch(/console\.(log|error|warn)\([^)]*OPENAI_API_KEY/);
+    expect(src).not.toMatch(/JSON\.stringify\(\{[^}]*\bkey\s*[,}]/);
+  });
+});
+
+/** Fake Realtime socket: replays `events` after the first send; the real provider is NOT contacted (MOCKED). */
+function fakeSocket(script: (send: (m: unknown) => void, sent: any[]) => void, opts: { rejectStatus?: number } = {}) {
+  const handlers: Record<string, ((...a: any[]) => void)[]> = {};
+  const sent: any[] = [];
+  const emit = (n: string, ...a: any[]) => (handlers[n] ?? []).forEach((h) => h(...a));
+  const ws: any = {
+    on: (n: string, h: (...a: any[]) => void) => { (handlers[n] ??= []).push(h); return ws; },
+    send: (m: string) => { sent.push(JSON.parse(m)); script((e) => emit('message', JSON.stringify(e)), sent); },
+    close: vi.fn(),
+  };
+  setTimeout(() => (opts.rejectStatus ? emit('unexpected-response', {}, { statusCode: opts.rejectStatus }) : emit('message', JSON.stringify({ type: 'session.created' }))), 0);
+  return { ws, sent };
+}
+
+describe('probeRealtimeResponse (MOCKED socket)', () => {
+  const run = (script: Parameters<typeof fakeSocket>[0], opts?: Parameters<typeof fakeSocket>[1]) => {
+    const s = fakeSocket(script, opts);
+    const factory = vi.fn(async () => s.ws);
+    return probeRealtimeResponse({ key: 'k-secret-not-real', wsFactory: factory, timeoutMs: 500 }).then((r: unknown) => ({ r, s, factory }));
+  };
+
+  it('no key => no_key and no socket', async () => {
+    const factory = vi.fn();
+    expect(await probeRealtimeResponse({ key: '', wsFactory: factory })).toEqual({ status: 'no_key', httpStatus: 0, responded: false });
+    expect(factory).not.toHaveBeenCalled();
+  });
+
+  it('a completed text answer => ok + responded, one request only, text-only, and the text/key never returned', async () => {
+    const { r, s, factory } = await run((send) => { send({ type: 'response.output_text.delta', delta: 'OK' }); send({ type: 'response.done', response: { status: 'completed' } }); });
+    expect(r).toEqual({ status: 'ok', httpStatus: 200, responded: true });
+    expect(s.sent).toHaveLength(1);
+    expect(s.sent[0].response.output_modalities).toEqual(['text']);
+    expect(JSON.stringify(r)).not.toMatch(/k-secret|"OK"/);
+    expect((factory.mock.calls[0] as unknown as any[])[1].headers.Authorization).toBe('Bearer k-secret-not-real');
+    expect(s.ws.close).toHaveBeenCalled();
+  });
+
+  it('completed with no text is NOT a proven answer', async () => {
+    const { r } = await run((send) => send({ type: 'response.done', response: { status: 'completed', output: [] } }));
+    expect(r).toMatchObject({ status: 'unexpected', responded: false });
+  });
+
+  it.each([
+    ['insufficient_quota', 'quota_exhausted'],
+    ['invalid_api_key', 'invalid_key'],
+    ['model_not_found', 'model_not_available'],
+  ])('an in-session error %s => %s', async (code, expected) => {
+    const { r } = await run((send) => send({ type: 'error', error: { code } }));
+    expect(r).toMatchObject({ status: expected, responded: false });
+  });
+
+  it('a failed response carries its provider code', async () => {
+    const { r } = await run((send) => send({ type: 'response.done', response: { status: 'failed', status_details: { error: { code: 'insufficient_quota' } } } }));
+    expect(r).toMatchObject({ status: 'quota_exhausted', responded: false });
+  });
+
+  it.each([[401, 'invalid_key'], [403, 'forbidden'], [404, 'model_not_available']])('handshake rejected with HTTP %s => %s', async (status, expected) => {
+    const { r } = await run(() => undefined, { rejectStatus: status as number });
+    expect(r).toMatchObject({ status: expected, httpStatus: status, responded: false });
+  });
+
+  it('silence => provider_unavailable after the timeout, never hangs', async () => {
+    const { r } = await run(() => undefined);
+    expect(r).toMatchObject({ status: 'provider_unavailable', responded: false });
   });
 });
