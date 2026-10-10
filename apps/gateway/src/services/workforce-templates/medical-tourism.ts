@@ -252,7 +252,8 @@ export const medicalTourismTemplate: WorkforceTemplate = {
   ],
   knownPlatformGaps: [
     'No content-level safety enforcement: diagnosis/prescription/guarantee/fabrication refusals are prompt instructions only.',
-    'No code-level emergency detection: emergency escalation depends on the model recognising the emergency and calling transfer_call.',
+    'Emergency handling: when voice_tenants.metadata.safety_supervisor.enabled is true, the gateway detects an emergency in the CALLER\'s words (keyword lists, English and Arabic, not clinically or linguistically reviewed), interrupts with a fixed instruction and publishes lead.escalated; it also retracts guarantee / diagnosis / prescription-type statements AFTER they were spoken. This is detective and corrective, not preventive: speech-to-speech audio is heard before it can be checked. Without the flag nothing but the prompt protects the caller.',
+    'Escalation without a number: for a tenant with consent capture configured, transfer_call is always offered; with no transfer number (or a failed transfer) it records a human call-back (lead.escalated target human_callback) instead of failing. No live transfer happens in that case.',
     'qualificationQuestions, requiredFields (beyond name/phone/service/email), optionalFields, transferConditions and fallbackMessage are stored but not read by the live realtime prompt.',
     'Per-agent knowledgeCategory is not applied to realtime knowledge search (search is tenant-wide).',
     'Consent evidence exists only for a tenant that has configured voice_tenants.metadata.consent_capture.wording_version, and only when the model calls record_consent after an explicit answer. The consent wording itself is not stored or enforced: the prompt does not force an approved script, and the business has not yet supplied one. A lead can still be created without consent evidence (nothing blocks it); Klaros then receives no consent object.',

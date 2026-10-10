@@ -43,6 +43,11 @@ function baseUrl(): string {
 export async function initiateOutboundCall(
     ctx: OutboundCallContext
 ): Promise<{ callSid: string }> {
+    // Consent enforcement (tenants that opted in to consent capture only): a call to a lead needs a currently granted `contact`
+    // decision. Throws ConsentRequiredError, which every caller turns into a refusal (HTTP 403 / failed campaign row).
+    const { assertOutboundContactConsent } = await import('../consent/consent-gate.js');
+    await assertOutboundContactConsent(ctx.tenantId, ctx.toNumber);
+
     const twilioClient = (await import('twilio')).default(
         process.env.TWILIO_ACCOUNT_SID,
         process.env.TWILIO_AUTH_TOKEN

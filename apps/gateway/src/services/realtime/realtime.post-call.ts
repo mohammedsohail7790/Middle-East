@@ -81,6 +81,13 @@ export async function finalizeRuntimeSession(
             `Call with ${name || state.callerPhone || 'unknown caller'} — ${Math.round(durationMs / 1000)}s`;
         }
 
+        // Consent enforcement (tenants that opted in to consent capture only; otherwise the gate is open and nothing changes):
+        //  - nothing is processed or stored about the caller without a granted store_personal_data decision for this call;
+        //  - the transcript text is kept only with a granted store_medical_information decision.
+        const { getCallConsentGate } = await import('../consent/consent-gate.js');
+        const consentGate = await getCallConsentGate(state.tenantId, state.callSid);
+        const noPersonalDataConsent = !consentGate.allows('store_personal_data');
+
         // Store call in database (so it shows in dashboard)
         const { storeCall } = await import('../voice/voice.controller.js');
         const { createHash } = await import('crypto');
@@ -102,7 +109,9 @@ export async function finalizeRuntimeSession(
         // at the consent-response stage) and no persisted transcript text.
         const storedTranscript = state.consentDeclined
           ? '[Not recorded — caller did not consent to recording/transcription.]'
-          : transcript;
+          : !consentGate.allows('store_medical_information')
+            ? '[Transcript not stored — no consent to store medical information was recorded for this call.]'
+            : transcript;
 
         await storeCall({
           tenantId: state.tenantId,
@@ -124,7 +133,8 @@ export async function finalizeRuntimeSession(
         const bookedAppointment = memories.find(
           (m) => m.type === 'entity' && String(m.key || '').includes('appointment')
         );
-        const transcriptTurns = (session.transcriptLines || []).map((line) => ({
+        // Without consent to keep personal data the transcript is not sent to any model for extraction or evaluation either.
+        const transcriptTurns = (noPersonalDataConsent ? [] : session.transcriptLines || []).map((line) => ({
           role:
             line.role === 'caller'
               ? ('user' as const)
@@ -177,7 +187,14 @@ export async function finalizeRuntimeSession(
           resolvedAppointmentTime = merged.preferred_time || resolvedAppointmentTime;
         }
 
-        let shouldBackfillAppointment = Boolean(bookedAppointment);
+        if (noPersonalDataConsent) {
+          resolvedName = undefined;
+          resolvedPhone = undefined;
+          resolvedService = undefined;
+          resolvedAppointmentTime = undefined;
+        }
+
+        let shouldBackfillAppointment = Boolean(bookedAppointment) && !noPersonalDataConsent;
         if (state.tenantConfig && transcriptTurns.length > 0) {
           const { detectVerbalBookingConfirmation } = await import('./post-call-booking.js');
           if (detectVerbalBookingConfirmation(transcript)) {
@@ -244,7 +261,7 @@ export async function finalizeRuntimeSession(
               escalated: callOutcome === 'transferred',
             });
           };
-        } else {
+        } else if (!noPersonalDataConsent) {
           import('../slack/slack.service.js').then(({ slackService }) => {
             slackService
               .sendNewCallNotification(state.tenantId!, {
@@ -260,7 +277,9 @@ export async function finalizeRuntimeSession(
           }).catch(() => {});
         }
 
-        await storeLead({
+        if (noPersonalDataConsent) {
+          logger.info('REALTIME_POST_CALL_LEAD_SKIPPED_NO_CONSENT', { tenantId: state.tenantId, callSid: state.callSid, unavailable: Boolean(consentGate.unavailable) });
+        } else await storeLead({
           tenantId: state.tenantId,
           callId: persistedCallId ?? undefined,
           name: resolvedName,
@@ -406,7 +425,8 @@ export async function finalizeRuntimeSession(
             await publishEvent('CALL_ENDED', {
               callSid: completionCallSid,
               durationMs,
-              callerPhone: state.callerPhone,
+              // the caller's number is personal data: not put on the platform event stream without consent to keep it
+              callerPhone: noPersonalDataConsent ? undefined : state.callerPhone,
               hasTranscript: !!transcript,
               klarosLeadId: finalState.klarosLeadId,
               qualificationStatus: finalState.qualificationStatus,
@@ -443,6 +463,7 @@ export async function finalizeRuntimeSession(
         }
 
         const shouldSendPostCallCrm =
+          !noPersonalDataConsent &&
           !appointmentSyncedViaBooking &&
           !leadToolRan &&
           (resolvedName || resolvedPhone || state.callerPhone);
@@ -517,17 +538,29 @@ export async function finalizeRuntimeSession(
 
       // Save conversation summary (Redis-based, for quick lookups)
       if (state.tenantId) {
-        saveSummary(state, deps).catch(err => {
-          logger.error('REALTIME_SUMMARY_SAVE_FAILED', {
-            tenantId: state.tenantId,
-            sessionId: state.sessionId,
-            error: String(err),
+        // The conversation summary keeps the caller's name, phone and topics: without consent to keep personal data it is saved without them.
+        import('../consent/consent-gate.js')
+          .then(({ getCallConsentGate }) => getCallConsentGate(state.tenantId!, state.callSid ?? undefined))
+          .then((summaryGate) => saveSummary(state, deps, !summaryGate.allows('store_personal_data')))
+          .catch(err => {
+            logger.error('REALTIME_SUMMARY_SAVE_FAILED', {
+              tenantId: state.tenantId,
+              sessionId: state.sessionId,
+              error: String(err),
+            });
           });
-        });
 
-        // Trigger automation: call ended follow-up
-        import('../automation/automation.service.js').then(({ automationService }) => {
-          automationService.sendCallFollowUp(
+        // Trigger automation: call ended follow-up. A follow-up message to the caller is a contact: for tenants that opted in to
+        // consent capture it needs a granted `contact` decision for this call (otherwise the gate is open and nothing changes).
+        void Promise.all([
+          import('../automation/automation.service.js'),
+          import('../consent/consent-gate.js').then(({ getCallConsentGate }) => getCallConsentGate(state.tenantId!, state.callSid ?? undefined)),
+        ]).then(([{ automationService }, followUpGate]) => {
+          if (!followUpGate.allows('contact')) {
+            logger.info('AUTOMATION_CALL_FOLLOWUP_SKIPPED_NO_CONSENT', { tenantId: state.tenantId, callSid: state.callSid, unavailable: Boolean(followUpGate.unavailable) });
+            return;
+          }
+          return automationService.sendCallFollowUp(
             state.tenantId!,
             state.callSid || state.sessionId || '',
             state.callerPhone || ''
@@ -560,16 +593,17 @@ export async function finalizeRuntimeSession(
 
 async function saveSummary(
   state: PostCallState,
-  deps: PostCallDeps
+  deps: PostCallDeps,
+  minimize = false
 ): Promise<void> {
   if (!state.sessionId || !state.tenantId) return;
 
   const sessionMetrics = deps.eventManager.getSessionMetrics(state.sessionId);
   const memories = await deps.memoryManager.getAllSessionMemory(state.sessionId);
 
-  const customerName = memories.find(m => m.type === 'customer_info' && m.key === 'name')?.value;
-  const customerPhone = memories.find(m => m.type === 'customer_info' && m.key === 'phone')?.value;
-  const primaryIntent = memories.find(m => m.type === 'intent' && m.key === 'primary')?.value?.intent;
+  const customerName = minimize ? undefined : memories.find(m => m.type === 'customer_info' && m.key === 'name')?.value;
+  const customerPhone = minimize ? undefined : memories.find(m => m.type === 'customer_info' && m.key === 'phone')?.value;
+  const primaryIntent = minimize ? undefined : memories.find(m => m.type === 'intent' && m.key === 'primary')?.value?.intent;
 
   const summary = {
     sessionId: state.sessionId,
@@ -578,7 +612,7 @@ async function saveSummary(
     customerName: customerName || undefined,
     customerPhone: customerPhone || undefined,
     primaryIntent: primaryIntent || undefined,
-    topics: memories.filter(m => m.type === 'entity').map(m => m.value),
+    topics: minimize ? [] : memories.filter(m => m.type === 'entity').map(m => m.value),
     sentiment: 'neutral' as const,
     outcome: 'completed' as const,
     duration: sessionMetrics?.startTime ? Date.now() - sessionMetrics.startTime.getTime() : 0,

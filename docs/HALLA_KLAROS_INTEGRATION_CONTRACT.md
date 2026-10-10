@@ -122,3 +122,32 @@ deployed gateway's sender).
 - Delivery: the outbox entry is retried by the sweeper until the event is added to the Redis stream; Klaros de-duplicates on the event id and orders evidence by `recorded_at`.
 - **Delivery-time refresh (reconciliation):** every publish gets a fresh random event id, and the bus, the sender and Klaros all treat a repeated id as a duplicate, so an id can never be re-used for a different consent state. Because a failed delivery is retried after later events were already sent, the consumer re-reads the stored consent for that tenant and lead at the moment of delivery for any `lead.created` / `lead.updated` that carries `consent` (`withFreshConsent`). A retried or delayed event therefore cannot deliver an older state than the one stored now, and the `recorded_at` sequence a receiver sees does not go backwards. If that read fails the handler throws: the bus retries (bounded, `P2_CONSUMER_MAX_RETRIES`, default 5) and then dead-letters the event; it is never sent stale and never dropped silently. Tests: `tests/integration/consent-delivery-ordering.test.ts`, `tests/integration/klaros-consent-evidence-delivery.test.ts` (in-memory Redis and database emulations; not real PostgreSQL or Redis).
 - Two equal-content events (the outbox can publish a state more than once) are harmless to a receiver that applies `consent` idempotently by `recorded_at`; Klaros' behaviour here is unverified from this repository.
+
+## 7. Medical Tourism pilot controls (opt-in per tenant; nothing here changes a tenant that has not opted in)
+Configured in `voice_tenants.metadata` (JSON). **Not applied anywhere by this change.**
+
+| Key | Effect |
+|---|---|
+| `consent_capture.wording_version` (label, 1-64 chars) | Offers the `record_consent` tool AND turns on consent enforcement (below). The wording text is never stored. |
+| `safety_supervisor.enabled = true` | Turns on the live safety supervisor (below). |
+| `voice_tenants.transfer_phone_number` | Live transfer target for `transfer_call`. Optional for a tenant with consent capture (see call-back). |
+
+**Consent enforcement** (`services/consent/consent-gate.ts`; fails closed: any unreadable state denies):
+- `create_lead` and post-call lead storage need a granted `store_personal_data` decision **for that call**; without it the transcript is not sent to any model, no CRM sync, no Slack notification, no appointment back-fill, the conversation summary is saved without name / phone / topics, and the caller's number is left off the call-ended platform event.
+- The transcript text is stored only with a granted `store_medical_information` decision (the AI does not ask for it today, so by default no Medical Tourism transcript is kept). A caller who declined the recording prompt never has one stored (existing rule).
+- A post-call follow-up automation and every outbound call (`POST /api/v1/voice/outbound`, Klaros "call lead", campaigns: all go through `initiateOutboundCall`) need a granted `contact` decision (outbound: the lead matched by tenant + phone must currently have `contact`; none / several leads or any error refuses; HTTP 403 `{"error":"consent_required","code":...}`).
+- Residual: caller phone numbers still exist in call-log metadata and live-call session memory; the live conversation itself necessarily hears whatever the caller volunteers.
+
+**Escalation destinations** (`lead.escalated` `data`): `target` = the transfer number (live transfer happened) | `human_callback` (no number, or the transfer failed: a person must call the caller back; `reason` is the model's short code) | `human_review` (safety supervisor: `reason` = `emergency_<category>` or `unsafe_statement_<category>`). None carries what was said.
+
+**Safety supervisor** (`services/realtime/safety-supervisor.ts`): detective and corrective, not preventive. Emergency words from the caller (keyword lists, English and Arabic) interrupt the call with a fixed instruction and escalate; guarantee / diagnosis / prescription-type assistant statements are retracted on the call after they were spoken and escalated for human review. The lists are starter lists not reviewed by a clinician or native speaker; a miss and a false alarm are both possible; the live model was not exercised. `readiness.ts` keeps `HALLA_LIVE_SAFETY_CONTROL = BLOCKED`.
+
+**Prepared, NOT executed** staging change for a Medical Tourism tenant (needs approval; replace the placeholders; the wording label is the owner's, never invented):
+```sql
+UPDATE public.voice_tenants
+   SET metadata = COALESCE(metadata, '{}'::jsonb)
+                  || jsonb_build_object('consent_capture', jsonb_build_object('wording_version', '<OWNER_APPROVED_LABEL>'),
+                                        'safety_supervisor', jsonb_build_object('enabled', true))
+ WHERE id = '<TENANT_UUID>';
+```
+**Provider key check** (run by the key's owner, never paste the key into chat): `node scripts/check-provider-key.mjs` prints a status label only. `ok` means the key is accepted, not that credit remains; the gateway logs `REALTIME_PROVIDER_CREDENTIAL_FAILURE` when a call hits `invalid_api_key` / `insufficient_quota`.

@@ -460,13 +460,21 @@ export class RealtimeToolsManager {
 
       const targetNumber = tenant.rows[0]?.transfer_phone_number;
       if (!targetNumber) {
+        const { getTenantConsentWordingVersion } = await import('../consent/consent-evidence.js');
+        if (await getTenantConsentWordingVersion(session.tenantId)) return this.recordHumanCallback(session, params.reason, 'no_transfer_number');
         return {
           success: false,
           error: 'No transfer number configured for this tenant.',
         };
       }
 
-      await transferService.transferCall(session.callSid, targetNumber);
+      try {
+        await transferService.transferCall(session.callSid, targetNumber);
+      } catch (transferErr) {
+        const { getTenantConsentWordingVersion } = await import('../consent/consent-evidence.js');
+        if (await getTenantConsentWordingVersion(session.tenantId)) return this.recordHumanCallback(session, params.reason, 'transfer_failed');
+        throw transferErr;
+      }
       session.callOutcome = 'transferred';
       session.transferTarget = targetNumber;
 
@@ -500,6 +508,32 @@ export class RealtimeToolsManager {
         error: `Transfer failed: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
+  }
+
+  /**
+   * Escalation without a live transfer (Medical Tourism): publishes lead.escalated so Klaros and the human team know a person must
+   * call this caller back, and tells the model exactly what to say. It never claims a transfer happened. The reason is a short code
+   * chosen by the model, never free text from the caller.
+   */
+  private async recordHumanCallback(session: RealtimeSession, reason: string, why: 'no_transfer_number' | 'transfer_failed'): Promise<ToolResult> {
+    logger.warn('REALTIME_ESCALATION_CALLBACK_RECORDED', { sessionId: session.id, tenantId: session.tenantId, why, reason: safeReason(reason) });
+    void import('../../events/event-publisher.js')
+      .then(async ({ publishPlatformEvent }) => {
+        const { PlatformEventTypes } = await import('../../events/event-types.js');
+        const { resolveCallCorrelation } = await import('../klaros/correlation.js');
+        const correlation = await resolveCallCorrelation(session.tenantId, session.callSid);
+        publishPlatformEvent(
+          PlatformEventTypes.LEAD_ESCALATED,
+          { callId: session.callSid, target: 'human_callback', reason: String(reason ?? '').slice(0, 60), ...correlation },
+          { tenantId: session.tenantId, callSid: session.callSid, sessionId: session.id }
+        );
+      })
+      .catch(() => {});
+    return {
+      success: true,
+      data: { mode: 'callback' },
+      message: 'There is no live transfer available. Tell the caller, in one short calm sentence, that a member of the team will call them back as soon as possible. If it is an emergency, also tell them to contact their local emergency services now. Do not say they are being transferred. Then close politely.',
+    };
   }
 
   /**
@@ -601,6 +635,19 @@ export class RealtimeToolsManager {
       hasPhone: Boolean(params.phone),
       hasAddress: Boolean(params.address),
     });
+
+    // Consent enforcement (tenants that opted in to consent capture only): no personal data is saved without a granted
+    // store_personal_data decision for THIS call. Not opted in => the gate is open and nothing changes.
+    const { getCallConsentGate } = await import('../consent/consent-gate.js');
+    const consentGate = await getCallConsentGate(session.tenantId, session.callSid);
+    if (!consentGate.allows('store_personal_data')) {
+      logger.info('REALTIME_TOOL_CREATE_LEAD_REFUSED', { sessionId: session.id, tenantId: session.tenantId, reason: consentGate.unavailable ? 'consent_state_unavailable' : 'no_store_personal_data_consent' });
+      return {
+        success: false,
+        error: 'consent_required',
+        message: 'Nothing was saved: the caller has not agreed to have their details kept. Do not collect or repeat more personal details. Ask the consent question if you have not, otherwise offer a person from the team.',
+      };
+    }
 
     try {
       const address = params.address?.trim() || undefined;

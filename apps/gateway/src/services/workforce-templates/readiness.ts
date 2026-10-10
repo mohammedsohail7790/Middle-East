@@ -24,6 +24,15 @@ export const CODE_LEVEL_OUTPUT_GUARD_IMPLEMENTED = false as boolean;
 
 export const HALLA_LIVE_SAFETY_CONTROL: Readiness = CODE_LEVEL_OUTPUT_GUARD_IMPLEMENTED ? 'READY' : 'BLOCKED';
 
+/**
+ * A DETECTIVE and CORRECTIVE supervisor exists (services/realtime/safety-supervisor.ts), enabled per tenant by
+ * voice_tenants.metadata.safety_supervisor.enabled: it detects emergencies in the caller's words and unsafe claims in the assistant's
+ * words, interrupts / retracts on the call and escalates for human review. It is NOT a preventive output guard (so the constant above
+ * stays false and the control above stays BLOCKED): audio can be heard before it is checked, its phrase lists were not reviewed by a
+ * clinician or a native speaker, and the live model was never exercised against it. It narrows the gap; it does not close it.
+ */
+export const SAFETY_SUPERVISOR_AVAILABLE = true as boolean;
+
 /** Live-model behaviour was not evaluated: no sandbox model credential/budget was available or authorised. */
 export const LIVE_MODEL_BEHAVIOUR: Readiness = 'NOT_TESTED';
 

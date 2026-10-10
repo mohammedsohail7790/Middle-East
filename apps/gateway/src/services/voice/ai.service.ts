@@ -72,6 +72,8 @@ export interface TenantVoiceConfig {
      * voice_tenants.metadata.consent_capture. Its presence is what offers the record_consent tool; it never implies consent.
      */
     consentCapture?: { wordingVersion: string };
+    /** Opt-in live safety supervisor: voice_tenants.metadata.safety_supervisor.enabled === true. */
+    safetySupervisor?: { enabled: boolean };
     /** Service-area check for on-site visits (metadata.service_area) */
     serviceArea?: {
         enabled: boolean;
@@ -278,6 +280,7 @@ export class AiService {
             customSystemPrompt,
             capabilities: row.metadata?.capabilities,
             consentCapture: parseConsentCaptureConfig(row.metadata?.consent_capture),
+            safetySupervisor: row.metadata?.safety_supervisor?.enabled === true ? { enabled: true } : undefined,
         };
 
         const { parseServiceAreaSettings } = await import('./service-area.service.js');

@@ -9,7 +9,9 @@ import { isOrderLookupAvailable } from '../order-lookup/order-lookup.service.js'
 export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'essential'): any[] {
   const caps = tenantConfig.capabilities ?? {};
   const bookingOn = caps.bookAppointments !== false;
-  const transferOn = caps.transferCalls !== false && !!tenantConfig.transferPhoneNumber;
+  // A tenant that opted in to consent capture (Medical Tourism) always gets the escalation tool: with no transfer number, or if the
+  // live transfer fails, it records a human call-back request instead (see RealtimeToolsManager.transferCall).
+  const transferOn = caps.transferCalls !== false && (!!tenantConfig.transferPhoneNumber || !!tenantConfig.consentCapture);
   const smsOn = caps.sendSMS !== false;
   const knowledgeOn = caps.accessKnowledge !== false;
 

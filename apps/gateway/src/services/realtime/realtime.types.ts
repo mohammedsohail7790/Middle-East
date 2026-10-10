@@ -15,6 +15,8 @@ export interface RealtimeSessionConfig {
   speechRate?: number;
   /** The routed ai_agents row for this call, if any (recorded in the tool audit trail). */
   agentId?: string;
+  /** Opt-in live safety supervisor (voice_tenants.metadata.safety_supervisor.enabled). See safety-supervisor.ts. */
+  safetySupervisor?: { enabled: boolean };
 }
 
 export interface RealtimeTool {
@@ -41,6 +43,8 @@ export interface RealtimeSession {
   config: RealtimeSessionConfig;
   nodeId?: string;
   reconnectCount?: number;
+  /** Safety supervisor bookkeeping for this call (emergency already handled, corrections issued). */
+  safety?: { emergencyHandled: boolean; corrections: number };
   /** Persisted on call row when session ends */
   callOutcome?: 'completed' | 'transferred' | 'failed';
   /** Number the call was transferred to (set by the transfer_call tool); persisted as calls.transfer_target. */
