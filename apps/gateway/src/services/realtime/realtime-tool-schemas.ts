@@ -165,6 +165,22 @@ export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'es
     });
   }
 
+  // Structured Medical Tourism intake (consent-capture tenants only; every other tenant's create_lead is unchanged). All optional and short; the
+  // capture side drops `procedure` unless the caller agreed to its being kept, and the delivery side re-checks that.
+  if (tenantConfig.consentCapture) {
+    const createLead = tools.find((t) => t.name === 'create_lead');
+    if (createLead) {
+      createLead.parameters.properties = {
+        ...createLead.parameters.properties,
+        procedure: { type: 'string', description: 'The treatment the caller asked about, in their own words (for example "dental implants"). Never a diagnosis, symptom, medication or medical history. Leave blank if not stated.' },
+        destination: { type: 'string', description: 'The country or city they would like to travel to, if they said. Leave blank otherwise.' },
+        timeframe: { type: 'string', description: 'When they are thinking of travelling, in their own words (for example "next spring"). Leave blank if not stated.' },
+        preferred_language: { type: 'string', description: 'The language they prefer us to use. Leave blank if not stated.' },
+        preferred_contact_time: { type: 'string', description: 'The best time to be contacted, in their own words. Leave blank if not stated.' },
+      };
+    }
+  }
+
   if (transferOn) {
     tools.push({
       type: 'function',

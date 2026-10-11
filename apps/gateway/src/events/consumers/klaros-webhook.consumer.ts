@@ -4,7 +4,8 @@ import { customWebhooksService, type KlarosSequenceStep } from '../../services/w
 import { isKlarosEventType, type KlarosEventType } from '../../security/klaros-event-types.js';
 import { logger } from '../../services/logger.js';
 import { sanitizeConsentEvidence, withFreshConsent } from '../../services/consent/consent-evidence.js';
-import { personalDataMayBeDelivered } from '../../services/consent/consent-gate.js';
+import { medicalInfoMayBeDelivered, personalDataMayBeDelivered } from '../../services/consent/consent-gate.js';
+import { sanitizeIntake } from '../../services/consent/intake.js';
 
 /** Internal platform event type -> external Klaros contract event name. */
 const EVENT_TYPE_MAP: Partial<Record<string, KlarosEventType>> = {
@@ -84,9 +85,17 @@ export async function handleKlarosWebhookEvent(
 async function withholdPersonalData(event: PlatformEvent, klarosType: KlarosEventType): Promise<PlatformEvent> {
   const payload = event.payload as Record<string, unknown>;
   if (klarosType === 'lead.created' || klarosType === 'lead.updated') {
-    if (await personalDataMayBeDelivered(event.tenantId, { leadId: payload.leadId, callSid: event.callSid })) return event;
-    const { phone: _phone, name: _name, ...rest } = payload;
-    return { ...event, payload: { ...rest, personalDataWithheld: true } };
+    if (!(await personalDataMayBeDelivered(event.tenantId, { leadId: payload.leadId, callSid: event.callSid }))) {
+      const { phone: _phone, name: _name, intake: _intake, ...rest } = payload;
+      return { ...event, payload: { ...rest, personalDataWithheld: true } };
+    }
+    // Personal data may go. A treatment named in the intake additionally needs the CURRENT store_medical_information decision.
+    const intake = sanitizeIntake(payload.intake);
+    if (intake?.procedure && !(await medicalInfoMayBeDelivered(event.tenantId, { leadId: payload.leadId, callSid: event.callSid }))) {
+      const { procedure: _procedure, ...restIntake } = intake;
+      return { ...event, payload: { ...payload, intake: Object.keys(restIntake).length ? restIntake : undefined } };
+    }
+    return event;
   }
   if (klarosType === 'lead.qualified') {
     if (await personalDataMayBeDelivered(event.tenantId, { leadId: payload.leadId, callSid: event.callSid ?? payload.callId })) return event;
@@ -148,10 +157,12 @@ function buildEventData(klarosType: KlarosEventType, event: PlatformEvent): Reco
     case 'lead.updated': {
       // Optional consent evidence: rebuilt field by field from a validated shape, or omitted. Never defaulted, never inferred.
       const consent = sanitizeConsentEvidence(payload.consent);
+      const intake = sanitizeIntake(payload.intake);
       return {
         leadId: payload.leadId,
         phone: payload.phone,
         name: payload.name,
+        ...(intake ? { intake } : {}),
         callId: payload.callId ?? event.callSid,
         klarosLeadId: payload.klarosLeadId,
         ...(consent ? { consent } : {}),

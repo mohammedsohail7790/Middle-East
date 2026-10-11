@@ -273,4 +273,54 @@ describe('consent evidence on lead events: delivered, signed, verified', () => {
       expect(d.fields).toEqual(qualified.fields);
     });
   });
+  describe('the structured intake is re-checked against CURRENT consent immediately before delivery', () => {
+    const INTAKE = { procedure: 'dental implants', destination: 'India', timeframe: 'next spring', preferredLanguage: 'Arabic', preferredContactTime: 'evenings' };
+    const PERSON = { leadId: 'L1', phone: '+15550000101', name: 'SYNTHETIC Test Person', klarosLeadId: 'K1', intake: INTAKE };
+    const T1 = Date.parse('2026-10-09T10:00:01.000Z');
+    const T3 = Date.parse('2026-10-09T10:00:03.000Z');
+    const delivered = () => JSON.parse(received[0].body).data;
+
+    it('personal + medical consent: the whole intake is delivered', async () => {
+      seed(['contact', 'store_personal_data', 'store_medical_information'], T2);
+      await send('LEAD_CREATED', { ...PERSON, consent: GOOD });
+      expect(delivered().intake).toEqual(INTAKE);
+    });
+
+    it('personal consent only: everything but the treatment is delivered', async () => {
+      seed(['contact', 'store_personal_data'], T2);
+      await send('LEAD_CREATED', { ...PERSON, consent: GOOD });
+      const { procedure: _p, ...rest } = INTAKE;
+      expect(delivered().intake).toEqual(rest);
+      expect(JSON.stringify(delivered())).not.toContain('dental implants');
+    });
+
+    it('medical consent withdrawn AFTER the event was queued: the delayed event goes out without the treatment', async () => {
+      seed(['contact', 'store_personal_data', 'store_medical_information'], T1);
+      seed(['store_medical_information'], T3, false);
+      await send('LEAD_UPDATED', { ...PERSON, consent: GOOD });
+      expect(delivered().intake.procedure).toBeUndefined();
+      expect(delivered().intake.destination).toBe('India');
+    });
+
+    it('personal-data consent withdrawn or never given: no intake at all, flagged', async () => {
+      seed(['store_personal_data'], T1);
+      seed(['store_personal_data'], T3, false);
+      await send('LEAD_CREATED', { ...PERSON, consent: GOOD });
+      expect('intake' in delivered()).toBe(false);
+      expect(delivered().personalDataWithheld).toBe(true);
+    });
+
+    it('an intake with unknown or oversized values is rebuilt field by field and capped', async () => {
+      seed(['contact', 'store_personal_data', 'store_medical_information'], T2);
+      await send('LEAD_CREATED', { ...PERSON, consent: GOOD, intake: { ...INTAKE, diagnosis: 'secret', destination: 'z'.repeat(500) } });
+      expect(delivered().intake.diagnosis).toBeUndefined();
+      expect(delivered().intake.destination).toHaveLength(80);
+    });
+
+    it('a tenant that did not opt in is unchanged: the intake goes through as given', async () => {
+      optedOut.add(TENANT);
+      await send('LEAD_CREATED', { ...PERSON });
+      expect(delivered().intake).toEqual(INTAKE);
+    });
+  });
 });

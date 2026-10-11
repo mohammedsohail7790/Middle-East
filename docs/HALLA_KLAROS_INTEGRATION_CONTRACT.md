@@ -49,6 +49,14 @@ A finished call delivers `lead.qualified` (id `<eventId>:lead.qualified`, only w
 ### 3.0 Personal data is re-checked against current consent at delivery (tenants with consent capture only)
 For a tenant that configured `consent_capture`, `name` and `phone` (`lead.created` / `lead.updated`), `fields` (`lead.qualified`, also inside the finalisation sequence of a finished call) leave Halla only while the lead's CURRENT stored decisions grant `store_personal_data`. Withdrawn after the event was queued, declined, or never given: those fields are removed and `personalDataWithheld: true` is set; ids, status and the consent evidence are still delivered, so the receiver learns the state without receiving the data. An unreadable consent state makes the delivery fail and retry (never sent on a guess). Tenants without the opt-in are unchanged.
 
+### 3.0.1 Structured intake on `lead.created` / `lead.updated` (consent-capture tenants only)
+
+A lead event may carry an optional `intake` object with up to five short free-text fields: `procedure` (the treatment, in the caller's words), `destination`, `timeframe`, `preferredLanguage`, `preferredContactTime` (80 characters each, language 35; nothing else is ever sent). It exists so the receiver can match the enquiry against its provider catalogue. It is rebuilt field by field at delivery. It is delivered only while the lead's CURRENT stored decisions grant `store_personal_data`; `procedure` additionally needs `store_medical_information` (a treatment is health-related) and is removed on its own when that is withdrawn. Without `store_personal_data` the whole object is removed and `personalDataWithheld: true` is set. A tenant that has not opted in is unchanged.
+
+### 3.0.2 Sharing with a clinic is not a Halla consent scope
+
+Halla's consent vocabulary is exactly `contact`, `store_personal_data`, `store_medical_information`. The fourth scope, `share_with_selected_provider`, is provider-specific and is recorded only by a person in Klaros after the patient has been told which clinic will receive which information. Halla never asks for it, never records it and never sends patient details to a clinic; an event whose `consent.scope` contains it is not valid evidence and is ignored by the receiver. A later withdrawal that Halla reports (a newer decision that does not grant `store_personal_data`) blocks any referral that has not yet been sent, because Klaros re-checks current consent at send time.
+
 ### 3.1 Optional consent evidence on `lead.created` / `lead.updated` (proposed for review; local code, not deployed)
 `data` may carry one extra key, `consent`, **only when a real consent record exists**. When none exists the key is **absent** (never
 `null`, never `{ "granted": false }` as a stand-in). Existing receivers that ignore unknown keys are unaffected.

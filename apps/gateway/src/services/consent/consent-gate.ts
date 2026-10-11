@@ -91,6 +91,29 @@ export async function personalDataMayBeDelivered(tenantId: string, ref: { leadId
   return false;
 }
 
+/**
+ * Delivery-time check for the one intake field that names a treatment (`procedure`): for a tenant that opted in to consent capture it may be delivered
+ * ONLY while the lead's CURRENT stored decisions grant `store_medical_information` (a treatment is health-related). A tenant that has not opted in
+ * is never restricted. Throws on a database error (the bus retries), like personalDataMayBeDelivered.
+ */
+export async function medicalInfoMayBeDelivered(tenantId: string, ref: { leadId?: unknown; callSid?: unknown }): Promise<boolean> {
+  const enforced = await readConsentEnforced(tenantId);
+  if (!enforced) return true;
+  if (typeof ref.leadId === 'string' && ref.leadId) {
+    const evidence = await readConsentEvidenceForLead(tenantId, ref.leadId);
+    return Boolean(evidence && evidence.granted && evidence.scope.includes('store_medical_information'));
+  }
+  if (typeof ref.callSid === 'string' && ref.callSid) {
+    const r = await voiceDb.query(
+      `SELECT scope, granted, method, wording_version, recorded_at
+         FROM public.lead_consents WHERE tenant_id = $1 AND call_sid = $2 ORDER BY recorded_at, seq`,
+      [tenantId, ref.callSid]
+    );
+    return grantedScopesFromRows(r.rows as ConsentRow[]).includes('store_medical_information');
+  }
+  return false;
+}
+
 export type OutboundConsentCode = 'no_lead' | 'ambiguous_lead' | 'no_contact_consent' | 'consent_state_unavailable';
 
 export class ConsentRequiredError extends Error {

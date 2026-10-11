@@ -69,6 +69,7 @@ import { getCallConsentGate, assertOutboundContactConsent, ConsentRequiredError,
 import { RealtimeToolsManager, escalationReasonCode } from '../../../apps/gateway/src/services/realtime/realtime.tools.js';
 import { initiateOutboundCall } from '../../../apps/gateway/src/services/voice/outbound.service.js';
 import { buildToolsList } from '../../../apps/gateway/src/services/realtime/realtime-tool-schemas.js';
+import { sanitizeIntake } from '../../../apps/gateway/src/services/consent/intake.js';
 
 const T0 = Date.parse('2026-10-09T10:00:00.000Z');
 const decide = (tenant: string, call: string, scope: string, granted: boolean, s: number, leadId: string | null = null) =>
@@ -324,5 +325,56 @@ describe('the outbound call service itself enforces the contact decision (click-
   it('a tenant that did not opt in is unchanged: the call is placed with no consent record', async () => {
     await expect(initiateOutboundCall(ctx(PLAIN))).resolves.toEqual({ callSid: 'CA-OUT-1' });
     expect(twilioCreate.calls).toHaveLength(1);
+  });
+});
+
+describe('structured Medical Tourism intake (procedure, destination, timeframe, language, contact time)', () => {
+  const intakeArgs = {
+    name: 'Test Person', phone: '+971500000001', procedure: 'dental implants', destination: 'India', timeframe: 'next spring',
+    preferred_language: 'Arabic', preferred_contact_time: 'evenings',
+  };
+  const sentData = () => (created[created.length - 1] as unknown[])[3] as { intake?: Record<string, string> };
+  let sid = '';
+  beforeEach(() => { sid = freshSid(); });
+
+  it('sanitizeIntake keeps only the five known fields, trims, strips control characters, caps length and drops empties', () => {
+    expect(sanitizeIntake({ procedure: '  dental   implants\u0000 ', destination: 'x'.repeat(200), diagnosis: 'secret', timeframe: '', preferredLanguage: 7 })).toEqual({
+      procedure: 'dental implants',
+      destination: 'x'.repeat(80),
+    });
+    expect(sanitizeIntake({ diagnosis: 'a' })).toBeUndefined();
+    expect(sanitizeIntake(null)).toBeUndefined();
+    expect(sanitizeIntake(['procedure'])).toBeUndefined();
+    expect(sanitizeIntake({ preferredLanguage: 'y'.repeat(100) })?.preferredLanguage).toHaveLength(35);
+  });
+
+  it('only a consent-capture tenant is offered the structured fields; every other tenant create_lead is unchanged', () => {
+    const props = (cfg: Record<string, unknown>) => Object.keys(buildToolsList(cfg as never).find((t: { name: string }) => t.name === 'create_lead').parameters.properties);
+    expect(props({ consentCapture: { wordingVersion: 'v1' } })).toEqual(expect.arrayContaining(['procedure', 'destination', 'timeframe', 'preferred_language', 'preferred_contact_time']));
+    expect(props({})).toEqual(['name', 'phone', 'email', 'address', 'interest']);
+  });
+
+  it('with personal-data consent only, the treatment is NOT passed on but the other intake fields are', async () => {
+    decide(OPT_IN, sid, 'store_personal_data', true, 1);
+    const r = await new RealtimeToolsManager().executeToolDirect(session(OPT_IN, sid), 'create_lead', intakeArgs);
+    expect(r.success).toBe(true);
+    expect(sentData().intake).toEqual({ destination: 'India', timeframe: 'next spring', preferredLanguage: 'Arabic', preferredContactTime: 'evenings' });
+  });
+
+  it('with personal-data AND medical-information consent, the treatment is passed on too', async () => {
+    decide(OPT_IN, sid, 'store_personal_data', true, 1); decide(OPT_IN, sid, 'store_medical_information', true, 1);
+    await new RealtimeToolsManager().executeToolDirect(session(OPT_IN, sid), 'create_lead', intakeArgs);
+    expect(sentData().intake?.procedure).toBe('dental implants');
+  });
+
+  it('a tenant that did not opt in never sends an intake object, even if the model supplied the fields', async () => {
+    await new RealtimeToolsManager().executeToolDirect(session(PLAIN, sid), 'create_lead', intakeArgs);
+    expect(sentData().intake).toBeUndefined();
+  });
+
+  it('without personal-data consent nothing is saved, so no intake leaves the call either', async () => {
+    const r = await new RealtimeToolsManager().executeToolDirect(session(OPT_IN, sid), 'create_lead', intakeArgs);
+    expect(r.success).toBe(false);
+    expect(created).toHaveLength(0);
   });
 });

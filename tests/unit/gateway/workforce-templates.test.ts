@@ -453,6 +453,12 @@ describe('Medical Tourism receptionist: consent is asked BEFORE any personal det
 
   it('still keeps the separate-questions rule and never asks for medical-information consent', () => {
     expect(steps).toMatch(/Ask about being contacted and about keeping their details as separate questions/);
-    expect(steps).toMatch(/Never ask for, or record consent for, medical information/);
+    expect(steps).toMatch(/Ask a third, separate question only about keeping the TREATMENT they are interested in \(not their medical history\)/);
+    expect(steps).toMatch(/Never ask for, accept or record medical history, symptoms, test results, medications or diagnoses/);
+  });
+
+  it('collects the structured intake fields into create_lead, and only after consent', () => {
+    expect(steps).toMatch(/put these in the structured fields of create_lead: procedure .*destination, timeframe, preferred_language and preferred_contact_time/);
+    expect(steps.indexOf('Only after the caller has agreed that you may keep their details, collect')).toBeGreaterThan(steps.indexOf('Consent comes BEFORE any personal detail'));
   });
 });

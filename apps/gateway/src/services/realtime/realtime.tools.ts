@@ -1,4 +1,5 @@
 import { logger } from '../logger.js';
+import { sanitizeIntake, type LeadIntake } from '../consent/intake.js';
 import { RealtimeSession } from './realtime.types.js';
 import { appointmentService } from '../appointments/appointment.service.js';
 import { getTenantAvailabilitySlots } from '../appointments/tenant-availability.service.js';
@@ -648,7 +649,10 @@ export class RealtimeToolsManager {
 
   private async createLead(
     session: RealtimeSession,
-    params: { name: string; phone: string; email?: string; address?: string; interest?: string }
+    params: {
+      name: string; phone: string; email?: string; address?: string; interest?: string;
+      procedure?: string; destination?: string; timeframe?: string; preferred_language?: string; preferred_contact_time?: string;
+    }
   ): Promise<ToolResult> {
     logger.info('REALTIME_TOOL_CREATE_LEAD', {
       sessionId: session.id,
@@ -671,6 +675,23 @@ export class RealtimeToolsManager {
       };
     }
 
+    // Structured intake (consent-capture tenants only). The treatment is kept only if the caller ALSO agreed to its being kept
+    // (store_medical_information); everything else needs only the store_personal_data decision already checked above.
+    let intake: LeadIntake | undefined;
+    if (consentGate.enforced) {
+      intake = sanitizeIntake({
+        procedure: params.procedure,
+        destination: params.destination,
+        timeframe: params.timeframe,
+        preferredLanguage: params.preferred_language,
+        preferredContactTime: params.preferred_contact_time,
+      });
+      if (intake?.procedure && !consentGate.allows('store_medical_information')) {
+        const { procedure: _dropped, ...rest } = intake;
+        intake = Object.keys(rest).length ? rest : undefined;
+      }
+    }
+
     try {
       const address = params.address?.trim() || undefined;
       const callId = await resolveCallIdForLead(session.tenantId, session.callSid);
@@ -684,6 +705,7 @@ export class RealtimeToolsManager {
         callId: callId ?? undefined,
         consentCallSid: session.callSid,
         metadata: { interest: params.interest, address },
+        ...(intake ? { intake } : {}),
       });
 
       const { RealtimeMemoryManager } = await import('./realtime.memory.js');

@@ -4,6 +4,7 @@
  */
 
 import { voiceDb } from '../voice/tenant-scope.js';
+import type { LeadIntake } from '../consent/intake.js';
 import { getLeadSelectList } from './leads-schema.js';
 import { resolveConsentForLeadEvent } from '../consent/consent-evidence.js';
 
@@ -135,6 +136,8 @@ export class LeadsService {
       klarosLeadId?: string;
       /** The call whose recorded consent decisions belong to this lead (never used as a source of consent by itself). */
       consentCallSid?: string;
+      /** Structured Medical Tourism intake (already sanitised and consent-filtered by the caller). */
+      intake?: LeadIntake;
     }
   ): Promise<Lead> {
     try {
@@ -186,7 +189,7 @@ export class LeadsService {
               const consent = await resolveConsentForLeadEvent(tenantId, leadId, data?.consentCallSid);
               publishPlatformEvent(
                 PlatformEventTypes.LEAD_UPDATED,
-                { leadId, phone: phoneNumber, name: data?.name, callId: data?.callId, ...(consent ? { consent } : {}) },
+                { leadId, phone: phoneNumber, name: data?.name, callId: data?.callId, ...(data?.intake ? { intake: data.intake } : {}), ...(consent ? { consent } : {}) },
                 { tenantId }
               );
             })
@@ -244,6 +247,7 @@ export class LeadsService {
               name: data?.name,
               callId: data?.callId,
               klarosLeadId: data?.klarosLeadId,
+              ...(data?.intake ? { intake: data.intake } : {}),
               ...(consent ? { consent } : {}),
             },
             { tenantId }
