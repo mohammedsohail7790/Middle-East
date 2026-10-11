@@ -434,3 +434,25 @@ describe('escalation wording: Medical Tourism never promises an unverified call-
     expect(ESCALATION_MECHANISM).toContain("take the caller's first name and callback number, tell them a person will call back");
   });
 });
+
+describe('Medical Tourism receptionist: consent is asked BEFORE any personal detail is collected', () => {
+  const intake = WORKFORCE_TEMPLATES.medical_tourism.agents.find((a) => a.key === 'receptionist_intake')!.systemPrompt;
+  const steps = intake.slice(intake.indexOf('WHAT YOU DO'));
+
+  it('the AI-disclosure and consent step comes before the step that collects name and phone', () => {
+    const consent = steps.indexOf('Consent comes BEFORE any personal detail');
+    const collect = steps.indexOf('collect: first name, best phone number');
+    expect(consent).toBeGreaterThan(-1);
+    expect(collect).toBeGreaterThan(consent);
+  });
+
+  it('collection is conditional on the caller having agreed, and a refusal means nothing is asked or written down', () => {
+    expect(steps).toMatch(/Only after the caller has agreed that you may keep their details, collect/);
+    expect(steps).toMatch(/If they have not agreed, do not ask for or write down any of these, and offer a person instead/);
+  });
+
+  it('still keeps the separate-questions rule and never asks for medical-information consent', () => {
+    expect(steps).toMatch(/Ask about being contacted and about keeping their details as separate questions/);
+    expect(steps).toMatch(/Never ask for, or record consent for, medical information/);
+  });
+});
