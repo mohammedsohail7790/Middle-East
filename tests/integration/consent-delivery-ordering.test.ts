@@ -30,6 +30,7 @@ vi.mock('../../apps/gateway/src/services/db/pool.js', () => ({
   pool: {
     query: vi.fn(async (sql: string, params: any[]) => {
       const t = sql.replace(/\s+/g, ' ').trim();
+      if (t.startsWith("SELECT metadata->'consent_capture'")) return { rows: [{ consent_capture: { wording_version: 'MT-CONSENT-v1' } }] };
       if (t.startsWith('SELECT scope, granted, method, wording_version, recorded_at FROM public.lead_consents')) {
         if (state.failReads > 0) { state.failReads--; throw new Error('connection terminated unexpectedly'); }
         return {

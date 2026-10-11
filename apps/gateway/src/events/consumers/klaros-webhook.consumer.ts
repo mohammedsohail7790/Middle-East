@@ -4,6 +4,7 @@ import { customWebhooksService, type KlarosSequenceStep } from '../../services/w
 import { isKlarosEventType, type KlarosEventType } from '../../security/klaros-event-types.js';
 import { logger } from '../../services/logger.js';
 import { sanitizeConsentEvidence, withFreshConsent } from '../../services/consent/consent-evidence.js';
+import { personalDataMayBeDelivered } from '../../services/consent/consent-gate.js';
 
 /** Internal platform event type -> external Klaros contract event name. */
 const EVENT_TYPE_MAP: Partial<Record<string, KlarosEventType>> = {
@@ -46,10 +47,12 @@ export async function handleKlarosWebhookEvent(
     // A lead event that carries consent is delivered with the evidence as it is stored NOW, not as it was when the event was
     // published, so a retried or delayed event cannot deliver an older state. A database error here throws: the bus retries
     // (bounded, then DLQ) rather than sending stale evidence or dropping a withdrawal.
-    const delivered =
+    const withConsent =
       klarosType === 'lead.created' || klarosType === 'lead.updated'
         ? { ...event, payload: await withFreshConsent(event.tenantId, event.payload as Record<string, unknown>) }
         : event;
+    // Personal data (name, phone, collected fields) is delivered only while the stored consent still allows it; see withholdPersonalData.
+    const delivered = await withholdPersonalData(withConsent, klarosType);
     steps =
       event.eventType === PlatformEventTypes.CALL_ENDED
         ? buildCallFinalizationSequence(delivered)
@@ -70,6 +73,34 @@ export async function handleKlarosWebhookEvent(
     });
     throw err;
   }
+}
+
+/**
+ * Re-checks CURRENT consent immediately before an event that carries personal data leaves Halla. Without a currently granted
+ * `store_personal_data` decision (never given, declined, or withdrawn after the event was queued) the personal fields are removed and
+ * `personalDataWithheld: true` says so; the event itself (ids, status, consent evidence) is still delivered so the receiver learns
+ * the state. A tenant that did not opt in to consent capture is untouched. A database error throws (the bus retries).
+ */
+async function withholdPersonalData(event: PlatformEvent, klarosType: KlarosEventType): Promise<PlatformEvent> {
+  const payload = event.payload as Record<string, unknown>;
+  if (klarosType === 'lead.created' || klarosType === 'lead.updated') {
+    if (await personalDataMayBeDelivered(event.tenantId, { leadId: payload.leadId, callSid: event.callSid })) return event;
+    const { phone: _phone, name: _name, ...rest } = payload;
+    return { ...event, payload: { ...rest, personalDataWithheld: true } };
+  }
+  if (klarosType === 'lead.qualified') {
+    if (await personalDataMayBeDelivered(event.tenantId, { leadId: payload.leadId, callSid: event.callSid ?? payload.callId })) return event;
+    const { fields: _fields, ...rest } = payload;
+    return { ...event, payload: { ...rest, personalDataWithheld: true } };
+  }
+  if (event.eventType === PlatformEventTypes.CALL_ENDED) {
+    const q = payload.qualificationEvent as Record<string, unknown> | undefined;
+    if (!q || q.fields === undefined) return event;
+    if (await personalDataMayBeDelivered(event.tenantId, { leadId: q.leadId, callSid: event.callSid ?? payload.callSid })) return event;
+    const { fields: _fields, ...restQ } = q;
+    return { ...event, payload: { ...payload, qualificationEvent: { ...restQ, personalDataWithheld: true } } };
+  }
+  return event;
 }
 
 /** lead.qualified (when present) then call.completed. Ids are derived from the platform event id so retries reuse them. */
@@ -124,6 +155,7 @@ function buildEventData(klarosType: KlarosEventType, event: PlatformEvent): Reco
         callId: payload.callId ?? event.callSid,
         klarosLeadId: payload.klarosLeadId,
         ...(consent ? { consent } : {}),
+        ...(payload.personalDataWithheld ? { personalDataWithheld: true } : {}),
       };
     }
     case 'lead.qualified':
@@ -140,6 +172,7 @@ function buildEventData(klarosType: KlarosEventType, event: PlatformEvent): Reco
         missingFields: payload.missingFields,
         reason: payload.reason,
         confidence: payload.confidence,
+        ...(payload.personalDataWithheld ? { personalDataWithheld: true } : {}),
       };
     case 'lead.escalated':
       return {

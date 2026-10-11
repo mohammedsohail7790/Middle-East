@@ -46,6 +46,9 @@ The bus consumer maps these platform events (`events/consumers/klaros-webhook.co
 A finished call delivers `lead.qualified` (id `<eventId>:lead.qualified`, only when a real qualification exists) and then
 `call.completed`, as one ordered sequence.
 
+### 3.0 Personal data is re-checked against current consent at delivery (tenants with consent capture only)
+For a tenant that configured `consent_capture`, `name` and `phone` (`lead.created` / `lead.updated`), `fields` (`lead.qualified`, also inside the finalisation sequence of a finished call) leave Halla only while the lead's CURRENT stored decisions grant `store_personal_data`. Withdrawn after the event was queued, declined, or never given: those fields are removed and `personalDataWithheld: true` is set; ids, status and the consent evidence are still delivered, so the receiver learns the state without receiving the data. An unreadable consent state makes the delivery fail and retry (never sent on a guess). Tenants without the opt-in are unchanged.
+
 ### 3.1 Optional consent evidence on `lead.created` / `lead.updated` (proposed for review; local code, not deployed)
 `data` may carry one extra key, `consent`, **only when a real consent record exists**. When none exists the key is **absent** (never
 `null`, never `{ "granted": false }` as a stand-in). Existing receivers that ignore unknown keys are unaffected.

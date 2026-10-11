@@ -65,6 +65,32 @@ export async function getCallConsentGate(tenantId: string, callSid: string | und
   }
 }
 
+/**
+ * Delivery-time check for events that leave Halla carrying personal data (name, phone, collected fields). For a tenant that opted in
+ * to consent capture, personal data may be delivered ONLY while the lead's CURRENT stored decisions grant `store_personal_data`
+ * (or, for an event that names only a call, the call's decisions do). A withdrawal, a decline or no decision at all means "no", and
+ * so does an event that names neither a lead nor a call. A tenant that has not opted in is never restricted.
+ * THROWS on a database error: the platform bus then retries (bounded, then dead-letter) instead of sending personal data on a guess
+ * or silently dropping the event.
+ */
+export async function personalDataMayBeDelivered(tenantId: string, ref: { leadId?: unknown; callSid?: unknown }): Promise<boolean> {
+  const enforced = await readConsentEnforced(tenantId);
+  if (!enforced) return true;
+  if (typeof ref.leadId === 'string' && ref.leadId) {
+    const evidence = await readConsentEvidenceForLead(tenantId, ref.leadId);
+    return Boolean(evidence && evidence.granted && evidence.scope.includes('store_personal_data'));
+  }
+  if (typeof ref.callSid === 'string' && ref.callSid) {
+    const r = await voiceDb.query(
+      `SELECT scope, granted, method, wording_version, recorded_at
+         FROM public.lead_consents WHERE tenant_id = $1 AND call_sid = $2 ORDER BY recorded_at, seq`,
+      [tenantId, ref.callSid]
+    );
+    return grantedScopesFromRows(r.rows as ConsentRow[]).includes('store_personal_data');
+  }
+  return false;
+}
+
 export type OutboundConsentCode = 'no_lead' | 'ambiguous_lead' | 'no_contact_consent' | 'consent_state_unavailable';
 
 export class ConsentRequiredError extends Error {

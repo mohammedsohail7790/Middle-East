@@ -21,16 +21,22 @@ const deliveries = new Map<string, boolean>();
 let receiverPort = 0;
 interface StoredConsent { tenant_id: string; lead_id: string; scope: string; granted: boolean; method: string; wording_version: string; recorded_at: Date; seq: number }
 const storedConsents: StoredConsent[] = [];
+const optedOut = new Set<string>();
+const failConfigReads = { n: 0 };
 
 vi.mock('../../apps/gateway/src/services/db/pool.js', () => ({
   pool: {
     query: vi.fn(async (sql: string, params: any[]) => {
       const t = sql.replace(/\s+/g, ' ').trim();
+      if (t.startsWith("SELECT metadata->'consent_capture'")) {
+        if (failConfigReads.n > 0) { failConfigReads.n--; throw new Error('connection terminated unexpectedly'); }
+        return { rows: [{ consent_capture: optedOut.has(params[0]) ? null : { wording_version: 'MT-CONSENT-v1' } }] };
+      }
       if (t.startsWith('SELECT scope, granted, method, wording_version, recorded_at FROM public.lead_consents')) {
         return { rows: storedConsents.filter((r) => r.tenant_id === params[0] && r.lead_id === params[1]).sort((a, b) => a.recorded_at.getTime() - b.recorded_at.getTime() || a.seq - b.seq) };
       }
       if (t.startsWith('SELECT id, url, secret, events FROM public.custom_webhooks')) {
-        return { rows: [{ id: 'wh-1', tenant_id: TENANT, url: URL_OK, secret: SECRET, active: true, events: ['lead.created', 'lead.updated'] }] };
+        return { rows: [{ id: 'wh-1', tenant_id: TENANT, url: URL_OK, secret: SECRET, active: true, events: ['lead.created', 'lead.updated', 'lead.qualified', 'call.completed'] }] };
       }
       if (t.startsWith('SELECT delivered FROM public.webhook_deliveries')) {
         const d = deliveries.get(`${params[0]}:${params[1]}`);
@@ -75,7 +81,7 @@ describe('consent evidence on lead events: delivered, signed, verified', () => {
     receiverPort = (server.address() as AddressInfo).port;
   });
   afterAll(() => new Promise<void>((r) => server.close(() => r())));
-  beforeEach(() => { received = []; deliveries.clear(); storedConsents.length = 0; });
+  beforeEach(() => { received = []; deliveries.clear(); storedConsents.length = 0; optedOut.clear(); failConfigReads.n = 0; });
 
   /** Stored decisions for lead L1 of this tenant: the scopes decided at the given time (granted or declined). */
   const seed = (scopes: string[], atMs: number, granted = true, wording = 'MT-CONSENT-v1', tenant = TENANT) => {
@@ -182,5 +188,89 @@ describe('consent evidence on lead events: delivered, signed, verified', () => {
       await handleKlarosWebhookEvent(event, { finalAttempt: false });
       if (received.length) expect('consent' in JSON.parse(received[0].body).data).toBe(false);
     }
+  });
+  describe('personal data is re-checked against CURRENT consent immediately before delivery', () => {
+    const PERSONAL = { leadId: 'L1', phone: '+15550000101', name: 'SYNTHETIC Test Person', klarosLeadId: 'K1' };
+    const T1 = Date.parse('2026-10-09T10:00:01.000Z');
+    const T3 = Date.parse('2026-10-09T10:00:03.000Z');
+    const delivered = () => JSON.parse(received[0].body).data;
+
+    it('store_personal_data currently granted: name and phone are delivered, nothing is flagged', async () => {
+      seed(['contact', 'store_personal_data'], T2);
+      await send('LEAD_CREATED', { ...PERSONAL, consent: GOOD });
+      expect(delivered()).toMatchObject({ phone: PERSONAL.phone, name: PERSONAL.name });
+      expect('personalDataWithheld' in delivered()).toBe(false);
+    });
+
+    it('withdrawn AFTER the event was queued: the delayed event goes out WITHOUT name and phone, flagged, and shows the withdrawal', async () => {
+      seed(['contact', 'store_personal_data'], T1);
+      seed(['store_personal_data'], T3, false); // the newer decision: withdrawn
+      await send('LEAD_CREATED', { ...PERSONAL, consent: GOOD }); // the event still carries the older "granted" snapshot
+      const d = delivered();
+      expect('phone' in d).toBe(false);
+      expect('name' in d).toBe(false);
+      expect(d.personalDataWithheld).toBe(true);
+      expect(d.consent).toMatchObject({ granted: true, scope: ['contact'] }); // evidence is the stored state, not the snapshot
+      expect(verify(received[0]).valid).toBe(true);
+    });
+
+    it.each([
+      ['contact consent only', () => seed(['contact'], T2)],
+      ['personal data declined', () => seed(['store_personal_data'], T2, false)],
+      ['no decision at all', () => undefined],
+    ])('%s: no personal data leaves Halla', async (_n, arrange) => {
+      arrange();
+      await send('LEAD_UPDATED', { ...PERSONAL });
+      const d = delivered();
+      expect(['phone' in d, 'name' in d]).toEqual([false, false]);
+      expect(d.personalDataWithheld).toBe(true);
+      expect(d.leadId).toBe('L1');
+    });
+
+    it("another tenant's grant for the same lead id never opens it", async () => {
+      seed(['contact', 'store_personal_data'], T2, true, 'MT-CONSENT-v1', '22222222-2222-4222-8222-222222222222');
+      await send('LEAD_CREATED', { ...PERSONAL });
+      expect(delivered().personalDataWithheld).toBe(true);
+    });
+
+    it('a tenant that did NOT opt in to consent capture is unchanged: personal data is delivered as before, no flag', async () => {
+      optedOut.add(TENANT);
+      await send('LEAD_CREATED', { ...PERSONAL });
+      expect(delivered()).toMatchObject({ phone: PERSONAL.phone, name: PERSONAL.name });
+      expect('personalDataWithheld' in delivered()).toBe(false);
+    });
+
+    it('an unreadable consent state throws (the bus retries) and nothing is sent', async () => {
+      failConfigReads.n = 1;
+      await expect(send('LEAD_CREATED', { ...PERSONAL })).rejects.toThrow();
+      expect(received).toHaveLength(0);
+      // the retry, once the database is back, delivers according to the stored state
+      seed(['contact', 'store_personal_data'], T2);
+      await send('LEAD_CREATED', { ...PERSONAL });
+      expect(delivered()).toMatchObject({ phone: PERSONAL.phone });
+    });
+
+    it('the collected fields of a qualification and the call-finalisation sequence are withheld the same way', async () => {
+      const qualified = { leadId: 'L1', status: 'needs_human_review', fields: { name: 'SYNTHETIC Test Person', phone: '+15550000101' }, reason: 'Needs human review.', missingFields: ['service'] };
+      // withdrawn
+      seed(['store_personal_data'], T1, true);
+      seed(['store_personal_data'], T3, false);
+      await handleKlarosWebhookEvent(createPlatformEvent(PlatformEventTypes.LEAD_QUALIFIED as never, qualified, { tenantId: TENANT, callSid: 'CA1' }), { finalAttempt: false });
+      let d = JSON.parse(received[0].body).data;
+      expect('fields' in d).toBe(false);
+      expect(d).toMatchObject({ status: 'needs_human_review', qualification: 'needs_human_review', personalDataWithheld: true });
+      // the same through the CALL_ENDED sequence (lead.qualified step, then call.completed)
+      received = [];
+      await handleKlarosWebhookEvent(createPlatformEvent(PlatformEventTypes.CALL_ENDED as never, { callSid: 'CA1', durationMs: 1000, qualificationEvent: qualified }, { tenantId: TENANT, callSid: 'CA1' }), { finalAttempt: false });
+      const types = received.map((r) => JSON.parse(r.body).type);
+      expect(types).toEqual(['lead.qualified', 'call.completed']);
+      expect('fields' in JSON.parse(received[0].body).data).toBe(false);
+      // granted again by a newer decision: delivered
+      received = []; deliveries.clear();
+      seed(['store_personal_data'], Date.parse('2026-10-09T10:00:09.000Z'), true);
+      await handleKlarosWebhookEvent(createPlatformEvent(PlatformEventTypes.LEAD_QUALIFIED as never, qualified, { tenantId: TENANT, callSid: 'CA1' }), { finalAttempt: false });
+      d = JSON.parse(received[0].body).data;
+      expect(d.fields).toEqual(qualified.fields);
+    });
   });
 });
