@@ -86,19 +86,21 @@ export class IVRService {
     name: string; role: string; systemPrompt: string; voiceId?: string;
     tone?: string; services?: string[]; maxDurationSeconds?: number;
     transferOnTimeout?: boolean; transferNumber?: string; knowledgeCategory?: string;
-  }): Promise<AIAgent> {
-    const sub = await pool.query(
-      `SELECT plan, status FROM public.subscriptions WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT 1`,
-      [tenantId]
-    );
-    const { getMaxAiAgents } = await import('../../config/plan-limits.js');
-    const maxAgents = getMaxAiAgents(sub.rows[0]?.plan || 'essential', sub.rows[0]?.status);
-    const count = await pool.query(
-      `SELECT COUNT(*) FROM public.ai_agents WHERE tenant_id = $1 AND active = true`,
-      [tenantId]
-    );
-    if (parseInt(count.rows[0].count, 10) >= maxAgents) {
-      throw new Error(`Agent limit reached (${maxAgents}) for your plan`);
+  }, opts: { enforcePlanLimit?: boolean } = {}): Promise<AIAgent> {
+    if (opts.enforcePlanLimit !== false) {
+      const sub = await pool.query(
+        `SELECT plan, status FROM public.subscriptions WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        [tenantId]
+      );
+      const { getMaxAiAgents } = await import('../../config/plan-limits.js');
+      const maxAgents = getMaxAiAgents(sub.rows[0]?.plan || 'essential', sub.rows[0]?.status);
+      const count = await pool.query(
+        `SELECT COUNT(*) FROM public.ai_agents WHERE tenant_id = $1 AND active = true`,
+        [tenantId]
+      );
+      if (parseInt(count.rows[0].count, 10) >= maxAgents) {
+        throw new Error(`Agent limit reached (${maxAgents}) for your plan`);
+      }
     }
 
     const result = await pool.query(
