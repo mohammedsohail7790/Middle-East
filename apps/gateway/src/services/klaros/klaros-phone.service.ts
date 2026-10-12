@@ -1,7 +1,7 @@
 import { pool } from '../db/pool.js';
 import { logger } from '../logger.js';
 import { PhoneProvisioningService, isGatewayReadyForTwilio, isTwilioConfigured } from '../phone-provisioning/phoneProvisioning.service.js';
-import { ensureTrialSubscription, findKlarosTenant, KlarosProvisioningError } from './klaros-provisioning.service.js';
+import { ensureTrialSubscription, findKlarosTenant, KlarosProvisioningError, templateStatus } from './klaros-provisioning.service.js';
 
 /**
  * Klaros-driven phone numbers. A business Klaros created has no usable Halla login, so the owner cannot use Halla's own number screens; Klaros asks
@@ -121,6 +121,7 @@ export async function phoneStatus(tenantId: string, env: NodeJS.ProcessEnv = pro
     plan: sub ? { plan: sub.plan, status: sub.status, trialExpiresAt: sub.trial_expires_at ?? null, trialMinutesUsed: sub.trial_minutes_used ?? 0 } : null,
     canBuy: numbers.length === 0 && used < cap && isTwilioConfigured() && isGatewayReadyForTwilio(),
     monthlyCostUsd: MONTHLY_COST_USD,
+    template: await templateStatus(tenantId),
   };
 }
 
