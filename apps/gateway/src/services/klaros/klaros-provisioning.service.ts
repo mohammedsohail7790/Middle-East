@@ -21,9 +21,33 @@ import { applyTemplateToTenant } from '../workforce-templates/provision.js';
  *   - the API key and the webhook signing secret are returned exactly once, to the caller, and are never logged.
  */
 export class KlarosProvisioningError extends Error {
-  constructor(message: string, readonly status: 400 | 404 | 409 | 500 | 503 = 400) {
+  /** `code` is a short machine-readable reason from a fixed vocabulary (never free text), so Klaros can show the owner a plain message. */
+  constructor(message: string, readonly status: 400 | 404 | 409 | 429 | 500 | 502 | 503 = 400, readonly code?: string) {
     super(message);
   }
+}
+
+/** The built-in cap while a business is being tried out: 60 minutes and 14 days. The gateway refuses calls for a tenant that has no plan at all. */
+export const TRIAL_DAYS = 14;
+
+export async function ensureTrialSubscription(tenantId: string): Promise<void> {
+  await pool.query(
+    `INSERT INTO public.subscriptions (tenant_id, plan, status, trial_started_at, trial_expires_at, trial_minutes_used, included_minutes)
+     VALUES ($1, 'professional', 'trialing', now(), now() + ($2 || ' days')::interval, 0, 0)
+     ON CONFLICT (tenant_id) DO NOTHING`,
+    [tenantId, String(TRIAL_DAYS)]
+  );
+}
+
+/** The Halla tenant Klaros created for this business. 404 `no_receptionist` when Klaros has not provisioned one yet. */
+export async function findKlarosTenant(klarosTenantId: string): Promise<{ id: string }> {
+  const r = await pool.query(
+    `SELECT id FROM public.voice_tenants WHERE metadata->>'klaros_tenant_id' = $1 AND metadata->>'provisioned_by' = 'klaros' LIMIT 2`,
+    [klarosTenantId]
+  );
+  if (r.rows.length === 0) throw new KlarosProvisioningError('No receptionist exists for this business yet.', 404, 'no_receptionist');
+  if (r.rows.length > 1) throw new KlarosProvisioningError('More than one receptionist is linked to this business.', 409);
+  return { id: String(r.rows[0].id) };
 }
 
 export const PROVISIONABLE_VERTICALS: ReadonlyArray<WorkforceVertical> = ['medical_tourism'];
@@ -187,6 +211,7 @@ export async function provisionKlarosBusiness(
     );
     tenantId = String(inserted.rows[0].id);
     await applyTemplateToTenant(tenantId, template, { requireTransferNumber: false, enforcePlanLimit: false });
+    await ensureTrialSubscription(tenantId);
     const creds = await issueCredentials(tenantId, input);
     logger.info('KLAROS_PROVISION_CREATED', { tenantId, vertical: input.vertical, agents: agents.length });
     return { status: 'created', tenantId, ...creds, agents, consentWordingVersion: wordingVersion };

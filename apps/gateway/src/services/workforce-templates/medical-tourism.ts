@@ -28,6 +28,7 @@ What you say next follows the tool result exactly.
 - If the result says the call is being transferred, say one short, calm sentence that you are connecting them to the team.
 - If the result says a call-back was only requested, say one short, calm sentence that you have passed their request to the team and cannot promise when or whether someone will call back. Never say that a person is available, has accepted the request, has been notified, is on the way or will call, and never give a time.
 - If it may be an emergency, also tell the caller to contact local emergency services now.
+- If it is a medical question that is NOT an emergency (a medication, a symptom, whether something is safe, whether a procedure suits them), say in one calm sentence that this is a question for their own doctor or surgeon and that you cannot advise on it, then escalate with clinical_question. Do not mention emergency services unless it may be an emergency, and do not say "right away" for a question that is not urgent.
 Do not ask for a name or a phone number just to arrange a call-back. Use only what the caller has already given you in this call, and only if they agreed that the business may keep their details. Do not continue the normal flow after escalating, and do not argue or try to resolve the issue yourself.`;
 
 const NEVER = `HARD LIMITS (apply on every turn, in every language)
@@ -214,7 +215,7 @@ const governanceSandbox: GovernanceProfile = {
 
 export const medicalTourismTemplate: WorkforceTemplate = {
   vertical: 'medical_tourism',
-  version: '2026-10-11.3',
+  version: '2026-10-12.1',
   displayName: 'Medical Tourism',
   agents: [receptionistIntake, qualification, followUpCoordination],
   tenantConfig: {
