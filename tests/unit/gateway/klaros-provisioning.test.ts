@@ -12,6 +12,7 @@ import {
   provisioningEnabled,
   secretMatches,
   validateProvisionInput,
+  validateRefreshInput,
 } from '../../../apps/gateway/src/services/klaros/klaros-provisioning.service.js';
 import { API_KEY_ROUTE_POLICY } from '../../../apps/gateway/src/security/api-key-scope-policy.js';
 import { KLAROS_EVENT_TYPES } from '../../../apps/gateway/src/security/klaros-event-types.js';
@@ -101,6 +102,15 @@ describe('the request body', () => {
     // another business's address, or an unrelated endpoint, cannot be registered
     rejects(good({ webhookUrl: 'https://klaros.example.com/api/v1/webhooks/halla/11111111-1111-4111-8111-111111111111' }), /this business/);
     rejects(good({ webhookUrl: 'https://evil.example.com/collect' }), /this business/);
+  });
+});
+
+describe('the template refresh request', () => {
+  it('needs only the business id, normalised, and refuses anything else', () => {
+    expect(validateRefreshInput({ klarosTenantId: TENANT.toUpperCase() })).toBe(TENANT);
+    for (const bad of [undefined, null, {}, { klarosTenantId: 'nope' }, { klarosTenantId: 5 }]) {
+      expect(() => validateRefreshInput(bad)).toThrow(KlarosProvisioningError);
+    }
   });
 });
 

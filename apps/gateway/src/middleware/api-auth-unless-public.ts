@@ -44,6 +44,8 @@ const PUBLIC_POST_ROUTES = new Set([
   '/platform/klaros/provision',
   // The same platform-secret route family: Klaros asks for a business's phone number (search, buy, existing business number, status).
   '/platform/klaros/phone',
+  // And the template roll-out to an existing business (agent prompts only).
+  '/platform/klaros/refresh',
 ]);
 
 const PUBLIC_GET_ROUTES = new Set([
