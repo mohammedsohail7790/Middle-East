@@ -9,6 +9,7 @@ import {
   appendSessionTranscript,
   extractMessageText,
 } from './realtime.transcript.js';
+import { createSafetySupervisor } from './safety-supervisor.js';
 import {
   buildGreetingSpeakInstruction,
   buildHumanRealtimePreamble,
@@ -30,6 +31,28 @@ export class RealtimeSessionManager {
   private eventManager?: RealtimeEventManager;
   /** Per-session: ms from Twilio start → first outbound audio frame to Twilio */
   private callStartTimes = new Map<string, number>();
+  /** Opt-in live safety supervisor (emergency detection, unsafe-claim correction). A no-op unless the tenant enabled it. */
+  private readonly safety = createSafetySupervisor({
+    send: (session, message) => this.sendToOpenAI(session as RealtimeSession, message),
+    escalate: (session, reason) => this.publishSafetyEscalation(session as RealtimeSession, reason),
+    log: (event, fields) => logger.warn(event, fields),
+  });
+
+  /** Tell Klaros (lead.escalated) that a person must look at this call. Ids and a reason code only: never what was said. */
+  private publishSafetyEscalation(session: RealtimeSession, reason: string): void {
+    void import('../../events/event-publisher.js')
+      .then(async ({ publishPlatformEvent }) => {
+        const { PlatformEventTypes } = await import('../../events/event-types.js');
+        const { resolveCallCorrelation } = await import('../klaros/correlation.js');
+        const correlation = await resolveCallCorrelation(session.tenantId, session.callSid);
+        publishPlatformEvent(
+          PlatformEventTypes.LEAD_ESCALATED,
+          { callId: session.callSid, target: 'human_review', reason, ...correlation },
+          { tenantId: session.tenantId, callSid: session.callSid, sessionId: session.id }
+        );
+      })
+      .catch(() => {});
+  }
 
   async createSession(config: RealtimeSessionConfig): Promise<RealtimeSession> {
     const sessionId = `realtime_${config.tenantId}_${config.callSid}_${Date.now()}`;
@@ -399,6 +422,7 @@ export class RealtimeSessionManager {
               'assistant',
               String(event.transcript || event.text)
             );
+            this.safety.onAssistantTranscript(session, String(event.transcript || event.text));
           }
           break;
 
@@ -408,6 +432,7 @@ export class RealtimeSessionManager {
         case 'conversation.item.input_audio_transcription.completed':
           if (event.transcript) {
             appendSessionTranscript(session, 'caller', String(event.transcript));
+            this.safety.onCallerTranscript(session, String(event.transcript));
           }
           break;
 
@@ -677,6 +702,10 @@ export class RealtimeSessionManager {
     ]);
     const fatalCodes = ['invalid_api_key', 'insufficient_quota', 'server_error'];
     const code = event.error?.code as string | undefined;
+    if (code === 'invalid_api_key' || code === 'insufficient_quota') {
+      // The provider credential is unusable: every call will fail the same way until it is fixed. Distinct, greppable, error level.
+      logger.error('REALTIME_PROVIDER_CREDENTIAL_FAILURE', { sessionId: session.id, tenantId: session.tenantId, code });
+    }
     const isFatal =
       (code && fatalCodes.includes(code)) ||
       (event.error?.type === 'invalid_request_error' && code && !nonFatalCodes.has(code));

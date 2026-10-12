@@ -10,6 +10,7 @@ import {
 } from '../realtime/receptionist-voice.js';
 import { aiCircuitBreaker } from './circuit-breaker.js';
 import { pool } from '../db/pool.js';
+import { parseConsentCaptureConfig } from '../consent/consent-evidence.js';
 
 export type TranscriptRole = 'user' | 'assistant' | 'system';
 
@@ -66,6 +67,13 @@ export interface TenantVoiceConfig {
         /** Offer the read-only lookup_order tool. Honoured only while an order-lookup provider is registered. */
         orderLookup?: boolean;
     };
+    /**
+     * Opt-in explicit consent capture (Medical Tourism). Present only when the tenant has configured a wording version in
+     * voice_tenants.metadata.consent_capture. Its presence is what offers the record_consent tool; it never implies consent.
+     */
+    consentCapture?: { wordingVersion: string };
+    /** Opt-in live safety supervisor: voice_tenants.metadata.safety_supervisor.enabled === true. */
+    safetySupervisor?: { enabled: boolean };
     /** Service-area check for on-site visits (metadata.service_area) */
     serviceArea?: {
         enabled: boolean;
@@ -271,6 +279,8 @@ export class AiService {
             voiceId: row.voice_id ?? undefined,
             customSystemPrompt,
             capabilities: row.metadata?.capabilities,
+            consentCapture: parseConsentCaptureConfig(row.metadata?.consent_capture),
+            safetySupervisor: row.metadata?.safety_supervisor?.enabled === true ? { enabled: true } : undefined,
         };
 
         const { parseServiceAreaSettings } = await import('./service-area.service.js');

@@ -1,4 +1,5 @@
 import { logger } from '../logger.js';
+import { sanitizeIntake, type LeadIntake } from '../consent/intake.js';
 import { RealtimeSession } from './realtime.types.js';
 import { appointmentService } from '../appointments/appointment.service.js';
 import { getTenantAvailabilitySlots } from '../appointments/tenant-availability.service.js';
@@ -17,6 +18,24 @@ import { redactToolArguments, summarizeToolArguments, safeErrorForLog, scrubFree
 /** A reason is logged only if it is one of the platform's own codes; free text becomes a marker. */
 function safeReason(reason: unknown): string {
   return typeof reason === 'string' ? redactToolArguments('', { reason }).reason as string : REDACTED.text;
+}
+
+const ESCALATION_REASON_CODES = new Set(['emergency', 'urgent', 'human_requested', 'complaint', 'clinical_question', 'billing', 'other']);
+
+/**
+ * The reason that leaves Halla on a Medical Tourism escalation is ONE code from a closed list, never the model's own words: the model
+ * writes this field, and free text there could carry a caller's name or a health detail into an event that is delivered to Klaros.
+ * Known codes pass; anything else is bucketed by keyword and the text itself is dropped.
+ */
+export function escalationReasonCode(reason: unknown): string {
+  const r = typeof reason === 'string' ? reason.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') : '';
+  if (ESCALATION_REASON_CODES.has(r)) return r;
+  if (/emergenc|urgent|chest|breath|bleed|unconscious|suicid/.test(r)) return 'urgent';
+  if (/human|person|agent|represent|speak|call_?back|team/.test(r)) return 'human_requested';
+  if (/complain|upset|angry/.test(r)) return 'complaint';
+  if (/clinic|medic|diagnos|treat|surgery|symptom|doctor/.test(r)) return 'clinical_question';
+  if (/bill|price|cost|pay|invoice/.test(r)) return 'billing';
+  return 'other';
 }
 
 export interface ToolResult {
@@ -58,7 +77,9 @@ export class RealtimeToolsManager {
       argumentSummary: summarizeToolArguments(parameters),
     });
 
-    if (isP1RuntimeSessionEnabled()) {
+    // record_consent is deliberately exempt from the 30s same-key skip: a caller may grant, withdraw and re-grant the same scope in
+    // one call, and a silently skipped decision would leave the stored state different from what the caller said.
+    if (isP1RuntimeSessionEnabled() && toolName !== 'record_consent') {
       const idempotencyKey =
         parameters?.idempotency_key ||
         parameters?.idempotencyKey ||
@@ -113,6 +134,10 @@ export class RealtimeToolsManager {
 
         case 'create_lead':
           result = await this.createLead(session, parameters);
+          break;
+
+        case 'record_consent':
+          result = await this.recordConsent(session, parameters);
           break;
 
         case 'search_knowledge_base':
@@ -454,13 +479,21 @@ export class RealtimeToolsManager {
 
       const targetNumber = tenant.rows[0]?.transfer_phone_number;
       if (!targetNumber) {
+        const { getTenantConsentWordingVersion } = await import('../consent/consent-evidence.js');
+        if (await getTenantConsentWordingVersion(session.tenantId)) return this.recordHumanCallback(session, params.reason, 'no_transfer_number');
         return {
           success: false,
           error: 'No transfer number configured for this tenant.',
         };
       }
 
-      await transferService.transferCall(session.callSid, targetNumber);
+      try {
+        await transferService.transferCall(session.callSid, targetNumber);
+      } catch (transferErr) {
+        const { getTenantConsentWordingVersion } = await import('../consent/consent-evidence.js');
+        if (await getTenantConsentWordingVersion(session.tenantId)) return this.recordHumanCallback(session, params.reason, 'transfer_failed');
+        throw transferErr;
+      }
       session.callOutcome = 'transferred';
       session.transferTarget = targetNumber;
 
@@ -474,7 +507,10 @@ export class RealtimeToolsManager {
             {
               callId: session.callSid,
               target: targetNumber,
-              reason: params.reason,
+              // Medical Tourism (consent capture opted in): a closed reason code, never the model's own words. Other tenants unchanged.
+              reason: (await import('../consent/consent-evidence.js').then((m) => m.getTenantConsentWordingVersion(session.tenantId)))
+                ? escalationReasonCode(params.reason)
+                : params.reason,
               ...correlation,
             },
             { tenantId: session.tenantId, callSid: session.callSid, sessionId: session.id }
@@ -494,6 +530,33 @@ export class RealtimeToolsManager {
         error: `Transfer failed: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
+  }
+
+  /**
+   * Escalation without a live transfer (Medical Tourism): publishes lead.escalated so Klaros and the human team know a person must
+   * call this caller back, and tells the model exactly what to say. It never claims a transfer happened. The reason is a short code
+   * chosen by the model, never free text from the caller.
+   */
+  private async recordHumanCallback(session: RealtimeSession, reason: string, why: 'no_transfer_number' | 'transfer_failed'): Promise<ToolResult> {
+    logger.warn('REALTIME_ESCALATION_CALLBACK_RECORDED', { sessionId: session.id, tenantId: session.tenantId, why, reason: safeReason(reason) });
+    session.humanCallbackRequested = true;
+    void import('../../events/event-publisher.js')
+      .then(async ({ publishPlatformEvent }) => {
+        const { PlatformEventTypes } = await import('../../events/event-types.js');
+        const { resolveCallCorrelation } = await import('../klaros/correlation.js');
+        const correlation = await resolveCallCorrelation(session.tenantId, session.callSid);
+        publishPlatformEvent(
+          PlatformEventTypes.LEAD_ESCALATED,
+          { callId: session.callSid, target: 'human_callback', reason: escalationReasonCode(reason), ...correlation },
+          { tenantId: session.tenantId, callSid: session.callSid, sessionId: session.id }
+        );
+      })
+      .catch(() => {});
+    return {
+      success: true,
+      data: { mode: 'callback' },
+      message: 'There is no live transfer available, and a call-back has only been REQUESTED, not arranged. Tell the caller, in one short calm sentence, that you have passed their request to the team to review and cannot promise when or whether someone will call them back. If it is an emergency, also tell them to contact their local emergency services now. Do not say they are being transferred and do not promise a call-back or a time. Then close politely.',
+    };
   }
 
   /**
@@ -586,7 +649,10 @@ export class RealtimeToolsManager {
 
   private async createLead(
     session: RealtimeSession,
-    params: { name: string; phone: string; email?: string; address?: string; interest?: string }
+    params: {
+      name: string; phone: string; email?: string; address?: string; interest?: string;
+      procedure?: string; destination?: string; timeframe?: string; preferred_language?: string; preferred_contact_time?: string;
+    }
   ): Promise<ToolResult> {
     logger.info('REALTIME_TOOL_CREATE_LEAD', {
       sessionId: session.id,
@@ -595,6 +661,36 @@ export class RealtimeToolsManager {
       hasPhone: Boolean(params.phone),
       hasAddress: Boolean(params.address),
     });
+
+    // Consent enforcement (tenants that opted in to consent capture only): no personal data is saved without a granted
+    // store_personal_data decision for THIS call. Not opted in => the gate is open and nothing changes.
+    const { getCallConsentGate } = await import('../consent/consent-gate.js');
+    const consentGate = await getCallConsentGate(session.tenantId, session.callSid);
+    if (!consentGate.allows('store_personal_data')) {
+      logger.info('REALTIME_TOOL_CREATE_LEAD_REFUSED', { sessionId: session.id, tenantId: session.tenantId, reason: consentGate.unavailable ? 'consent_state_unavailable' : 'no_store_personal_data_consent' });
+      return {
+        success: false,
+        error: 'consent_required',
+        message: 'Nothing was saved: the caller has not agreed to have their details kept. Do not collect or repeat more personal details. Ask the consent question if you have not, otherwise offer a person from the team.',
+      };
+    }
+
+    // Structured intake (consent-capture tenants only). The treatment is kept only if the caller ALSO agreed to its being kept
+    // (store_medical_information); everything else needs only the store_personal_data decision already checked above.
+    let intake: LeadIntake | undefined;
+    if (consentGate.enforced) {
+      intake = sanitizeIntake({
+        procedure: params.procedure,
+        destination: params.destination,
+        timeframe: params.timeframe,
+        preferredLanguage: params.preferred_language,
+        preferredContactTime: params.preferred_contact_time,
+      });
+      if (intake?.procedure && !consentGate.allows('store_medical_information')) {
+        const { procedure: _dropped, ...rest } = intake;
+        intake = Object.keys(rest).length ? rest : undefined;
+      }
+    }
 
     try {
       const address = params.address?.trim() || undefined;
@@ -607,7 +703,9 @@ export class RealtimeToolsManager {
           .filter(Boolean)
           .join(' — ') || undefined,
         callId: callId ?? undefined,
+        consentCallSid: session.callSid,
         metadata: { interest: params.interest, address },
+        ...(intake ? { intake } : {}),
       });
 
       const { RealtimeMemoryManager } = await import('./realtime.memory.js');
@@ -655,6 +753,36 @@ export class RealtimeToolsManager {
         error: `Failed to save lead: ${scrubFreeText(error instanceof Error ? error.message : String(error), 300)}`
       };
     }
+  }
+
+  /**
+   * Stores one explicit consent decision. The tenant and call come from the session; the wording version comes from tenant
+   * configuration and the timestamp from the database. A tenant without a configured wording version, or any decision/scope
+   * outside the enumerations, stores nothing and tells the agent so. Nothing about the decision is logged beyond its outcome.
+   */
+  private async recordConsent(
+    session: RealtimeSession,
+    params: { decision?: unknown; scopes?: unknown }
+  ): Promise<ToolResult> {
+    const { recordConsentDecision } = await import('../consent/consent-evidence.js');
+    const r = await recordConsentDecision(session.tenantId, session.callSid, { decision: params?.decision, scopes: params?.scopes });
+    logger.info('REALTIME_TOOL_RECORD_CONSENT', { sessionId: session.id, tenantId: session.tenantId, outcome: r.ok ? 'recorded' : r.reason });
+    if (!r.ok) {
+      return {
+        success: false,
+        error: `Consent was not recorded (${r.reason}).`,
+        message: 'Nothing was recorded. Do not tell the caller it was. Treat the answer as not given, do not save their details, and offer a person.',
+      };
+    }
+    // Tell Klaros about the stored change (grant, decline or withdrawal). Fire-and-forget: it never delays or fails the tool result.
+    void import('../consent/consent-evidence.js').then(({ flushConsentOutbox }) => flushConsentOutbox(10, { tenantId: session.tenantId, callSid: session.callSid })).catch(() => {});
+    const declined = params?.decision !== 'granted';
+    return {
+      success: true,
+      message: declined
+        ? 'Their answer is recorded as not given. Do not save or use the details for that purpose, and offer a person.'
+        : 'Their answer is recorded.',
+    };
   }
 
   /**

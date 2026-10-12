@@ -1128,6 +1128,9 @@ export function createCallsRouter(): express.Router {
 
             return res.json({ success: true, callSid });
         } catch (error) {
+            if (error instanceof Error && error.name === 'ConsentRequiredError') {
+                return res.status(403).json({ success: false, error: 'consent_required', code: (error as { code?: string }).code });
+            }
             res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to place outbound call') });
         }
     });

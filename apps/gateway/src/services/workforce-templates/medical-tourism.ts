@@ -1,5 +1,5 @@
 import type { EscalationTrigger, GovernanceProfile, WorkforceAgentTemplate, WorkforceTemplate } from './types.js';
-import { ESCALATION_MECHANISM, KNOWLEDGE_BOUNDARY, PRECEDENCE_AND_HONESTY } from './shared.js';
+import { KNOWLEDGE_BOUNDARY, PRECEDENCE_AND_HONESTY } from './shared.js';
 
 const ALL = ['receptionist_intake', 'qualification', 'follow_up_coordination'];
 
@@ -15,6 +15,20 @@ export const MEDICAL_TOURISM_ESCALATION_TRIGGERS: EscalationTrigger[] = [
   { id: 'unclear_patient_requirements', description: 'The patient cannot say what service they want, what they need, or the requirements stay unclear after one clarifying question.', action: 'record_and_hand_off', appliesTo: ['qualification', 'follow_up_coordination'] },
   { id: 'human_requested', description: 'The caller asks to speak to a person.', action: 'transfer_to_human', appliesTo: ALL },
 ];
+
+/**
+ * Medical Tourism escalation clause. It replaces the shared one (which Dropshipping still uses, unchanged) because the shared text tells the
+ * model to promise "a person will call back" and to take a name and callback number. For this vertical a call-back is only a REQUEST that
+ * the system records: nothing here may say or imply that a person is available, has accepted it, or will call. What is said after the tool
+ * runs follows the tool result, which states whether the call is being transferred or a call-back was only requested.
+ */
+export const MEDICAL_TOURISM_ESCALATION_MECHANISM = `HOW TO ESCALATE
+Escalating means: call transfer_call with a reason code only, one of: emergency, human_requested, complaint, clinical_question, billing, other. Never put a name or any health detail in the reason.
+What you say next follows the tool result exactly.
+- If the result says the call is being transferred, say one short, calm sentence that you are connecting them to the team.
+- If the result says a call-back was only requested, say one short, calm sentence that you have passed their request to the team and cannot promise when or whether someone will call back. Never say that a person is available, has accepted the request, has been notified, is on the way or will call, and never give a time.
+- If it may be an emergency, also tell the caller to contact local emergency services now.
+Do not ask for a name or a phone number just to arrange a call-back. Use only what the caller has already given you in this call, and only if they agreed that the business may keep their details. Do not continue the normal flow after escalating, and do not argue or try to resolve the issue yourself.`;
 
 const NEVER = `HARD LIMITS (apply on every turn, in every language)
 - Never diagnose, suggest what a symptom might be, or say whether something is serious or harmless.
@@ -80,13 +94,13 @@ const receptionistIntake: WorkforceAgentTemplate = {
     `WHAT YOU DO
 1. Greet the caller warmly and ask how you can help.
 2. Find out what they are enquiring about: the procedure or service of interest, in the caller's own words, and any destination they have in mind. Do not suggest a procedure, a destination, a provider or a price.
-3. Collect: first name, best phone number (read it back once), the language they prefer, and the best time to be contacted.
-4. Ask only for non-diagnostic intake information the business has asked for. Do not ask about medical history, symptoms, test results, medications or diagnoses. If the caller volunteers medical details, listen, do not interpret them, do not repeat them back, and note only that the caller shared medical information for the human coordinator.
-5. Before saving anything, say briefly that you are an AI assistant, that you will record their contact details and enquiry so the team can follow up, and ask whether that is all right. Record the answer. If they decline, do not save their details and offer a person instead.
+3. Consent comes BEFORE any personal detail. As soon as you know what they are enquiring about, and before you ask for a name, a phone number or anything else about them, say briefly that you are an AI assistant, that you will record their contact details and enquiry so the team can follow up, and ask whether that is all right. Ask about being contacted and about keeping their details as separate questions; one yes does not cover the other. Right after the caller clearly answers each question, call record_consent (if you have that tool) with only what they answered: scope contact for being contacted about the enquiry, scope store_personal_data for keeping their contact details and enquiry. Ask a third, separate question only about keeping the TREATMENT they are interested in (not their medical history), and record it with scope store_medical_information; if they say no, still help, simply do not put the treatment in procedure. Never ask for, accept or record medical history, symptoms, test results, medications or diagnoses. Continuing the call, pressing a key, silence, or an unclear answer is NOT consent: ask once more, and if it is still unclear treat it as no and do not call record_consent. If they decline or take back a yes, call record_consent with declined or withdrawn, do not save their details, and offer a person instead.
+4. Only after the caller has agreed that you may keep their details, collect: first name, best phone number (read it back once), the language they prefer, the best time to be contacted, the country they would like to travel to and roughly when (only what they volunteer or answer; never press). When you save the lead, put these in the structured fields of create_lead: procedure (the treatment in their own words, for example "dental implants"), destination, timeframe, preferred_language and preferred_contact_time. Leave a field blank if they did not say it. If they have not agreed, do not ask for or write down any of these, and offer a person instead.
+5. Ask only for non-diagnostic intake information the business has asked for. Do not ask about medical history, symptoms, test results, medications or diagnoses. If the caller volunteers medical details, listen, do not interpret them, do not repeat them back, and note only that the caller shared medical information for the human coordinator.
 6. Close politely and say that a member of the team will follow up. Do not promise a time unless the business knowledge gives one.`,
     TRIGGER_LIST,
     KNOWLEDGE_BOUNDARY,
-    ESCALATION_MECHANISM,
+    MEDICAL_TOURISM_ESCALATION_MECHANISM,
   ),
 };
 
@@ -130,7 +144,7 @@ const qualification: WorkforceAgentTemplate = {
 6. Never describe an enquiry as approved, accepted, suitable or eligible. You are not able to judge that.`,
     TRIGGER_LIST,
     KNOWLEDGE_BOUNDARY,
-    ESCALATION_MECHANISM,
+    MEDICAL_TOURISM_ESCALATION_MECHANISM,
   ),
 };
 
@@ -173,7 +187,7 @@ const followUpCoordination: WorkforceAgentTemplate = {
 5. Pass anything ambiguous, sensitive or high-risk to a human. When you hand over, say what you recorded so the caller does not have to repeat it.`,
     TRIGGER_LIST,
     KNOWLEDGE_BOUNDARY,
-    ESCALATION_MECHANISM,
+    MEDICAL_TOURISM_ESCALATION_MECHANISM,
   ),
 };
 
@@ -200,7 +214,7 @@ const governanceSandbox: GovernanceProfile = {
 
 export const medicalTourismTemplate: WorkforceTemplate = {
   vertical: 'medical_tourism',
-  version: '2026-10-06.1',
+  version: '2026-10-11.3',
   displayName: 'Medical Tourism',
   agents: [receptionistIntake, qualification, followUpCoordination],
   tenantConfig: {
@@ -211,7 +225,7 @@ export const medicalTourismTemplate: WorkforceTemplate = {
       EMERGENCY,
       TRIGGER_LIST,
       KNOWLEDGE_BOUNDARY,
-      ESCALATION_MECHANISM,
+      MEDICAL_TOURISM_ESCALATION_MECHANISM,
     ),
     doInstructions: [
       'Be calm, respectful and unhurried',
@@ -252,10 +266,11 @@ export const medicalTourismTemplate: WorkforceTemplate = {
   ],
   knownPlatformGaps: [
     'No content-level safety enforcement: diagnosis/prescription/guarantee/fabrication refusals are prompt instructions only.',
-    'No code-level emergency detection: emergency escalation depends on the model recognising the emergency and calling transfer_call.',
+    'Emergency handling: when voice_tenants.metadata.safety_supervisor.enabled is true, the gateway detects an emergency in the CALLER\'s words (keyword lists, English and Arabic, not clinically or linguistically reviewed), interrupts with a fixed instruction and publishes lead.escalated; it also retracts guarantee / diagnosis / prescription-type statements AFTER they were spoken. This is detective and corrective, not preventive: speech-to-speech audio is heard before it can be checked. Without the flag nothing but the prompt protects the caller.',
+    'Escalation without a number: for a tenant with consent capture configured, transfer_call is always offered; with no transfer number (or a failed transfer) it records a human call-back (lead.escalated target human_callback) instead of failing. No live transfer happens in that case.',
     'qualificationQuestions, requiredFields (beyond name/phone/service/email), optionalFields, transferConditions and fallbackMessage are stored but not read by the live realtime prompt.',
     'Per-agent knowledgeCategory is not applied to realtime knowledge search (search is tenant-wide).',
-    'No consent capture field or consent record: consent is spoken and noted in the call/lead record only.',
+    'Consent evidence exists only for a tenant that has configured voice_tenants.metadata.consent_capture.wording_version, and only when the model calls record_consent after an explicit answer. The consent wording itself is not stored or enforced: the prompt does not force an approved script, and the business has not yet supplied one. A lead can still be created without consent evidence (nothing blocks it); Klaros then receives no consent object.',
     'The base realtime prompt tells the model it is a person and uses New York English; the agent prompt overrides this in text only.',
     'ai_agents.name is spoken as the persona name in the greeting, so the Klaros label is read aloud.',
     'No in-call hand-off between agents; progression between the three agents is by phone-number routing or human action.',

@@ -1,0 +1,326 @@
+/**
+ * lead.created / lead.updated with consent evidence, through the REAL consumer -> REAL webhook dispatch -> REAL HMAC signing ->
+ * a REAL local HTTP receiver that verifies the signature over the exact bytes it received (the same algorithm Klaros uses;
+ * see docs/HALLA_KLAROS_INTEGRATION_CONTRACT.md section 4).
+ *
+ * The consent shown in a delivered lead.created / lead.updated is re-read from the stored decisions at delivery time (the platform
+ * event's own `consent` is only a trigger and is never forwarded as-is), so the tests seed the decisions the event refers to.
+ *
+ * Substituted, as in klaros-webhook-delivery.test.ts: Postgres (`pool.query` is an in-memory fake; the one consent SELECT is
+ * emulated, NOT run against PostgreSQL), DNS, and the TLS transport (forwarded to the local receiver). Not covered here: the Klaros
+ * Python receiver itself.
+ */
+import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
+import http from 'http';
+import type { AddressInfo } from 'net';
+
+const SECRET = 'c'.repeat(64);
+const TENANT = '11111111-1111-4111-8111-111111111111';
+const URL_OK = 'https://klaros.integration-test.example.com/api/v1/webhooks/halla/c14d42d1-4c63-46c1-bdc3-89d4dc2b7b7b';
+const deliveries = new Map<string, boolean>();
+let receiverPort = 0;
+interface StoredConsent { tenant_id: string; lead_id: string; scope: string; granted: boolean; method: string; wording_version: string; recorded_at: Date; seq: number }
+const storedConsents: StoredConsent[] = [];
+const optedOut = new Set<string>();
+const failConfigReads = { n: 0 };
+
+vi.mock('../../apps/gateway/src/services/db/pool.js', () => ({
+  pool: {
+    query: vi.fn(async (sql: string, params: any[]) => {
+      const t = sql.replace(/\s+/g, ' ').trim();
+      if (t.startsWith("SELECT metadata->'consent_capture'")) {
+        if (failConfigReads.n > 0) { failConfigReads.n--; throw new Error('connection terminated unexpectedly'); }
+        return { rows: [{ consent_capture: optedOut.has(params[0]) ? null : { wording_version: 'MT-CONSENT-v1' } }] };
+      }
+      if (t.startsWith('SELECT scope, granted, method, wording_version, recorded_at FROM public.lead_consents')) {
+        return { rows: storedConsents.filter((r) => r.tenant_id === params[0] && r.lead_id === params[1]).sort((a, b) => a.recorded_at.getTime() - b.recorded_at.getTime() || a.seq - b.seq) };
+      }
+      if (t.startsWith('SELECT id, url, secret, events FROM public.custom_webhooks')) {
+        return { rows: [{ id: 'wh-1', tenant_id: TENANT, url: URL_OK, secret: SECRET, active: true, events: ['lead.created', 'lead.updated', 'lead.qualified', 'call.completed'] }] };
+      }
+      if (t.startsWith('SELECT delivered FROM public.webhook_deliveries')) {
+        const d = deliveries.get(`${params[0]}:${params[1]}`);
+        return { rows: d === undefined ? [] : [{ delivered: d }] };
+      }
+      if (t.startsWith('INSERT INTO public.webhook_deliveries')) { deliveries.set(`${params[0]}:${params[3]}`, params[7]); return { rows: [] }; }
+      if (t.startsWith('UPDATE public.custom_webhooks')) return { rows: [] };
+      throw new Error(`Unexpected query in test fake: ${t}`);
+    }),
+  },
+}));
+vi.mock('node:dns/promises', () => ({ lookup: vi.fn(async () => [{ address: '93.184.216.34', family: 4 }]) }));
+vi.mock('../../apps/gateway/src/services/logger.js', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
+vi.mock('../../apps/gateway/src/security/safe-http.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../apps/gateway/src/security/safe-http.js')>()),
+  safePostJson: vi.fn(async (url: URL, _addresses: string[], opts: { headers: Record<string, string>; body: string }) =>
+    new Promise((resolve, reject) => {
+      const req = http.request({ hostname: '127.0.0.1', port: receiverPort, path: url.pathname, method: 'POST', headers: opts.headers }, (res) => {
+        let data = ''; res.on('data', (c) => (data += c)); res.on('end', () => resolve({ status: res.statusCode ?? 0, body: data }));
+      });
+      req.on('error', reject); req.end(opts.body);
+    })),
+}));
+
+import { handleKlarosWebhookEvent } from '../../apps/gateway/src/events/consumers/klaros-webhook.consumer.js';
+import { createPlatformEvent } from '../../infrastructure/events/event-envelope.js';
+import { PlatformEventTypes } from '../../infrastructure/events/event-types.js';
+import { verifyWebhookSignature, signWebhookPayload } from '../../apps/gateway/src/security/webhook-signing.js';
+
+const GOOD = { granted: true, scope: ['contact', 'store_personal_data'], method: 'voice_ai_verbal', wording_version: 'MT-CONSENT-v1', recorded_at: '2026-10-09T10:00:02.000Z' };
+
+describe('consent evidence on lead events: delivered, signed, verified', () => {
+  let server: http.Server;
+  let received: Array<{ headers: http.IncomingHttpHeaders; body: string; url: string }>;
+
+  beforeAll(async () => {
+    server = http.createServer((req, res) => {
+      let body = ''; req.on('data', (c) => (body += c));
+      req.on('end', () => { received.push({ headers: req.headers, body, url: req.url ?? '' }); res.statusCode = 200; res.end('{"ok":true}'); });
+    });
+    await new Promise<void>((r) => server.listen(0, '127.0.0.1', () => r()));
+    receiverPort = (server.address() as AddressInfo).port;
+  });
+  afterAll(() => new Promise<void>((r) => server.close(() => r())));
+  beforeEach(() => { received = []; deliveries.clear(); storedConsents.length = 0; optedOut.clear(); failConfigReads.n = 0; });
+
+  /** Stored decisions for lead L1 of this tenant: the scopes decided at the given time (granted or declined). */
+  const seed = (scopes: string[], atMs: number, granted = true, wording = 'MT-CONSENT-v1', tenant = TENANT) => {
+    for (const scope of scopes) {
+      storedConsents.push({ tenant_id: tenant, lead_id: 'L1', scope, granted, method: 'voice_ai_verbal', wording_version: wording, recorded_at: new Date(atMs), seq: storedConsents.length });
+    }
+  };
+  const T2 = Date.parse('2026-10-09T10:00:02.000Z');
+
+  const send = async (type: 'LEAD_CREATED' | 'LEAD_UPDATED', payload: Record<string, unknown>) => {
+    const event = createPlatformEvent(PlatformEventTypes[type] as never, payload, { tenantId: TENANT, callSid: 'CA1' });
+    await handleKlarosWebhookEvent(event, { finalAttempt: false });
+    return event;
+  };
+  const verify = (r: { headers: http.IncomingHttpHeaders; body: string }, secret = SECRET) =>
+    verifyWebhookSignature({ secret, timestamp: String(r.headers['x-hallaai-timestamp']), rawBody: r.body, signatureHeader: String(r.headers['x-hallaai-signature']) });
+
+  it.each([['LEAD_CREATED', 'lead.created'], ['LEAD_UPDATED', 'lead.updated']] as const)('%s: the consent object arrives exactly as recorded, inside a correctly signed body', async (type, name) => {
+    seed(['contact', 'store_personal_data'], T2);
+    const event = await send(type, { leadId: 'L1', phone: '+971500000001', name: 'Test Person', klarosLeadId: 'K1', consent: GOOD });
+    expect(received).toHaveLength(1);
+    expect(verify(received[0])).toEqual({ valid: true });
+    const body = JSON.parse(received[0].body);
+    expect(body).toMatchObject({ id: event.eventId, type: name, tenant_id: TENANT });
+    expect(body.data.consent).toEqual(GOOD);
+    expect(Object.keys(body.data).sort()).toEqual(['callId', 'consent', 'klarosLeadId', 'leadId', 'name', 'phone']);
+    expect(received[0].url).toContain('/api/v1/webhooks/halla/c14d42d1-4c63-46c1-bdc3-89d4dc2b7b7b');
+  });
+
+  it('the signature covers the consent: changing granted:false -> true after signing, or the scope, fails verification', async () => {
+    seed(['store_personal_data'], T2, false);
+    await send('LEAD_CREATED', { leadId: 'L1', phone: 'p', name: 'n', consent: { ...GOOD, granted: false, scope: ['store_personal_data'] } });
+    const r = received[0];
+    expect(verify(r).valid).toBe(true);
+    const tampered = { ...r, body: r.body.replace('"granted":false', '"granted":true') };
+    expect(verify(tampered)).toEqual({ valid: false, reason: 'signature_mismatch' });
+    expect(verify(r, 'd'.repeat(64)).valid).toBe(false);
+    // the same bytes re-signed by Halla's own signer reproduce the header (no second signature format exists)
+    expect(`sha256=${signWebhookPayload(SECRET, String(r.headers['x-hallaai-timestamp']), r.body)}`).toBe(r.headers['x-hallaai-signature']);
+  });
+
+  it('no consent on the platform event => the key is absent from the delivered data (not null, not false)', async () => {
+    await send('LEAD_CREATED', { leadId: 'L1', phone: 'p', name: 'n' });
+    const body = JSON.parse(received[0].body);
+    expect('consent' in body.data).toBe(false);
+    expect(verify(received[0]).valid).toBe(true);
+  });
+
+  it.each([
+    ['a bare boolean', true],
+    ['a string', 'granted'],
+    ['empty scope', { ...GOOD, scope: [] }],
+    ['unknown scope', { ...GOOD, scope: ['everything'] }],
+    ['no wording version', { ...GOOD, wording_version: '' }],
+    ['no timestamp', { ...GOOD, recorded_at: undefined }],
+    ['unknown method', { ...GOOD, method: 'phone_press_1' }],
+  ])('an unusable snapshot on the event (%s) is never forwarded or repaired: with no stored decision, no consent is sent', async (_n, consent) => {
+    await send('LEAD_CREATED', { leadId: 'L1', phone: 'p', name: 'n', consent });
+    expect('consent' in JSON.parse(received[0].body).data).toBe(false);
+  });
+
+  it('what is delivered is what is STORED now, not what the event claimed: a snapshot saying granted is replaced by a later withdrawal', async () => {
+    seed(['contact'], T2, true);
+    seed(['contact'], T2 + 5000, false);
+    await send('LEAD_UPDATED', { leadId: 'L1', consent: { ...GOOD, scope: ['contact'] } });
+    expect(JSON.parse(received[0].body).data.consent).toMatchObject({ granted: false, scope: ['contact'], recorded_at: '2026-10-09T10:00:07.000Z' });
+  });
+
+  it('another tenant\'s stored decisions for the same lead id are never delivered', async () => {
+    seed(['contact'], T2, true, 'MT-CONSENT-v1', '99999999-9999-4999-8999-999999999999');
+    await send('LEAD_UPDATED', { leadId: 'L1', consent: GOOD });
+    expect('consent' in JSON.parse(received[0].body).data).toBe(false);
+  });
+
+  it('a database error while reading the stored decisions makes the handler throw (so the bus retries) and nothing is sent', async () => {
+    (storedConsents as any).filter = () => { throw new Error('connection terminated unexpectedly'); };
+    try {
+      await expect(send('LEAD_UPDATED', { leadId: 'L1', consent: GOOD })).rejects.toThrow(/connection terminated/);
+    } finally {
+      delete (storedConsents as any).filter;
+    }
+    expect(received).toHaveLength(0);
+  });
+
+  it('extra fields smuggled into the consent object (wording text, transcript, medical content) never leave Halla', async () => {
+    seed(['contact', 'store_personal_data'], T2);
+    await send('LEAD_CREATED', { leadId: 'L1', phone: 'p', name: 'n', consent: { ...GOOD, wording_text: 'I agree to ...', transcript: 'I have diabetes', diagnosis: 'x' } });
+    expect(received[0].body).not.toMatch(/wording_text|I agree|transcript|diabetes|diagnosis/);
+    expect(JSON.parse(received[0].body).data.consent).toEqual(GOOD);
+  });
+
+  it('a replay of the same event id is delivered once (existing idempotency is unchanged)', async () => {
+    seed(['contact', 'store_personal_data'], T2);
+    const event = createPlatformEvent(PlatformEventTypes.LEAD_CREATED as never, { leadId: 'L1', phone: 'p', name: 'n', consent: GOOD }, { tenantId: TENANT, callSid: 'CA1' });
+    await handleKlarosWebhookEvent(event, { finalAttempt: false });
+    await handleKlarosWebhookEvent(event, { finalAttempt: false });
+    expect(received).toHaveLength(1);
+  });
+
+  it('other lead events are untouched: lead.qualified / lead.escalated never carry a consent key even if one is smuggled in', async () => {
+    for (const type of ['LEAD_QUALIFIED', 'LEAD_ESCALATED'] as const) {
+      received = [];
+      const event = createPlatformEvent(PlatformEventTypes[type] as never, { leadId: 'L1', status: 'qualified', target: 'human', reason: 'r', consent: GOOD }, { tenantId: TENANT, callSid: 'CA1' });
+      await handleKlarosWebhookEvent(event, { finalAttempt: false });
+      if (received.length) expect('consent' in JSON.parse(received[0].body).data).toBe(false);
+    }
+  });
+  describe('personal data is re-checked against CURRENT consent immediately before delivery', () => {
+    const PERSONAL = { leadId: 'L1', phone: '+15550000101', name: 'SYNTHETIC Test Person', klarosLeadId: 'K1' };
+    const T1 = Date.parse('2026-10-09T10:00:01.000Z');
+    const T3 = Date.parse('2026-10-09T10:00:03.000Z');
+    const delivered = () => JSON.parse(received[0].body).data;
+
+    it('store_personal_data currently granted: name and phone are delivered, nothing is flagged', async () => {
+      seed(['contact', 'store_personal_data'], T2);
+      await send('LEAD_CREATED', { ...PERSONAL, consent: GOOD });
+      expect(delivered()).toMatchObject({ phone: PERSONAL.phone, name: PERSONAL.name });
+      expect('personalDataWithheld' in delivered()).toBe(false);
+    });
+
+    it('withdrawn AFTER the event was queued: the delayed event goes out WITHOUT name and phone, flagged, and shows the withdrawal', async () => {
+      seed(['contact', 'store_personal_data'], T1);
+      seed(['store_personal_data'], T3, false); // the newer decision: withdrawn
+      await send('LEAD_CREATED', { ...PERSONAL, consent: GOOD }); // the event still carries the older "granted" snapshot
+      const d = delivered();
+      expect('phone' in d).toBe(false);
+      expect('name' in d).toBe(false);
+      expect(d.personalDataWithheld).toBe(true);
+      expect(d.consent).toMatchObject({ granted: true, scope: ['contact'] }); // evidence is the stored state, not the snapshot
+      expect(verify(received[0]).valid).toBe(true);
+    });
+
+    it.each([
+      ['contact consent only', () => seed(['contact'], T2)],
+      ['personal data declined', () => seed(['store_personal_data'], T2, false)],
+      ['no decision at all', () => undefined],
+    ])('%s: no personal data leaves Halla', async (_n, arrange) => {
+      arrange();
+      await send('LEAD_UPDATED', { ...PERSONAL });
+      const d = delivered();
+      expect(['phone' in d, 'name' in d]).toEqual([false, false]);
+      expect(d.personalDataWithheld).toBe(true);
+      expect(d.leadId).toBe('L1');
+    });
+
+    it("another tenant's grant for the same lead id never opens it", async () => {
+      seed(['contact', 'store_personal_data'], T2, true, 'MT-CONSENT-v1', '22222222-2222-4222-8222-222222222222');
+      await send('LEAD_CREATED', { ...PERSONAL });
+      expect(delivered().personalDataWithheld).toBe(true);
+    });
+
+    it('a tenant that did NOT opt in to consent capture is unchanged: personal data is delivered as before, no flag', async () => {
+      optedOut.add(TENANT);
+      await send('LEAD_CREATED', { ...PERSONAL });
+      expect(delivered()).toMatchObject({ phone: PERSONAL.phone, name: PERSONAL.name });
+      expect('personalDataWithheld' in delivered()).toBe(false);
+    });
+
+    it('an unreadable consent state throws (the bus retries) and nothing is sent', async () => {
+      failConfigReads.n = 1;
+      await expect(send('LEAD_CREATED', { ...PERSONAL })).rejects.toThrow();
+      expect(received).toHaveLength(0);
+      // the retry, once the database is back, delivers according to the stored state
+      seed(['contact', 'store_personal_data'], T2);
+      await send('LEAD_CREATED', { ...PERSONAL });
+      expect(delivered()).toMatchObject({ phone: PERSONAL.phone });
+    });
+
+    it('the collected fields of a qualification and the call-finalisation sequence are withheld the same way', async () => {
+      const qualified = { leadId: 'L1', status: 'needs_human_review', fields: { name: 'SYNTHETIC Test Person', phone: '+15550000101' }, reason: 'Needs human review.', missingFields: ['service'] };
+      // withdrawn
+      seed(['store_personal_data'], T1, true);
+      seed(['store_personal_data'], T3, false);
+      await handleKlarosWebhookEvent(createPlatformEvent(PlatformEventTypes.LEAD_QUALIFIED as never, qualified, { tenantId: TENANT, callSid: 'CA1' }), { finalAttempt: false });
+      let d = JSON.parse(received[0].body).data;
+      expect('fields' in d).toBe(false);
+      expect(d).toMatchObject({ status: 'needs_human_review', qualification: 'needs_human_review', personalDataWithheld: true });
+      // the same through the CALL_ENDED sequence (lead.qualified step, then call.completed)
+      received = [];
+      await handleKlarosWebhookEvent(createPlatformEvent(PlatformEventTypes.CALL_ENDED as never, { callSid: 'CA1', durationMs: 1000, qualificationEvent: qualified }, { tenantId: TENANT, callSid: 'CA1' }), { finalAttempt: false });
+      const types = received.map((r) => JSON.parse(r.body).type);
+      expect(types).toEqual(['lead.qualified', 'call.completed']);
+      expect('fields' in JSON.parse(received[0].body).data).toBe(false);
+      // granted again by a newer decision: delivered
+      received = []; deliveries.clear();
+      seed(['store_personal_data'], Date.parse('2026-10-09T10:00:09.000Z'), true);
+      await handleKlarosWebhookEvent(createPlatformEvent(PlatformEventTypes.LEAD_QUALIFIED as never, qualified, { tenantId: TENANT, callSid: 'CA1' }), { finalAttempt: false });
+      d = JSON.parse(received[0].body).data;
+      expect(d.fields).toEqual(qualified.fields);
+    });
+  });
+  describe('the structured intake is re-checked against CURRENT consent immediately before delivery', () => {
+    const INTAKE = { procedure: 'dental implants', destination: 'India', timeframe: 'next spring', preferredLanguage: 'Arabic', preferredContactTime: 'evenings' };
+    const PERSON = { leadId: 'L1', phone: '+15550000101', name: 'SYNTHETIC Test Person', klarosLeadId: 'K1', intake: INTAKE };
+    const T1 = Date.parse('2026-10-09T10:00:01.000Z');
+    const T3 = Date.parse('2026-10-09T10:00:03.000Z');
+    const delivered = () => JSON.parse(received[0].body).data;
+
+    it('personal + medical consent: the whole intake is delivered', async () => {
+      seed(['contact', 'store_personal_data', 'store_medical_information'], T2);
+      await send('LEAD_CREATED', { ...PERSON, consent: GOOD });
+      expect(delivered().intake).toEqual(INTAKE);
+    });
+
+    it('personal consent only: everything but the treatment is delivered', async () => {
+      seed(['contact', 'store_personal_data'], T2);
+      await send('LEAD_CREATED', { ...PERSON, consent: GOOD });
+      const { procedure: _p, ...rest } = INTAKE;
+      expect(delivered().intake).toEqual(rest);
+      expect(JSON.stringify(delivered())).not.toContain('dental implants');
+    });
+
+    it('medical consent withdrawn AFTER the event was queued: the delayed event goes out without the treatment', async () => {
+      seed(['contact', 'store_personal_data', 'store_medical_information'], T1);
+      seed(['store_medical_information'], T3, false);
+      await send('LEAD_UPDATED', { ...PERSON, consent: GOOD });
+      expect(delivered().intake.procedure).toBeUndefined();
+      expect(delivered().intake.destination).toBe('India');
+    });
+
+    it('personal-data consent withdrawn or never given: no intake at all, flagged', async () => {
+      seed(['store_personal_data'], T1);
+      seed(['store_personal_data'], T3, false);
+      await send('LEAD_CREATED', { ...PERSON, consent: GOOD });
+      expect('intake' in delivered()).toBe(false);
+      expect(delivered().personalDataWithheld).toBe(true);
+    });
+
+    it('an intake with unknown or oversized values is rebuilt field by field and capped', async () => {
+      seed(['contact', 'store_personal_data', 'store_medical_information'], T2);
+      await send('LEAD_CREATED', { ...PERSON, consent: GOOD, intake: { ...INTAKE, diagnosis: 'secret', destination: 'z'.repeat(500) } });
+      expect(delivered().intake.diagnosis).toBeUndefined();
+      expect(delivered().intake.destination).toHaveLength(80);
+    });
+
+    it('a tenant that did not opt in is unchanged: the intake goes through as given', async () => {
+      optedOut.add(TENANT);
+      await send('LEAD_CREATED', { ...PERSON });
+      expect(delivered().intake).toEqual(INTAKE);
+    });
+  });
+});
