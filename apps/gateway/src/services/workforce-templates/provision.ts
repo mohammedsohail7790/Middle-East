@@ -63,14 +63,34 @@ export async function applyWorkforceTemplate(
   template: WorkforceTemplate,
   opts: { dryRun?: boolean } = {}
 ): Promise<ProvisionResult> {
-  const dryRun = Boolean(opts.dryRun);
-
   assertSandboxEnvironment();
   if (!sandboxAllowList().has(tenantId.toLowerCase())) {
     throw new WorkforceProvisioningError(
       'Refusing to provision: the tenant is not in HALLA_WORKFORCE_SANDBOX_TENANT_IDS (sandbox tenants only).'
     );
   }
+  return applyTemplateToTenant(tenantId, template, { dryRun: opts.dryRun, requireTransferNumber: true, enforcePlanLimit: true });
+}
+
+export interface ApplyTemplateOptions {
+  dryRun?: boolean;
+  /** The sandbox path needs a transfer number up front. A Klaros-provisioned tenant has none until the business supplies one: its call-backs are recorded as requests instead. */
+  requireTransferNumber: boolean;
+  /** False only for a tenant whose plan is governed by Klaros rather than by Halla's own billing plan. */
+  enforcePlanLimit: boolean;
+}
+
+/**
+ * Writes a template onto an existing tenant. This is NOT a guard: the caller decides who may reach it. There are exactly two callers,
+ * `applyWorkforceTemplate` above (sandbox only, guarded) and the Klaros provisioning service (service-secret authenticated, creates the tenant itself).
+ */
+export async function applyTemplateToTenant(
+  tenantId: string,
+  template: WorkforceTemplate,
+  opts: ApplyTemplateOptions
+): Promise<ProvisionResult> {
+  const dryRun = Boolean(opts.dryRun);
+
   const problems = validateWorkforceTemplate(template);
   if (problems.length > 0) {
     throw new WorkforceProvisioningError(`Refusing to provision an invalid template: ${problems.slice(0, 5).join('; ')}`);
@@ -82,20 +102,24 @@ export async function applyWorkforceTemplate(
   const byName = new Map(existingAgents.map((a) => [a.name, a]));
 
   // Pre-flight: everything that would make the apply fail or leave it half-done is checked before the first write.
-  const transfer = String(tenant.rows[0].transfer_phone_number ?? '').replace(/[\s()-]/g, '');
-  if (!E164.test(transfer)) {
-    throw new WorkforceProvisioningError(
-      'Refusing to provision: the tenant has no valid E.164 transfer number. Every escalation relies on transfer_call, so a workforce without one cannot escalate.'
-    );
+  if (opts.requireTransferNumber) {
+    const transfer = String(tenant.rows[0].transfer_phone_number ?? '').replace(/[\s()-]/g, '');
+    if (!E164.test(transfer)) {
+      throw new WorkforceProvisioningError(
+        'Refusing to provision: the tenant has no valid E.164 transfer number. Every escalation relies on transfer_call, so a workforce without one cannot escalate.'
+      );
+    }
   }
-  const sub = await pool.query('SELECT plan, status FROM public.subscriptions WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT 1', [tenantId]);
-  const maxAgents = getMaxAiAgents(sub.rows[0]?.plan || 'essential', sub.rows[0]?.status);
-  const activeOther = existingAgents.filter((a) => a.active && !template.agents.some((t) => t.name === a.name)).length;
-  const needed = activeOther + template.agents.length;
-  if (needed > maxAgents) {
-    throw new WorkforceProvisioningError(
-      `Refusing to provision: the tenant's plan allows ${maxAgents} active agent(s) but this workforce needs ${needed}. A professional (or trialing) plan allows 3.`
-    );
+  if (opts.enforcePlanLimit) {
+    const sub = await pool.query('SELECT plan, status FROM public.subscriptions WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT 1', [tenantId]);
+    const maxAgents = getMaxAiAgents(sub.rows[0]?.plan || 'essential', sub.rows[0]?.status);
+    const activeOther = existingAgents.filter((a) => a.active && !template.agents.some((t) => t.name === a.name)).length;
+    const needed = activeOther + template.agents.length;
+    if (needed > maxAgents) {
+      throw new WorkforceProvisioningError(
+        `Refusing to provision: the tenant's plan allows ${maxAgents} active agent(s) but this workforce needs ${needed}. A professional (or trialing) plan allows 3.`
+      );
+    }
   }
   const warnings: string[] = [];
   try {
@@ -179,7 +203,7 @@ export async function applyWorkforceTemplate(
     } else if (dryRun) {
       result.agents.push({ key: agent.key, name: agent.name, id: null, action: 'would_create' });
     } else {
-      const created = await ivrService.createAgent(tenantId, fields); // enforces the plan's agent limit
+      const created = await ivrService.createAgent(tenantId, fields, { enforcePlanLimit: opts.enforcePlanLimit }); // the plan limit applies unless Klaros governs the plan
       result.agents.push({ key: agent.key, name: agent.name, id: created.id, action: 'created' });
     }
   }
