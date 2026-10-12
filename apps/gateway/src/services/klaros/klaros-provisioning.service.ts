@@ -1,4 +1,5 @@
-import { createHash, randomUUID, timingSafeEqual } from 'crypto';
+import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'crypto';
+import { getSupabaseAdmin } from '../auth/supabase-admin.js';
 import { pool } from '../db/pool.js';
 import { logger } from '../logger.js';
 import { tenantApiKeyService } from '../api-keys/apiKey.service.js';
@@ -11,8 +12,10 @@ import { applyTemplateToTenant } from '../workforce-templates/provision.js';
  * Klaros-driven provisioning: Klaros (a separate platform) asks Halla to create the AI receptionist for a business Klaros built, so the business
  * never opens a Halla account. This is the ONLY production path that creates a workforce, and it is deliberately narrow:
  *   - it exists only when KLAROS_PROVISIONING_SECRET is set (unset => the route answers 404), and that secret is compared in constant time;
- *   - the tenant is created under ONE platform owner (KLAROS_PROVISIONING_OWNER_USER_ID), with a placeholder phone number that no carrier can
- *     route to, so a provisioned tenant can neither receive nor place a call until a real number is attached later on purpose;
+ *   - every business gets its OWN managed owner account (voice_tenants.owner_user_id is unique, so one login cannot own two businesses). It has a
+ *     random password nobody is ever told and a mailbox that does not exist, so nobody can sign in as it; it is removed again if provisioning fails.
+ *     The tenant carries a placeholder phone number that no carrier can route to, so it can neither receive nor place a call until a real number
+ *     is attached later on purpose;
  *   - consent capture and the live safety supervisor are always on, and it refuses to run without an approved consent wording version;
  *   - only verticals listed in PROVISIONABLE_VERTICALS can be created, and the template is the same tenant-agnostic one the sandbox uses;
  *   - the API key and the webhook signing secret are returned exactly once, to the caller, and are never logged.
@@ -106,14 +109,34 @@ export function validateProvisionInput(body: unknown): ProvisionInput {
   return { klarosTenantId, businessName, vertical: vertical as WorkforceVertical, webhookUrl: url.toString(), rotate: b.rotate === true };
 }
 
-function config(env: NodeJS.ProcessEnv = process.env): { ownerUserId: string; wordingVersion: string } {
-  const ownerUserId = (env.KLAROS_PROVISIONING_OWNER_USER_ID || '').trim().toLowerCase();
+function config(env: NodeJS.ProcessEnv = process.env): { wordingVersion: string } {
   const wordingVersion = (env.KLAROS_CONSENT_WORDING_VERSION || '').trim();
-  if (!UUID_RE.test(ownerUserId)) throw new KlarosProvisioningError('Provisioning is not configured (owner).', 503);
   // Fail closed: no approved wording, no receptionist. The wording itself is the business's to supply; Halla only records which version was used.
   if (!isValidWordingVersion(wordingVersion)) throw new KlarosProvisioningError('Provisioning is not configured (consent wording).', 503);
-  return { ownerUserId, wordingVersion };
+  return { wordingVersion };
 }
+
+/** Creates and removes the managed owner login. Injectable so the database check can run without the Supabase service key. */
+export interface OwnerAccounts {
+  create(klarosTenantId: string): Promise<string>;
+  remove(userId: string): Promise<void>;
+}
+
+export const supabaseOwnerAccounts: OwnerAccounts = {
+  async create(klarosTenantId) {
+    const { data, error } = await getSupabaseAdmin().auth.admin.createUser({
+      email: `klaros-${klarosTenantId}@managed.invalid`,
+      password: randomBytes(48).toString('base64url'), // never stored, never shown: no one can sign in as this account
+      email_confirm: true,
+      user_metadata: { managed_by: 'klaros', klaros_tenant_id: klarosTenantId },
+    });
+    if (error || !data?.user?.id) throw new KlarosProvisioningError('The receptionist owner account could not be created.', 500);
+    return data.user.id;
+  },
+  async remove(userId) {
+    await getSupabaseAdmin().auth.admin.deleteUser(userId);
+  },
+};
 
 async function issueCredentials(tenantId: string, input: ProvisionInput): Promise<{ apiKey: string; signingSecret: string }> {
   // Re-issuing replaces what Klaros held: the previous key is revoked and the previous webhook removed, so there is never more than one live pair.
@@ -127,8 +150,12 @@ async function issueCredentials(tenantId: string, input: ProvisionInput): Promis
   return { apiKey: key.key, signingSecret: hook.secret };
 }
 
-export async function provisionKlarosBusiness(input: ProvisionInput, env: NodeJS.ProcessEnv = process.env): Promise<ProvisionOutput> {
-  const { ownerUserId, wordingVersion } = config(env);
+export async function provisionKlarosBusiness(
+  input: ProvisionInput,
+  env: NodeJS.ProcessEnv = process.env,
+  owners: OwnerAccounts = supabaseOwnerAccounts
+): Promise<ProvisionOutput> {
+  const { wordingVersion } = config(env);
   const template = WORKFORCE_TEMPLATES[input.vertical];
 
   const found = await pool.query(`SELECT id FROM public.voice_tenants WHERE metadata->>'klaros_tenant_id' = $1 LIMIT 2`, [input.klarosTenantId]);
@@ -149,21 +176,26 @@ export async function provisionKlarosBusiness(input: ProvisionInput, env: NodeJS
     consent_capture: { wording_version: wordingVersion },
     safety_supervisor: { enabled: true },
   };
-  // The placeholder is not a phone number: no carrier can route to it, so nothing can call this tenant or be called from it until a real number is attached.
-  const inserted = await pool.query(
-    `INSERT INTO public.voice_tenants (owner_user_id, company_name, phone_number, default_language, region, metadata)
-     VALUES ($1, $2, $3, 'en', 'gcc', $4::jsonb) RETURNING id`,
-    [ownerUserId, input.businessName, `klaros-pending-${randomUUID()}`, JSON.stringify(metadata)]
-  );
-  const tenantId = String(inserted.rows[0].id);
+  const ownerUserId = await owners.create(input.klarosTenantId);
+  let tenantId: string | undefined;
   try {
+    // The placeholder is not a phone number: no carrier can route to it, so nothing can call this tenant or be called from it until a real number is attached.
+    const inserted = await pool.query(
+      `INSERT INTO public.voice_tenants (owner_user_id, company_name, phone_number, default_language, region, metadata)
+       VALUES ($1, $2, $3, 'en', 'gcc', $4::jsonb) RETURNING id`,
+      [ownerUserId, input.businessName, `klaros-pending-${randomUUID()}`, JSON.stringify(metadata)]
+    );
+    tenantId = String(inserted.rows[0].id);
     await applyTemplateToTenant(tenantId, template, { requireTransferNumber: false, enforcePlanLimit: false });
     const creds = await issueCredentials(tenantId, input);
     logger.info('KLAROS_PROVISION_CREATED', { tenantId, vertical: input.vertical, agents: agents.length });
     return { status: 'created', tenantId, ...creds, agents, consentWordingVersion: wordingVersion };
   } catch (err) {
-    // Never leave a half-built tenant behind: a retry from Klaros then starts clean.
-    await pool.query(`DELETE FROM public.voice_tenants WHERE id = $1 AND metadata->>'klaros_tenant_id' = $2`, [tenantId, input.klarosTenantId]).catch(() => undefined);
+    // Never leave a half-built tenant or an orphan owner account behind: a retry from Klaros then starts clean.
+    if (tenantId) {
+      await pool.query(`DELETE FROM public.voice_tenants WHERE id = $1 AND metadata->>'klaros_tenant_id' = $2`, [tenantId, input.klarosTenantId]).catch(() => undefined);
+    }
+    await owners.remove(ownerUserId).catch(() => undefined);
     logger.warn('KLAROS_PROVISION_FAILED', { tenantId, error: err instanceof Error ? err.name : 'error' });
     if (err instanceof KlarosProvisioningError) throw err;
     throw new KlarosProvisioningError('The receptionist could not be created.', 500);
