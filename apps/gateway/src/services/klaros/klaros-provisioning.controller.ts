@@ -5,8 +5,10 @@ import {
   bearerFrom,
   provisionKlarosBusiness,
   provisioningEnabled,
+  refreshKlarosTemplate,
   secretMatches,
   validateProvisionInput,
+  validateRefreshInput,
 } from './klaros-provisioning.service.js';
 import { handlePhoneRequest, validatePhoneRequest } from './klaros-phone.service.js';
 
@@ -56,6 +58,7 @@ function fail(res: express.Response, err: unknown, event: string): void {
  * api-auth-unless-public and authenticates itself here.
  *   POST /api/v1/platform/klaros/provision   create or re-issue a business's receptionist (credentials shown once, never logged)
  *   POST /api/v1/platform/klaros/phone       {action: status | search | buy | set_business_number}
+ *   POST /api/v1/platform/klaros/refresh     roll the current agent template out to an existing business (prompts only)
  */
 export function createKlarosProvisioningRouter(): express.Router {
   const router = express.Router();
@@ -68,6 +71,17 @@ export function createKlarosProvisioningRouter(): express.Router {
       res.status(out.status === 'created' ? 201 : 200).json({ success: true, data: out });
     } catch (err) {
       fail(res, err, 'KLAROS_PROVISION_UNEXPECTED');
+    }
+  });
+
+  router.post('/refresh', async (req, res) => {
+    if (!authorize(req, res)) return;
+    try {
+      const out = await refreshKlarosTemplate(validateRefreshInput(req.body));
+      res.setHeader('Cache-Control', 'no-store');
+      res.status(200).json({ success: true, data: out });
+    } catch (err) {
+      fail(res, err, 'KLAROS_REFRESH_UNEXPECTED');
     }
   });
 

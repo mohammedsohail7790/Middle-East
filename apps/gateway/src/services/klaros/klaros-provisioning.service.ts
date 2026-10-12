@@ -133,6 +133,13 @@ export function validateProvisionInput(body: unknown): ProvisionInput {
   return { klarosTenantId, businessName, vertical: vertical as WorkforceVertical, webhookUrl: url.toString(), rotate: b.rotate === true };
 }
 
+/** Validates the body of a template refresh: just the business. Pure; throws KlarosProvisioningError(400). */
+export function validateRefreshInput(body: unknown): string {
+  const id = typeof (body as Record<string, unknown> | null)?.klarosTenantId === 'string' ? ((body as Record<string, string>).klarosTenantId).trim().toLowerCase() : '';
+  if (!UUID_RE.test(id)) throw new KlarosProvisioningError('klarosTenantId must be a UUID.');
+  return id;
+}
+
 function config(env: NodeJS.ProcessEnv = process.env): { wordingVersion: string } {
   const wordingVersion = (env.KLAROS_CONSENT_WORDING_VERSION || '').trim();
   // Fail closed: no approved wording, no receptionist. The wording itself is the business's to supply; Halla only records which version was used.
@@ -199,6 +206,9 @@ export async function provisionKlarosBusiness(
     provisioned_by: 'klaros',
     consent_capture: { wording_version: wordingVersion },
     safety_supervisor: { enabled: true },
+    // Which template the stored agent prompts came from, so a later template fix can be rolled out to this tenant (see refreshKlarosTemplate).
+    vertical: input.vertical,
+    template_version: template.version,
   };
   const ownerUserId = await owners.create(input.klarosTenantId);
   let tenantId: string | undefined;
@@ -225,4 +235,45 @@ export async function provisionKlarosBusiness(
     if (err instanceof KlarosProvisioningError) throw err;
     throw new KlarosProvisioningError('The receptionist could not be created.', 500);
   }
+}
+
+export interface TemplateStatus {
+  templateVersion: string;
+  currentVersion: string;
+  outdated: boolean;
+}
+
+/** Which template version this business's stored agent prompts came from, against the current one. A tenant created before the version was recorded counts as outdated. */
+export async function templateStatus(tenantId: string): Promise<TemplateStatus> {
+  const r = await pool.query(`SELECT metadata FROM public.voice_tenants WHERE id = $1`, [tenantId]);
+  const md = r.rows[0]?.metadata ?? {};
+  const vertical = (PROVISIONABLE_VERTICALS as ReadonlyArray<string>).includes(md.vertical) ? (md.vertical as WorkforceVertical) : PROVISIONABLE_VERTICALS[0];
+  const current = WORKFORCE_TEMPLATES[vertical].version;
+  const stored = typeof md.template_version === 'string' ? md.template_version : 'unknown';
+  return { templateVersion: stored, currentVersion: current, outdated: stored !== current };
+}
+
+/**
+ * Rolls the current template out to an existing Klaros business: its three agents' prompts and the shared instructions are rewritten from the template.
+ * Nothing else changes (no number, no key, no webhook, no leads, no consent). Safe to repeat: a business already on the current version is left alone.
+ * The template also resets the tenant's qualification questions and required fields, so Klaros re-sends the business context straight after.
+ */
+export async function refreshKlarosTemplate(klarosTenantId: string): Promise<{ updated: boolean; templateVersion: string; previousVersion: string }> {
+  const { id: tenantId } = await findKlarosTenant(klarosTenantId);
+  const status = await templateStatus(tenantId);
+  if (!status.outdated) return { updated: false, templateVersion: status.currentVersion, previousVersion: status.templateVersion };
+  const md = (await pool.query(`SELECT metadata FROM public.voice_tenants WHERE id = $1`, [tenantId])).rows[0]?.metadata ?? {};
+  const vertical = (PROVISIONABLE_VERTICALS as ReadonlyArray<string>).includes(md.vertical) ? (md.vertical as WorkforceVertical) : PROVISIONABLE_VERTICALS[0];
+  try {
+    await applyTemplateToTenant(tenantId, WORKFORCE_TEMPLATES[vertical], { requireTransferNumber: false, enforcePlanLimit: false });
+  } catch (err) {
+    logger.warn('KLAROS_TEMPLATE_REFRESH_FAILED', { tenantId, error: err instanceof Error ? err.name : 'error' });
+    throw new KlarosProvisioningError('The receptionist could not be updated.', 500, 'refresh_failed');
+  }
+  await pool.query(
+    `UPDATE public.voice_tenants SET metadata = metadata || jsonb_build_object('vertical', $2::text, 'template_version', $3::text), updated_at = now() WHERE id = $1`,
+    [tenantId, vertical, status.currentVersion]
+  );
+  logger.info('KLAROS_TEMPLATE_REFRESHED', { tenantId, from: status.templateVersion, to: status.currentVersion });
+  return { updated: true, templateVersion: status.currentVersion, previousVersion: status.templateVersion };
 }
