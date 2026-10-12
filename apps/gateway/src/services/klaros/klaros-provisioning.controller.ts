@@ -8,10 +8,11 @@ import {
   secretMatches,
   validateProvisionInput,
 } from './klaros-provisioning.service.js';
+import { handlePhoneRequest, validatePhoneRequest } from './klaros-phone.service.js';
 
 /** Small in-process limiter: provisioning is a rare, human-triggered action, so a handful per minute is plenty and brute force of the secret is pointless. */
 const WINDOW_MS = 60_000;
-const MAX_PER_WINDOW = 10;
+const MAX_PER_WINDOW = 30;
 let windowStart = Date.now();
 let count = 0;
 function overLimit(): boolean {
@@ -24,28 +25,60 @@ function overLimit(): boolean {
   return count > MAX_PER_WINDOW;
 }
 
+/** Off unless configured (indistinguishable from a route that does not exist), then rate limited, then the platform secret. Returns true when allowed. */
+function authorize(req: express.Request, res: express.Response): boolean {
+  if (!provisioningEnabled()) {
+    res.status(404).json({ success: false, error: 'Not found' });
+    return false;
+  }
+  if (overLimit()) {
+    res.status(429).json({ success: false, error: 'Too many requests' });
+    return false;
+  }
+  if (!secretMatches(bearerFrom(req.header('authorization')))) {
+    res.status(401).json({ success: false, error: 'Unauthorized' });
+    return false;
+  }
+  return true;
+}
+
+function fail(res: express.Response, err: unknown, event: string): void {
+  if (err instanceof KlarosProvisioningError) {
+    res.status(err.status).json({ success: false, error: err.message, ...(err.code ? { code: err.code } : {}) });
+    return;
+  }
+  logger.error(event, { error: err instanceof Error ? err.name : 'error' });
+  res.status(500).json({ success: false, error: 'The request could not be completed.' });
+}
+
 /**
- * POST /api/v1/platform/klaros/provision — server-to-server, authenticated by the platform secret (NOT a tenant key or a user JWT), so it is listed as a
- * public route in api-auth-unless-public and authenticates itself here. The credentials in the answer are shown once and never logged.
+ * Server-to-server routes for Klaros, authenticated by the platform secret (NOT a tenant key or a user JWT), so each is listed as a public route in
+ * api-auth-unless-public and authenticates itself here.
+ *   POST /api/v1/platform/klaros/provision   create or re-issue a business's receptionist (credentials shown once, never logged)
+ *   POST /api/v1/platform/klaros/phone       {action: status | search | buy | set_business_number}
  */
 export function createKlarosProvisioningRouter(): express.Router {
   const router = express.Router();
 
   router.post('/provision', async (req, res) => {
-    // Off unless configured: indistinguishable from a route that does not exist.
-    if (!provisioningEnabled()) return void res.status(404).json({ success: false, error: 'Not found' });
-    if (overLimit()) return void res.status(429).json({ success: false, error: 'Too many requests' });
-    if (!secretMatches(bearerFrom(req.header('authorization')))) {
-      return void res.status(401).json({ success: false, error: 'Unauthorized' });
-    }
+    if (!authorize(req, res)) return;
     try {
       const out = await provisionKlarosBusiness(validateProvisionInput(req.body));
       res.setHeader('Cache-Control', 'no-store');
-      return void res.status(out.status === 'created' ? 201 : 200).json({ success: true, data: out });
+      res.status(out.status === 'created' ? 201 : 200).json({ success: true, data: out });
     } catch (err) {
-      if (err instanceof KlarosProvisioningError) return void res.status(err.status).json({ success: false, error: err.message });
-      logger.error('KLAROS_PROVISION_UNEXPECTED', { error: err instanceof Error ? err.name : 'error' });
-      return void res.status(500).json({ success: false, error: 'The receptionist could not be created.' });
+      fail(res, err, 'KLAROS_PROVISION_UNEXPECTED');
+    }
+  });
+
+  router.post('/phone', async (req, res) => {
+    if (!authorize(req, res)) return;
+    try {
+      const out = await handlePhoneRequest(validatePhoneRequest(req.body));
+      res.setHeader('Cache-Control', 'no-store');
+      res.status(200).json({ success: true, data: out });
+    } catch (err) {
+      fail(res, err, 'KLAROS_PHONE_UNEXPECTED');
     }
   });
 

@@ -42,6 +42,8 @@ const PUBLIC_POST_ROUTES = new Set([
   // Klaros asks Halla to create a business's receptionist. Server-to-server: it carries no tenant JWT and authenticates itself
   // with the platform secret in the route (404 unless KLAROS_PROVISIONING_SECRET is set).
   '/platform/klaros/provision',
+  // The same platform-secret route family: Klaros asks for a business's phone number (search, buy, existing business number, status).
+  '/platform/klaros/phone',
 ]);
 
 const PUBLIC_GET_ROUTES = new Set([
