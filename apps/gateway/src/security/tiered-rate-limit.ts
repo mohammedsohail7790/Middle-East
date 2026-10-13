@@ -44,6 +44,16 @@ function isPublicBillingRead(path: string, method: string): boolean {
   );
 }
 
+/**
+ * Klaros's backend calls Halla server-to-server (provision / phone / refresh) with the platform secret,
+ * so these requests carry no tenant and would otherwise land in the anonymous per-IP bucket. Every Klaros
+ * business shares one egress IP, so that bucket (20/min) throttles provisioning ("Halla is rate limiting
+ * Klaros"). The route authenticates itself and has its own in-process limiter; give it a dedicated bucket.
+ */
+export function isPlatformServerRoute(path: string): boolean {
+  return /^\/platform\/klaros\//.test(path);
+}
+
 /** Stable per-user bucket from Bearer token (no JWT decode — avoids auth bypass). */
 function getBearerUserKey(req: Request): string | null {
   const auth = req.headers.authorization;
@@ -150,6 +160,9 @@ export async function tieredRateLimitMiddleware(
     // Separate bucket so redeploy reconnect storms do not exhaust the general API quota.
     max = Number(process.env.RATE_LIMIT_REALTIME_PER_MIN || 600);
     key = tenantId ? `rt:${tenantId}` : `rt:${ip}`;
+  } else if (isPlatformServerRoute(path)) {
+    max = Number(process.env.RATE_LIMIT_PLATFORM_PER_MIN || 120);
+    key = `platform:${ip}`;
   } else if (isPublicWebhook(path, method)) {
     // Provider webhooks (Twilio, Stripe, Slack, SMS) — higher ceiling, still IP-bound.
     max = Number(process.env.RATE_LIMIT_WEBHOOK_PER_MIN || 120);
@@ -178,7 +191,7 @@ export async function tieredRateLimitMiddleware(
   }
 
   // Authenticated traffic is keyed by tenant; do not also cap shared proxy egress (e.g. Vercel → Render).
-  if (!tenantId && !isPublicWebhook(path, method)) {
+  if (!tenantId && !isPublicWebhook(path, method) && !isPlatformServerRoute(path)) {
     const ipCap = await checkLimit(`ip:${ip}`, Number(process.env.IP_RATE_LIMIT_MAX || 120), WINDOW_MS);
     if (!ipCap.allowed) {
       respond429(res, ipCap.retryAfterSec || 60);
