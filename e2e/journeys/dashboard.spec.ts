@@ -62,6 +62,10 @@ const ARABIC_DASHBOARD_ROUTES = [
 ] as const;
 
 test.describe('arabic dashboard journeys', () => {
+  test.beforeEach(() => {
+    test.skip(!hasAuthCredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD to run authenticated journeys");
+  });
+
   for (const route of ARABIC_DASHBOARD_ROUTES) {
     test(`loads ${route} in RTL without console errors`, async ({ page, consoleErrors, failedRequests }) => {
       const response = await page.goto(route, { waitUntil: 'domcontentloaded' });

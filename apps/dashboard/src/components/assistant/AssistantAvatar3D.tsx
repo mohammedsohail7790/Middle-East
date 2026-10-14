@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
+import { SafeCanvas as Canvas } from "@/components/three/SafeCanvas";
 import { Float, MeshDistortMaterial, Sphere } from "@react-three/drei";
 
 export type AssistantMood = "idle" | "thinking" | "speaking";

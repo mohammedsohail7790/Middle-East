@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
+import { SafeCanvas as Canvas } from "@/components/three/SafeCanvas";
 import { useEffect, useState } from "react";
 import { AIIntelligenceScene } from "./consultancy-intelligence/AIIntelligenceScene";
 
