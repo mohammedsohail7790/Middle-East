@@ -60,7 +60,7 @@
     "apiConnectionIssue": "API connection issue",
     "noSession": "No active session — sign in again.",
     "upgradeRequired": "upgrade required",
-    "bootTimeout": "This is taking longer than expected.",
+    "bootTimeout": "Waking up your workspace. After a quiet period this can take up to a minute.",
     "backToSignIn": "Back to sign in"
   },
   "common": {
