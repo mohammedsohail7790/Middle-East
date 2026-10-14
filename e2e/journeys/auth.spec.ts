@@ -10,7 +10,7 @@ test.describe('auth journeys', () => {
 
   test('navigate login → signup → forgot password', async ({ page, consoleErrors }) => {
     await page.goto('/login', { waitUntil: 'load' });
-    await page.getByRole('link', { name: 'Create an account' }).click();
+    await page.getByRole('link', { name: /create (a|an)( free)? account/i }).click();
     await expect(page).toHaveURL(/\/signup/);
     await page.goto('/forgot-password', { waitUntil: 'load' });
     await expect(page.getByRole('heading', { name: /reset your password/i })).toBeVisible();

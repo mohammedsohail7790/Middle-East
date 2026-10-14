@@ -1,4 +1,4 @@
-import { test, expect, assertNoSeriousAxeViolations, filterHardApiFailures } from '../fixtures';
+import { test, expect, assertNoSeriousAxeViolations, filterHardApiFailures, hasAuthCredentials } from '../fixtures';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -22,6 +22,10 @@ const DASHBOARD_ROUTES = [
 ] as const;
 
 test.describe('authenticated dashboard journeys', () => {
+  test.beforeEach(() => {
+    test.skip(!hasAuthCredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD to run authenticated journeys");
+  });
+
   for (const route of DASHBOARD_ROUTES) {
     test(`loads ${route} without console errors`, async ({ page, consoleErrors, failedRequests }) => {
       const response = await page.goto(route, { waitUntil: 'domcontentloaded' });
