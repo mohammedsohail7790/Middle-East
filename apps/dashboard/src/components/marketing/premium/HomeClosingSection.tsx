@@ -176,7 +176,7 @@ export function HomeClosingSection() {
             <div className="premium-final-cta-actions">
               <ShimmerButton
                 className="btn-lg"
-                background="linear-gradient(135deg, #2997FF 0%, #0066CC 100%)"
+                background="#0066CC"
                 onClick={() => spaGo("signup")}
               >
                 Get My AI Receptionist →
