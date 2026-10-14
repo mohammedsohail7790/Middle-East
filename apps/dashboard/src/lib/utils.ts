@@ -36,3 +36,15 @@ export function timeAgo(date: string): string {
   if (days < 7) return `${days}d ago`;
   return new Date(date).toLocaleDateString();
 }
+
+/** "2026-10-02" or "2026-10-02T00:00:00.000Z" → "Oct 2" (chart axis labels). */
+export function formatChartDay(value: unknown): string {
+  const d = new Date(String(value));
+  if (Number.isNaN(d.getTime())) return String(value ?? "");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+/** Conversion is leads ÷ calls; leads can outnumber calls (manual/web leads), so never show more than 100%. */
+export function clampPercent(value: number): number {
+  return Math.max(0, Math.min(100, value));
+}
