@@ -339,7 +339,7 @@ function AnalyticsPageContent() {
           <div className="space-y-4">
             {funnel.map((step, i) => (
               <motion.div
-                key={step.name}
+                key={step.name ?? i}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + i * 0.1 }}

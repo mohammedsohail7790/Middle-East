@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MarketingProviders } from "@/components/marketing/MarketingProviders";
 import "../globals.css";
+import "@/styles/apple-dashboard.css";
 
 export const metadata: Metadata = {
   title: {
@@ -37,14 +38,14 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#8C6F3E",
+  themeColor: "#0066CC",
 };
 
 // Prevent FOUC on theme toggle
 const themeInitScript = `(function(){try{var t=localStorage.getItem('halla_theme')||localStorage.getItem('calliq_theme');document.documentElement.classList.remove('light','dark');document.documentElement.classList.add(t==='dark'?'dark':'light');}catch(e){document.documentElement.classList.add('light');}})();`;
 
-// Marketing & auth pages share the dashboard's warm gold/bronze accent —
-// no override needed; halla_styles.css already sets --accent to Aureate Gold.
+// Marketing & auth pages share the Apple blue action color with the dashboard and meetklaros.com;
+// /marketing-apple.css (loaded last) is the Apple surface layer over halla_styles.css.
 
 export default function MarketingRootLayout({
   children,
@@ -67,6 +68,8 @@ export default function MarketingRootLayout({
         <link id="halla-styles" rel="stylesheet" href="/halla_styles.css" />
         {/* eslint-disable-next-line @next/next/no-css-tags */}
         <link id="marketing-premium" rel="stylesheet" href="/marketing-premium.css" />
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link id="marketing-apple" rel="stylesheet" href="/marketing-apple.css" />
         <link
           id="tabler-icons"
           rel="stylesheet"
@@ -76,7 +79,7 @@ export default function MarketingRootLayout({
         <link
           id="halla-fonts"
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=Cairo:wght@300;400;500;600;700;800;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800;900&display=swap"
         />
       </head>
       <body suppressHydrationWarning>

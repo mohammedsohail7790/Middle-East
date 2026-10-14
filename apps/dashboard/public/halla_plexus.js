@@ -21,10 +21,18 @@
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
+  // Without WebGL (headless CI, blocklisted GPUs) three.js logs console errors; skip the decorative scene instead.
+  function webglAvailable() {
+    try {
+      const c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+    } catch (e) { return false; }
+  }
+
   class StarfieldScene {
     constructor(mountId) {
       this.mount = document.getElementById(mountId);
-      if (!this.mount || !window.THREE) return;
+      if (!this.mount || !window.THREE || !webglAvailable()) return;
       const THREE = window.THREE;
       this.THREE = THREE;
 

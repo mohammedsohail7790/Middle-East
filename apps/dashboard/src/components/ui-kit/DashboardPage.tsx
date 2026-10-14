@@ -1,17 +1,11 @@
 "use client";
 
 import { ReactNode } from "react";
-import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { PageSkeleton } from "@/components/ui-kit/PageSkeleton";
-
-const DashboardAmbient3D = dynamic(
-  () => import("@/components/effects/DashboardAmbient3D").then((m) => m.DashboardAmbient3D),
-  { ssr: false },
-);
 
 type DashboardPageProps = {
   title: string;
@@ -56,25 +50,11 @@ export function DashboardPage({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-        className="dashboard-page-header dashboard-page-header--premium relative overflow-hidden"
+        className="dashboard-page-header dashboard-page-header--premium relative"
       >
-        <DashboardAmbient3D />
-        <div
-          className="pointer-events-none absolute -right-6 -top-10 size-36 rounded-full opacity-[0.12] blur-3xl dark:opacity-[0.18]"
-          style={{ background: "var(--accent)" }}
-          aria-hidden
-        />
         <div className="min-w-0 flex-1 relative">
-          <div className="flex items-center gap-3">
-            <div
-              className="h-7 w-0.5 shrink-0 rounded-full bg-gradient-to-b from-accent to-accent-mid opacity-90 sm:h-8"
-              aria-hidden
-            />
-            <div className="min-w-0">
-              <h1 className="dashboard-title leading-tight">{title}</h1>
-              {description && <p className="dashboard-description">{description}</p>}
-            </div>
-          </div>
+          <h1 className="dashboard-title">{title}</h1>
+          {description && <p className="dashboard-description">{description}</p>}
         </div>
         {actions && (
           <div className="dashboard-page-actions">

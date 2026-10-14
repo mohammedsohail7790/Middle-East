@@ -119,8 +119,8 @@ export function MarketingConsultancyLayer() {
             key={i}
             size={i === 1 ? 140 : 100}
             duration={7 + i}
-            colorFrom="#C7A25A"
-            colorTo="#8C6F3E"
+            colorFrom="#2997FF"
+            colorTo="#0066CC"
             borderWidth={2}
           />,
           mount,

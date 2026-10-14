@@ -88,7 +88,7 @@ export function HomeClosingSection() {
               >
                 {plan.popular && <span className="premium-pricing-badge">Most popular</span>}
                 {plan.popular && (
-                  <BorderBeam size={100} duration={7} colorFrom="#C7A25A" colorTo="#8C6F3E" borderWidth={2} />
+                  <BorderBeam size={100} duration={7} colorFrom="#2997FF" colorTo="#0066CC" borderWidth={2} />
                 )}
                 <div className="premium-pricing-plan">{plan.name}</div>
                 <div className="premium-pricing-price">
@@ -176,7 +176,7 @@ export function HomeClosingSection() {
             <div className="premium-final-cta-actions">
               <ShimmerButton
                 className="btn-lg"
-                background="linear-gradient(135deg, #C7A25A 0%, #8C6F3E 100%)"
+                background="linear-gradient(135deg, #2997FF 0%, #0066CC 100%)"
                 onClick={() => spaGo("signup")}
               >
                 Get My AI Receptionist →
