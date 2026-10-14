@@ -49,7 +49,7 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
           </p>
           <p className="text-[12px] text-muted-foreground">
             Also from Halla AI:{" "}
-            <a href="https://meetklaros.com" target="_blank" rel="noopener" className="text-accent no-underline hover:underline">Klaros AI &#8599;</a>
+            <a href="https://meetklaros.com" target="_blank" rel="noopener" className="text-accent underline">Klaros AI &#8599;</a>
           </p>
         </div>
       </footer>
@@ -117,7 +117,7 @@ export function AuthFooterLink({
       {prompt}{" "}
       <Link
         href={href}
-        className="font-semibold text-accent no-underline transition-colors hover:underline"
+        className="font-semibold text-accent underline underline-offset-2 transition-colors"
       >
         {linkLabel}
       </Link>

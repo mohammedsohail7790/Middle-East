@@ -79,7 +79,7 @@
   --background-hover: var(--gray-200);
   --foreground: var(--gray-800);
   --foreground-secondary: var(--gray-500);
-  --foreground-tertiary: var(--gray-400);
+  --foreground-tertiary: var(--gray-500);
   --card: var(--white);
   --card-foreground: var(--gray-800);
   --popover: var(--white);
@@ -2275,7 +2275,7 @@ body:has(.auth-shell) {
     color: var(--black);
     --foreground: var(--black);
     --foreground-secondary: var(--gray-500);
-    --foreground-tertiary: var(--gray-400);
+    --foreground-tertiary: var(--gray-500);
     --card: var(--white);
     --card-foreground: var(--black);
     --border: var(--gray-200);
@@ -2398,7 +2398,7 @@ body:has(.auth-shell) {
     color: var(--black);
     --foreground: var(--black);
     --foreground-secondary: var(--gray-500);
-    --foreground-tertiary: var(--gray-400);
+    --foreground-tertiary: var(--gray-500);
     --card: var(--white);
     --card-foreground: var(--black);
     --border: var(--gray-200);

@@ -876,7 +876,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, #D9C08A 0%, var(--consult-accent) 42%, var(--consult-accent-soft) 100%);
+  background: radial-gradient(circle at 32% 28%, #A9D3F8 0%, var(--consult-accent) 42%, var(--consult-accent-soft) 100%);
   box-shadow:
     0 0 24px rgba(0,102,204, 0.45),
     inset 0 -8px 18px rgba(0,102,204, 0.35);

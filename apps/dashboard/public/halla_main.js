@@ -38,7 +38,7 @@ function applyPrimaryCtaText() {
 function setSectionMode(section) {
   document.body.setAttribute('data-section', section);
   document.querySelectorAll('.section-switch-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.section === section);
+    b.classList.toggle('active', b.dataset.section === section); if (b.tagName === 'BUTTON') b.setAttribute('aria-pressed', String(b.dataset.section === section));
   });
   applyPrimaryCtaText();
 }

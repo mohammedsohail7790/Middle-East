@@ -1,7 +1,7 @@
 /* ================================================
    Halla AI — Stylesheet
    Design: warm porcelain/gold luxury system
-   Font: Hanken Grotesk | Primary: #121212 | Accent: #C7A25A
+   Font: Hanken Grotesk | Primary: #1D1D1F | Accent: #0066CC
    © 2025 Halla AI
 ================================================ */
 
@@ -17,27 +17,27 @@ html { scroll-behavior: smooth; font-size: 16px; }
      neutrals + restrained gold, replaces the prior violet/navy SaaS
      palette site-wide; see docs reference image for the source system). */
   --white: #ffffff;
-  --black: #121212;
-  --gray-50: #FAF8F3;
-  --gray-100: #F4F1EC;
-  --gray-200: #E9E6DF;
-  --gray-300: #DCD6C9;
-  --gray-400: #A7ADA3;
-  --gray-500: #7C7568;
-  --gray-600: #636865;
-  --gray-700: #4A473F;
-  --gray-800: #2B2D2A;
-  --gray-900: #1A1A1A;
-  --accent: #C7A25A;
-  --accent-dark: #8C6F3E;
-  --accent-light: #EEEAE2;
-  --accent-mid: #C7A25A;
-  --green: #6B7A6B;
-  --green-light: #E4E8E1;
-  --orange: #C7A25A;
-  --red: #A8583F;
-  --violet: #8C6F3E;
-  --violet-light: #EEEAE2;
+  --black: #1D1D1F;
+  --gray-50: #FBFBFD;
+  --gray-100: #F5F5F7;
+  --gray-200: #E8E8ED;
+  --gray-300: #D2D2D7;
+  --gray-400: #6E6E73;
+  --gray-500: #6e6e73;
+  --gray-600: #6E6E73;
+  --gray-700: #424245;
+  --gray-800: #333336;
+  --gray-900: #1D1D1F;
+  --accent: #0066CC;
+  --accent-dark: #0066CC;
+  --accent-light: #EBF4FD;
+  --accent-mid: #0066CC;
+  --green: #248A3D;
+  --green-light: #E9F7EC;
+  --orange: #0066CC;
+  --red: #D70015;
+  --violet: #0066CC;
+  --violet-light: #EBF4FD;
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow: 0 4px 16px rgba(0,0,0,0.08);
@@ -60,17 +60,17 @@ html { scroll-behavior: smooth; font-size: 16px; }
      rule that already consumes var(--consult-*) renders light instead of
      needing each of those ~100 rules touched individually. */
   --consult-ink: #ffffff;
-  --consult-ink-soft: #FAF8F3;
+  --consult-ink-soft: #FBFBFD;
   --consult-surface: rgba(0,0,0,0.05);
   --consult-surface-strong: rgba(0,0,0,0.10);
   --consult-hairline: rgba(0,0,0,0.14);
   --consult-hairline-strong: rgba(0,0,0,0.24);
-  --consult-accent: #C7A25A;
-  --consult-accent-soft: #8C6F3E;
+  --consult-accent: #0066CC;
+  --consult-accent-soft: #0066CC;
   --consult-accent-dim: rgba(0,102,204,0.12);
-  --consult-text: #121212;
-  --consult-text-muted: #5B5F5A;
-  --consult-text-faint: #8E928D;
+  --consult-text: #1D1D1F;
+  --consult-text-muted: #6E6E73;
+  --consult-text-faint: #6E6E73;
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   /* AI Intelligence (Klaros AI) — the product's own real brand accent
      (deep indigo-navy), kept distinct from the shared gold used by

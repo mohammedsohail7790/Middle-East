@@ -25,7 +25,7 @@
   --consult-accent-dim: rgba(0, 102, 204, 0.12);
   --consult-text: #1d1d1f;
   --consult-text-muted: #6e6e73;
-  --consult-text-faint: #86868b;
+  --consult-text-faint: #6e6e73;
   --consult-hairline: rgba(0, 0, 0, 0.1);
   --consult-hairline-strong: rgba(0, 0, 0, 0.18);
   --consult-surface: #f5f5f7;
@@ -159,7 +159,7 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 
 /* Marquee / ticker / stats bands */
 .consult-marquee, .ticker-wrap, .stats-bar, .brand-strip { background: #fff; border-top: 1px solid rgba(0, 0, 0, 0.08); border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
-.consult-marquee-track, .ticker-item { font-family: var(--font) !important; text-transform: none !important; letter-spacing: -0.006em !important; font-size: 15px !important; color: #86868b !important; }
+.consult-marquee-track, .ticker-item { font-family: var(--font) !important; text-transform: none !important; letter-spacing: -0.006em !important; font-size: 15px !important; color: #6e6e73 !important; }
 .stat-num, .roi-result-num { font-weight: 700; letter-spacing: -0.04em; }
 
 /* Tables */
@@ -210,7 +210,7 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 .brand-lockup { display: inline-flex; align-items: center; gap: 10px; color: #1d1d1f; }
 .brand-tile { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 9px; background: #1d1d1f; color: #fff; flex-shrink: 0; }
 .brand-word { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
-.brand-word span { color: #86868b; }
+.brand-word span { color: #6e6e73; }
 .footer-logo .brand-lockup { margin-bottom: 8px; }
 .logo-img.nav-group[data-section="intelligence"], .klaros-wordmark-nav { display: none !important; }
 /* Featured (black) cards: restore readable text on the black surface. */
@@ -283,3 +283,7 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 /* ───── Polish pass 3 ───── */
 .ind-icon, .feat-icon { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .ind-card p, .ind-card [class*="desc"], .premium-industry-card p { color: #6e6e73 !important; }
+
+/* ───── Accessibility: footer text on the light footer must meet 4.5:1 ───── */
+#marketing-spa-root footer :is(span, p, div, small, li):not(.brand-tile):not(.brand-word):not(.brand-word *):not(.btn):not(.btn *) { color: #6e6e73 !important; }
+#marketing-spa-root footer a:not(.btn) { color: #424245 !important; }
