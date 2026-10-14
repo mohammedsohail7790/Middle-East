@@ -185,7 +185,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setInitError("Taking too long to load your workspace. Please sign in again.");
         return true;
       });
-    }, 15_000);
+    }, 100_000);
 
     init().catch((e) => {
       if (cancelled) return;
