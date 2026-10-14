@@ -17,7 +17,7 @@ import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 import { StatCard } from "@/components/ui-kit/StatCard";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
-import { cn } from "@/lib/utils";
+import { cn, formatChartDay, clampPercent } from "@/lib/utils";
 import { DASHBOARD_POLL_MS } from "@/lib/dashboard-sync";
 import { useRealtimeQuery } from "@/lib/use-realtime-query";
 import { PlanFeatureGate } from "@/components/billing/PlanFeatureGate";
@@ -80,7 +80,7 @@ function AnalyticsPageContent() {
         return api.get<Record<string, unknown>>("/dashboard/metrics").then((d) => ({
           totalCalls: Number(d.totalCalls ?? 0),
           totalLeads: Number(d.leads ?? 0),
-          conversionRate: Number(d.conversionRate ?? 0),
+          conversionRate: clampPercent(Number(d.conversionRate ?? 0)),
           avgCallDuration: Number(d.avgCallDuration ?? d.avgResponseLatency ?? 0),
         }));
       }),
@@ -287,6 +287,7 @@ function AnalyticsPageContent() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis
                   dataKey="date"
+                  tickFormatter={formatChartDay}
                   tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}

@@ -20,7 +20,7 @@ import { fetchDashboardBootstrap, readBootstrapSnapshot } from "@/lib/dashboard-
 import { funnelFromMetrics } from "@/lib/gateway-adapters";
 import { useDashboardLive } from "@/components/dashboard/DashboardRealtimeProvider";
 import { DASHBOARD_POLL_MS, useDashboardSync } from "@/lib/dashboard-sync";
-import { timeAgo, formatDuration } from "@/lib/utils";
+import { timeAgo, formatDuration, formatChartDay, clampPercent } from "@/lib/utils";
 import { useTranslations, useLocale } from "next-intl";
 import { StatCard } from "@/components/ui-kit/StatCard";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
@@ -47,7 +47,7 @@ function normalizeMetrics(raw: CachedMetrics): Metrics {
     conversionRate:
       raw.conversionRate <= 1 && raw.conversionRate > 0
         ? Number((raw.conversionRate * 100).toFixed(1))
-        : raw.conversionRate,
+        : clampPercent(raw.conversionRate),
     avgResponseLatency: raw.avgResponseLatency ?? 0,
     avgCallDuration: raw.avgCallDuration ?? 0,
   };
@@ -198,7 +198,7 @@ export default function DashboardHome() {
       leads: live.totalLeads ?? prev?.leads ?? 0,
       conversionRate:
         live.totalCalls > 0 && live.totalLeads != null
-          ? Number(((live.totalLeads / live.totalCalls) * 100).toFixed(1))
+          ? clampPercent(Number(((live.totalLeads / live.totalCalls) * 100).toFixed(1)))
           : prev?.conversionRate ?? 0,
       avgResponseLatency: prev?.avgResponseLatency ?? 0,
       avgCallDuration: prev?.avgCallDuration ?? 0,
@@ -381,7 +381,7 @@ export default function DashboardHome() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.6} />
-                <XAxis dataKey="day" stroke="currentColor" opacity={0.4} fontSize={12} tickLine={false} axisLine={false} />
+                <XAxis dataKey="day" stroke="currentColor" opacity={0.4} fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatChartDay} />
                 <YAxis stroke="currentColor" opacity={0.4} fontSize={12} width={32} tickLine={false} axisLine={false} />
                 <Tooltip
                   contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, boxShadow: "var(--shadow-md)" }}

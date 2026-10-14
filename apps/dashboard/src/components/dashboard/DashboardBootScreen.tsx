@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { HallaAiLogo } from "@/components/brand/HallaAiLogo";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -23,7 +23,7 @@ export function DashboardBootScreen() {
       <div className="dashboard-boot-glow dashboard-boot-glow--tl" aria-hidden />
       <div className="dashboard-boot-glow dashboard-boot-glow--br" aria-hidden />
       <div className="dashboard-boot-card">
-        <Image src="/logo-receptionist-nav.jpg" alt="Halla AI — AI Receptionist" width={200} height={200} className="h-16 w-auto max-w-[180px] object-contain rounded-md" priority />
+        <HallaAiLogo href={undefined} size="lg" />
         <div className="dashboard-boot-dots" role="status" aria-label={t("loading")}>
           <span className="dashboard-boot-dot" style={{ animationDelay: "0ms" }} />
           <span className="dashboard-boot-dot" style={{ animationDelay: "150ms" }} />
