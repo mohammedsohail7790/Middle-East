@@ -287,3 +287,8 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 /* ───── Accessibility: footer text on the light footer must meet 4.5:1 ───── */
 #marketing-spa-root footer :is(span, p, div, small, li):not(.brand-tile):not(.brand-word):not(.brand-word *):not(.btn):not(.btn *) { color: #6e6e73 !important; }
 #marketing-spa-root footer a:not(.btn) { color: #424245 !important; }
+
+/* CTA buttons inside the footer keep white-on-blue text (the footer greys must not reach them). */
+#marketing-spa-root footer .btn, #marketing-spa-root footer .btn * , .footer-bottom .btn, .footer-bottom .btn * { color: #fff !important; }
+/* Scroll-reveal slides in but never fades: text must always be at full contrast (axe samples mid-animation). */
+.reveal-up, .reveal-up.is-visible { opacity: 1 !important; }
