@@ -38,7 +38,7 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --red: #A8583F;
   --violet: #8C6F3E;
   --violet-light: #EEEAE2;
-  --font: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow: 0 4px 16px rgba(0,0,0,0.08);
   --shadow-md: 0 8px 32px rgba(0,0,0,0.10);
@@ -61,13 +61,13 @@ html { scroll-behavior: smooth; font-size: 16px; }
      needing each of those ~100 rules touched individually. */
   --consult-ink: #ffffff;
   --consult-ink-soft: #FAF8F3;
-  --consult-surface: rgba(43,45,42,0.05);
-  --consult-surface-strong: rgba(43,45,42,0.10);
-  --consult-hairline: rgba(43,45,42,0.14);
-  --consult-hairline-strong: rgba(43,45,42,0.24);
+  --consult-surface: rgba(0,0,0,0.05);
+  --consult-surface-strong: rgba(0,0,0,0.10);
+  --consult-hairline: rgba(0,0,0,0.14);
+  --consult-hairline-strong: rgba(0,0,0,0.24);
   --consult-accent: #C7A25A;
   --consult-accent-soft: #8C6F3E;
-  --consult-accent-dim: rgba(199,162,90,0.12);
+  --consult-accent-dim: rgba(0,102,204,0.12);
   --consult-text: #121212;
   --consult-text-muted: #5B5F5A;
   --consult-text-faint: #8E928D;
@@ -154,7 +154,7 @@ p { color: var(--gray-500); line-height: 1.72; }
 .btn-outline { background: transparent; color: var(--black); border: 1.5px solid var(--gray-200); }
 .btn-outline:hover { border-color: var(--gray-400); background: var(--gray-50); }
 .btn-blue { background: var(--accent); color: var(--white); }
-.btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(140,111,62,0.3); }
+.btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,102,204,0.3); }
 /* Primary CTA buttons ("Book a Diagnostic Call", etc.) use the shared
    .btn-blue class, which is teal everywhere else on the site — swap it
    for the consultancy accent while any page in that section is active.
@@ -549,7 +549,7 @@ body[data-section="intelligence"] .footer-brand p.footer-group[data-section="rec
 .cta-block::before {
   content: ""; position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
   width: 500px; height: 300px;
-  background: radial-gradient(circle, rgba(140,111,62,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0,102,204,0.15) 0%, transparent 70%);
   pointer-events: none;
 }
 .cta-block h2, .cta-block h3 { color: var(--white); }
@@ -773,7 +773,7 @@ body[data-section="intelligence"] .footer-brand p.footer-group[data-section="rec
 }
 .logo-pill:hover {
   border-color: var(--accent); color: var(--accent);
-  box-shadow: 0 4px 12px rgba(140,111,62,0.15);
+  box-shadow: 0 4px 12px rgba(0,102,204,0.15);
   transform: translateY(-1px);
 }
 .logo-pill svg { flex-shrink: 0; border-radius: 4px; }

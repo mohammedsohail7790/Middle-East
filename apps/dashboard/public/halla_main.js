@@ -44,7 +44,7 @@ function setSectionMode(section) {
 }
 function switchSection(section) {
   if (section === 'consultancy') { go('consultancy'); }
-  else if (section === 'intelligence') { go('intelligence'); }
+  else if (section === 'intelligence') { window.open('https://meetklaros.com', '_blank', 'noopener'); }
   else { go('home'); }
 }
 function navPrimaryCtaClick() {

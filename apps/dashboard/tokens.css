@@ -16,13 +16,13 @@
 
   --color-rule: #D7DCE3;
   --color-rule-strong: #BEC5C8;
-  --color-focus: #8C6F3E;
+  --color-focus: #0066CC;
 
-  --color-accent: #8C6F3E;
-  --color-accent-hover: #6B5326;
-  --color-accent-muted: #ECE7DF;
+  --color-accent: #0066CC;
+  --color-accent-hover: #0055AA;
+  --color-accent-muted: #EBF4FD;
   --color-accent-ink: #FFFFFF;
-  --color-accent-glow: rgba(198,169,122,0.35);
+  --color-accent-glow: rgba(41, 151, 255,0.35);
 
   --color-sidebar: #0E1116;
   --color-sidebar-elevated: #2A313C;
@@ -47,14 +47,14 @@
   --color-highlight: #F7B500;
   --color-highlight-muted: #FEF3D6;
   --color-disabled: #E5E7EB;
-  --color-error: #A8583F;
+  --color-error: #D70015;
   --color-error-muted: #F5E9E5;
 
   --gradient-brand: linear-gradient(
     135deg,
-    #C6A97A 0%,
-    #8C6F3E 50%,
-    #6B5326 100%
+    #2997FF 0%,
+    #0066CC 50%,
+    #0055AA 100%
   );
   --gradient-surface: linear-gradient(
     180deg,
@@ -62,8 +62,8 @@
     #F7F8F9 100%
   );
   --gradient-hero-mesh:
-    radial-gradient(ellipse 90% 60% at 10% -10%, rgba(198,169,122,0.12), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 90% 0%, rgba(140,111,62,0.08), transparent 50%),
+    radial-gradient(ellipse 90% 60% at 10% -10%, rgba(41, 151, 255,0.12), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 0%, rgba(0, 102, 204,0.08), transparent 50%),
     radial-gradient(ellipse 50% 40% at 50% 100%, rgba(64,74,62,0.06), transparent 45%);
 
   --font-display: var(--font-sans), Inter, system-ui, sans-serif;

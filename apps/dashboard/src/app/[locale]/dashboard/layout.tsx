@@ -221,6 +221,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     return () => {
       cancelled = true;
+      // React StrictMode (dev) runs effect → cleanup → effect. Without this
+      // reset the second run is skipped by the guard above while the first run
+      // is already cancelled, so the boot screen would never resolve.
+      initStarted.current = false;
       window.clearTimeout(watchdog);
       authListener.subscription.unsubscribe();
       window.removeEventListener("focus", onFocus);
