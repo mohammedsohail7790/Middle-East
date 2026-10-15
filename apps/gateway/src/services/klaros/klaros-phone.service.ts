@@ -125,12 +125,38 @@ export async function phoneStatus(tenantId: string, env: NodeJS.ProcessEnv = pro
   };
 }
 
+/**
+ * A short, safe description of why a phone-provider call failed, for the log only (never returned to a caller): the error's name, its numeric code and HTTP status when it
+ * has them (Twilio's errors carry both), and its message with anything that looks like a secret or a phone number removed, cut short. Without this the real reason a number
+ * search or purchase fails (bad credentials, a suspended account, a regulatory block) is thrown away and cannot be diagnosed.
+ */
+export function describePhoneError(err: unknown): { errorName: string; errorCode?: string | number; errorStatus?: number; errorMessage?: string } {
+  if (!err || typeof err !== 'object') return { errorName: 'unknown' };
+  const e = err as { name?: unknown; code?: unknown; status?: unknown; statusCode?: unknown; message?: unknown };
+  const out: { errorName: string; errorCode?: string | number; errorStatus?: number; errorMessage?: string } = {
+    errorName: typeof e.name === 'string' && e.name ? e.name : 'Error',
+  };
+  if (typeof e.code === 'string' || typeof e.code === 'number') out.errorCode = e.code;
+  const status = typeof e.status === 'number' ? e.status : typeof e.statusCode === 'number' ? e.statusCode : undefined;
+  if (status !== undefined) out.errorStatus = status;
+  if (typeof e.message === 'string' && e.message) {
+    out.errorMessage = e.message
+      .replace(/\bA[CK][0-9a-fA-F]{32}\b/g, '[sid]') // Twilio account and API-key identifiers
+      .replace(/\b[0-9a-fA-F]{32,}\b/g, '[secret]') // any long hex token
+      .replace(/(Bearer|Basic)\s+\S+/gi, '$1 [removed]')
+      .replace(/\+\d{7,15}/g, '[number]')
+      .slice(0, 240);
+  }
+  return out;
+}
+
 export async function searchNumbers(areaCode: string) {
   if (!isTwilioConfigured()) throw new KlarosPhoneError('Phone numbers are not available right now.', 503, 'not_available');
   try {
     const found = await new PhoneProvisioningService().searchAvailable(areaCode, 5);
     return { numbers: found.map((n) => ({ phoneNumber: n.phoneNumber, friendlyName: n.friendlyName })), monthlyCostUsd: MONTHLY_COST_USD };
-  } catch {
+  } catch (err) {
+    logger.warn('KLAROS_PHONE_SEARCH_FAILED', { areaCode, ...describePhoneError(err) });
     throw new KlarosPhoneError('We could not search for numbers just now.', 502, 'search_failed');
   }
 }
@@ -157,7 +183,7 @@ export async function buyNumber(
     try {
       purchased = await new PhoneProvisioningService().purchaseNumber(tenantId, phoneNumber);
     } catch (err) {
-      logger.warn('KLAROS_PHONE_BUY_FAILED', { tenantId, error: err instanceof Error ? err.name : 'error' });
+      logger.warn('KLAROS_PHONE_BUY_FAILED', { tenantId, ...describePhoneError(err) });
       throw new KlarosPhoneError('The number could not be bought. It may have just been taken: search again.', 502, 'number_unavailable');
     }
     // Pin the Receptionist so the intake and consent flow answers, never another agent.
