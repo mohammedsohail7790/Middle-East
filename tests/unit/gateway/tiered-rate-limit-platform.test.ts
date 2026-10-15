@@ -3,9 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 // No Redis: the limiter falls back to its in-memory buckets.
 vi.mock('../../../apps/gateway/src/services/voice/redis.client.js', () => ({
     voiceRedis: {
-        incr: vi.fn().mockRejectedValue(new Error('no redis')),
-        pexpire: vi.fn(),
-        pttl: vi.fn(),
+        eval: vi.fn().mockRejectedValue(new Error('no redis')),
     },
 }));
 
