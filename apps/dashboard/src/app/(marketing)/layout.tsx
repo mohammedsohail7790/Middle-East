@@ -70,6 +70,15 @@ export default function MarketingRootLayout({
         <link id="marketing-premium" rel="stylesheet" href="/marketing-premium.css" />
         {/* eslint-disable-next-line @next/next/no-css-tags */}
         <link id="marketing-apple" rel="stylesheet" href="/marketing-apple.css" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          id="halla-gcc-fonts"
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        />
+        {/* GCC theme: charcoal / off-white / champagne. Must load after marketing-apple.css. */}
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link id="halla-gcc-theme" rel="stylesheet" href="/halla-gcc-theme.css" />
         <link
           id="tabler-icons"
           rel="stylesheet"

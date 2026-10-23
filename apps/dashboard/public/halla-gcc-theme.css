@@ -1,0 +1,54 @@
+/* HallaAI GCC theme — load LAST (after marketing-apple.css). Charcoal / off-white / champagne. */
+:root{
+  --ink:#121417; --paper:#FAF9F6; --gold:#C5A059; --gold-text:#8F6B28; --gold-dark:#6F5120;
+  --black:#121417; --gray-50:#FAF9F6; --gray-100:#F3F1EC; --gray-200:#E6E2D9;
+  --accent:var(--gold-text); --accent-dark:var(--gold-dark); --accent-mid:var(--gold);
+  --accent-light:rgba(197,160,89,.14); --violet:var(--gold-text); --violet-light:rgba(197,160,89,.14); --orange:var(--gold-text);
+  --consult-accent:var(--gold); --consult-accent-soft:var(--gold-text); --consult-accent-dim:rgba(197,160,89,.16);
+  --consult-text:#121417; --consult-surface:#F3F1EC; --consult-surface-strong:#E6E2D9;
+  --font:'Plus Jakarta Sans','Inter',-apple-system,'Cairo',sans-serif;
+  --font-display:'Cormorant Garamond','Cinzel',Georgia,serif;
+  --radius:6px; --radius-lg:8px; --radius-xl:10px;
+  --shadow-sm:none; --shadow:0 1px 0 rgba(18,20,23,.06); --shadow-md:0 8px 28px -14px rgba(18,20,23,.18);
+}
+html body{background:var(--paper);color:var(--ink);font-family:var(--font);letter-spacing:0}
+html body .page,html body .page-hero,html body .hero,html body .hero.hero--premium{background:var(--paper)!important;border:0}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+h1 em,h2 em{color:var(--gold-text);font-style:italic}
+h4,h5{font-family:var(--font)}
+.label,.hero-eyebrow{color:var(--gold-text)}
+/* Buttons: champagne primary, outline secondary */
+html body .btn-primary,html body .btn-blue,html body #pages .btn-primary,html body #pages .btn-blue,html body nav .btn-primary,html body #mob-nav .btn-primary{
+  background:var(--gold)!important;color:var(--ink)!important;border:1px solid var(--gold)!important;font-weight:600;box-shadow:none!important}
+html body .btn-primary:hover,html body .btn-blue:hover,html body #pages .btn-primary:hover,html body #pages .btn-blue:hover{background:#D4B26E!important}
+html body .btn-outline,html body #pages .btn-outline{background:transparent!important;color:var(--ink);border:1px solid rgba(18,20,23,.35)!important}
+html body .btn-outline:hover{border-color:var(--gold-text)!important;color:var(--gold-text)}
+/* Surfaces: hairline editorial panels instead of glossy cards */
+.card,.pricing-card,.roi-wrap,.roi-result,.ind-card,.faq-item,.browser-frame{background:#fff;border:1px solid rgba(18,20,23,.12);border-radius:var(--radius-lg);box-shadow:none}
+.card-blue{background:rgba(197,160,89,.08);border-color:rgba(197,160,89,.4)}
+.pricing-card.popular{border:1.5px solid var(--gold)}
+.pop-badge{background:var(--gold);color:var(--ink)}
+.feat-icon,.feat-icon-blue,.feat-icon-green,.feat-icon-orange,.ddi{background:rgba(197,160,89,.14)!important;color:var(--gold-text)!important}
+/* Replace the 3-column card grid on key pages with a hairline editorial list */
+#page-home .grid-3>.card,#page-features .grid-3>.card{background:transparent;border:0;border-top:1px solid rgba(18,20,23,.18);border-radius:0;padding:24px 4px 8px}
+/* Dark contrast sections */
+.cta-block,.ticker-wrap{background:var(--ink)!important;color:#F4EFE4}
+.cta-block h2,.cta-block h3{color:#F4EFE4}
+.cta-block p{color:rgba(244,239,228,.72)}
+.ticker-wrap{border:0}.ticker-item,.ticker-item strong{color:#F4EFE4}
+.stat-num,.value-num,.pricing-price{color:var(--gold-text);font-family:var(--font-display)}
+.status-dot{background:var(--gold)}
+.bubble.ai{background:rgba(197,160,89,.16);color:var(--ink)}
+/* Arabic: Cairo, no negative tracking (it breaks letter joining), ~12% larger headings */
+html[dir="rtl"] body,html[lang="ar"] body{font-family:'Cairo','Plus Jakarta Sans',sans-serif}
+html[dir="rtl"] h1,html[dir="rtl"] h2,html[dir="rtl"] h3,html[lang="ar"] h1,html[lang="ar"] h2,html[lang="ar"] h3{font-family:'Cairo',sans-serif;font-weight:700;letter-spacing:0;line-height:1.35}
+html[dir="rtl"] h1,html[lang="ar"] h1{font-size:clamp(2.9rem,1.7rem + 5.2vw,5.2rem)}
+html[dir="rtl"] h2,html[lang="ar"] h2{font-size:clamp(2.25rem,1.4rem + 3.4vw,3.8rem)}
+html[dir="rtl"] .hero-sub,html[dir="rtl"] p{line-height:1.9}
+
+.cur-select{font:600 .78rem var(--font);padding:6px 8px;border:1px solid rgba(18,20,23,.25);border-radius:6px;background:transparent;color:var(--ink);cursor:pointer;margin-inline-end:8px}
+.cur-select:hover{border-color:var(--gold-text)}
+.vat-note{text-align:center;font-size:.85rem;color:var(--gray-500);margin:-36px auto 36px;max-width:560px}
+.pricing-price sup.cur-sym{font-size:.9rem;font-weight:600;letter-spacing:.04em;margin-inline-end:4px}
+.fx-note{max-width:760px;margin:24px auto 0;padding:0 24px;text-align:center;font-size:.8rem;color:var(--gray-500)}
+html[data-cur="USD"] .fx-note{display:none}
