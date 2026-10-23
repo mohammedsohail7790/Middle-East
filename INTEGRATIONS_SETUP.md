@@ -607,21 +607,27 @@ SLACK_REDIRECT_URI=https://gateway.hallaai.com/api/v1/integrations/slack/callbac
    - Callback URL: `https://gateway.hallaai.com/api/v1/channels/whatsapp/webhook`
    - Verify Token: set any random string → use the same value as `WHATSAPP_WEBHOOK_VERIFY_TOKEN`
    - Subscribe to: `messages`
-6. Copy:
-   - **WhatsApp Business Account ID** → `WHATSAPP_BUSINESS_ACCOUNT_ID`
-   - **Phone Number ID** → `WHATSAPP_PHONE_NUMBER_ID`
-   - **System User access token** (permanent, not the temporary one) → `WHATSAPP_ACCESS_TOKEN`
+6. Copy the **App Secret** (App settings > Basic) -> `WHATSAPP_APP_SECRET`. The gateway rejects every webhook whose signature it cannot verify with it.
+7. Per business: the tenant opens **Dashboard > WhatsApp** and pastes the **Phone Number ID** and a permanent **System User token** (stored AES-encrypted; the gateway checks them against Meta before saving).
+8. Create and submit these **message templates** for approval (Utility category), in English and Arabic (`en`, `ar`):
+   - `appointment_confirmation` - body: `Hi {{1}}, your appointment at {{2}} is confirmed for {{3}} at {{4}}.`
+   - `appointment_reminder` - body: `Hi {{1}}, a reminder of your appointment at {{2}} on {{3}} at {{4}}. Does it still work for you?` plus three quick-reply buttons (Confirm / Reschedule / Cancel).
+   Names can be changed with `WHATSAPP_TEMPLATE_CONFIRM` / `WHATSAPP_TEMPLATE_REMINDER`. Templates are only needed to message a customer outside the 24-hour window; inside it the gateway sends normal text.
 
-**Env vars:**
+**Env vars (platform, on the gateway):**
 ```env
-WHATSAPP_BUSINESS_ACCOUNT_ID=xxxxxxxxxxxxxxxxxxxx
-WHATSAPP_ACCESS_TOKEN=EAAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-WHATSAPP_PHONE_NUMBER_ID=xxxxxxxxxxxxxxxxxxxx
-WHATSAPP_WEBHOOK_VERIFY_TOKEN=your-random-verify-token
+WHATSAPP_APP_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx      # required: webhook signature check (META_APP_SECRET also accepted)
+WHATSAPP_WEBHOOK_VERIFY_TOKEN=your-random-verify-token    # required: Meta's subscription handshake
+WHATSAPP_ACCESS_TOKEN=EAAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  # optional: fallback token for tenants that don't paste their own (pilot/test number)
+OPENAI_API_KEY=...                                        # already set for voice; also used for the chat agent and voice-note transcription
+WHATSAPP_AGENT_MODEL=gpt-4o-mini                          # optional
+WHATSAPP_TRANSCRIBE_MODEL=whisper-1                       # optional
+WHATSAPP_TEMPLATE_CONFIRM=appointment_confirmation        # optional
+WHATSAPP_TEMPLATE_REMINDER=appointment_reminder           # optional
 ```
 
-> **Database:** Each tenant's connection stored in `public.whatsapp_connections` (migration 065).  
-> **Status:** Schema ready. Webhook route stub at `POST /api/v1/channels/whatsapp/webhook`.
+> **Database:** migration `078_whatsapp_channel.sql` (`whatsapp_numbers`, `whatsapp_conversations`, `whatsapp_messages`, plus WhatsApp reminder flags on `appointments`).
+> **Behaviour:** the AI books/reschedules/cancels only the sender's own appointments; STOP/إيقاف opts a customer out; staff can take over a chat from the dashboard; tenants on the consent-capture (Medical Tourism) track are never auto-messaged and get no AI replies on WhatsApp.
 
 ---
 
