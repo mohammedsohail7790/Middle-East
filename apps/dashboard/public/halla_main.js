@@ -44,13 +44,13 @@ function setSectionMode(section) {
 }
 function switchSection(section) {
   if (section === 'consultancy') { go('consultancy'); }
-  else if (section === 'intelligence') { window.open('https://meetklaros.com', '_blank', 'noopener'); }
+  else if (section === 'intelligence') { go('intelligence'); }
   else { go('home'); }
 }
 function navPrimaryCtaClick() {
   const section = document.body.getAttribute('data-section') || 'consultancy';
   if (section === 'consultancy') { go('consult-signup'); }
-  else if (section === 'intelligence') { window.open('https://meetklaros.com/register', '_blank', 'noopener'); }
+  else if (section === 'intelligence') { go('consult-signup'); }
   else { go('signup'); }
 }
 function logoClick() {
@@ -60,6 +60,15 @@ function logoClick() {
 // Scroll to an anchor within the (already active) consultancy page.
 function scrollToConsultSection(anchorId) {
   go('consultancy');
+  setTimeout(() => {
+    const el = document.getElementById(anchorId);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 60);
+}
+
+// Scroll to an anchor within the AI Business Automation page (stays on hallaai).
+function scrollToIntelSection(anchorId) {
+  go('intelligence');
   setTimeout(() => {
     const el = document.getElementById(anchorId);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -115,6 +124,7 @@ function routeFromHash(opts) {
 }
 
 function go(page, opts) {
+  if (page === 'industries') page = 'industries-all';
   const options = opts || {};
   const authHref = { login: '/login', signup: '/signup' }[page];
   if (authHref && !pageExists(page)) {
@@ -156,13 +166,8 @@ function goSol(sub) {
   go('solutions', { sub });
   loadSol(sub);
 }
-function goInd(sub) {
-  if (sub === 'all') {
-    go('industries-all');
-  } else {
-    go('industries');
-    loadInd(sub);
-  }
+function goInd() {
+  go('industries-all');
 }
 
 // ============ MOBILE NAV ============
@@ -194,24 +199,30 @@ function faqToggle(el) { el.parentElement.classList.toggle('open'); }
 
 // ============ ROI ============
 function calcROI() {
+  const C = window.HallaCur;
+  const cur = C ? C.get() : 'USD';
+  const PLAN_COST = { '39': { AED: 149, SAR: 149, USD: 39 }, '149': { AED: 549, SAR: 559, USD: 149 } };
+  const fmt = v => C ? C.money(v) : '$' + v.toLocaleString();
   const miss = +document.getElementById('r-miss').value || 0;
   const val = +document.getElementById('r-val').value || 0;
   const conv = +document.getElementById('r-conv').value || 0;
-  const plan = +document.getElementById('r-plan').value || 149;
+  const key = document.getElementById('r-plan').value || '149';
+  const plan = (PLAN_COST[key] || PLAN_COST['149'])[cur];
   const monthly = Math.round(miss * (conv/100) * val);
   const annual = monthly * 12;
   const cost = plan * 12;
   const net = Math.max(0, annual - cost);
-  const mult = cost > 0 ? (annual/cost).toFixed(1) : '∞';
-  document.getElementById('r-monthly').textContent = '$' + monthly.toLocaleString();
-  document.getElementById('r-annual').textContent = '$' + annual.toLocaleString();
-  document.getElementById('r-cost').textContent = '$' + cost.toLocaleString();
-  document.getElementById('r-net').textContent = '$' + net.toLocaleString();
+  const mult = cost > 0 ? (annual/cost).toFixed(1) : '\u221e';
+  document.getElementById('r-monthly').textContent = fmt(monthly);
+  document.getElementById('r-annual').textContent = fmt(annual);
+  document.getElementById('r-cost').textContent = fmt(cost);
+  document.getElementById('r-net').textContent = fmt(net);
   const isAr = document.documentElement.getAttribute('lang') === 'ar';
   document.getElementById('r-mult').textContent = isAr
-    ? 'صافي العائد السنوي — ' + mult + 'x من استثمارك'
-    : 'Net Annual ROI — ' + mult + 'x your investment';
+    ? '\u0635\u0627\u0641\u064a \u0627\u0644\u0639\u0627\u0626\u062f \u0627\u0644\u0633\u0646\u0648\u064a \u2014 ' + mult + 'x \u0645\u0646 \u0627\u0633\u062a\u062b\u0645\u0627\u0631\u0643'
+    : 'Net Annual ROI \u2014 ' + mult + 'x your investment';
 }
+
 
 // ============ SOLUTIONS ============
 const SOLS = {
@@ -250,85 +261,6 @@ function loadSol(key) {
           <h3 style="margin-bottom:10px">One call pays for months.</h3>
           <p>Businesses lose $5,000+/month in missed calls. Halla AI pays for itself in the first week.</p>
           <div class="btn-group"><a class="btn btn-blue" href="javascript:void(0)" onclick="go('roi')">Calculate My ROI →</a></div>
-        </div>
-      </div>
-    </div>`;
-}
-
-// ============ INDUSTRIES ============
-const INDS = {
-  hvac: { name:'HVAC', icon:'<i class="ti ti-snowflake"></i>', tag:'Keep Your Schedule Hot. Not Your Customers.', desc:'Halla AI dispatches HVAC technicians 24/7 — handling no-heat emergencies in winter, no-AC calls in summer, and maintenance bookings all year round while you\'re in an attic or under a house.', faqs:[['How does Halla AI handle seasonal demand spikes?','The AI scales automatically. During heat waves or cold snaps, it handles hundreds of simultaneous calls without busy signals. You define priority rules — AI follows them consistently.'],['Can the AI diagnose basic HVAC problems?','Yes. It guides homeowners through basic troubleshooting (thermostat batteries, resetting breakers, changing filters). If not resolved, it escalates for dispatch.'],['How does Halla AI handle carbon monoxide concerns?','CO-related calls are flagged as highest priority. The AI instructs the homeowner to evacuate and call the fire department, then immediately alerts your team.']] },
-  plumbing: { name:'Plumbing', icon:'<i class="ti ti-tool"></i>', tag:'Stop Leaks. Not Leads.', desc:'Captures emergency details, books service windows, and sends job summaries instantly to your phone when you\'re knee-deep in a flooded basement — burst pipes, clogged drains, water heaters, and routine maintenance.', faqs:[['How does Halla AI handle after-hours emergency calls?','You define what\'s an emergency. The AI collects details and immediately notifies your on-call plumber via text with the full job summary.'],['Can the AI provide estimates over the phone?','Yes — service call fees, hourly rates, and common flat-rate pricing. For complex estimates, it collects details and schedules an on-site assessment.'],['What if a customer has a gas line concern?','Gas-related calls are flagged as highest priority with immediate team notification and instructions to evacuate and call the gas company.']] },
-  electrical: { name:'Electrical', icon:'<i class="ti ti-bolt"></i>', tag:'Power Your Business Growth.', desc:'Captures emergency details when you\'re up to your elbows in a panel. Handles questions about service areas, hourly rates, availability, and routes emergency calls instantly.', faqs:[['How does Halla AI handle electrical emergencies?','You define emergency criteria. The AI collects details and immediately notifies your on-call electrician via text with the full job summary.'],['Can the AI provide estimates?','Service call fees and hourly rates yes. For full estimates, it schedules an on-site assessment.'],['What if a caller describes something the AI doesn\'t understand?','The AI collects the description verbatim, flags for review, and promises a callback. No technical diagnosis attempted.']] },
-  landscaping: { name:'Landscaping', icon:'<i class="ti ti-leaf"></i>', tag:'Grow Your Business. Never Miss a Spring Call.', desc:'Captures property details, books estimates, and handles mowing schedules, fertilization programs, tree services, and snow removal bookings while you\'re on a zero-turn or trimming hedges.', faqs:[['Can the AI handle different service frequencies?','Yes. Weekly, bi-weekly, monthly, or one-time. Recurring services booked automatically.'],['Can the AI provide mowing quotes?','Yes, based on property size using your standard rate. Complex properties require an on-site estimate.'],['How does the AI handle emergency tree removal?','Storm-damaged tree calls are dispatched immediately. AI captures tree details and schedules an arborist visit.']] },
-  cleaning: { name:'Home Cleaning', icon:'<i class="ti ti-wash"></i>', tag:'Clean More Homes. Never Miss a Quote.', desc:'Captures property details, books estimates and recurring services for standard, deep, move-out, and commercial cleaning while you\'re driving between jobs.', faqs:[['Can the AI provide quotes over the phone?','For standard recurring cleans, yes — firm pricing based on bedroom/bathroom count. For deep or move-out cleans, a virtual or in-person estimate is needed.'],['How does Halla AI handle recurring scheduling?','Sets up weekly, bi-weekly, or monthly recurring appointments based on route availability. Confirmed via SMS and email.'],['What if a customer needs to skip a week?','The AI reschedules single occurrences or modifies the recurring pattern based on your rescheduling policy.']] },
-  legal: { name:'Legal Firms', icon:'<i class="ti ti-scale"></i>', tag:'Never Miss a Billable Consultation Call.', desc:'Captures potential client details, books initial consultations, and logs intake into your practice management system while you\'re in court, drafting documents, or meeting with existing clients.', faqs:[['How does Halla AI handle attorney-client confidentiality?','All calls processed through encrypted systems. Transcripts stored securely. The AI never shares client info with third parties.'],['Can the AI screen for conflicts of interest?','Yes. You provide conflict check questions. The AI collects this during intake and flags potential conflicts before scheduling.'],['Can the AI handle different practice areas?','Yes. Separate intake flows per practice area — different questions for PI vs. estate planning vs. criminal defense.']] },
-};
-
-function loadInd(key) {
-  if (key === 'all') {
-    document.getElementById('ind-label').textContent = 'Industries';
-    document.getElementById('ind-title').textContent = 'Industries We Serve';
-    document.getElementById('ind-sub').textContent = '50+ industries. Pre-configured. Ready in minutes.';
-    document.getElementById('ind-content').innerHTML = `
-      <div style="margin-bottom:48px">
-        <p style="font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-400);margin-bottom:20px">Trades & Services</p>
-        <div class="grid-4" style="gap:16px">
-          ${['hvac','plumbing','electrical','landscaping'].map(k=>`<a class="ind-card" href="javascript:void(0)" onclick="loadInd('${k}')"><div class="ind-icon">${INDS[k].icon}</div><h4>${INDS[k].name}</h4><p>${INDS[k].tag}</p></a>`).join('')}
-        </div>
-      </div>
-      <div style="margin-bottom:48px">
-        <p style="font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-400);margin-bottom:20px">Professional Services</p>
-        <div class="grid-4" style="gap:16px">
-          ${['hvac','plumbing','electrical'].map(k=>`<a class="ind-card" href="javascript:void(0)" onclick="loadInd('${k}')"><div class="ind-icon">${INDS[k].icon}</div><h4>${INDS[k].name}</h4><p>${INDS[k].tag}</p></a>`).join('')}
-          <a class="ind-card" href="javascript:void(0)"><div class="ind-icon"><i class="ti ti-building"></i></div><h4>Property Management</h4><p>Maintenance requests, tenant calls, emergency routing</p></a>
-        </div>
-      </div>
-      <div style="margin-bottom:48px">
-        <p style="font-size:0.78rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-400);margin-bottom:20px">Beauty & Automotive & More</p>
-        <div class="grid-4" style="gap:16px">
-          <a class="ind-card" href="javascript:void(0)"><div class="ind-icon"><i class="ti ti-scissors"></i></div><h4>Salons & Spas</h4><p>Booking, pricing, availability</p></a>
-          <a class="ind-card" href="javascript:void(0)"><div class="ind-icon"><i class="ti ti-car"></i></div><h4>Auto Repair</h4><p>Service appointments, estimates</p></a>
-          <a class="ind-card" href="javascript:void(0)"><div class="ind-icon"><i class="ti ti-paw"></i></div><h4>Veterinary</h4><p>Appointments, emergency triage</p></a>
-          <a class="ind-card" href="javascript:void(0)"><div class="ind-icon"><i class="ti ti-book"></i></div><h4>Education</h4><p>Enrollment, tuition, scheduling</p></a>
-        </div>
-      </div>
-      <div class="cta-block"><h3 style="margin-bottom:10px">Don\'t See Your Industry?</h3><p>We support 50+ industries. Contact us — we\'ll build a custom template for free.</p><div class="btn-group"><a class="btn btn-blue" href="javascript:void(0)" onclick="go('signup')">Get My AI Receptionist →</a></div></div>`;
-    return;
-  }
-  const ind = INDS[key];
-  if (!ind) return;
-  document.getElementById('ind-label').textContent = ind.name;
-  document.getElementById('ind-title').textContent = 'Halla AI for ' + ind.name;
-  document.getElementById('ind-sub').textContent = ind.tag;
-  document.getElementById('ind-content').innerHTML = `
-    <div class="grid-2" style="gap:64px;align-items:start">
-      <div>
-        <div style="font-size:2.8rem;margin-bottom:20px">${ind.icon}</div>
-        <p style="font-size:1.05rem;margin-bottom:32px">${ind.desc}</p>
-        <h3 style="margin-bottom:16px">What Halla AI Does for ${ind.name}</h3>
-        <div style="display:grid;gap:10px;margin-bottom:28px">
-          <div class="pricing-feature" style="color:var(--gray-700)">Answers every call 24/7 — even during jobs</div>
-          <div class="pricing-feature" style="color:var(--gray-700)">Custom intake questions for your service type</div>
-          <div class="pricing-feature" style="color:var(--gray-700)">Emergency triage and immediate team alerts</div>
-          <div class="pricing-feature" style="color:var(--gray-700)">Appointment booking and calendar sync</div>
-          <div class="pricing-feature" style="color:var(--gray-700)">Lead qualification and CRM auto-entry</div>
-          <div class="pricing-feature" style="color:var(--gray-700)">Bilingual English + Spanish support</div>
-        </div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <a class="btn btn-primary" href="javascript:void(0)" onclick="go('signup')">Start Free Trial →</a>
-          <a class="btn btn-outline" href="javascript:void(0)" onclick="go('pricing')">View Pricing</a>
-        </div>
-      </div>
-      <div>
-        <h3 style="margin-bottom:18px">Frequently Asked Questions</h3>
-        ${(ind.faqs||[]).map(([q,a])=>`<div class="faq-item"><div class="faq-q" onclick="faqToggle(this)">${q} <span class="faq-icon">+</span></div><div class="faq-a">${a}</div></div>`).join('')}
-        <div style="margin-top:24px">
-          <h4 style="margin-bottom:14px;color:var(--gray-400);font-size:0.8rem;text-transform:uppercase;letter-spacing:0.07em">Other Industries</h4>
-          <div style="display:flex;flex-wrap:wrap;gap:8px">
-            ${Object.keys(INDS).filter(k=>k!==key).map(k=>`<a class="pill" href="javascript:void(0)" onclick="loadInd('${k}')">${INDS[k].icon} ${INDS[k].name}</a>`).join('')}
-            <a class="pill" href="javascript:void(0)" onclick="loadInd('all')" style="color:var(--accent)">+ See All</a>
-          </div>
         </div>
       </div>
     </div>`;
