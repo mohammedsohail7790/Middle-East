@@ -52,3 +52,5 @@ html[dir="rtl"] .hero-sub,html[dir="rtl"] p{line-height:1.9}
 .pricing-price sup.cur-sym{font-size:.9rem;font-weight:600;letter-spacing:.04em;margin-inline-end:4px}
 .fx-note{max-width:760px;margin:24px auto 0;padding:0 24px;text-align:center;font-size:.8rem;color:var(--gray-500)}
 html[data-cur="USD"] .fx-note{display:none}
+/* Footer CTA: marketing-apple.css forces white text on footer buttons (ID selector); gold needs ink text for AA contrast. */
+html body #marketing-spa-root footer .btn-primary,html body #marketing-spa-root footer .btn-primary *,html body #marketing-spa-root footer .btn-blue,html body #marketing-spa-root footer .btn-blue *{color:var(--ink)!important}

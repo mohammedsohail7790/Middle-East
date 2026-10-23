@@ -68,7 +68,7 @@ function scrollToConsultSection(anchorId) {
 
 // Scroll to an anchor within the AI Business Automation page (stays on hallaai).
 function scrollToIntelSection(anchorId) {
-  go('intelligence');
+  go('intelligence', { noScroll: true });
   setTimeout(() => {
     const el = document.getElementById(anchorId);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
