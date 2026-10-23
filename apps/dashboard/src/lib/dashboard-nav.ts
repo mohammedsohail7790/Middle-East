@@ -51,6 +51,7 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
     items: [
       { href: "/dashboard/calls", label: "Inbound", labelKey: "nav.calls", subtitle: "Transcripts, outcomes, and call history", subtitleKey: "nav.callsSubtitle" },
       { href: "/dashboard/outbound", label: "Outbound", labelKey: "nav.outbound", subtitle: "Click-to-call, campaigns, and reminders", subtitleKey: "nav.outboundSubtitle" },
+      { href: "/dashboard/whatsapp", label: "WhatsApp", labelKey: "nav.whatsapp", subtitle: "Customer chats, bookings, and reminders", subtitleKey: "nav.whatsappSubtitle" },
     ],
   },
   {
