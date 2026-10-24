@@ -351,6 +351,11 @@ export class AutomationService {
         );
       }
 
+      // WhatsApp confirmation (no-op unless the tenant has a connected number; sends once per appointment)
+      void import('../whatsapp/whatsapp.outbound.js')
+        .then((m) => m.notifyAppointmentConfirmed(tenantId, appointmentId))
+        .catch((err) => console.warn('[Automation] WhatsApp confirmation skipped:', String(err).slice(0, 120)));
+
       // Always notify the business of the new booking
       const ownerEmails = await this.getOwnerNotificationEmails(tenantId);
       for (const ownerEmail of ownerEmails) {
@@ -606,5 +611,8 @@ export const automationService = new AutomationService();
 // Start reminder scheduler (runs every 5 minutes)
 setInterval(() => {
   automationService.processScheduledReminders().catch(console.error);
+  void import('../whatsapp/whatsapp.outbound.js')
+    .then((m) => m.sendDueWhatsAppReminders())
+    .catch((err) => console.warn('[Automation] WhatsApp reminders skipped:', String(err).slice(0, 120)));
 }, 5 * 60 * 1000);
 

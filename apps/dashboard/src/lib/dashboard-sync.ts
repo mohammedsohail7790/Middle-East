@@ -14,6 +14,7 @@ export type DashboardSyncScope =
   | "leads"
   | "calendar"
   | "sms"
+  | "whatsapp"
   | "analytics"
   | "billing"
   | "phone"
@@ -136,6 +137,7 @@ function isSyncScope(s: string): s is DashboardSyncScope {
     s === "leads" ||
     s === "calendar" ||
     s === "sms" ||
+    s === "whatsapp" ||
     s === "analytics" ||
     s === "billing" ||
     s === "phone" ||

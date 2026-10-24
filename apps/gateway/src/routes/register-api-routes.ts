@@ -36,6 +36,7 @@ import { createOnboardingRouter } from '../services/onboarding/onboarding.contro
 import { createOrganizationsRouter } from '../services/organizations/organization.controller.js';
 import { createCrmRouter } from '../services/crm/crm.controller.js';
 import { createChannelsRouter } from '../services/channels/channels.controller.js';
+import { createWhatsAppRouter } from '../services/whatsapp/whatsapp.controller.js';
 import { createIntegrationRouter } from '../services/integrations/integration.controller.js';
 import { createKlarosRouter } from '../services/klaros/klaros.controller.js';
 import { createKlarosProvisioningRouter } from '../services/klaros/klaros-provisioning.controller.js';
@@ -69,6 +70,7 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/tenants', createTenantsRouter());
     apiRouter.use('/organizations', createOrganizationsRouter());
     apiRouter.use('/crm', createCrmRouter());
+    apiRouter.use('/channels/whatsapp', createWhatsAppRouter());
     apiRouter.use('/channels', createChannelsRouter());
     apiRouter.use('/integrations', createIntegrationOAuthRouter());
     apiRouter.use('/integrations', createIntegrationRouter());

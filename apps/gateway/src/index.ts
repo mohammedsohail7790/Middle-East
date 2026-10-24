@@ -24,6 +24,7 @@ process.on('unhandledRejection', (reason) => {
 import { createServer } from 'http';
 import express from 'express';
 import { handleStripeBillingWebhook } from './services/billing/stripe-webhook.js';
+import { handleWhatsAppWebhook, verifyWhatsAppWebhook } from './services/whatsapp/whatsapp.controller.js';
 import cors from 'cors';
 
 import {
@@ -130,6 +131,10 @@ app.use(MiddlewareFactory.requestId());
 app.post('/api/v1/billing/webhook', express.raw({ type: 'application/json' }), (req, res) => {
     void handleStripeBillingWebhook(req, res);
 });
+
+// WhatsApp (Meta) webhook: HMAC is computed over the raw bytes, so it also bypasses the JSON parser. Authenticated by signature.
+app.get('/api/v1/channels/whatsapp/webhook', verifyWhatsAppWebhook);
+app.post('/api/v1/channels/whatsapp/webhook', express.raw({ type: '*/*', limit: '2mb' }), handleWhatsAppWebhook);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(requestHardeningMiddleware);
