@@ -6,6 +6,7 @@ import { requireVoiceApiAccess, twilioWebhookGuard, voiceRateLimit } from './sec
 import { validate } from '../../middleware/validation.js';
 import { tenantCreateBodySchema } from '../../security/validation-schemas.js';
 import { getAdminApiKey } from '../../security/secrets.js';
+import { redactTranscriptPii } from '../compliance/pii-redaction.js';
 import { integrationService } from '../integrations/integration.service.js';
 import { listIndustries, buildIndustryConfig } from '../industry/index.js';
 import express from 'express';
@@ -204,7 +205,7 @@ export async function storeCall(args: {
             args.callId ?? null,
             args.tenantId,
             args.callSid,
-            args.transcript,
+            redactTranscriptPii(args.transcript),
             recordingUrl,
             args.language ?? 'en',
             args.latency,
