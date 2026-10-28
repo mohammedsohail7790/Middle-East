@@ -54,3 +54,4 @@ html[dir="rtl"] .hero-sub,html[dir="rtl"] p{line-height:1.9}
 html[data-cur="USD"] .fx-note{display:none}
 /* Footer CTA: marketing-apple.css forces white text on footer buttons (ID selector); gold needs ink text for AA contrast. */
 html body #marketing-spa-root footer .btn-primary,html body #marketing-spa-root footer .btn-primary *,html body #marketing-spa-root footer .btn-blue,html body #marketing-spa-root footer .btn-blue *{color:var(--ink)!important}
+html body #marketing-spa-root footer .btn-primary,html body #marketing-spa-root footer .btn-blue{background:var(--gold)!important;border-color:var(--gold)!important}

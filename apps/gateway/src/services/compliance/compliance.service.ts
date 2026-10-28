@@ -2,20 +2,10 @@ import { voiceDb } from '../voice/tenant-scope.js';
 import { pool } from '../db/pool.js';
 import { recordEnterpriseAuditEvent } from '../enterprise/enterprise-audit.service.js';
 import { logger } from '../logger.js';
-
-const PII_PATTERNS = [
-  /\b\d{3}-\d{2}-\d{4}\b/g,                                                      // SSN
-  /\b\d{16}\b/g,                                                                   // credit card
-  /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,                                 // email
-  /(\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/g,                          // US phone
-];
+import { redactPiiGeneric } from './pii-redaction.js';
 
 export function redactPii(text: string): string {
-  let out = text;
-  for (const p of PII_PATTERNS) {
-    out = out.replace(p, '[REDACTED]');
-  }
-  return out;
+  return redactPiiGeneric(text);
 }
 
 export async function getRetentionSummary(tenantId: string) {
