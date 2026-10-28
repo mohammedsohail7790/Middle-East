@@ -1,17 +1,17 @@
 /*
  * Halla AI — Apple surface layer for the marketing site.
  * Loaded after halla_styles.css and marketing-premium.css. Same visual system as
- * meetklaros.com: SF Pro type, #0066CC action blue, #f5f5f7 grouped surfaces with no
+ * meetklaros.com: SF Pro type, #85631F action blue, #f5f5f7 grouped surfaces with no
  * outlines, black bands, pill buttons, big tight headlines, translucent 52px nav.
  */
 
 :root {
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --black: #1d1d1f;
-  --accent: #0066cc;
-  --accent-dark: #0055aa;
-  --accent-light: #ebf4fd;
-  --accent-mid: #2997ff;
+  --accent: #85631F;
+  --accent-dark: #6B4F18;
+  --accent-light: #F6F0E2;
+  --accent-mid: #C5A059;
   --radius: 12px;
   --radius-lg: 20px;
   --radius-xl: 28px;
@@ -20,12 +20,12 @@
   --shadow-md: 0 14px 44px -16px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 28px 70px -20px rgba(0, 0, 0, 0.28);
   --shadow-xl: 0 40px 90px -24px rgba(0, 0, 0, 0.34);
-  --consult-accent: #0066cc;
-  --consult-accent-soft: #0055aa;
-  --consult-accent-dim: rgba(0, 102, 204, 0.12);
+  --consult-accent: #85631F;
+  --consult-accent-soft: #6B4F18;
+  --consult-accent-dim: rgba(197,160,89, 0.12);
   --consult-text: #1d1d1f;
-  --consult-text-muted: #6e6e73;
-  --consult-text-faint: #6e6e73;
+  --consult-text-muted: #636368;
+  --consult-text-faint: #636368;
   --consult-hairline: rgba(0, 0, 0, 0.1);
   --consult-hairline-strong: rgba(0, 0, 0, 0.18);
   --consult-surface: #f5f5f7;
@@ -42,18 +42,18 @@ h1 { font-size: clamp(2.75rem, 1.6rem + 5vw, 5rem); font-weight: 700; line-heigh
 h2 { font-size: clamp(2rem, 1.2rem + 3vw, 3.5rem); font-weight: 700; line-height: 1.07; letter-spacing: -0.035em; color: #1d1d1f; }
 h3 { font-size: clamp(1.25rem, 1rem + 1vw, 1.75rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; color: #1d1d1f; }
 h4 { font-weight: 600; letter-spacing: -0.012em; color: #1d1d1f; }
-p { color: #6e6e73; line-height: 1.5; }
-.consult-hero-sub, .hero-sub, .consult-split p { font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.375rem); line-height: 1.4; color: #6e6e73; }
-.consult-gradient-text, .gradient-text { background: none !important; -webkit-text-fill-color: #0066cc !important; color: #0066cc !important; }
+p { color: #636368; line-height: 1.5; }
+.consult-hero-sub, .hero-sub, .consult-split p { font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.375rem); line-height: 1.4; color: #636368; }
+.consult-gradient-text, .gradient-text { background: none !important; -webkit-text-fill-color: #85631F !important; color: #85631F !important; }
 
 /* Eyebrows: plain blue text instead of pills / mono tags. */
 .label, .hero-eyebrow, .premium-label, .consult-label-glow, .consult-featured-badge {
   display: inline-block; background: transparent !important; padding: 0 !important; margin-bottom: 14px;
   font-size: 1.0625rem; font-weight: 600; letter-spacing: -0.01em; text-transform: none !important;
-  color: #0066cc !important; border: 0 !important; box-shadow: none !important;
+  color: #85631F !important; border: 0 !important; box-shadow: none !important;
 }
 .hero-eyebrow .dot { display: none; }
-.consult-featured-badge { font-size: 12px; background: #0066cc !important; color: #fff !important; padding: 3px 10px !important; border-radius: 999px; }
+.consult-featured-badge { font-size: 12px; background: #85631F !important; color: #fff !important; padding: 3px 10px !important; border-radius: 999px; }
 
 /* ───── Decorative layers off: flat, quiet canvases ───── */
 .mkt-atmosphere, .mkt-atmosphere__grid, .mkt-atmosphere__orb, .mkt-atmosphere__particles,
@@ -74,7 +74,7 @@ p { color: #6e6e73; line-height: 1.5; }
 .halla-wordmark { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.02em; }
 .klaros-wordmark-nav { font-size: 1.1rem; font-weight: 600; }
 .section-switch { background: #f5f5f7; padding: 3px; margin-right: 12px; }
-.section-switch-btn { font-size: 13px; font-weight: 500; color: #6e6e73; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+.section-switch-btn { font-size: 13px; font-weight: 500; color: #636368; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
 .section-switch-btn:hover { color: #1d1d1f; }
 .section-switch-btn.active { background: #fff; color: #1d1d1f; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
 .section-switch-link span[aria-hidden="true"] { font-size: 11px; opacity: 0.6; }
@@ -83,7 +83,7 @@ p { color: #6e6e73; line-height: 1.5; }
 .dropdown-inner { border: 0; border-radius: 22px; padding: 8px; box-shadow: 0 28px 70px -16px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(0, 0, 0, 0.06); background: rgba(255, 255, 255, 0.92); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); }
 .dropdown-link { border-radius: 14px; font-size: 14px; }
 .dropdown-link:hover { background: #f5f5f7; }
-.ddi { border-radius: 999px !important; background: #f5f5f7 !important; color: #0066cc !important; }
+.ddi { border-radius: 999px !important; background: #f5f5f7 !important; color: #85631F !important; }
 .lang-toggle { background: #f5f5f7; border-radius: 999px; }
 .lang-toggle button { font-size: 12px; font-weight: 500; }
 .lang-toggle button.active { background: #fff; color: #1d1d1f; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
@@ -100,19 +100,19 @@ p { color: #6e6e73; line-height: 1.5; }
 body[data-section="consultancy"] .btn-blue, #page-consultancy .btn-blue, #page-svc-operations .btn-blue, #page-svc-acquisition .btn-blue,
 #page-svc-brand .btn-blue, #page-consult-signup .btn-blue, #page-home .btn-blue, #page-pricing .btn-blue, #page-features .btn-blue,
 #page-how-it-works .btn-blue, #page-intelligence .btn-blue {
-  background: #0066cc !important; color: #fff !important; border: 0 !important; box-shadow: none !important; transform: none;
+  background: #85631F !important; color: #fff !important; border: 0 !important; box-shadow: none !important; transform: none;
 }
 .btn-primary:hover, .btn-blue:hover,
 #marketing-spa-root .btn-primary:hover,
 body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:hover, #page-svc-operations .btn-blue:hover,
 #page-svc-acquisition .btn-blue:hover, #page-svc-brand .btn-blue:hover, #page-consult-signup .btn-blue:hover, #page-home .btn-blue:hover,
 #page-pricing .btn-blue:hover, #page-features .btn-blue:hover, #page-how-it-works .btn-blue:hover, #page-intelligence .btn-blue:hover {
-  background: #0055aa !important; box-shadow: none !important; transform: none;
+  background: #6B4F18 !important; box-shadow: none !important; transform: none;
 }
 .btn-outline, .consult-hero-outline, .premium-cta-ghost {
-  background: transparent !important; color: #0066cc !important; border: 1px solid #0066cc !important; box-shadow: none;
+  background: transparent !important; color: #85631F !important; border: 1px solid #85631F !important; box-shadow: none;
 }
-.btn-outline:hover, .consult-hero-outline:hover, .premium-cta-ghost:hover { background: #ebf4fd !important; border-color: #0066cc !important; }
+.btn-outline:hover, .consult-hero-outline:hover, .premium-cta-ghost:hover { background: #F6F0E2 !important; border-color: #85631F !important; }
 
 /* ───── Layout rhythm ───── */
 .section { padding: 112px 0; }
@@ -134,7 +134,7 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 }
 .card-dark *, .consult-service-featured *, .premium-pricing-card--popular * { color: inherit; }
 .consult-service-featured p, .premium-pricing-card--popular p { color: #a1a1a6; }
-.card-blue { background: #ebf4fd !important; }
+.card-blue { background: #F6F0E2 !important; }
 .consult-service-card, .ind-card, .premium-industry-card, .pricing-card, .premium-pricing-card, .testi {
   padding: 32px; transition: background-color 0.5s var(--ease-apple), box-shadow 0.5s var(--ease-apple), transform 0.5s var(--ease-apple);
 }
@@ -143,13 +143,13 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 }
 .consult-service-featured:hover, .premium-pricing-card--popular:hover { background: #000 !important; }
 .feat-icon, .feat-icon-blue, .feat-icon-green, .feat-icon-orange, .feat-icon-red, .feat-icon-violet, .ind-icon, .consult-activity-icon {
-  background: #fff !important; color: #0066cc !important; border: 0 !important; border-radius: 999px !important; box-shadow: none !important;
+  background: #fff !important; color: #85631F !important; border: 0 !important; border-radius: 999px !important; box-shadow: none !important;
 }
 .consult-timeline-num, .step-num, .value-num, .premium-workflow-num { background: #1d1d1f !important; color: #fff !important; border: 0 !important; border-radius: 999px !important; }
 .pill, .chip, .premium-feature-pill, .consult-stack-pills > * { background: #fff !important; color: #424245 !important; border: 0 !important; border-radius: 999px !important; box-shadow: none !important; font-size: 13px; }
-.pop-badge, .premium-pricing-badge { background: #0066cc !important; color: #fff !important; border-radius: 999px !important; border: 0 !important; }
+.pop-badge, .premium-pricing-badge { background: #85631F !important; color: #fff !important; border-radius: 999px !important; border: 0 !important; }
 .consult-float-badge, .mock-badge, .dash3d-badge { background: #1d1d1f !important; color: #fff !important; border: 0 !important; border-radius: 18px !important; box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.4) !important; }
-.consult-trust-row { color: #6e6e73; font-size: 14px; }
+.consult-trust-row { color: #636368; font-size: 14px; }
 .consult-trust-row span, .hero-note { font-family: var(--font) !important; }
 
 /* Browser/dashboard mockups: soft, not outlined. */
@@ -159,14 +159,14 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 
 /* Marquee / ticker / stats bands */
 .consult-marquee, .ticker-wrap, .stats-bar, .brand-strip { background: #fff; border-top: 1px solid rgba(0, 0, 0, 0.08); border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
-.consult-marquee-track, .ticker-item { font-family: var(--font) !important; text-transform: none !important; letter-spacing: -0.006em !important; font-size: 15px !important; color: #6e6e73 !important; }
+.consult-marquee-track, .ticker-item { font-family: var(--font) !important; text-transform: none !important; letter-spacing: -0.006em !important; font-size: 15px !important; color: #636368 !important; }
 .stat-num, .roi-result-num { font-weight: 700; letter-spacing: -0.04em; }
 
 /* Tables */
 .comp-table, .table-wrap { overflow: hidden; }
 .comp-table th, .comp-table td { border-color: rgba(0, 0, 0, 0.08) !important; }
 .comp-table th { text-transform: none !important; letter-spacing: 0 !important; font-weight: 600; color: #1d1d1f; background: transparent !important; }
-.comp-highlight { background: #ebf4fd !important; color: #0055aa !important; }
+.comp-highlight { background: #F6F0E2 !important; color: #6B4F18 !important; }
 
 /* FAQ */
 .faq-item { padding: 0; }
@@ -178,15 +178,15 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
   border: 1px solid #d2d2d7 !important; border-radius: 12px !important; background: #fff !important; font-family: var(--font); font-size: 15px;
 }
 #marketing-spa-root input:focus, #marketing-spa-root select:focus, #marketing-spa-root textarea:focus {
-  outline: none; border-color: #0066cc !important; box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.18) !important;
+  outline: none; border-color: #85631F !important; box-shadow: 0 0 0 4px rgba(197,160,89, 0.18) !important;
 }
 
 /* ───── Footer: Apple-style light gray, small type ───── */
-#marketing-spa-root footer { background: #f5f5f7; padding: 56px 0 32px; border-top: 1px solid rgba(0, 0, 0, 0.08); color: #6e6e73; }
+#marketing-spa-root footer { background: #f5f5f7; padding: 56px 0 32px; border-top: 1px solid rgba(0, 0, 0, 0.08); color: #636368; }
 .footer-col h5 { text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 600; color: #1d1d1f; }
 .footer-col a, .flink { color: #424245 !important; font-size: 12px; }
 .footer-col a:hover, .flink:hover { color: #1d1d1f !important; text-decoration: underline; }
-.footer-brand p, .footer-bottom, .footer-legal, .footer-bottom * { color: #6e6e73 !important; font-size: 12px; }
+.footer-brand p, .footer-bottom, .footer-legal, .footer-bottom * { color: #636368 !important; font-size: 12px; }
 .footer-bottom { border-top: 1px solid rgba(0, 0, 0, 0.1) !important; }
 
 /* Dark bands stay black (Apple alternates light/black sections). */
@@ -210,15 +210,15 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 .brand-lockup { display: inline-flex; align-items: center; gap: 10px; color: #1d1d1f; }
 .brand-tile { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 9px; background: #1d1d1f; color: #fff; flex-shrink: 0; }
 .brand-word { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
-.brand-word span { color: #6e6e73; }
+.brand-word span { color: #636368; }
 .footer-logo .brand-lockup { margin-bottom: 8px; }
 .logo-img.nav-group[data-section="intelligence"], .klaros-wordmark-nav { display: none !important; }
 /* Featured (black) cards: restore readable text on the black surface. */
 .consult-service-featured h3, .consult-service-featured h4, .consult-service-featured .label, .consult-service-featured .consult-service-link,
 .consult-service-featured li, .consult-service-featured .consult-service-list li { color: #f5f5f7 !important; }
-.consult-service-featured .label { color: #2997ff !important; }
-.consult-service-featured .consult-service-link { color: #2997ff !important; }
-.consult-service-featured .feat-icon, .consult-service-featured .consult-activity-icon { background: #1c1c1e !important; color: #2997ff !important; }
+.consult-service-featured .label { color: #C5A059 !important; }
+.consult-service-featured .consult-service-link { color: #C5A059 !important; }
+.consult-service-featured .feat-icon, .consult-service-featured .consult-activity-icon { background: #1c1c1e !important; color: #C5A059 !important; }
 
 /* ───── Polish pass 1 ───── */
 .nav-inner.container, #marketing-spa-root nav .container { max-width: 1360px; }
@@ -233,12 +233,12 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 
 .stats-bar { background: #f5f5f7 !important; border: 0 !important; border-radius: 28px !important; overflow: hidden; padding: 8px; gap: 0; }
 .stats-bar .stat-item, .stat-item { background: transparent !important; border-radius: 0 !important; }
-.stat-label { text-transform: none !important; letter-spacing: 0 !important; font-size: 13px !important; color: #6e6e73 !important; }
+.stat-label { text-transform: none !important; letter-spacing: 0 !important; font-size: 13px !important; color: #636368 !important; }
 
 .premium-compare-col, .premium-outcome-col, .premium-scenario-card { background: #f5f5f7 !important; border: 0 !important; border-radius: 28px !important; box-shadow: none !important; }
-.premium-compare-col--with, .premium-outcome-col--with, .premium-scenario-card--solution { background: #ebf4fd !important; }
-.premium-compare-col--without h3, .premium-outcome-col--without h3 { color: #6e6e73; }
-.premium-outcome-tab, .ptab { background: #f5f5f7 !important; color: #6e6e73 !important; border: 0 !important; border-radius: 999px !important; box-shadow: none !important; font-weight: 500; }
+.premium-compare-col--with, .premium-outcome-col--with, .premium-scenario-card--solution { background: #F6F0E2 !important; }
+.premium-compare-col--without h3, .premium-outcome-col--without h3 { color: #636368; }
+.premium-outcome-tab, .ptab { background: #f5f5f7 !important; color: #636368 !important; border: 0 !important; border-radius: 999px !important; box-shadow: none !important; font-weight: 500; }
 .premium-outcome-tab.active, .premium-outcome-tab[aria-selected="true"], .ptab.active { background: #1d1d1f !important; color: #fff !important; }
 
 /* Quiet small-caps tags → normal sentence case */
@@ -246,10 +246,10 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 [class*="eyebrow"], .premium-demo-status, .dash3d-chip, .consult-mini-stat-label, .mockup-status, .dd-section {
   text-transform: none !important; letter-spacing: 0 !important; font-family: var(--font) !important;
 }
-.pricing-plan, .premium-pricing-plan { font-size: 15px !important; font-weight: 600; color: #6e6e73; }
+.pricing-plan, .premium-pricing-plan { font-size: 15px !important; font-weight: 600; color: #636368; }
 .premium-pricing-card--popular .premium-pricing-plan, .premium-pricing-card--popular .pricing-plan { color: #a1a1a6; }
 .premium-pricing-card--popular { background: #000 !important; }
-.premium-pricing-card--popular .btn { background: #0066cc !important; color: #fff !important; }
+.premium-pricing-card--popular .btn { background: #85631F !important; color: #fff !important; }
 
 /* Video/demo tiles: neutral dark instead of the old brown gradient */
 .premium-video-thumb, .premium-video-thumb--interactive { background: #1c1c1e !important; background-image: none !important; }
@@ -260,7 +260,7 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 .premium-section--dark .premium-action-feature, .premium-section--dark .premium-call-stage, .premium-section--dark [class*="stage"] { border-color: rgba(255, 255, 255, 0.12) !important; }
 
 /* ───── Polish pass 2 ───── */
-.consult-magnetic, .btn-blue.btn-lg, .consult-hero .btn-blue { background: #0066cc !important; background-image: none !important; box-shadow: none !important; }
+.consult-magnetic, .btn-blue.btn-lg, .consult-hero .btn-blue { background: #85631F !important; background-image: none !important; box-shadow: none !important; }
 .consult-split h2 { font-size: clamp(2rem, 1.2rem + 2.4vw, 3.25rem); }
 .consult-marquee-track *, .ticker-item, .consult-marquee * { text-transform: none !important; letter-spacing: -0.006em !important; font-family: var(--font) !important; }
 .consult-activity-feed *, .mockup-header *, .browser-frame [class*="label"], .consult-hero-visual [style*="uppercase"], [style*="text-transform:uppercase"], [style*="text-transform: uppercase"] {
@@ -272,7 +272,7 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 #marketing-spa-root .card, #marketing-spa-root .pricing-card, #marketing-spa-root .roi-wrap, #marketing-spa-root .roi-result {
   background: #f5f5f7 !important; border: 0 !important; box-shadow: none !important; border-radius: 28px !important;
 }
-#marketing-spa-root .pricing-card.popular { background: #ebf4fd !important; border: 0 !important; box-shadow: none !important; }
+#marketing-spa-root .pricing-card.popular { background: #F6F0E2 !important; border: 0 !important; box-shadow: none !important; }
 #marketing-spa-root .card:hover, #marketing-spa-root .pricing-card:hover { background: #fff !important; box-shadow: 0 18px 50px -18px rgba(0, 0, 0, 0.22) !important; }
 #marketing-spa-root .card .card, #marketing-spa-root .roi-wrap .card { background: #fff !important; }
 .page-hero { background: #fff !important; border-bottom: 0 !important; padding: 128px 0 40px; }
@@ -282,10 +282,10 @@ body[data-section="consultancy"] .btn-blue:hover, #page-consultancy .btn-blue:ho
 
 /* ───── Polish pass 3 ───── */
 .ind-icon, .feat-icon { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.ind-card p, .ind-card [class*="desc"], .premium-industry-card p { color: #6e6e73 !important; }
+.ind-card p, .ind-card [class*="desc"], .premium-industry-card p { color: #636368 !important; }
 
 /* ───── Accessibility: footer text on the light footer must meet 4.5:1 ───── */
-#marketing-spa-root footer :is(span, p, div, small, li):not(.brand-tile):not(.brand-word):not(.brand-word *):not(.btn):not(.btn *) { color: #6e6e73 !important; }
+#marketing-spa-root footer :is(span, p, div, small, li):not(.brand-tile):not(.brand-word):not(.brand-word *):not(.btn):not(.btn *) { color: #636368 !important; }
 #marketing-spa-root footer a:not(.btn) { color: #424245 !important; }
 
 /* CTA buttons inside the footer keep white-on-blue text (the footer greys must not reach them). */

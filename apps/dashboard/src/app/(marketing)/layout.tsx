@@ -5,16 +5,16 @@ import "@/styles/apple-dashboard.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Halla AI – AI Consultancy & Pure AI Receptionist",
+    default: "Halla AI | AI Consultancy & AI Receptionist for the GCC",
     template: "%s | Halla AI",
   },
   description:
-    "Halla AI Consultancy installs connected automation for small businesses. Plus a 24/7 AI receptionist that answers every call — starting at $39/month.",
+    "We don’t sell AI — we install it. Halla AI builds connected AI systems for operations, client acquisition and brand visibility for businesses in the UAE, Saudi Arabia and the wider GCC, plus a 24/7 Arabic and English AI receptionist.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://www.hallaai.com"
   ),
   openGraph: {
-    title: "Halla AI – AI Consultancy & Pure AI Receptionist",
+    title: "Halla AI | AI Consultancy & AI Receptionist for the GCC",
     description:
       "We install AI systems for operations, growth, and brand — plus a receptionist that never misses a call.",
     type: "website",
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Halla AI – AI Consultancy & Pure AI Receptionist",
+    title: "Halla AI | AI Consultancy & AI Receptionist for the GCC",
     description:
       "Connected AI systems for small business — and a 24/7 receptionist from $39/month.",
     images: ["/logo-consultancy.jpg"],

@@ -1,6 +1,6 @@
 /* HallaAI GCC theme — load LAST (after marketing-apple.css). Charcoal / off-white / champagne. */
 :root{
-  --ink:#121417; --paper:#FAF9F6; --gold:#C5A059; --gold-text:#7A5A1E; --gold-dark:#6F5120;
+  --ink:#121417; --paper:#FAF9F6; --gold:#C5A059; --gold-text:#7A5A1E; --gold-dark:#6B4F18;
   --black:#121417; --gray-50:#FAF9F6; --gray-100:#F3F1EC; --gray-200:#E6E2D9;
   --accent:var(--gold-text); --accent-dark:var(--gold-dark); --accent-mid:var(--gold);
   --accent-light:rgba(197,160,89,.14); --violet:var(--gold-text); --violet-light:rgba(197,160,89,.14); --orange:var(--gold-text);
@@ -52,5 +52,76 @@ html[dir="rtl"] .hero-sub,html[dir="rtl"] p{line-height:1.9}
 .pricing-price sup.cur-sym{font-size:.9rem;font-weight:600;letter-spacing:.04em;margin-inline-end:4px}
 .fx-note{max-width:760px;margin:24px auto 0;padding:0 24px;text-align:center;font-size:.8rem;color:var(--gray-500)}
 html[data-cur="USD"] .fx-note{display:none}
+
+/* --- real-browser audit fixes --- */
+:root{--green:#1B7A33;--gray-500:#636368}
+nav .container{max-width:1400px;padding-inline:24px}
+nav .nav-inner{gap:12px}
+html body .ticker-wrap,html body .ticker-wrap *{color:#E9E3D3!important}
+
+/* --- layout fixes from real-browser audit --- */
+@media (max-width: 820px){
+  .page [style*="grid-template-columns:1fr 1fr"],.page [style*="grid-template-columns: 1fr 1fr"],
+  .page [style*="grid-template-columns:1.3fr 0.7fr"],.page [style*="grid-template-columns: 1.3fr 0.7fr"],
+  .page [style*="grid-template-columns:1fr 1.3fr"],.page [style*="grid-template-columns:1.2fr 1fr"],.page [style*="grid-template-columns:1fr 1.2fr"]{grid-template-columns:1fr!important;gap:32px!important}
+}
+@media (max-width: 640px){
+  nav .nav-actions .cur-select{display:none}
+  .roi-wrap{box-sizing:border-box;max-width:100%;padding:24px 20px}
+  .roi-wrap *{min-width:0}
+}
+@media (min-width: 1380px) and (max-width: 1560px){
+  nav .nav-inner{gap:6px}
+  nav .nav-links .nav-link,nav .nav-links > a,nav .nav-links > div{padding-inline:6px;font-size:.84rem}
+  nav .section-switch button,nav .section-switch a{padding:6px 10px;font-size:.78rem}
+  nav .nav-actions{gap:6px}
+  nav .nav-actions .btn{padding:8px 14px;font-size:.82rem}
+  nav .cur-select{padding:5px 3px;font-size:.74rem;margin-inline-end:2px}
+}
+
+/* --- nav: hamburger below 1366px (bilingual labels + currency selector need more room) --- */
+@media (max-width: 1379px){
+  body[data-section="receptionist"] .nav-links.nav-group[data-section="receptionist"],
+  body[data-section="consultancy"] .nav-links.nav-group[data-section="consultancy"],
+  body[data-section="intelligence"] .nav-links.nav-group[data-section="intelligence"],
+  .nav-links.nav-group[data-section="consultancy"]{display:none!important}
+  .hamburger{display:block}
+  .section-switch{display:none}
+  .mob-section-switch{display:flex}
+  .nav-actions .btn-outline,.nav-actions #navPrimaryCta{display:none!important}
+}
+
+@media (max-width: 640px){
+  .page .grid-2{grid-template-columns:minmax(0,1fr)!important}
+  .page .grid-2>*{min-width:0}
+  .roi-result-num,.roi-result-label{overflow-wrap:anywhere}
+}
+
+/* --- contrast fixes --- */
+.comp-table .no{color:#636368}
+.mock-badge .mock-badge-green,.mock-badge [class*="green"]{color:#6FD58A!important}
+html body .cta-block .label,html body .cta-block .btn-outline,html body .consult-cta-block .label,html body .consult-cta-block .btn-outline{color:#E4CF9B!important}
+html body .cta-block .btn-outline,html body .consult-cta-block .btn-outline{border-color:rgba(228,207,155,.5)!important}
+
+@media (max-width: 640px){
+  .btn{max-width:100%;white-space:normal;text-align:center}
+  .hero-actions{flex-direction:column;align-items:stretch}
+}
+
+/* --- polish from visual review --- */
+.pricing-price,.stat-num,.value-num,.roi-result-num{font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1}
+.pricing-price sup.cur-sym{font-size:1rem}
+html[dir="rtl"] h1,html[lang="ar"] h1{font-size:clamp(2.3rem,1.4rem + 3.8vw,4.2rem)}
+html[dir="rtl"] .page-hero h1,html[lang="ar"] .page-hero h1{font-size:clamp(2.1rem,1.3rem + 3.2vw,3.6rem)}
+
+/* --- Arabic section headings: keep proportions closer to the English layout --- */
+html[dir="rtl"] h2,html[lang="ar"] h2{font-size:clamp(1.8rem,1.2rem + 2.3vw,2.9rem)}
+
+/* --- footer was designed for a dark background; keep it readable on the light theme --- */
+html body footer span[style*="rgba(255,255,255,0.4)"],html body footer span[style*="rgba(255, 255, 255, 0.4)"]{color:#636368!important}
+html body footer .btn-blue,html body footer #footerPrimaryCta{color:#121417!important}
+html body nav #navPrimaryCta{background:var(--gold)!important;color:var(--ink)!important;border-color:var(--gold)!important}
+html body #mob-nav a.btn:not(.btn-outline){background:var(--gold)!important;color:var(--ink)!important;border-color:var(--gold)!important}
+html body footer .btn-blue,html body footer #footerPrimaryCta{background:var(--gold)!important;border-color:var(--gold)!important;color:var(--ink)!important}
 /* Footer CTA: marketing-apple.css forces white text on footer buttons (ID selector); gold needs ink text for AA contrast. */
 html body #marketing-spa-root footer .btn-primary,html body #marketing-spa-root footer .btn-primary *,html body #marketing-spa-root footer .btn-blue,html body #marketing-spa-root footer .btn-blue *{color:var(--ink)!important}

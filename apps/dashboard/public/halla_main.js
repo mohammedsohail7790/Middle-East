@@ -24,7 +24,7 @@ function sectionForPage(page) {
 const SECTION_CTA_TEXT = {
   consultancy: { en: 'Book a Consultation →', ar: 'احجز استشارة ←' },
   intelligence: { en: 'Create Your Company →', ar: 'أنشئ شركتك ←' },
-  receptionist: { en: 'Get My AI Receptionist →', ar: 'احصل على موظف الاستقبال الذكي ←' },
+  receptionist: { en: 'Start Free Trial →', ar: 'ابدأ التجربة المجانية ←' },
 };
 function applyPrimaryCtaText() {
   const section = document.body.getAttribute('data-section') || 'consultancy';
@@ -493,7 +493,8 @@ function initConsultForm() {
     btn.insertAdjacentElement('afterend', statusEl);
   }
 
-  const btnDefaultText = btn.textContent;
+  const btnDefaultText = btn.innerHTML;
+  const isAr = () => document.documentElement.lang === 'ar';
 
   btn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -513,7 +514,7 @@ function initConsultForm() {
     if (!valid) return;
 
     btn.disabled = true;
-    btn.textContent = 'Sending...';
+    btn.textContent = isAr() ? 'جارٍ الإرسال...' : 'Sending...';
     statusEl.style.color = '';
     statusEl.textContent = '';
 
@@ -532,18 +533,18 @@ function initConsultForm() {
       .then(async (res) => {
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || 'Something went wrong. Please email hello@hallaai.com directly.');
+          throw new Error(data.error || (isAr() ? 'حدث خطأ ما. يُرجى مراسلتنا مباشرة على hello@hallaai.com.' : 'Something went wrong. Please email hello@hallaai.com directly.'));
         }
         statusEl.style.color = 'var(--green, #2ecc71)';
-        statusEl.textContent = 'Thank you! We will reach out within 1 business day to schedule your diagnostic call.';
+        statusEl.textContent = isAr() ? 'شكرًا لك! سنتواصل معك خلال يوم عمل واحد لتحديد موعد مكالمتك التشخيصية.' : 'Thank you! We will reach out within 1 business day to schedule your diagnostic call.';
         form.querySelectorAll('input, select, textarea').forEach((el) => { el.value = ''; });
-        btn.textContent = btnDefaultText;
+        btn.innerHTML = btnDefaultText;
         btn.disabled = false;
       })
       .catch((err) => {
         statusEl.style.color = 'var(--red)';
-        statusEl.textContent = err.message || 'Something went wrong. Please email hello@hallaai.com directly.';
-        btn.textContent = btnDefaultText;
+        statusEl.textContent = err.message || (isAr() ? 'حدث خطأ ما. يُرجى مراسلتنا مباشرة على hello@hallaai.com.' : 'Something went wrong. Please email hello@hallaai.com directly.');
+        btn.innerHTML = btnDefaultText;
         btn.disabled = false;
       });
   });
