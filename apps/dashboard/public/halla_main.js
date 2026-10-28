@@ -171,8 +171,9 @@ function goInd() {
 }
 
 // ============ MOBILE NAV ============
-function toggleMob() { document.getElementById('mob-nav').classList.toggle('open'); }
-function closeMob() { document.getElementById('mob-nav').classList.remove('open'); }
+function setMobExpanded(open) { const b = document.getElementById('hamb'); if (b) b.setAttribute('aria-expanded', String(open)); }
+function toggleMob() { const open = document.getElementById('mob-nav').classList.toggle('open'); setMobExpanded(open); }
+function closeMob() { document.getElementById('mob-nav').classList.remove('open'); setMobExpanded(false); }
 
 // ============ DESKTOP DROPDOWN NAV ============
 // Click-based (not hover-only) so the menu stays open while the user
