@@ -34,7 +34,7 @@
       <div class="section-switch" role="group" aria-label="Site section">
         <button class="section-switch-btn active" data-section="consultancy" onclick="switchSection('consultancy')" aria-pressed="true"><span class="lang-en"><span class="lang-en">Consultancy</span><span class="lang-ar">الاستشارات</span></span><span class="lang-ar">الاستشارات</span></button>
         <button class="section-switch-btn" data-section="receptionist" onclick="switchSection('receptionist')" aria-pressed="false"><span class="lang-en"><span class="lang-en">AI Receptionist</span><span class="lang-ar">موظف الاستقبال الذكي</span></span><span class="lang-ar">موظف الاستقبال الذكي</span></button>
-        <a class="section-switch-btn section-switch-link" href="javascript:void(0)" onclick="switchSection('intelligence')" data-section="intelligence"><span class="lang-en"><span class="lang-en">AI Business Automation</span><span class="lang-ar">أتمتة الأعمال بالذكاء الاصطناعي</span></span><span class="lang-ar">أتمتة الأعمال بالذكاء الاصطناعي</span></a>
+        <a class="section-switch-btn section-switch-link" href="javascript:void(0)" onclick="switchSection('intelligence')" data-section="intelligence"><span class="lang-en"><span class="lang-en">Business Automation</span><span class="lang-ar">أتمتة الأعمال بالذكاء الاصطناعي</span></span><span class="lang-ar">أتمتة الأعمال بالذكاء الاصطناعي</span></a>
       </div>
 
       <!-- RECEPTIONIST NAV -->
@@ -134,7 +134,7 @@
         <a class="btn btn-outline btn-sm nav-group" data-section="intelligence" href="https://meetklaros.com/login" target="_blank" rel="noopener"><span class="lang-en"><span class="lang-en">Sign In</span><span class="lang-ar">تسجيل الدخول</span></span><span class="lang-ar">تسجيل الدخول</span></a>
         <a class="btn btn-primary btn-sm" id="navPrimaryCta" href="javascript:void(0)" onclick="navPrimaryCtaClick()">Book a Consultation →</a>
       </div>
-      <button class="hamburger" onclick="toggleMob()" id="hamb"><span></span><span></span><span></span></button>
+      <button class="hamburger" onclick="toggleMob()" id="hamb" type="button" aria-label="Menu / القائمة" aria-controls="mob-nav" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
   </div>
 </nav>
@@ -3326,7 +3326,7 @@
         <div class="consult-hero-copy reveal-up">
           <div class="label consult-label-glow"><span class="lang-en">Halla AI Consultancy</span><span class="lang-ar">استشارات Halla AI</span></div>
           <h1><span class="lang-en">We Don't Sell AI.<br><span class="consult-gradient-text">We Install It.</span></span><span class="lang-ar">نحن لا نبيع الذكاء الاصطناعي.<br><span class="consult-gradient-text">نحن نُركّبه.</span></span></h1>
-          <p class="consult-hero-sub"><span class="lang-en">An implementation partner for small businesses — building connected systems for operations, client acquisition, and brand visibility. One direct point of contact, backed by a full AI engineering team.</span><span class="lang-ar">شريك تنفيذي للشركات الصغيرة — نبني أنظمة متصلة للعمليات، واكتساب العملاء، وحضور العلامة التجارية. جهة اتصال واحدة مباشرة، مدعومة بفريق هندسي متكامل للذكاء الاصطناعي.</span></p>
+          <p class="consult-hero-sub"><span class="lang-en">An implementation partner for growing businesses across the GCC — building connected systems for operations, client acquisition, and brand visibility. One direct point of contact, backed by a full AI engineering team.</span><span class="lang-ar">شريك تنفيذي للشركات النامية في دول الخليج — نبني أنظمة متصلة للعمليات، واكتساب العملاء، وحضور العلامة التجارية. جهة اتصال واحدة مباشرة، مدعومة بفريق هندسي متكامل للذكاء الاصطناعي.</span></p>
           <div class="consult-hero-actions">
             <a class="btn btn-blue btn-lg consult-magnetic" href="javascript:void(0)" onclick="go('consult-signup')"><span class="lang-en">Book a Diagnostic Call →</span><span class="lang-ar">احجز مكالمة تشخيصية ←</span></a>
             <a class="btn btn-outline btn-lg consult-hero-outline" href="javascript:void(0)" onclick="switchSection('receptionist')"><span class="lang-en">See the AI Receptionist</span><span class="lang-ar">تعرّف على موظف الاستقبال الذكي</span></a>
@@ -3380,7 +3380,7 @@
       <div class="consult-split reveal-up">
         <div>
           <div class="label"><span class="lang-en">Why it matters</span><span class="lang-ar">لماذا يهم هذا</span></div>
-          <h2><span class="lang-en">Most small businesses are running on manual work they don't have to do</span><span class="lang-ar">معظم الشركات الصغيرة تعتمد على عمل يدوي لسن حاجة له</span></h2>
+          <h2><span class="lang-en">Most growing businesses are running on manual work they don't have to do</span><span class="lang-ar">معظم الشركات النامية تعتمد على عمل يدوي لا حاجة لها إليه</span></h2>
         </div>
         <p><span class="lang-en">Every hour spent on repeat admin, unanswered leads, or a dormant social page is an hour that isn't going toward the work that actually grows the business. That's the gap the consultancy closes — with systems that stay running after we leave.</span><span class="lang-ar">كل ساعة تُصرف على أعمال إدارية متكررة، أو عملاء محتملين دون رد، أو صفحة تواصل اجتماعي خاملة، هي ساعة لا تذهب إلى العمل الذي ينمّي أعمالك فعلاً. هذه هي الفجوة التي تسدّها استشاراتنا — بأنظمة تبقى تعمل بعد رحيلنا.</span></p>
       </div>
@@ -3513,6 +3513,15 @@
           </tbody>
         </table>
       </div>
+    </div>
+  </section>
+
+  <section class="section-sm" id="consult-gcc">
+    <div class="container text-center" style="max-width:860px">
+      <div class="label"><span class="lang-en">Built for the GCC</span><span class="lang-ar">مصمَّم لدول الخليج</span></div>
+      <h2 style="margin-top:12px"><span class="lang-en">Delivered in Arabic and English, for the industries that drive the region</span><span class="lang-ar">نقدّم خدماتنا بالعربية والإنجليزية، للقطاعات التي تقود المنطقة</span></h2>
+      <p style="margin:16px auto 28px;max-width:680px"><span class="lang-en">Every system we build supports both languages and fits how GCC businesses actually work, including customers who message on WhatsApp before they call. Our AI Receptionist is pre-configured for eight industries:</span><span class="lang-ar">كل نظام نبنيه يدعم اللغتين ويلائم طريقة عمل الشركات في الخليج فعلاً، بما في ذلك العملاء الذين يراسلونك عبر واتساب قبل أن يتصلوا. موظف الاستقبال الذكي لدينا مُهيّأ مسبقاً لثمانية قطاعات:</span></p>
+      <div class="pills-wrap" style="justify-content:center"><a class="pill" href="javascript:void(0)" onclick="go('industry-realtors')"><i class="ti ti-key"></i> <span class="lang-en">Real Estate</span><span class="lang-ar">العقارات</span></a><a class="pill" href="javascript:void(0)" onclick="go('industry-legal')"><i class="ti ti-scale"></i> <span class="lang-en">Legal &amp; Business Setup</span><span class="lang-ar">المحاماة وتأسيس الشركات</span></a><a class="pill" href="javascript:void(0)" onclick="go('industry-hospitality')"><i class="ti ti-tools-kitchen-2"></i> <span class="lang-en">Hotels &amp; Restaurants</span><span class="lang-ar">الفنادق والمطاعم</span></a><a class="pill" href="javascript:void(0)" onclick="go('industry-automotive')"><i class="ti ti-car"></i> <span class="lang-en">Automotive</span><span class="lang-ar">السيارات</span></a><a class="pill" href="javascript:void(0)" onclick="go('industry-hvac')"><i class="ti ti-snowflake"></i> <span class="lang-en">Facilities &amp; AC</span><span class="lang-ar">صيانة المرافق والتكييف</span></a><a class="pill" href="javascript:void(0)" onclick="go('industry-education')"><i class="ti ti-school"></i> <span class="lang-en">Schools &amp; Training</span><span class="lang-ar">المدارس والتدريب</span></a><a class="pill" href="javascript:void(0)" onclick="go('industry-insurance')"><i class="ti ti-shield"></i> <span class="lang-en">Insurance &amp; Mortgage</span><span class="lang-ar">التأمين والتمويل العقاري</span></a><a class="pill" href="javascript:void(0)" onclick="go('industry-clinics')"><i class="ti ti-stethoscope"></i> <span class="lang-en">Clinics</span><span class="lang-ar">العيادات والمنشآت الطبية</span></a></div>
     </div>
   </section>
 
@@ -4715,7 +4724,7 @@
           <span class="brand-lockup" aria-label="Halla AI"><span class="brand-tile" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3.5 2.5v11M12.5 2.5v11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M3.5 8h9" stroke="#C5A059" stroke-width="2.2" stroke-linecap="round"/></svg></span><span class="brand-word">Halla <span>AI</span></span></span>
         <span class="logo-img nav-group klaros-wordmark-nav" data-section="intelligence">Halla AI</span>
         </div>
-       <p class="footer-group" data-section="consultancy">An AI implementation partner for small businesses — operations, client acquisition, and brand growth, backed by a full AI team.</p>
+       <p class="footer-group" data-section="consultancy">An AI implementation partner for growing businesses across the GCC — operations, client acquisition, and brand growth, backed by a full AI team.</p>
        <p class="footer-group" data-section="receptionist">Pure AI Receptionist. No live agents. No hidden fees. 24/7/365 answering for eight GCC industries.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap; margin-top: 12px;">
           <span style="font-size:0.85rem; color: rgba(255,255,255,0.4);"><i class="ti ti-phone"></i> <span class="lang-en">24/7</span><span class="lang-ar">على مدار الساعة</span></span>
@@ -4833,11 +4842,11 @@
     
     <div class="footer-bottom">
       <div class="footer-legal">
-        <div>© 2025 Halla AI – Pure AI Receptionist. All rights reserved.</div>
-        <div style="margin-top:8px"><strong>Pricing:</strong> Essential $39/mo (250 min, $0.20/min overage) · Professional $149/mo (750 min, $0.15/min overage) · Annual plans: 20% off · Free trial: 14 days, no CC · Support: Live chat 9am–5pm UAE time + email 24/7</div>
-        <div style="margin-top:6px"><strong>AI Disclosure:</strong> Optional. Indemnity form required to disable. &nbsp;|&nbsp; <strong>Call Recording:</strong> Off by default, opt-in with caller consent.</div>
-      </div>
-      <a class="btn btn-blue btn-sm" id="footerPrimaryCta" href="javascript:void(0)" onclick="navPrimaryCtaClick()" style="flex-shrink: 0;">Get My AI Receptionist →</a>
+<div>© 2026 Halla AI – Pure AI Receptionist. All rights reserved.</div><div class="footer-powered" style="margin-top:6px">Powered by Vertex Connect</div>
+<div style="margin-top:8px"><strong>Pricing:</strong> Essential AED 149/mo (250 min, AED 0.75/min overage) · Professional AED 549/mo (750 min, AED 0.55/min overage) · Annual plans: 20% off · Prices exclude VAT · Free trial: 14 days, no credit card · Support: Live chat Mon–Fri 9am–5pm UAE time + email 24/7</div>
+<div style="margin-top:6px"><strong>AI Disclosure:</strong> Optional. Indemnity form required to disable.  |  <strong>Call Recording:</strong> Off by default, opt-in with caller consent. | <strong>Data location:</strong> Database and gateway can be hosted in the UAE or Saudi Arabia; live voice, speech-to-text and the AI model run on international providers outside the Gulf.</div>
+</div>
+      <a class="btn btn-blue btn-sm" id="footerPrimaryCta" href="javascript:void(0)" onclick="navPrimaryCtaClick()" style="flex-shrink: 0;">Book a Consultation →</a>
     </div>
   </div>
 </footer>

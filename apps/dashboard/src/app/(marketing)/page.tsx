@@ -4,9 +4,9 @@ import { join } from "path";
 import MarketingSPA from "@/components/marketing/MarketingSPA";
 
 export const metadata: Metadata = {
-  title: "Halla AI – AI Consultancy & Pure AI Receptionist",
+  title: "Halla AI | AI Consultancy & AI Receptionist for the GCC",
   description:
-    "Halla AI Consultancy installs connected automation for small businesses. Plus a 24/7 AI receptionist that answers every call — starting at $39/month.",
+    "We don’t sell AI — we install it. Halla AI builds connected AI systems for operations, client acquisition and brand visibility for businesses in the UAE, Saudi Arabia and the wider GCC, plus a 24/7 Arabic and English AI receptionist.",
   openGraph: {
     title: "Halla AI – Never Miss a Call",
     description:

@@ -1,7 +1,7 @@
 /* ================================================
    Halla AI — Stylesheet
    Design: warm porcelain/gold luxury system
-   Font: Hanken Grotesk | Primary: #1D1D1F | Accent: #0066CC
+   Font: Hanken Grotesk | Primary: #1D1D1F | Accent: #85631F
    © 2025 Halla AI
 ================================================ */
 
@@ -22,22 +22,22 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --gray-100: #F5F5F7;
   --gray-200: #E8E8ED;
   --gray-300: #D2D2D7;
-  --gray-400: #6E6E73;
-  --gray-500: #6e6e73;
-  --gray-600: #6E6E73;
+  --gray-400: #636368;
+  --gray-500: #636368;
+  --gray-600: #636368;
   --gray-700: #424245;
   --gray-800: #333336;
   --gray-900: #1D1D1F;
-  --accent: #0066CC;
-  --accent-dark: #0066CC;
-  --accent-light: #EBF4FD;
-  --accent-mid: #0066CC;
-  --green: #248A3D;
+  --accent: #85631F;
+  --accent-dark: #85631F;
+  --accent-light: #F6F0E2;
+  --accent-mid: #85631F;
+  --green: #1B7A33;
   --green-light: #E9F7EC;
-  --orange: #0066CC;
+  --orange: #85631F;
   --red: #D70015;
-  --violet: #0066CC;
-  --violet-light: #EBF4FD;
+  --violet: #85631F;
+  --violet-light: #F6F0E2;
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow: 0 4px 16px rgba(0,0,0,0.08);
@@ -65,12 +65,12 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --consult-surface-strong: rgba(0,0,0,0.10);
   --consult-hairline: rgba(0,0,0,0.14);
   --consult-hairline-strong: rgba(0,0,0,0.24);
-  --consult-accent: #0066CC;
-  --consult-accent-soft: #0066CC;
-  --consult-accent-dim: rgba(0,102,204,0.12);
+  --consult-accent: #85631F;
+  --consult-accent-soft: #85631F;
+  --consult-accent-dim: rgba(197,160,89,0.12);
   --consult-text: #1D1D1F;
-  --consult-text-muted: #6E6E73;
-  --consult-text-faint: #6E6E73;
+  --consult-text-muted: #636368;
+  --consult-text-faint: #636368;
   --consult-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
   /* AI Intelligence (Klaros AI) — the product's own real brand accent
      (deep indigo-navy), kept distinct from the shared gold used by
@@ -154,7 +154,7 @@ p { color: var(--gray-500); line-height: 1.72; }
 .btn-outline { background: transparent; color: var(--black); border: 1.5px solid var(--gray-200); }
 .btn-outline:hover { border-color: var(--gray-400); background: var(--gray-50); }
 .btn-blue { background: var(--accent); color: var(--white); }
-.btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,102,204,0.3); }
+.btn-blue:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(197,160,89,0.3); }
 /* Primary CTA buttons ("Book a Diagnostic Call", etc.) use the shared
    .btn-blue class, which is teal everywhere else on the site — swap it
    for the consultancy accent while any page in that section is active.
@@ -549,7 +549,7 @@ body[data-section="intelligence"] .footer-brand p.footer-group[data-section="rec
 .cta-block::before {
   content: ""; position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
   width: 500px; height: 300px;
-  background: radial-gradient(circle, rgba(0,102,204,0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(197,160,89,0.15) 0%, transparent 70%);
   pointer-events: none;
 }
 .cta-block h2, .cta-block h3 { color: var(--white); }
@@ -773,7 +773,7 @@ body[data-section="intelligence"] .footer-brand p.footer-group[data-section="rec
 }
 .logo-pill:hover {
   border-color: var(--accent); color: var(--accent);
-  box-shadow: 0 4px 12px rgba(0,102,204,0.15);
+  box-shadow: 0 4px 12px rgba(197,160,89,0.15);
   transform: translateY(-1px);
 }
 .logo-pill svg { flex-shrink: 0; border-radius: 4px; }
