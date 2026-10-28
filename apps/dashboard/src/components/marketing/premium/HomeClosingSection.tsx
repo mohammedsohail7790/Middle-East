@@ -88,7 +88,7 @@ export function HomeClosingSection() {
               >
                 {plan.popular && <span className="premium-pricing-badge">Most popular</span>}
                 {plan.popular && (
-                  <BorderBeam size={100} duration={7} colorFrom="#2997FF" colorTo="#0066CC" borderWidth={2} />
+                  <BorderBeam size={100} duration={7} colorFrom="#E4CF9B" colorTo="#C5A059" borderWidth={2} />
                 )}
                 <div className="premium-pricing-plan">{plan.name}</div>
                 <div className="premium-pricing-price">
@@ -149,7 +149,7 @@ export function HomeClosingSection() {
 
       <section className="premium-section" aria-labelledby="premium-consult-bridge-heading">
         <div className="container">
-          <NeonGradientCard className="premium-consult-bridge">
+          <NeonGradientCard className="premium-consult-bridge" firstColor="#E4CF9B" secondColor="#C5A059">
             <div className="premium-consult-bridge-copy">
               <div className="premium-label">Beyond the front desk</div>
               <h2 id="premium-consult-bridge-heading">Need more than a receptionist?</h2>
@@ -175,8 +175,8 @@ export function HomeClosingSection() {
             </p>
             <div className="premium-final-cta-actions">
               <ShimmerButton
-                className="btn-lg"
-                background="#0066CC"
+                className="btn-lg !text-[#121417]"
+                background="#C5A059"
                 onClick={() => spaGo("signup")}
               >
                 Get My AI Receptionist →

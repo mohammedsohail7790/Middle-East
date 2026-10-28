@@ -126,3 +126,7 @@ html body footer .btn-blue,html body footer #footerPrimaryCta{background:var(--g
 /* Footer CTA: marketing-apple.css forces white text on footer buttons (ID selector); gold needs ink text for AA contrast. */
 html body #marketing-spa-root footer .btn-primary,html body #marketing-spa-root footer .btn-primary *,html body #marketing-spa-root footer .btn-blue,html body #marketing-spa-root footer .btn-blue *{color:var(--ink)!important}
 html body #marketing-spa-root footer .btn-primary,html body #marketing-spa-root footer .btn-blue{background:var(--gold)!important;border-color:var(--gold)!important}
+/* Popular pricing card sits on a light champagne surface (marketing-apple.css), but halla_styles.css still paints its text white. */
+html body #marketing-spa-root .pricing-card.popular :is(.pricing-plan,.pricing-mins,.pricing-feature,.pricing-feature *){color:var(--ink)!important}
+html body #marketing-spa-root .pricing-card.popular .pricing-feature.miss,html body #marketing-spa-root .pricing-card.popular .pricing-feature.miss *{color:#636368!important}
+html body #marketing-spa-root .pricing-card.popular .pricing-price,html body #marketing-spa-root .pricing-card.popular .pricing-price *{color:var(--gold-text)!important}

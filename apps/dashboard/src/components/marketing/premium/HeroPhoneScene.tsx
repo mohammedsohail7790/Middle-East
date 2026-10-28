@@ -15,7 +15,7 @@ function PhoneModel() {
           <planeGeometry args={[0.98, 1.88]} />
           <meshStandardMaterial
             color="#0f172a"
-            emissive="#0066CC"
+            emissive="#C5A059"
             emissiveIntensity={0.35}
             metalness={0.1}
             roughness={0.4}
@@ -24,8 +24,8 @@ function PhoneModel() {
 
         <Sphere args={[0.14, 24, 24]} position={[0, 0.72, 0.08]}>
           <MeshDistortMaterial
-            color="#2997FF"
-            emissive="#0066CC"
+            color="#E4CF9B"
+            emissive="#C5A059"
             emissiveIntensity={0.55}
             distort={0.28}
             speed={2.2}
@@ -36,8 +36,8 @@ function PhoneModel() {
 
         <Torus args={[1.55, 0.014, 12, 80]} rotation={[Math.PI / 2.2, 0.15, 0]}>
           <meshStandardMaterial
-            color="#2997FF"
-            emissive="#2997FF"
+            color="#E4CF9B"
+            emissive="#E4CF9B"
             emissiveIntensity={0.65}
             transparent
             opacity={0.45}
@@ -46,8 +46,8 @@ function PhoneModel() {
 
         <Torus args={[1.75, 0.008, 8, 64]} rotation={[Math.PI / 2.5, -0.2, 0.4]}>
           <meshStandardMaterial
-            color="#0066CC"
-            emissive="#0066CC"
+            color="#C5A059"
+            emissive="#C5A059"
             emissiveIntensity={0.4}
             transparent
             opacity={0.25}
@@ -68,8 +68,8 @@ export function HeroPhoneScene() {
     >
       <ambientLight intensity={0.55} />
       <directionalLight position={[4, 5, 6]} intensity={1.15} />
-      <pointLight position={[-3, 2, 4]} intensity={0.55} color="#2997FF" />
-      <pointLight position={[2, -2, 3]} intensity={0.25} color="#0066CC" />
+      <pointLight position={[-3, 2, 4]} intensity={0.55} color="#E4CF9B" />
+      <pointLight position={[2, -2, 3]} intensity={0.25} color="#C5A059" />
       <PhoneModel />
     </Canvas>
   );
