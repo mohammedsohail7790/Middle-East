@@ -61,7 +61,7 @@ const ROLE_LABEL: Record<string, string> = { owner: 'Owner or founder', manager:
 const DECIDER_LABEL: Record<string, string> = { yes: 'Yes', shared: 'Decides with others', no: 'No, gathering information' };
 const HOURS_LABEL: Record<string, string> = { 'under-5': 'Under 5', '5-20': '5 to 20', '20-50': '20 to 50', 'over-50': 'Over 50', unsure: 'Not sure' };
 const START_LABEL: Record<string, string> = { 'this-month': 'This month', '1-3-months': 'In 1 to 3 months', later: 'Later', exploring: 'Just exploring' };
-const BUDGET_LABEL: Record<string, string> = { 'under-5000': 'Under 5,000 USD', '5000-10000': '5,000 to 10,000 USD', '10000-35000': '10,000 to 35,000 USD', 'over-35000': 'Over 35,000 USD', unsure: 'Not sure yet' };
+const BUDGET_LABEL: Record<string, string> = { 'under-5000': 'Under 5,000 AED', '5000-15000': '5,000 to 15,000 AED', '15000-60000': '15,000 to 60,000 AED', 'over-60000': 'Over 60,000 AED', unsure: 'Not sure yet' };
 
 /**
  * Public (unauthenticated) endpoint for "Form 1", the short fit check on the Consultancy site (the second form is the paid audit questionnaire). No account exists yet; the only side effect is an email to us whose first lines

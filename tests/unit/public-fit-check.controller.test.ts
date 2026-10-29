@@ -37,7 +37,7 @@ afterEach(async () => {
 const valid = {
   name: 'Jordan Smith', email: 'jordan@example.com', role: 'owner', decider: 'yes', company: 'Smith & Co', size: '16-50', office: '6-15', departments: 'Sales, Finance and accounts', industry: 'Trading', country: 'United Arab Emirates', city: 'Dubai',
   accounting: 'QuickBooks', erp: 'Odoo', pain: 'Quotes and invoices', problem: 'Invoices are typed by hand from emails and it takes two days every month.',
-  hours: '20-50', start: '1-3-months', budget: '5000-10000', consent: true,
+  hours: '20-50', start: '1-3-months', budget: '5000-15000', consent: true,
 };
 const post = (body: unknown) => fetch(base, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 

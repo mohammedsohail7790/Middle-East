@@ -10,7 +10,7 @@ const good: FitInput = {
   departments: 'Sales, Finance and accounts, Warehouse or logistics',
   hours: '20-50',
   start: '1-3-months',
-  budget: '5000-10000',
+  budget: '5000-15000',
   erp: 'Odoo',
 };
 
@@ -50,10 +50,10 @@ describe('assessFit', () => {
     expect(assessFit({ ...good, start: 'later' }).verdict).toBe('amber');
   });
 
-  it('checks the budget against the 5,000 USD audit: below it is a bad signal, and two bad signals together are red', () => {
+  it('checks the budget against the 5,000 AED audit: below it is a bad signal, and two bad signals together are red', () => {
     const below = assessFit({ ...good, budget: 'under-5000' });
     expect(below.verdict).toBe('amber');
-    expect(below.reasons.join(' ')).toContain('below the audit price');
+    expect(below.reasons.join(' ')).toContain('Budget: under 5,000 AED, below the audit price.');
     expect(assessFit({ ...good, budget: 'under-5000', start: 'exploring' }).verdict).toBe('red');
     expect(assessFit({ ...good, hours: 'under-5', start: 'exploring' }).verdict).toBe('red');
   });

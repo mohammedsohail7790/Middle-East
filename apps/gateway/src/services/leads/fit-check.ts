@@ -4,7 +4,7 @@
  *
  * Hk's direction: there is no hard limit of 50 people. A company with 30 warehouse staff may have a small office, and what matters is the ERP, the departments and the
  * processes. So company size is only a soft signal, office staff count more than total headcount, and a person decides. The first engagement is a paid audit of
- * 5,000 USD (one week, not credited against the build), so a budget below that is the main "not yet" signal. Every threshold is a named constant here.
+ * 5,000 AED (one week, not credited against the build), so a budget below that is the main "not yet" signal. Every threshold is a named constant here.
  */
 
 export const COMPANY_SIZES = ['1-5', '6-15', '16-50', '51-150', '150+'] as const;
@@ -12,8 +12,8 @@ export const OFFICE_SIZES = ['1-5', '6-15', '16-50', '51+'] as const;
 export const DECIDER_ANSWERS = ['yes', 'shared', 'no'] as const;
 export const HOURS_ANSWERS = ['under-5', '5-20', '20-50', 'over-50', 'unsure'] as const;
 export const START_ANSWERS = ['this-month', '1-3-months', 'later', 'exploring'] as const;
-/** Bands in US dollars. The audit is 5,000 USD and a first build usually adds 4,000 to 30,000 USD. */
-export const BUDGET_ANSWERS = ['under-5000', '5000-10000', '10000-35000', 'over-35000', 'unsure'] as const;
+/** Bands in UAE dirhams. The audit is 5,000 AED and a build is 8,000 to 60,000 AED, so a first engagement is audit plus build: from about 13,000 AED. */
+export const BUDGET_ANSWERS = ['under-5000', '5000-15000', '15000-60000', 'over-60000', 'unsure'] as const;
 /** GCC countries, and the currency we quote in for each. Anything else is quoted in US dollars. */
 export const COUNTRIES = ['United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Kuwait', 'Bahrain', 'Oman', 'Other'] as const;
 
@@ -131,7 +131,7 @@ export function assessFit(input: FitInput): FitResult {
   }
 
   if (input.budget === 'under-5000') {
-    reasons.push('Budget: under 5,000 USD, below the audit price.');
+    reasons.push('Budget: under 5,000 AED, below the audit price.');
     bad++;
   } else if (!input.budget || input.budget === 'unsure') {
     reasons.push('Budget: not stated.');
