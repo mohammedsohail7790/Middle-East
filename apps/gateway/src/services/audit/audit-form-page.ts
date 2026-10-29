@@ -27,7 +27,7 @@ function section(s: Section): string {
   const blocks = Array.from({ length: count }, (_, i) => {
     const qs = s.questions.slice(i * perBlock, (i + 1) * perBlock);
     const hidden = i > 0 ? ' style="display:none" data-extra="1"' : '';
-    return `<div data-block="${s.id}"${hidden}><h5 style="margin:18px 0 0;font-size:0.95rem;color:var(--gray-800)">${escapeHtml(noun)} ${i + 1}</h5><div style="display:grid;gap:16px;margin-top:10px">${qs.map(field).join('')}</div></div>`;
+    return `<div data-block="${s.id}"${hidden}><h5 style="margin:18px 0 0;font-size:0.95rem;color:var(--gray-800)">${escapeHtml(noun[0].toUpperCase() + noun.slice(1))} ${i + 1}</h5><div style="display:grid;gap:16px;margin-top:10px">${qs.map(field).join('')}</div></div>`;
   }).join('');
   return `<div>${head}${blocks}<button type="button" class="btn btn-secondary" style="margin-top:16px" data-add="${s.id}" data-noun="${escapeHtml(noun)}">+ Add another ${escapeHtml(noun.toLowerCase())}</button></div>`;
 }
