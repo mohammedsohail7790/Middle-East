@@ -11,6 +11,8 @@ import { MarketingAtmosphere } from "@/components/marketing/effects/MarketingAtm
 interface Props {
   bodyHtml: string;
   initialPage?: string;
+  /** One page's HTML rendered on the server, so crawlers and link previews get real text. The browser replaces it with the full app on mount. */
+  ssrHtml?: string;
 }
 
 const NEXT_ROUTES: Record<string, string> = {
@@ -55,7 +57,7 @@ function loadScript(src: string): Promise<void> {
  * halla_main.js loads first so routing works even if THREE/GSAP fail.
  * Neural + GSAP are decorative and load in parallel afterward.
  */
-export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: Props) {
+export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ssrHtml }: Props) {
   const safeInitialPage = initialPage.replace(/[^a-z0-9-]/gi, "") || "consultancy";
   const bridgeInstalled = useRef(false);
   const decorStarted = useRef(false);
@@ -178,7 +180,7 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy" }: 
       <MarketingVibeLayer />
       <MarketingPremiumLayer />
       <MarketingConsultancyLayer />
-      <div id="marketing-spa-root" ref={spaRootRef} />
+      <div id="marketing-spa-root" ref={spaRootRef} suppressHydrationWarning dangerouslySetInnerHTML={ssrHtml ? { __html: ssrHtml } : undefined} />
       <Dashboard3DMounts />
 
       <Script
