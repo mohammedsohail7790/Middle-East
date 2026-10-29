@@ -18,7 +18,7 @@ export type Verdict = 'green' | 'amber' | 'red';
 export interface FitInput {
   size: CompanySize;
   decider: (typeof DECIDER_ANSWERS)[number];
-  /** Where the most time or money goes: up to two areas, comma separated. */
+  /** Where the most time or money goes: every area the prospect ticked, comma separated. */
   pain: string;
   /** The prospect's own words about the problem. */
   problem: string;
@@ -54,6 +54,7 @@ export function assessFit(input: FitInput): FitResult {
   const problem = (input.problem ?? '').trim();
   const painAreas = (input.pain ?? '').split(',').map((s) => s.trim()).filter(Boolean);
   const specific = problem.length >= SPECIFIC_PROBLEM_MIN_CHARS;
+  // A company over 50 people is only worth a call if it points at one clear problem (one area ticked and described specifically).
   const focused = specific && painAreas.length === 1;
 
   const outOfScope = input.size === '51+';

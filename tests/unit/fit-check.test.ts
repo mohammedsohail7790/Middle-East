@@ -64,3 +64,11 @@ describe('assessFit', () => {
     }
   });
 });
+
+describe('assessFit with several areas ticked', () => {
+  it('treats a company over 50 people as unfocused when it ticks more than one area, but a company in scope is judged on the rest', () => {
+    const many = 'Quotes and invoices, Scheduling, Reports and admin';
+    expect(assessFit({ ...good, size: '51+', pain: many }).verdict).toBe('red');
+    expect(assessFit({ ...good, pain: many }).verdict).toBe('green');
+  });
+});

@@ -575,18 +575,6 @@ function initFitCheckForm() {
     sizeSelect.addEventListener('change', () => { sizeNote.style.display = sizeSelect.value === '51+' ? 'block' : 'none'; });
   }
 
-  // "Choose up to two" for the biggest drain.
-  form.querySelectorAll('input[name="pain"]').forEach((el) => {
-    el.addEventListener('change', () => {
-      if (checked('pain').length > 2) {
-        el.checked = false;
-        say('Please choose up to two.', 'var(--red)');
-      } else if (statusEl.textContent === 'Please choose up to two.') {
-        say('');
-      }
-    });
-  });
-
   btn.addEventListener('click', (e) => {
     e.preventDefault();
     form.querySelectorAll('[data-q]').forEach((q) => { q.style.outline = ''; });

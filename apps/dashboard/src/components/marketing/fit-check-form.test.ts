@@ -99,12 +99,18 @@ describe("Fit check form", () => {
     expect(status()).toBe("Please tick the box to agree, so we can reply to you.");
   });
 
-  it("allows at most two areas for the biggest drain", () => {
-    tick("pain", "Quotes and invoices");
-    tick("pain", "Scheduling");
-    const third = tick("pain", "Chasing payments");
-    expect(third.checked).toBe(false);
-    expect(status()).toBe("Please choose up to two.");
+  it("lets the visitor tick every area that applies, and sends them all", async () => {
+    const all = Array.from(form().querySelectorAll('input[name="pain"]')) as HTMLInputElement[];
+    expect(all.length).toBe(10);
+    fillRequired();
+    all.forEach((box) => tick("pain", box.value));
+    expect(all.every((box) => box.checked)).toBe(true);
+    expect(status()).toBe("");
+    send();
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    const pain = JSON.parse(fetchMock.mock.calls[0][1].body).pain as string;
+    expect(pain.split(", ")).toHaveLength(10);
+    expect(pain.length).toBeLessThanOrEqual(300); // the gateway's limit for this answer
   });
 
   it("shows the friendly note, and still accepts the form, for a company over 50 people", async () => {
