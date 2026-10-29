@@ -2,6 +2,7 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import MarketingSPA from "@/components/marketing/MarketingSPA";
+import { extractPageHtml } from "@/lib/marketing-ssr";
 
 export const metadata: Metadata = {
   title: "Halla AI | AI Consultancy & AI Receptionist for the GCC",
@@ -39,5 +40,5 @@ function getMarketingBodyHtml(): string {
 
 export default function HomePage() {
   const bodyHtml = getMarketingBodyHtml();
-  return <MarketingSPA bodyHtml={bodyHtml} initialPage="consultancy" />;
+  return <MarketingSPA bodyHtml={bodyHtml} initialPage="consultancy" ssrHtml={extractPageHtml(bodyHtml, "consultancy")} />;
 }
