@@ -499,11 +499,11 @@ function initConsultForm() {
 
   btn.addEventListener('click', (e) => {
     e.preventDefault();
-    const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]');
+    // Only name and email are needed to reach the lead (the gateway treats phone and business as optional), so those two are the only required fields.
+    form.querySelectorAll('input').forEach((inp) => { inp.style.borderColor = ''; });
     let valid = true;
-    inputs.forEach((inp) => {
-      inp.style.borderColor = '';
-      if (!inp.value.trim()) {
+    [nameInput, emailInput].forEach((inp) => {
+      if (inp && !inp.value.trim()) {
         inp.style.borderColor = 'var(--red)';
         valid = false;
       }
@@ -538,7 +538,8 @@ function initConsultForm() {
         }
         statusEl.style.color = 'var(--green, #2ecc71)';
         statusEl.textContent = isAr() ? 'شكرًا لك! سنتواصل معك خلال يوم عمل واحد لتحديد موعد مكالمتك التشخيصية.' : 'Thank you! We will reach out within 1 business day to schedule your diagnostic call.';
-        form.querySelectorAll('input, select, textarea').forEach((el) => { el.value = ''; });
+        form.querySelectorAll('input, textarea').forEach((el) => { el.value = ''; });
+        form.querySelectorAll('select').forEach((el) => { el.selectedIndex = 0; }); // back to the first choice, not a blank one
         btn.innerHTML = btnDefaultText;
         btn.disabled = false;
       })
