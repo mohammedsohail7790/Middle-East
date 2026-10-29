@@ -10,6 +10,7 @@ import { createAnalyticsRouter } from '../services/analytics/analytics.controlle
 import { createSmsRouter } from '../services/sms/sms.controller.js';
 import { createLeadsRouter } from '../services/leads/leads.controller.js';
 import { createPublicConsultRequestRouter } from '../services/leads/public-consult-request.controller.js';
+import { createPublicFitCheckRouter } from '../services/leads/public-fit-check.controller.js';
 import { createTeamRouter } from '../services/team/team.controller.js';
 import { createBusinessHoursRouter } from '../services/business-hours/business-hours.controller.js';
 import { createAIConfigRouter } from '../services/ai-config/ai-config.controller.js';
@@ -78,6 +79,7 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/platform/klaros', createKlarosProvisioningRouter());
     apiRouter.use('/leads', createLeadsRouter());
     apiRouter.use('/public/consult-request', createPublicConsultRequestRouter());
+    apiRouter.use('/public/fit-check', createPublicFitCheckRouter());
     apiRouter.use('/calls', createCallsRouter());
     apiRouter.use('/campaigns', createCampaignsRouter());
     apiRouter.use('/appointments', createAppointmentsRouter());

@@ -12,7 +12,7 @@
 // Industries/Pricing/Resources). page-consultancy is the only page in the
 // consultancy section; every other page belongs to the receptionist section.
 function sectionForPage(page) {
-  const consultancyPages = ['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup'];
+  const consultancyPages = ['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check'];
   const intelligencePages = ['intelligence'];
   if (consultancyPages.includes(page)) return 'consultancy';
   if (intelligencePages.includes(page)) return 'intelligence';
@@ -77,7 +77,7 @@ function scrollToIntelSection(anchorId) {
 
 // ============ ROUTING + DEEP LINKS ============
 const DEFAULT_PAGE = 'consultancy';
-const CONSULTANCY_PAGES = new Set(['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup']);
+const CONSULTANCY_PAGES = new Set(['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check']);
 // The site is light-themed everywhere now, so no page runs the starfield
 // backdrop or glassmorphism card treatment — both were built for a dark
 // background (bright stars, translucent glass over near-black) and don't
@@ -449,6 +449,7 @@ function hallaInit() {
   initPhone3D();
   initBrowserFrameTilt();
   initConsultForm();
+  initFitCheckForm();
 
   startHeroLiveFeed('consult-activity-feed-consultancy', [
     { icon: 'user-check', en: 'New lead auto-qualified &amp; synced to CRM', ar: 'عميل محتمل جديد مؤهّل تلقائياً ومتزامن مع نظام العملاء', timeEn: 'Just now', timeAr: 'الآن' },
@@ -549,6 +550,74 @@ function initConsultForm() {
         btn.innerHTML = btnDefaultText;
         btn.disabled = false;
       });
+  });
+}
+
+// ============ FIT CHECK (Form 1): a short public form whose answers reach us by email, with a verdict worked out on the server ============
+function initFitCheckForm() {
+  const btn = document.getElementById('fitCheckBtn');
+  const form = document.getElementById('fitCheckForm');
+  if (!btn || !form) return;
+
+  const statusEl = form.querySelector('.fit-form-status');
+  const btnDefaultText = btn.innerHTML;
+  const GATEWAY = 'https://gateway.hallaai.com/api/v1/public/fit-check';
+  const REQUIRED = ['name', 'email', 'role', 'decider', 'company', 'size', 'industry', 'country', 'accounting', 'erp', 'problem', 'start'];
+  const isAr = () => document.documentElement.lang === 'ar';
+  const field = (name) => form.querySelector('[name="' + name + '"]');
+  const box = (name) => form.querySelector('[data-q="' + name + '"]');
+  const checked = (name) => Array.from(form.querySelectorAll('input[name="' + name + '"]:checked')).map((el) => el.value);
+  const say = (text, color) => { statusEl.style.color = color || ''; statusEl.textContent = text; };
+
+
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    form.querySelectorAll('[data-q]').forEach((q) => { q.style.outline = ''; });
+    const missing = [];
+    REQUIRED.forEach((name) => {
+      const el = field(name);
+      if (el && !el.value.trim()) missing.push(name);
+    });
+    const email = field('email');
+    if (email && email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()) && !missing.includes('email')) missing.push('email');
+    if (checked('pain').length === 0) missing.push('pain');
+    if (!field('consent').checked) missing.push('consent');
+    if (missing.length) {
+      missing.forEach((name) => { const q = box(name); if (q) { q.style.outline = '2px solid var(--red)'; q.style.outlineOffset = '4px'; q.style.borderRadius = '8px'; } });
+      const first = box(missing[0]);
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      say(missing.includes('consent') && missing.length === 1 ? 'Please tick the box to agree, so we can reply to you.' : 'Please complete the highlighted questions.', 'var(--red)');
+      return;
+    }
+
+    const val = (name) => { const el = field(name); return el && el.value.trim() ? el.value.trim() : undefined; };
+    const list = (name) => { const v = checked(name); return v.length ? v.join(', ') : undefined; };
+    btn.disabled = true;
+    btn.textContent = isAr() ? 'جارٍ الإرسال...' : 'Sending...';
+    say('');
+
+    fetch(GATEWAY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: val('name'), email: val('email'), phone: val('phone'), role: val('role'), decider: val('decider'), company: val('company'), website: val('website'),
+        size: val('size'), office: val('office'), departments: list('departments'), industry: val('industry'), country: val('country'), city: val('city'), years: val('years'), accounting: val('accounting'), erp: val('erp'), crm: val('crm'),
+        channels: list('channels'), tools: list('tools'), pain: list('pain'), problem: val('problem'), hours: val('hours'), tried: val('tried'),
+        start: val('start'), budget: val('budget'), heard: val('heard'), consent: true,
+      }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || 'Something went wrong. Please email hello@hallaai.com directly.');
+        }
+        say('Thank you. We have your answers and will reply by email within 1 business day.', 'var(--green, #2ecc71)');
+        form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach((el) => { el.value = ''; });
+        form.querySelectorAll('input[type="checkbox"]').forEach((el) => { el.checked = false; });
+        form.querySelectorAll('select').forEach((el) => { el.selectedIndex = 0; });
+      })
+      .catch((err) => { say(err.message || 'Something went wrong. Please email hello@hallaai.com directly.', 'var(--red)'); })
+      .finally(() => { btn.innerHTML = btnDefaultText; btn.disabled = false; });
   });
 }
 

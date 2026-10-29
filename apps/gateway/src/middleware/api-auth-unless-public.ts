@@ -39,6 +39,8 @@ const PUBLIC_POST_ROUTES = new Set([
   // Consultancy marketing site's "Book a Diagnostic Call" form — submitted
   // by a prospect who has no account yet, so no tenant JWT exists.
   '/public/consult-request',
+  // The short "fit check" form on the same site: same trust model, a prospect with no account.
+  '/public/fit-check',
   // Klaros asks Halla to create a business's receptionist. Server-to-server: it carries no tenant JWT and authenticates itself
   // with the platform secret in the route (404 unless KLAROS_PROVISIONING_SECRET is set).
   '/platform/klaros/provision',
