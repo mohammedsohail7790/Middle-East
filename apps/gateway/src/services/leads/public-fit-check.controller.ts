@@ -14,7 +14,11 @@ const fitCheckRateLimit = MiddlewareFactory.createRateLimit({
 });
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const LEAD_NOTIFICATION_TO = process.env.CONSULT_LEAD_EMAIL || 'hello@hallaai.com';
+// Who receives a fit check. FIT_CHECK_LEAD_EMAILS takes one or more addresses separated by commas (so Hk and the owner both get it); without it the diagnostic-call address is used.
+const LEAD_NOTIFICATION_TO = (process.env.FIT_CHECK_LEAD_EMAILS || process.env.CONSULT_LEAD_EMAIL || 'hello@hallaai.com')
+  .split(',')
+  .map((address) => address.trim())
+  .filter((address) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address));
 
 const fitCheckBodySchema = {
   body: {

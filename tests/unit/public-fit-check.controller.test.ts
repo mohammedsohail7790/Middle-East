@@ -20,6 +20,7 @@ beforeEach(async () => {
   send.mockResolvedValue({ id: 'x' });
   process.env.RESEND_API_KEY = 'test-key';
   process.env.CONSULT_LEAD_EMAIL = 'leads@example.com';
+  delete process.env.FIT_CHECK_LEAD_EMAILS;
   const { createPublicFitCheckRouter } = await import('../../apps/gateway/src/services/leads/public-fit-check.controller.js');
   const app = express();
   app.use(express.json());
@@ -47,7 +48,7 @@ describe('POST /public/fit-check', () => {
     expect(res.status).toBe(200);
     expect(send).toHaveBeenCalledTimes(1);
     const mail = send.mock.calls[0][0];
-    expect(mail.to).toBe('leads@example.com');
+    expect(mail.to).toEqual(['leads@example.com']);
     expect(mail.replyTo).toBe('jordan@example.com');
     expect(mail.subject).toBe('New Fit Check — GREEN — Smith & Co');
     expect(mail.text).toContain('GREEN: a good fit');
@@ -103,5 +104,25 @@ describe('POST /public/fit-check', () => {
     for (let i = 0; i < 5; i++) expect((await post(valid)).status).toBe(200);
     expect((await post(valid)).status).toBe(429);
     expect(send).toHaveBeenCalledTimes(5);
+  });
+
+  it('sends the request to every address in FIT_CHECK_LEAD_EMAILS, so Hk and the owner both receive it, and skips anything that is not an address', async () => {
+    process.env.FIT_CHECK_LEAD_EMAILS = 'hk@halla.test, owner@halla.test, not-an-address';
+    vi.resetModules();
+    const { createPublicFitCheckRouter } = await import('../../apps/gateway/src/services/leads/public-fit-check.controller.js');
+    const app = express();
+    app.use(express.json());
+    app.use('/fit-check', createPublicFitCheckRouter());
+    const second = await new Promise<Server>((resolve) => {
+      const srv = app.listen(0, '127.0.0.1', () => resolve(srv));
+    });
+    try {
+      const url = `http://127.0.0.1:${(second.address() as AddressInfo).port}/fit-check`;
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(valid) });
+      expect(res.status).toBe(200);
+      expect(send.mock.calls[0][0].to).toEqual(['hk@halla.test', 'owner@halla.test']);
+    } finally {
+      await new Promise((resolve) => second.close(resolve));
+    }
   });
 });
