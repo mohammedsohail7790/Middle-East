@@ -41,6 +41,8 @@ const PUBLIC_POST_ROUTES = new Set([
   '/public/consult-request',
   // The short "fit check" form on the same site: same trust model, a prospect with no account.
   '/public/fit-check',
+  // The paid audit: Form 2 and the payment page open from a private signed link we email, not a login.
+  '/public/audit',
   // Klaros asks Halla to create a business's receptionist. Server-to-server: it carries no tenant JWT and authenticates itself
   // with the platform secret in the route (404 unless KLAROS_PROVISIONING_SECRET is set).
   '/platform/klaros/provision',

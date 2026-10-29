@@ -12,7 +12,7 @@
 // Industries/Pricing/Resources). page-consultancy is the only page in the
 // consultancy section; every other page belongs to the receptionist section.
 function sectionForPage(page) {
-  const consultancyPages = ['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check'];
+  const consultancyPages = ['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid'];
   const intelligencePages = ['intelligence'];
   if (consultancyPages.includes(page)) return 'consultancy';
   if (intelligencePages.includes(page)) return 'intelligence';
@@ -77,7 +77,7 @@ function scrollToIntelSection(anchorId) {
 
 // ============ ROUTING + DEEP LINKS ============
 const DEFAULT_PAGE = 'consultancy';
-const CONSULTANCY_PAGES = new Set(['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check']);
+const CONSULTANCY_PAGES = new Set(['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid']);
 // The site is light-themed everywhere now, so no page runs the starfield
 // backdrop or glassmorphism card treatment — both were built for a dark
 // background (bright stars, translucent glass over near-black) and don't
@@ -450,6 +450,7 @@ function hallaInit() {
   initBrowserFrameTilt();
   initConsultForm();
   initFitCheckForm();
+  initAuditPages();
 
   startHeroLiveFeed('consult-activity-feed-consultancy', [
     { icon: 'user-check', en: 'New lead auto-qualified &amp; synced to CRM', ar: 'عميل محتمل جديد مؤهّل تلقائياً ومتزامن مع نظام العملاء', timeEn: 'Just now', timeAr: 'الآن' },
@@ -619,6 +620,81 @@ function initFitCheckForm() {
       .catch((err) => { say(err.message || 'Something went wrong. Please email hello@hallaai.com directly.', 'var(--red)'); })
       .finally(() => { btn.innerHTML = btnDefaultText; btn.disabled = false; });
   });
+}
+
+// ============ PAID AUDIT: Form 2, payment page ============
+// Both pages open from a private signed link we email (?t=...). Nothing is stored on our side; answers reach us by email and payment is taken by Stripe.
+function initAuditPages() {
+  const API = 'https://gateway.hallaai.com/api/v1/public/audit';
+  const token = new URLSearchParams(window.location.search).get('t') || '';
+  const checkLink = () => token ? fetch(API + '/link?t=' + encodeURIComponent(token)).then((r) => r.json().catch(() => ({ valid: false }))) : Promise.resolve({ valid: false });
+  const bad = (d) => d && d.expired ? 'This link has expired. Please email hello@hallaai.com and we will help.' : 'This link is not valid. Please open the whole link from our email, or write to hello@hallaai.com.';
+
+  const form = document.getElementById('auditForm');
+  if (form) {
+    const note = document.getElementById('auditLinkNote');
+    const btn = document.getElementById('auditSubmitBtn');
+    const status = form.querySelector('.audit-status');
+    const say = (t, c) => { status.style.color = c || ''; status.textContent = t; };
+    const key = 'halla-audit-' + token.slice(-24);
+    const fields = () => Array.from(form.querySelectorAll('input[name], textarea[name], select[name]'));
+    const reveal = (id, n) => { const blocks = form.querySelectorAll('[data-block="' + id + '"]'); blocks.forEach((b, i) => { if (i < n) b.style.display = ''; }); const add = form.querySelector('[data-add="' + id + '"]'); if (add && n >= blocks.length) add.style.display = 'none'; };
+    const shown = (id) => Array.from(form.querySelectorAll('[data-block="' + id + '"]')).filter((b) => b.style.display !== 'none').length;
+
+    form.querySelectorAll('[data-add]').forEach((add) => add.addEventListener('click', () => { const id = add.getAttribute('data-add'); reveal(id, shown(id) + 1); }));
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || '{}');
+      fields().forEach((el) => { if (saved[el.name]) el.value = saved[el.name]; });
+      form.querySelectorAll('[data-add]').forEach((add) => { const id = add.getAttribute('data-add'); let n = 1; form.querySelectorAll('[data-block="' + id + '"]').forEach((b, i) => { if (i > 0 && Array.from(b.querySelectorAll('[name]')).some((el) => el.value)) n = i + 1; }); reveal(id, n); });
+    } catch (e) { /* no saved answers */ }
+    form.addEventListener('input', () => { try { const o = {}; fields().forEach((el) => { if (el.value) o[el.name] = el.value; }); localStorage.setItem(key, JSON.stringify(o)); } catch (e) { /* storage full or blocked */ } });
+
+    let valid = false;
+    btn.disabled = true;
+    checkLink().then((d) => {
+      valid = !!(d && d.valid && d.kind === 'form2');
+      if (valid) { note.textContent = 'Prepared for ' + d.company + '. This link is valid until ' + new Date(d.expiresAt).toLocaleDateString() + '.'; btn.disabled = false; }
+      else { note.style.color = 'var(--red)'; note.textContent = bad(d); }
+    }).catch(() => { note.style.color = 'var(--red)'; note.textContent = 'We could not check your link. Please try again.'; });
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const answers = {};
+      fields().forEach((el) => { const v = el.value.trim(); if (v) answers[el.name] = v; });
+      if (!answers.p1_name || !answers.p1_steps) { say('Please describe at least the first process: what it is called and the steps.', 'var(--red)'); return; }
+      btn.disabled = true; btn.textContent = 'Sending...'; say('');
+      fetch(API + '/form2', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, answers }) })
+        .then(async (res) => { if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || 'Something went wrong. Please email hello@hallaai.com directly.'); }
+          try { localStorage.removeItem(key); } catch (e2) { /* ignore */ }
+          form.querySelectorAll('input[name], textarea[name], select[name]').forEach((el) => { el.value = ''; });
+          say('Thank you. We have your answers. We will study them and email you when your audit is ready.', 'var(--green, #2ecc71)'); })
+        .catch((err) => { say(err.message || 'Something went wrong. Please email hello@hallaai.com directly.', 'var(--red)'); })
+        .finally(() => { btn.textContent = 'Send my answers →'; btn.disabled = !valid; });
+    });
+  }
+
+  const info = document.getElementById('auditPayInfo');
+  const payBtn = document.getElementById('auditPayBtn');
+  if (info && payBtn) {
+    const status = document.querySelector('.audit-pay-status');
+    checkLink().then((d) => {
+      if (!(d && d.valid && d.kind === 'pay')) { info.style.color = 'var(--red)'; info.textContent = bad(d); return; }
+      const until = new Date(d.expiresAt).toLocaleDateString();
+      if (!d.priceAvailable) { info.textContent = d.company + ': your audit is ready. We will send you an invoice by email.'; return; }
+      info.innerHTML = '';
+      const a = document.createElement('div'); a.textContent = d.company; a.style.fontWeight = '700';
+      const b = document.createElement('div'); b.textContent = 'Opportunity Audit: ' + d.priceText; b.style.fontSize = '1.4rem'; b.style.margin = '8px 0';
+      const c = document.createElement('div'); c.textContent = 'Please pay by ' + until + ' to receive your audit. After that this order is closed.'; c.style.fontSize = '0.9rem';
+      info.append(a, b, c);
+      payBtn.style.display = '';
+    }).catch(() => { info.textContent = 'We could not check your link. Please try again.'; });
+    payBtn.addEventListener('click', () => {
+      payBtn.disabled = true; status.textContent = '';
+      fetch(API + '/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) })
+        .then(async (res) => { const data = await res.json().catch(() => ({})); if (!res.ok || !data.url) throw new Error(data.error || 'We could not start the payment. Please write to hello@hallaai.com.'); window.location.href = data.url; })
+        .catch((err) => { status.style.color = 'var(--red)'; status.textContent = err.message; payBtn.disabled = false; });
+    });
+  }
 }
 
 // ============ HERO NEURAL — handled by halla_neural.js (Three.js) ============

@@ -24,6 +24,7 @@ process.on('unhandledRejection', (reason) => {
 import { createServer } from 'http';
 import express from 'express';
 import { handleStripeBillingWebhook } from './services/billing/stripe-webhook.js';
+import { handleAuditStripeWebhook } from './services/audit/public-audit.controller.js';
 import { handleWhatsAppWebhook, verifyWhatsAppWebhook } from './services/whatsapp/whatsapp.controller.js';
 import cors from 'cors';
 
@@ -130,6 +131,10 @@ app.use(MiddlewareFactory.requestId());
 // must be mounted before the global JSON parser below.
 app.post('/api/v1/billing/webhook', express.raw({ type: 'application/json' }), (req, res) => {
     void handleStripeBillingWebhook(req, res);
+});
+// Stripe tells us a client paid for the Opportunity Audit (its own signing secret; the subscription webhook above is untouched).
+app.post('/api/v1/public/audit/stripe-webhook', express.raw({ type: 'application/json' }), (req, res) => {
+    void handleAuditStripeWebhook(req, res);
 });
 
 // WhatsApp (Meta) webhook: HMAC is computed over the raw bytes, so it also bypasses the JSON parser. Authenticated by signature.

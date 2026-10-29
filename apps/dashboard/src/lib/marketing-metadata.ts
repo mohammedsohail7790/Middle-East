@@ -24,5 +24,9 @@ export function marketingMetadata(pageId: string, path: string): Metadata {
     const description = "Answer a few quick questions about your company and we will reply by email. No account, no password, no obligation.";
     return { title: { absolute: title }, description, alternates: { canonical: path.replace(/\/$/, "") || "/" } };
   }
+  if (pageId === "audit" || pageId === "audit-pay" || pageId === "audit-paid") {
+    // Private pages that open from an emailed link: never in search results.
+    return { title: { absolute: "Opportunity Audit | Halla AI Consultancy" }, robots: { index: false, follow: false } };
+  }
   return { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION };
 }
