@@ -4,7 +4,7 @@ import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
 import { escapeHtml, renderBrandedEmail, renderDetailList, stripToPlainText } from '../automation/email-template.js';
 import { Resend } from 'resend';
-import { assessFit, BUDGET_ANSWERS, COMPANY_SIZES, DECIDER_ANSWERS, HOURS_ANSWERS, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
+import { assessFit, BUDGET_ANSWERS, COMPANY_SIZES, COUNTRIES, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, QUOTE_CURRENCY, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
 
 // Public, unauthenticated endpoint: throttle per IP, like the diagnostic-call form.
 const fitCheckRateLimit = MiddlewareFactory.createRateLimit({
@@ -26,8 +26,11 @@ const fitCheckBodySchema = {
     company: { type: 'string', required: true, minLength: 1, maxLength: 200 },
     website: { type: 'string', required: false, maxLength: 300 },
     size: { type: 'string', required: true, enum: [...COMPANY_SIZES], maxLength: 10 },
+    office: { type: 'string', required: false, enum: [...OFFICE_SIZES], maxLength: 10 },
+    departments: { type: 'string', required: false, maxLength: 400 },
     industry: { type: 'string', required: true, minLength: 1, maxLength: 100 },
-    location: { type: 'string', required: true, minLength: 1, maxLength: 200 },
+    country: { type: 'string', required: true, enum: [...COUNTRIES], maxLength: 40 },
+    city: { type: 'string', required: false, maxLength: 100 },
     years: { type: 'string', required: false, maxLength: 30 },
     accounting: { type: 'string', required: true, minLength: 1, maxLength: 120 },
     erp: { type: 'string', required: true, minLength: 1, maxLength: 120 },
@@ -44,13 +47,13 @@ const fitCheckBodySchema = {
     consent: { type: 'boolean', required: true },
   },
   allowOnlyBody: [
-    'name', 'email', 'phone', 'role', 'decider', 'company', 'website', 'size', 'industry', 'location', 'years', 'accounting', 'erp', 'crm',
+    'name', 'email', 'phone', 'role', 'decider', 'company', 'website', 'size', 'office', 'departments', 'industry', 'country', 'city', 'years', 'accounting', 'erp', 'crm',
     'channels', 'tools', 'pain', 'problem', 'hours', 'tried', 'start', 'budget', 'heard', 'consent',
   ],
 };
 
 type FitBody = FitInput & {
-  name: string; email: string; phone?: string; role: string; company: string; website?: string; industry: string; location: string; years?: string;
+  name: string; email: string; phone?: string; role: string; company: string; website?: string; industry: string; country: (typeof COUNTRIES)[number]; city?: string; years?: string;
   accounting: string; crm?: string; channels?: string; tools?: string; tried?: string; heard?: string; consent: boolean;
 };
 
@@ -58,10 +61,10 @@ const ROLE_LABEL: Record<string, string> = { owner: 'Owner or founder', manager:
 const DECIDER_LABEL: Record<string, string> = { yes: 'Yes', shared: 'Decides with others', no: 'No, gathering information' };
 const HOURS_LABEL: Record<string, string> = { 'under-5': 'Under 5', '5-20': '5 to 20', '20-50': '20 to 50', 'over-50': 'Over 50', unsure: 'Not sure' };
 const START_LABEL: Record<string, string> = { 'this-month': 'This month', '1-3-months': 'In 1 to 3 months', later: 'Later', exploring: 'Just exploring' };
-const BUDGET_LABEL: Record<string, string> = { 'under-2500': 'Under 2,500 USD', '2500-10000': '2,500 to 10,000 USD', '10000-30000': '10,000 to 30,000 USD', 'over-30000': 'Over 30,000 USD', unsure: 'Not sure yet' };
+const BUDGET_LABEL: Record<string, string> = { 'under-5000': 'Under 5,000 USD', '5000-10000': '5,000 to 10,000 USD', '10000-35000': '10,000 to 35,000 USD', 'over-35000': 'Over 35,000 USD', unsure: 'Not sure yet' };
 
 /**
- * Public (unauthenticated) endpoint for "Form 1", the short fit check on the Consultancy site. No account exists yet; the only side effect is an email to us whose first lines
+ * Public (unauthenticated) endpoint for "Form 1", the short fit check on the Consultancy site (the second form is the paid audit questionnaire). No account exists yet; the only side effect is an email to us whose first lines
  * say whether the company looks like a fit (see fit-check.ts). Nothing is sent to the prospect, and the verdict never blocks a request.
  */
 export function createPublicFitCheckRouter(): Router {
@@ -94,9 +97,11 @@ export function createPublicFitCheckRouter(): Router {
         { label: 'Decides?', value: DECIDER_LABEL[b.decider] ?? b.decider },
         { label: 'Company', value: b.company },
         { label: 'Website', value: b.website || '—' },
-        { label: 'People', value: b.size },
+        { label: 'People', value: b.office ? `${b.size} (${b.office} in the office or deciding)` : b.size },
+        { label: 'Departments', value: b.departments || '—' },
         { label: 'Industry', value: b.industry },
-        { label: 'Location', value: b.location },
+        { label: 'Country', value: `${b.country}${b.city ? `, ${b.city}` : ''}` },
+        { label: 'Quote in', value: QUOTE_CURRENCY[b.country] },
         { label: 'Years operating', value: b.years || '—' },
         { label: 'Accounting', value: b.accounting },
         { label: 'ERP', value: b.erp },
@@ -113,7 +118,7 @@ export function createPublicFitCheckRouter(): Router {
       ];
 
       const reasonsHtml = `<ul style="margin: 8px 0 0; padding-left: 18px;">${fit.reasons.map((r) => `<li>${escapeHtml(r)}</li>`).join('')}</ul>`;
-      const verdictHtml = `<p style="margin: 0 0 4px; font-size: 16px; font-weight: 700;">${escapeHtml(VERDICT_LABEL[fit.verdict])}</p>${fit.outOfScope ? '<p style="margin: 0 0 4px;"><b>Out of scope:</b> more than 50 people.</p>' : ''}${reasonsHtml}`;
+      const verdictHtml = `<p style="margin: 0 0 4px; font-size: 16px; font-weight: 700;">${escapeHtml(VERDICT_LABEL[fit.verdict])}</p>${reasonsHtml}`;
 
       const html = renderBrandedEmail({
         eyebrow: `Fit check: ${fit.verdict.toUpperCase()}`,
@@ -128,7 +133,7 @@ export function createPublicFitCheckRouter(): Router {
           from: `Halla AI <${process.env.EMAIL_FROM || 'noreply@hallaai.com'}>`,
           to: LEAD_NOTIFICATION_TO,
           replyTo: b.email,
-          subject: `New Fit Check — ${fit.verdict.toUpperCase()}${fit.outOfScope ? ' (over 50 people)' : ''} — ${b.company}`,
+          subject: `New Fit Check — ${fit.verdict.toUpperCase()} — ${b.company}`,
           html,
           text: stripToPlainText(html),
         });

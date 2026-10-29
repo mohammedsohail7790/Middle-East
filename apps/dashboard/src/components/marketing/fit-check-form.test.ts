@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { BUDGET_ANSWERS, COMPANY_SIZES, DECIDER_ANSWERS, HOURS_ANSWERS, START_ANSWERS } from "../../../../gateway/src/services/leads/fit-check";
+import { BUDGET_ANSWERS, COMPANY_SIZES, COUNTRIES, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, START_ANSWERS } from "../../../../gateway/src/services/leads/fit-check";
 
 /**
  * Form 1 (the fit check) is plain browser JavaScript in public/halla_main.js. This loads the real form markup and the real initFitCheckForm() into jsdom, and checks the
@@ -42,7 +42,7 @@ const send = () => document.getElementById("fitCheckBtn")!.dispatchEvent(new Eve
 
 function fillRequired() {
   set("name", "Jordan Smith"); set("email", "jordan@example.com"); set("role", "owner"); set("decider", "yes"); set("company", "Smith & Co");
-  set("size", "16-30"); set("industry", "Trading or wholesale"); set("location", "Dubai, UAE"); set("accounting", "QuickBooks"); set("erp", "Odoo");
+  set("size", "16-50"); set("industry", "Trading or wholesale"); set("country", "United Arab Emirates"); set("accounting", "QuickBooks"); set("erp", "Odoo");
   tick("pain", "Quotes and invoices"); set("problem", "Invoices are typed by hand from emails."); set("start", "1-3-months");
   el("consent").checked = true;
 }
@@ -60,6 +60,8 @@ describe("Fit check form", () => {
   it("offers exactly the answers the gateway accepts for size, decision, hours, timing and budget", () => {
     const values = (name: string) => Array.from((el(name) as HTMLSelectElement).options).map((o) => o.value).filter(Boolean);
     expect(values("size")).toEqual([...COMPANY_SIZES]);
+    expect(values("office")).toEqual([...OFFICE_SIZES]);
+    expect(values("country")).toEqual([...COUNTRIES]);
     expect(values("decider")).toEqual([...DECIDER_ANSWERS]);
     expect(values("hours")).toEqual([...HOURS_ANSWERS]);
     expect(values("start")).toEqual([...START_ANSWERS]);
@@ -72,7 +74,7 @@ describe("Fit check form", () => {
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(fetchMock.mock.calls[0][0]).toBe("https://gateway.hallaai.com/api/v1/public/fit-check");
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
-    expect(body).toMatchObject({ name: "Jordan Smith", email: "jordan@example.com", size: "16-30", pain: "Quotes and invoices", start: "1-3-months", consent: true });
+    expect(body).toMatchObject({ name: "Jordan Smith", email: "jordan@example.com", size: "16-50", pain: "Quotes and invoices", start: "1-3-months", consent: true });
     expect(body).not.toHaveProperty("phone");
     expect(body).not.toHaveProperty("budget");
   });
@@ -113,15 +115,19 @@ describe("Fit check form", () => {
     expect(pain.length).toBeLessThanOrEqual(300); // the gateway's limit for this answer
   });
 
-  it("shows the friendly note, and still accepts the form, for a company over 50 people", async () => {
-    set("size", "51+");
-    el("size").dispatchEvent(new Event("change", { bubbles: true }));
-    expect((document.getElementById("fitSizeNote") as HTMLElement).style.display).toBe("block");
+  it("accepts a company of any size, with its office staff, departments and country, and shows no warning about size", async () => {
+    expect(document.getElementById("fitSizeNote")).toBeNull();
     fillRequired();
-    set("size", "51+");
+    set("size", "150+");
+    set("office", "16-50");
+    tick("departments", "Warehouse or logistics");
+    tick("departments", "Finance and accounts");
+    set("country", "Saudi Arabia");
+    set("city", "Riyadh");
     send();
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body).size).toBe("51+");
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body).toMatchObject({ size: "150+", office: "16-50", country: "Saudi Arabia", city: "Riyadh", departments: "Finance and accounts, Warehouse or logistics" });
   });
 
   it("thanks the visitor and resets the form, keeping every dropdown on a real first choice", async () => {

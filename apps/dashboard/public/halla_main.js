@@ -560,20 +560,15 @@ function initFitCheckForm() {
   if (!btn || !form) return;
 
   const statusEl = form.querySelector('.fit-form-status');
-  const sizeNote = document.getElementById('fitSizeNote');
-  const sizeSelect = form.querySelector('select[name="size"]');
   const btnDefaultText = btn.innerHTML;
   const GATEWAY = 'https://gateway.hallaai.com/api/v1/public/fit-check';
-  const REQUIRED = ['name', 'email', 'role', 'decider', 'company', 'size', 'industry', 'location', 'accounting', 'erp', 'problem', 'start'];
+  const REQUIRED = ['name', 'email', 'role', 'decider', 'company', 'size', 'industry', 'country', 'accounting', 'erp', 'problem', 'start'];
   const isAr = () => document.documentElement.lang === 'ar';
   const field = (name) => form.querySelector('[name="' + name + '"]');
   const box = (name) => form.querySelector('[data-q="' + name + '"]');
   const checked = (name) => Array.from(form.querySelectorAll('input[name="' + name + '"]:checked')).map((el) => el.value);
   const say = (text, color) => { statusEl.style.color = color || ''; statusEl.textContent = text; };
 
-  if (sizeSelect && sizeNote) {
-    sizeSelect.addEventListener('change', () => { sizeNote.style.display = sizeSelect.value === '51+' ? 'block' : 'none'; });
-  }
 
   btn.addEventListener('click', (e) => {
     e.preventDefault();
@@ -606,7 +601,7 @@ function initFitCheckForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: val('name'), email: val('email'), phone: val('phone'), role: val('role'), decider: val('decider'), company: val('company'), website: val('website'),
-        size: val('size'), industry: val('industry'), location: val('location'), years: val('years'), accounting: val('accounting'), erp: val('erp'), crm: val('crm'),
+        size: val('size'), office: val('office'), departments: list('departments'), industry: val('industry'), country: val('country'), city: val('city'), years: val('years'), accounting: val('accounting'), erp: val('erp'), crm: val('crm'),
         channels: list('channels'), tools: list('tools'), pain: list('pain'), problem: val('problem'), hours: val('hours'), tried: val('tried'),
         start: val('start'), budget: val('budget'), heard: val('heard'), consent: true,
       }),
@@ -620,7 +615,6 @@ function initFitCheckForm() {
         form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach((el) => { el.value = ''; });
         form.querySelectorAll('input[type="checkbox"]').forEach((el) => { el.checked = false; });
         form.querySelectorAll('select').forEach((el) => { el.selectedIndex = 0; });
-        if (sizeNote) sizeNote.style.display = 'none';
       })
       .catch((err) => { say(err.message || 'Something went wrong. Please email hello@hallaai.com directly.', 'var(--red)'); })
       .finally(() => { btn.innerHTML = btnDefaultText; btn.disabled = false; });

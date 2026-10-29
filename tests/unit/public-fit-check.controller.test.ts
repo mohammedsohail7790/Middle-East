@@ -35,9 +35,9 @@ afterEach(async () => {
 });
 
 const valid = {
-  name: 'Jordan Smith', email: 'jordan@example.com', role: 'owner', decider: 'yes', company: 'Smith & Co', size: '16-30', industry: 'Trading', location: 'Dubai, UAE',
+  name: 'Jordan Smith', email: 'jordan@example.com', role: 'owner', decider: 'yes', company: 'Smith & Co', size: '16-50', office: '6-15', departments: 'Sales, Finance and accounts', industry: 'Trading', country: 'United Arab Emirates', city: 'Dubai',
   accounting: 'QuickBooks', erp: 'Odoo', pain: 'Quotes and invoices', problem: 'Invoices are typed by hand from emails and it takes two days every month.',
-  hours: '20-50', start: '1-3-months', budget: '2500-10000', consent: true,
+  hours: '20-50', start: '1-3-months', budget: '5000-10000', consent: true,
 };
 const post = (body: unknown) => fetch(base, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
@@ -54,14 +54,18 @@ describe('POST /public/fit-check', () => {
     expect(mail.text.indexOf('GREEN')).toBeLessThan(mail.text.indexOf('Jordan Smith'));
   });
 
-  it('flags a company over 50 people in the subject but still delivers it', async () => {
-    const res = await post({ ...valid, size: '51+' });
+  it('accepts a company of any size, and tells us the currency to quote in for its country', async () => {
+    const res = await post({ ...valid, size: '150+', country: 'Saudi Arabia', city: 'Riyadh' });
     expect(res.status).toBe(200);
-    expect(send.mock.calls[0][0].subject).toContain('(over 50 people)');
+    const mail = send.mock.calls[0][0];
+    expect(mail.subject).not.toContain('over 50');
+    expect(mail.text).toContain('Saudi Arabia, Riyadh');
+    expect(mail.text).toContain('SAR');
+    expect(mail.text).toContain('Sales, Finance and accounts');
   });
 
   it('needs only the required answers: phone, website, CRM, hours and budget are optional', async () => {
-    const { hours: _h, budget: _b, ...minimal } = valid;
+    const { hours: _h, budget: _b, office: _o, departments: _d, city: _c, ...minimal } = valid;
     expect((await post(minimal)).status).toBe(200);
     expect(send.mock.calls[0][0].subject).toContain('AMBER'); // budget and hours unknown
   });
@@ -71,6 +75,12 @@ describe('POST /public/fit-check', () => {
     expect((await post({ ...valid, surprise: 'x' })).status).toBe(400);
     expect((await post({ ...valid, size: '1000' })).status).toBe(400);
     expect((await post({ ...valid, email: 'nope' })).status).toBe(400);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('refuses a country we do not list and a budget band that no longer exists', async () => {
+    expect((await post({ ...valid, country: 'Atlantis' })).status).toBe(400);
+    expect((await post({ ...valid, budget: 'under-2500' })).status).toBe(400);
     expect(send).not.toHaveBeenCalled();
   });
 

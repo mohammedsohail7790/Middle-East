@@ -44,4 +44,18 @@ describe("marketingMetadata", () => {
     expect(String(m.description)).toContain("answers every call 24/7");
     expect(m.alternates).toBeUndefined();
   });
+
+  it("gives the fit-check page its own title, description and canonical address", () => {
+    const m = marketingMetadata("fit-check", "/fit-check");
+    expect(m.title).toEqual({ absolute: "Is Halla AI a fit for your business? | Halla AI Consultancy" });
+    expect(String(m.description)).toContain("quick questions about your company");
+    expect(m.alternates?.canonical).toBe("/fit-check");
+  });
+
+  it("sends the fit-check form's real questions in the first HTML", () => {
+    const html = extractPageHtml(body, "fit-check");
+    expect(html).toMatch(/^<div id="page-fit-check" class="page active"/);
+    expect(html).toContain("How many people work in the company?");
+    expect(html).not.toContain('id="page-consult-signup"');
+  });
 });

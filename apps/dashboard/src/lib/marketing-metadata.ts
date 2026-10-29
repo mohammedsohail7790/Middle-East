@@ -19,5 +19,10 @@ export function marketingMetadata(pageId: string, path: string): Metadata {
       twitter: { card: "summary_large_image", title: CONSULTANCY_TITLE, description: CONSULTANCY_DESCRIPTION, images: ["/logo-consultancy.jpg"] },
     };
   }
+  if (pageId === "fit-check") {
+    const title = "Is Halla AI a fit for your business? | Halla AI Consultancy";
+    const description = "Answer a few quick questions about your company and we will reply by email. No account, no password, no obligation.";
+    return { title: { absolute: title }, description, alternates: { canonical: path.replace(/\/$/, "") || "/" } };
+  }
   return { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION };
 }
