@@ -220,3 +220,6 @@ html[dir="rtl"] #page-consultancy .cx-eyebrow,html[dir="rtl"] #page-consultancy 
 #page-consultancy .cx-phead,#page-consultancy .cx-prow{grid-template-columns:1fr 1.7fr .9fr 1.4fr}
 #page-consultancy .cx-pprice strong{font-size:1.7rem}
 @media (max-width:900px){#page-consultancy .cx-prow{grid-template-columns:minmax(0,1fr)}}
+
+/* The translucent nav now sits over the dark consultancy hero (blends to ~#cbcbcc); the grey "AI" in the logo needs a darker tone to keep 4.5:1. */
+html body .brand-word span{color:#424245}
