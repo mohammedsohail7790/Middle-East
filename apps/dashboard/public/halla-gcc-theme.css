@@ -177,7 +177,7 @@ html body #marketing-spa-root .pricing-card.popular .pricing-price,html body #ma
 #page-consultancy .cx-steps{border-top:1px solid rgba(233,227,211,.24)}
 #page-consultancy .cx-step{display:grid;grid-template-columns:96px minmax(0,1.5fr) minmax(0,.75fr);gap:28px;padding:36px 0;border-bottom:1px solid rgba(233,227,211,.24)}
 #page-consultancy .cx-step p{margin:0;color:#CFC9BB;max-width:580px;line-height:1.7;font-size:1.05rem}
-#page-consultancy .cx-meta span{display:block;color:#B9B4A8;font-size:.92rem}
+#page-consultancy .cx-meta>span{display:block;color:#B9B4A8;font-size:.92rem}
 #page-consultancy .cx-meta strong{display:block;margin-top:6px;font-size:1.2rem;color:#E4CF9B}
 #page-consultancy .cx-ptable{margin-top:48px;border-top:2px solid #121417}
 #page-consultancy .cx-phead,#page-consultancy .cx-prow{display:grid;grid-template-columns:1.1fr 2fr 1fr 1.1fr;gap:28px;padding:22px 0;border-bottom:1px solid rgba(18,20,23,.16);align-items:start}
@@ -185,7 +185,7 @@ html body #marketing-spa-root .pricing-card.popular .pricing-price,html body #ma
 #page-consultancy .cx-ptier{font-weight:700;font-size:1.15rem}
 #page-consultancy .cx-pscope,#page-consultancy .cx-ptime{color:#4B4B50;line-height:1.6}
 #page-consultancy .cx-pprice strong{display:block;font-family:var(--font-display);font-size:1.9rem;line-height:1.1;color:#121417}
-#page-consultancy .cx-pprice span{display:block;color:#636368;font-size:.88rem;margin-top:4px}
+#page-consultancy .cx-pprice>span{display:block;color:#636368;font-size:.88rem;margin-top:4px}
 #page-consultancy .cx-foot{color:#4B4B50;font-size:.92rem;line-height:1.7;margin:28px 0 0;max-width:760px}
 #page-consultancy .cx-chips{list-style:none;margin:28px 0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
 #page-consultancy .cx-chips li{border:1px solid rgba(233,227,211,.32);padding:9px 14px;border-radius:2px;font-size:.98rem;color:#E9E3D3}
