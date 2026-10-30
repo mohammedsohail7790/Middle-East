@@ -41,8 +41,9 @@ const PUBLIC_POST_ROUTES = new Set([
   '/public/consult-request',
   // The short "fit check" form on the same site: same trust model, a prospect with no account.
   '/public/fit-check',
-  // The paid audit: Form 2 and the payment page open from a private signed link we email, not a login.
-  '/public/audit',
+  // The paid audit: Form 2 and the payment page open from a private signed link we email, not a login. (The Stripe webhook for it is mounted before this layer, in index.ts.)
+  '/public/audit/form2',
+  '/public/audit/pay',
   // Klaros asks Halla to create a business's receptionist. Server-to-server: it carries no tenant JWT and authenticates itself
   // with the platform secret in the route (404 unless KLAROS_PROVISIONING_SECRET is set).
   '/platform/klaros/provision',
@@ -53,6 +54,8 @@ const PUBLIC_POST_ROUTES = new Set([
 ]);
 
 const PUBLIC_GET_ROUTES = new Set([
+  // Checks a private audit link and says what it is for.
+  '/public/audit/link',
   '/calendar/google/callback',
   '/calendar/outlook/callback',
   '/calendar/calendly/callback',
