@@ -56,7 +56,7 @@ export function renderAuditPages(): string {
       <div id="auditPayInfo" style="font-size:1rem">Checking your link…</div>
       <button type="button" class="btn btn-primary btn-lg" style="width:100%;font-size:1rem;margin-top:20px;display:none" id="auditPayBtn">Pay securely →</button>
       <div class="audit-pay-status" role="status" aria-live="polite" style="font-size:0.9rem;margin-top:12px"></div>
-      <p style="font-size:0.78rem;color:var(--gray-400);margin-top:16px">Card payment is handled by Stripe. The audit fee is separate from any build.</p>
+      <p style="font-size:0.78rem;color:var(--gray-400);margin-top:16px">Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.</p>
     </div>
   </div></section>
 </div>`;
