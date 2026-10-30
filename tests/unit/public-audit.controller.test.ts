@@ -80,8 +80,11 @@ describe('payment', () => {
     expect(args.line_items[0].price_data).toMatchObject({ currency: 'aed', unit_amount: 500000 });
     expect(args.metadata.kind).toBe('audit');
   });
-  it('says so when the currency has no price yet', async () => {
-    expect((await post('/pay', { token: pay('SAR') })).status).toBe(409);
+  it('charges a three-decimal currency in thousandths, and refuses an unknown currency', async () => {
+    await post('/pay', { token: pay('KWD') });
+    expect(create.mock.calls[0][0].line_items[0].price_data).toMatchObject({ currency: 'kwd', unit_amount: 425000 });
+    create.mockClear();
+    expect((await post('/pay', { token: pay('USD') })).status).toBe(409);
     expect(create).not.toHaveBeenCalled();
   });
   it('emails us when Stripe reports an audit payment, and ignores other payments', async () => {

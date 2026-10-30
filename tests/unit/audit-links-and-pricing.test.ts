@@ -28,12 +28,13 @@ describe('signed links', () => {
 });
 
 describe('audit pricing', () => {
-  it('defaults to 5,000 AED only', () => {
-    expect(auditPrices({} as any)).toEqual({ AED: 5000 });
+  it('defaults to Hk\'s prices in every currency', () => {
+    expect(auditPrices({} as any)).toEqual({ AED: 5000, SAR: 5100, QAR: 5000, OMR: 525, KWD: 425, BHD: 515 });
   });
   it('adds prices from the setting and ignores bad ones', () => {
-    expect(auditPrices({ AUDIT_PRICES_JSON: '{"SAR":5100,"OMR":-1,"XXX":5}' } as any)).toEqual({ AED: 5000, SAR: 5100 });
-    expect(auditPrices({ AUDIT_PRICES_JSON: 'not json' } as any)).toEqual({ AED: 5000 });
+    expect(auditPrices({ AUDIT_PRICES_JSON: '{"SAR":5100,"OMR":-1,"XXX":5}' } as any)).toEqual({ AED: 5000, SAR: 5100, QAR: 5000, OMR: 525, KWD: 425, BHD: 515 });
+    expect(auditPrices({ AUDIT_PRICES_JSON: 'not json' } as any).AED).toBe(5000);
+    expect(auditPrices({ AUDIT_PRICES_JSON: '{"SAR":5200}' } as any).SAR).toBe(5200);
   });
   it('converts to minor units, with a trailing zero for three-decimal currencies', () => {
     expect(minorUnits('AED', 5000)).toBe(500000);
