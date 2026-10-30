@@ -66,6 +66,15 @@ function scrollToConsultSection(anchorId) {
   }, 60);
 }
 
+// Scroll to a section of the AI Receptionist page (page-home).
+function scrollToHomeSection(anchorId) {
+  go('home', { noScroll: true });
+  setTimeout(() => {
+    const el = document.getElementById(anchorId);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 60);
+}
+
 // Scroll to an anchor within the AI Business Automation page (stays on hallaai).
 function scrollToIntelSection(anchorId) {
   go('intelligence', { noScroll: true });
