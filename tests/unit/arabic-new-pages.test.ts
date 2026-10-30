@@ -17,6 +17,9 @@ describe('Arabic on the new pages', () => {
   it('the Business Automation page has Arabic for all of its text', () => {
     expect(untranslated(page('intelligence', '<div id="page-svc-operations"'))).toEqual([]);
   });
+  it('the AI Receptionist page has Arabic for all of its text', () => {
+    expect(untranslated(page('home', '<div id="page-features"'))).toEqual([]);
+  });
   it('Form 1 has Arabic for all of its text', () => {
     expect(untranslated(page('fit-check', '<!-- AUDIT PAGES:'))).toEqual([]);
   });

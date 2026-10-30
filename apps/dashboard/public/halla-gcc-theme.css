@@ -133,93 +133,98 @@ html body #marketing-spa-root .pricing-card.popular .pricing-price,html body #ma
 
 
 /* =====================================================================
-   HallaAI Consultancy landing page — dark editorial (scoped to :is(#page-consultancy,#page-intelligence))
+   HallaAI Consultancy landing page — dark editorial (scoped to :is(#page-consultancy,#page-intelligence,#page-home))
    ===================================================================== */
-:is(#page-consultancy,#page-intelligence) .cx{padding:112px 0;position:relative}
-:is(#page-consultancy,#page-intelligence) .cx-dark{background:#121417;color:#E9E3D3}
-:is(#page-consultancy,#page-intelligence) .cx-light{background:#FAF9F6;color:#121417}
-:is(#page-consultancy,#page-intelligence) .cx-wrap{max-width:1180px;margin:0 auto;padding:0 28px}
-:is(#page-consultancy,#page-intelligence) .cx-hero{padding:128px 0 112px}
-:is(#page-consultancy,#page-intelligence) .cx-herogrid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:72px;align-items:end}
-:is(#page-consultancy,#page-intelligence) .cx-split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:72px;align-items:start}
-:is(#page-consultancy,#page-intelligence) .cx-eyebrow{font:600 .74rem/1.3 var(--font);letter-spacing:.18em;text-transform:uppercase;color:#C5A059;margin-bottom:28px}
-:is(#page-consultancy,#page-intelligence) .cx-ey-light{color:#85631F}
-:is(#page-consultancy,#page-intelligence) h1.cx-h1,:is(#page-consultancy,#page-intelligence) h2.cx-h1{font-family:var(--font-display);font-weight:600;font-size:clamp(2.9rem,1.5rem + 4.8vw,5.6rem);line-height:1.02;letter-spacing:-.02em;color:#F4EFE4;margin:0}
-:is(#page-consultancy,#page-intelligence) h2.cx-h1-sm{font-size:clamp(2.4rem,1.4rem + 3.6vw,4.4rem)}
-:is(#page-consultancy,#page-intelligence) h2.cx-h2{font-family:var(--font-display);font-weight:600;font-size:clamp(2.1rem,1.2rem + 2.8vw,3.6rem);line-height:1.08;letter-spacing:-.015em;max-width:900px;margin:0}
-:is(#page-consultancy,#page-intelligence) .cx-dark h2.cx-h2,:is(#page-consultancy,#page-intelligence) .cx-dark h3{color:#F4EFE4}
-:is(#page-consultancy,#page-intelligence) .cx-light h2.cx-h2,:is(#page-consultancy,#page-intelligence) .cx-light h3{color:#121417}
-:is(#page-consultancy,#page-intelligence) .cx-lead{font-size:1.25rem;line-height:1.65;color:#CFC9BB;max-width:640px;margin:28px 0 0}
-:is(#page-consultancy,#page-intelligence) .cx-triad{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:32px;font-family:var(--font-display);font-size:1.6rem;font-weight:600;color:#E4CF9B}
-:is(#page-consultancy,#page-intelligence) .cx-actions{display:flex;flex-wrap:wrap;align-items:center;gap:20px 32px;margin-top:40px}
-:is(#page-consultancy,#page-intelligence) .cx-link{color:#E4CF9B;border-bottom:1px solid currentColor;text-decoration:none;font-weight:600;padding-bottom:2px}
-:is(#page-consultancy,#page-intelligence) .cx-light .cx-link{color:#85631F}
-:is(#page-consultancy,#page-intelligence) .cx-ledger dl{margin:0;border-top:1px solid rgba(233,227,211,.28)}
-:is(#page-consultancy,#page-intelligence) .cx-ledger dl>div{padding:22px 0;border-bottom:1px solid rgba(233,227,211,.28)}
-:is(#page-consultancy,#page-intelligence) .cx-ledger dt{font:600 .72rem/1.3 var(--font);letter-spacing:.14em;text-transform:uppercase;color:#C5A059}
-:is(#page-consultancy,#page-intelligence) .cx-ledger dd{margin:8px 0 0;font-size:1.1rem;line-height:1.5;color:#E9E3D3}
-:is(#page-consultancy,#page-intelligence) .cx-rows,:is(#page-consultancy,#page-intelligence) .cx-steps{margin-top:56px}
-:is(#page-consultancy,#page-intelligence) .cx-rows{border-top:1px solid rgba(18,20,23,.16)}
-:is(#page-consultancy,#page-intelligence) .cx-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:24px;padding:36px 0;border-bottom:1px solid rgba(18,20,23,.16)}
-:is(#page-consultancy,#page-intelligence) .cx-num{font-family:var(--font-display);font-size:2.6rem;line-height:1;color:#85631F}
-:is(#page-consultancy,#page-intelligence) .cx-dark .cx-num{color:#C5A059}
-:is(#page-consultancy,#page-intelligence) .cx-row h3,:is(#page-consultancy,#page-intelligence) .cx-step h3{font-family:var(--font);font-size:1.5rem;font-weight:600;margin:0 0 10px;letter-spacing:0}
-:is(#page-consultancy,#page-intelligence) .cx-row p{margin:0;color:#4B4B50;max-width:660px;line-height:1.7;font-size:1.05rem}
-:is(#page-consultancy,#page-intelligence) .cx-closer{margin:48px 0 0;font-family:var(--font-display);font-size:2rem;font-weight:600;color:#121417;max-width:760px;line-height:1.2}
-:is(#page-consultancy,#page-intelligence) .cx-prose p{font-size:1.15rem;line-height:1.8;color:#CFC9BB;margin:0 0 20px}
-:is(#page-consultancy,#page-intelligence) .cx-links{display:flex;flex-wrap:wrap;gap:12px 28px}
-:is(#page-consultancy,#page-intelligence) .cx-links a{color:#E4CF9B;text-decoration:none;border-bottom:1px solid currentColor;font-weight:600}
-:is(#page-consultancy,#page-intelligence) .cx-objs{margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:0 72px}
-:is(#page-consultancy,#page-intelligence) .cx-obj{padding:32px 0;border-top:1px solid rgba(18,20,23,.16)}
-:is(#page-consultancy,#page-intelligence) .cx-q{font:600 .8rem/1.3 var(--font);letter-spacing:.12em;text-transform:uppercase;color:#636368}
-:is(#page-consultancy,#page-intelligence) .cx-a{font-family:var(--font-display);font-size:2.1rem;font-weight:600;line-height:1.1;margin:10px 0 12px;color:#121417}
-:is(#page-consultancy,#page-intelligence) .cx-obj p{margin:0;color:#4B4B50;line-height:1.7;font-size:1.05rem}
-:is(#page-consultancy,#page-intelligence) .cx-steps{border-top:1px solid rgba(233,227,211,.24)}
-:is(#page-consultancy,#page-intelligence) .cx-step{display:grid;grid-template-columns:96px minmax(0,1.5fr) minmax(0,.75fr);gap:28px;padding:36px 0;border-bottom:1px solid rgba(233,227,211,.24)}
-:is(#page-consultancy,#page-intelligence) .cx-step p{margin:0;color:#CFC9BB;max-width:580px;line-height:1.7;font-size:1.05rem}
-:is(#page-consultancy,#page-intelligence) .cx-meta>span{display:block;color:#B9B4A8;font-size:.92rem}
-:is(#page-consultancy,#page-intelligence) .cx-meta strong{display:block;margin-top:6px;font-size:1.2rem;color:#E4CF9B}
-:is(#page-consultancy,#page-intelligence) .cx-ptable{margin-top:48px;border-top:2px solid #121417}
-:is(#page-consultancy,#page-intelligence) .cx-phead,:is(#page-consultancy,#page-intelligence) .cx-prow{display:grid;grid-template-columns:1.1fr 2fr 1fr 1.1fr;gap:28px;padding:22px 0;border-bottom:1px solid rgba(18,20,23,.16);align-items:start}
-:is(#page-consultancy,#page-intelligence) .cx-phead{font:600 .72rem/1.3 var(--font);letter-spacing:.14em;text-transform:uppercase;color:#636368}
-:is(#page-consultancy,#page-intelligence) .cx-ptier{font-weight:700;font-size:1.15rem}
-:is(#page-consultancy,#page-intelligence) .cx-pscope,:is(#page-consultancy,#page-intelligence) .cx-ptime{color:#4B4B50;line-height:1.6}
-:is(#page-consultancy,#page-intelligence) .cx-pprice strong{display:block;font-family:var(--font-display);font-size:1.9rem;line-height:1.1;color:#121417}
-:is(#page-consultancy,#page-intelligence) .cx-pprice>span{display:block;color:#636368;font-size:.88rem;margin-top:4px}
-:is(#page-consultancy,#page-intelligence) .cx-foot{color:#4B4B50;font-size:.92rem;line-height:1.7;margin:28px 0 0;max-width:760px}
-:is(#page-consultancy,#page-intelligence) .cx-chips{list-style:none;margin:28px 0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
-:is(#page-consultancy,#page-intelligence) .cx-chips li{border:1px solid rgba(233,227,211,.32);padding:9px 14px;border-radius:2px;font-size:.98rem;color:#E9E3D3}
-:is(#page-consultancy,#page-intelligence) .cx-notfor{border-top:1px solid rgba(233,227,211,.28);padding-top:20px;color:#B9B4A8;margin:0;font-size:1.02rem;line-height:1.7}
-:is(#page-consultancy,#page-intelligence) .cx-notfor strong{color:#E4CF9B}
-:is(#page-consultancy,#page-intelligence) .cx-faq{padding:26px 0;border-top:1px solid rgba(18,20,23,.16)}
-:is(#page-consultancy,#page-intelligence) .cx-faq h3{font-family:var(--font);font-size:1.2rem;font-weight:600;margin:0 0 8px}
-:is(#page-consultancy,#page-intelligence) .cx-faq p{margin:0;color:#4B4B50;line-height:1.7;font-size:1.05rem}
-:is(#page-consultancy,#page-intelligence) .cx-final{text-align:center;padding:128px 0}
-:is(#page-consultancy,#page-intelligence) .cx-final .cx-lead{margin-inline:auto}
-:is(#page-consultancy,#page-intelligence) .cx-final .cx-actions{justify-content:center}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx{padding:112px 0;position:relative}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-dark{background:#121417;color:#E9E3D3}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-light{background:#FAF9F6;color:#121417}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-hero{padding:128px 0 112px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-herogrid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:72px;align-items:end}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:72px;align-items:start}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-eyebrow{font:600 .74rem/1.3 var(--font);letter-spacing:.18em;text-transform:uppercase;color:#C5A059;margin-bottom:28px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-ey-light{color:#85631F}
+:is(#page-consultancy,#page-intelligence,#page-home) h1.cx-h1,:is(#page-consultancy,#page-intelligence,#page-home) h2.cx-h1{font-family:var(--font-display);font-weight:600;font-size:clamp(2.9rem,1.5rem + 4.8vw,5.6rem);line-height:1.02;letter-spacing:-.02em;color:#F4EFE4;margin:0}
+:is(#page-consultancy,#page-intelligence,#page-home) h2.cx-h1-sm{font-size:clamp(2.4rem,1.4rem + 3.6vw,4.4rem)}
+:is(#page-consultancy,#page-intelligence,#page-home) h2.cx-h2{font-family:var(--font-display);font-weight:600;font-size:clamp(2.1rem,1.2rem + 2.8vw,3.6rem);line-height:1.08;letter-spacing:-.015em;max-width:900px;margin:0}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-dark h2.cx-h2,:is(#page-consultancy,#page-intelligence,#page-home) .cx-dark h3{color:#F4EFE4}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-light h2.cx-h2,:is(#page-consultancy,#page-intelligence,#page-home) .cx-light h3{color:#121417}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-lead{font-size:1.25rem;line-height:1.65;color:#CFC9BB;max-width:640px;margin:28px 0 0}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-triad{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:32px;font-family:var(--font-display);font-size:1.6rem;font-weight:600;color:#E4CF9B}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-actions{display:flex;flex-wrap:wrap;align-items:center;gap:20px 32px;margin-top:40px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-link{color:#E4CF9B;border-bottom:1px solid currentColor;text-decoration:none;font-weight:600;padding-bottom:2px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-light .cx-link{color:#85631F}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-ledger dl{margin:0;border-top:1px solid rgba(233,227,211,.28)}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-ledger dl>div{padding:22px 0;border-bottom:1px solid rgba(233,227,211,.28)}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-ledger dt{font:600 .72rem/1.3 var(--font);letter-spacing:.14em;text-transform:uppercase;color:#C5A059}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-ledger dd{margin:8px 0 0;font-size:1.1rem;line-height:1.5;color:#E9E3D3}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-rows,:is(#page-consultancy,#page-intelligence,#page-home) .cx-steps{margin-top:56px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-rows{border-top:1px solid rgba(18,20,23,.16)}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:24px;padding:36px 0;border-bottom:1px solid rgba(18,20,23,.16)}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-num{font-family:var(--font-display);font-size:2.6rem;line-height:1;color:#85631F}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-dark .cx-num{color:#C5A059}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-row h3,:is(#page-consultancy,#page-intelligence,#page-home) .cx-step h3{font-family:var(--font);font-size:1.5rem;font-weight:600;margin:0 0 10px;letter-spacing:0}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-row p{margin:0;color:#4B4B50;max-width:660px;line-height:1.7;font-size:1.05rem}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-closer{margin:48px 0 0;font-family:var(--font-display);font-size:2rem;font-weight:600;color:#121417;max-width:760px;line-height:1.2}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-prose p{font-size:1.15rem;line-height:1.8;color:#CFC9BB;margin:0 0 20px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-links{display:flex;flex-wrap:wrap;gap:12px 28px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-links a{color:#E4CF9B;text-decoration:none;border-bottom:1px solid currentColor;font-weight:600}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-objs{margin-top:56px;display:grid;grid-template-columns:1fr 1fr;gap:0 72px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-obj{padding:32px 0;border-top:1px solid rgba(18,20,23,.16)}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-q{font:600 .8rem/1.3 var(--font);letter-spacing:.12em;text-transform:uppercase;color:#636368}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-a{font-family:var(--font-display);font-size:2.1rem;font-weight:600;line-height:1.1;margin:10px 0 12px;color:#121417}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-obj p{margin:0;color:#4B4B50;line-height:1.7;font-size:1.05rem}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-steps{border-top:1px solid rgba(233,227,211,.24)}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-step{display:grid;grid-template-columns:96px minmax(0,1.5fr) minmax(0,.75fr);gap:28px;padding:36px 0;border-bottom:1px solid rgba(233,227,211,.24)}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-step p{margin:0;color:#CFC9BB;max-width:580px;line-height:1.7;font-size:1.05rem}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-meta>span{display:block;color:#B9B4A8;font-size:.92rem}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-meta strong{display:block;margin-top:6px;font-size:1.2rem;color:#E4CF9B}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-ptable{margin-top:48px;border-top:2px solid #121417}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-phead,:is(#page-consultancy,#page-intelligence,#page-home) .cx-prow{display:grid;grid-template-columns:1.1fr 2fr 1fr 1.1fr;gap:28px;padding:22px 0;border-bottom:1px solid rgba(18,20,23,.16);align-items:start}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-phead{font:600 .72rem/1.3 var(--font);letter-spacing:.14em;text-transform:uppercase;color:#636368}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-ptier{font-weight:700;font-size:1.15rem}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-pscope,:is(#page-consultancy,#page-intelligence,#page-home) .cx-ptime{color:#4B4B50;line-height:1.6}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-pprice strong{display:block;font-family:var(--font-display);font-size:1.9rem;line-height:1.1;color:#121417}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-pprice>span{display:block;color:#636368;font-size:.88rem;margin-top:4px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-foot{color:#4B4B50;font-size:.92rem;line-height:1.7;margin:28px 0 0;max-width:760px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-chips{list-style:none;margin:28px 0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-chips li{border:1px solid rgba(233,227,211,.32);padding:9px 14px;border-radius:2px;font-size:.98rem;color:#E9E3D3}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-notfor{border-top:1px solid rgba(233,227,211,.28);padding-top:20px;color:#B9B4A8;margin:0;font-size:1.02rem;line-height:1.7}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-notfor strong{color:#E4CF9B}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-faq{padding:26px 0;border-top:1px solid rgba(18,20,23,.16)}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-faq h3{font-family:var(--font);font-size:1.2rem;font-weight:600;margin:0 0 8px}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-faq p{margin:0;color:#4B4B50;line-height:1.7;font-size:1.05rem}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-final{text-align:center;padding:128px 0}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-final .cx-lead{margin-inline:auto}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-final .cx-actions{justify-content:center}
 @media (max-width:900px){
-  :is(#page-consultancy,#page-intelligence) .cx{padding:80px 0}
-  :is(#page-consultancy,#page-intelligence) .cx-hero{padding:96px 0 80px}
-  :is(#page-consultancy,#page-intelligence) .cx-herogrid,:is(#page-consultancy,#page-intelligence) .cx-split,:is(#page-consultancy,#page-intelligence) .cx-objs{grid-template-columns:minmax(0,1fr);gap:40px}
-  :is(#page-consultancy,#page-intelligence) .cx-row,:is(#page-consultancy,#page-intelligence) .cx-step{grid-template-columns:56px minmax(0,1fr);gap:16px}
-  :is(#page-consultancy,#page-intelligence) .cx-meta{grid-column:2}
-  :is(#page-consultancy,#page-intelligence) .cx-phead{display:none}
-  :is(#page-consultancy,#page-intelligence) .cx-prow{grid-template-columns:minmax(0,1fr);gap:8px;padding:24px 0}
-  :is(#page-consultancy,#page-intelligence) .cx-num{font-size:2rem}
+  :is(#page-consultancy,#page-intelligence,#page-home) .cx{padding:80px 0}
+  :is(#page-consultancy,#page-intelligence,#page-home) .cx-hero{padding:96px 0 80px}
+  :is(#page-consultancy,#page-intelligence,#page-home) .cx-herogrid,:is(#page-consultancy,#page-intelligence,#page-home) .cx-split,:is(#page-consultancy,#page-intelligence,#page-home) .cx-objs{grid-template-columns:minmax(0,1fr);gap:40px}
+  :is(#page-consultancy,#page-intelligence,#page-home) .cx-row,:is(#page-consultancy,#page-intelligence,#page-home) .cx-step{grid-template-columns:56px minmax(0,1fr);gap:16px}
+  :is(#page-consultancy,#page-intelligence,#page-home) .cx-meta{grid-column:2}
+  :is(#page-consultancy,#page-intelligence,#page-home) .cx-phead{display:none}
+  :is(#page-consultancy,#page-intelligence,#page-home) .cx-prow{grid-template-columns:minmax(0,1fr);gap:8px;padding:24px 0}
+  :is(#page-consultancy,#page-intelligence,#page-home) .cx-num{font-size:2rem}
 }
-html[dir="rtl"] :is(#page-consultancy,#page-intelligence) h1.cx-h1,html[dir="rtl"] :is(#page-consultancy,#page-intelligence) h2.cx-h1,html[dir="rtl"] :is(#page-consultancy,#page-intelligence) h2.cx-h2,html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-a,html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-closer,html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-triad,html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-pprice strong{font-family:'Cairo',sans-serif;letter-spacing:0;font-weight:700;line-height:1.3}
-html[dir="rtl"] :is(#page-consultancy,#page-intelligence) h1.cx-h1{font-size:clamp(2.2rem,1.3rem + 3.4vw,3.9rem)}
-html[dir="rtl"] :is(#page-consultancy,#page-intelligence) h2.cx-h1-sm{font-size:clamp(2rem,1.3rem + 2.6vw,3.4rem)}
-html[dir="rtl"] :is(#page-consultancy,#page-intelligence) h2.cx-h2{font-size:clamp(1.7rem,1.1rem + 2vw,2.7rem)}
-html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-a{font-size:1.6rem}
-html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-closer{font-size:1.6rem}
-html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-triad{font-size:1.3rem}
-html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-pprice strong{font-size:1.5rem}
-html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-eyebrow,html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-phead,html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-q,html[dir="rtl"] :is(#page-consultancy,#page-intelligence) .cx-ledger dt{letter-spacing:0;text-transform:none}
-:is(#page-consultancy,#page-intelligence) .cx-num,:is(#page-consultancy,#page-intelligence) .cx-triad,:is(#page-consultancy,#page-intelligence) .cx-pprice strong,:is(#page-consultancy,#page-intelligence) .cx-closer,:is(#page-consultancy,#page-intelligence) .cx-a,:is(#page-consultancy,#page-intelligence) h1.cx-h1,:is(#page-consultancy,#page-intelligence) h2.cx-h2{font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1}
-:is(#page-consultancy,#page-intelligence) .cx-phead,:is(#page-consultancy,#page-intelligence) .cx-prow{grid-template-columns:1fr 1.7fr .9fr 1.4fr}
-:is(#page-consultancy,#page-intelligence) .cx-pprice strong{font-size:1.7rem}
-@media (max-width:900px){:is(#page-consultancy,#page-intelligence) .cx-prow{grid-template-columns:minmax(0,1fr)}}
+html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) h1.cx-h1,html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) h2.cx-h1,html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) h2.cx-h2,html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-a,html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-closer,html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-triad,html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-pprice strong{font-family:'Cairo',sans-serif;letter-spacing:0;font-weight:700;line-height:1.3}
+html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) h1.cx-h1{font-size:clamp(2.2rem,1.3rem + 3.4vw,3.9rem)}
+html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) h2.cx-h1-sm{font-size:clamp(2rem,1.3rem + 2.6vw,3.4rem)}
+html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) h2.cx-h2{font-size:clamp(1.7rem,1.1rem + 2vw,2.7rem)}
+html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-a{font-size:1.6rem}
+html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-closer{font-size:1.6rem}
+html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-triad{font-size:1.3rem}
+html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-pprice strong{font-size:1.5rem}
+html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-eyebrow,html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-phead,html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-q,html[dir="rtl"] :is(#page-consultancy,#page-intelligence,#page-home) .cx-ledger dt{letter-spacing:0;text-transform:none}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-num,:is(#page-consultancy,#page-intelligence,#page-home) .cx-triad,:is(#page-consultancy,#page-intelligence,#page-home) .cx-pprice strong,:is(#page-consultancy,#page-intelligence,#page-home) .cx-closer,:is(#page-consultancy,#page-intelligence,#page-home) .cx-a,:is(#page-consultancy,#page-intelligence,#page-home) h1.cx-h1,:is(#page-consultancy,#page-intelligence,#page-home) h2.cx-h2{font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-phead,:is(#page-consultancy,#page-intelligence,#page-home) .cx-prow{grid-template-columns:1fr 1.7fr .9fr 1.4fr}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-pprice strong{font-size:1.7rem}
+@media (max-width:900px){:is(#page-consultancy,#page-intelligence,#page-home) .cx-prow{grid-template-columns:minmax(0,1fr)}}
 
 /* The translucent nav now sits over the dark consultancy hero (blends to ~#cbcbcc); the grey "AI" in the logo needs a darker tone to keep 4.5:1. */
 html body .brand-word span{color:#424245}
+
+/* FAQ blocks on dark sections (the receptionist page): lighter lines and text. */
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-dark .cx-faq{border-top:1px solid rgba(233,227,211,.24)}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-dark .cx-faq h3{color:#F4EFE4}
+:is(#page-consultancy,#page-intelligence,#page-home) .cx-dark .cx-faq p{color:#CFC9BB}
