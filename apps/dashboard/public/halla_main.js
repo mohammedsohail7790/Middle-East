@@ -555,6 +555,15 @@ function initConsultForm() {
 }
 
 // ============ FIT CHECK (Form 1): a short public form whose answers reach us by email, with a verdict worked out on the server ============
+// Messages from the gateway are English; Arabic visitors get an Arabic message chosen by the response status.
+function formErrorText(status, serverText, fallbackEn) {
+  if (document.documentElement.lang !== 'ar') return serverText || fallbackEn;
+  if (status === 410) return 'انتهت صلاحية هذا الرابط. يرجى مراسلتنا على hello@hallaai.com وسنساعدك.';
+  if (status === 429) return 'محاولات كثيرة. يرجى المحاولة لاحقاً أو مراسلتنا على hello@hallaai.com.';
+  if (status === 400) return 'يرجى مراجعة الإجابات أو التأكد من فتح الرابط كاملاً من رسالتنا، أو مراسلتنا على hello@hallaai.com.';
+  return 'حدث خطأ ما. يُرجى مراسلتنا مباشرة على hello@hallaai.com.';
+}
+
 function initFitCheckForm() {
   const btn = document.getElementById('fitCheckBtn');
   const form = document.getElementById('fitCheckForm');
@@ -587,7 +596,7 @@ function initFitCheckForm() {
       missing.forEach((name) => { const q = box(name); if (q) { q.style.outline = '2px solid var(--red)'; q.style.outlineOffset = '4px'; q.style.borderRadius = '8px'; } });
       const first = box(missing[0]);
       if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      say(missing.includes('consent') && missing.length === 1 ? 'Please tick the box to agree, so we can reply to you.' : 'Please complete the highlighted questions.', 'var(--red)');
+      say(missing.includes('consent') && missing.length === 1 ? (isAr() ? 'يرجى تحديد خانة الموافقة حتى نتمكن من الرد عليك.' : 'Please tick the box to agree, so we can reply to you.') : (isAr() ? 'يرجى إكمال الأسئلة المحددة.' : 'Please complete the highlighted questions.'), 'var(--red)');
       return;
     }
 
@@ -610,14 +619,14 @@ function initFitCheckForm() {
       .then(async (res) => {
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || 'Something went wrong. Please email hello@hallaai.com directly.');
+          throw new Error(formErrorText(res.status, data.error, 'Something went wrong. Please email hello@hallaai.com directly.'));
         }
-        say('Thank you. We have your answers and will reply by email within 1 business day.', 'var(--green, #2ecc71)');
+        say(isAr() ? 'شكراً لك. وصلتنا إجاباتك وسنرد عليك بالبريد الإلكتروني خلال يوم عمل واحد.' : 'Thank you. We have your answers and will reply by email within 1 business day.', 'var(--green, #2ecc71)');
         form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach((el) => { el.value = ''; });
         form.querySelectorAll('input[type="checkbox"]').forEach((el) => { el.checked = false; });
         form.querySelectorAll('select').forEach((el) => { el.selectedIndex = 0; });
       })
-      .catch((err) => { say(err.message || 'Something went wrong. Please email hello@hallaai.com directly.', 'var(--red)'); })
+      .catch((err) => { say(err.message || (isAr() ? 'حدث خطأ ما. يُرجى مراسلتنا مباشرة على hello@hallaai.com.' : 'Something went wrong. Please email hello@hallaai.com directly.'), 'var(--red)'); })
       .finally(() => { btn.innerHTML = btnDefaultText; btn.disabled = false; });
   });
 }
@@ -628,7 +637,8 @@ function initAuditPages() {
   const API = 'https://gateway.hallaai.com/api/v1/public/audit';
   const token = new URLSearchParams(window.location.search).get('t') || '';
   const checkLink = () => token ? fetch(API + '/link?t=' + encodeURIComponent(token)).then((r) => r.json().catch(() => ({ valid: false }))) : Promise.resolve({ valid: false });
-  const bad = (d) => d && d.expired ? 'This link has expired. Please email hello@hallaai.com and we will help.' : 'This link is not valid. Please open the whole link from our email, or write to hello@hallaai.com.';
+  const isAr = () => document.documentElement.lang === 'ar';
+  const bad = (d) => d && d.expired ? (isAr() ? 'انتهت صلاحية هذا الرابط. يرجى مراسلتنا على hello@hallaai.com وسنساعدك.' : 'This link has expired. Please email hello@hallaai.com and we will help.') : (isAr() ? 'هذا الرابط غير صالح. يرجى فتح الرابط كاملاً من رسالتنا، أو مراسلتنا على hello@hallaai.com.' : 'This link is not valid. Please open the whole link from our email, or write to hello@hallaai.com.');
 
   const form = document.getElementById('auditForm');
   if (form) {
@@ -653,23 +663,23 @@ function initAuditPages() {
     btn.disabled = true;
     checkLink().then((d) => {
       valid = !!(d && d.valid && d.kind === 'form2');
-      if (valid) { note.textContent = 'Prepared for ' + d.company + '. This link is valid until ' + new Date(d.expiresAt).toLocaleDateString() + '.'; btn.disabled = false; }
+      if (valid) { note.textContent = isAr() ? 'أُعدّ لـ ' + d.company + '. هذا الرابط صالح حتى ' + new Date(d.expiresAt).toLocaleDateString('ar-AE') + '.' : 'Prepared for ' + d.company + '. This link is valid until ' + new Date(d.expiresAt).toLocaleDateString() + '.'; btn.disabled = false; }
       else { note.style.color = 'var(--red)'; note.textContent = bad(d); }
-    }).catch(() => { note.style.color = 'var(--red)'; note.textContent = 'We could not check your link. Please try again.'; });
+    }).catch(() => { note.style.color = 'var(--red)'; note.textContent = isAr() ? 'تعذّر التحقق من الرابط. يرجى المحاولة مرة أخرى.' : 'We could not check your link. Please try again.'; });
 
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const answers = {};
       fields().forEach((el) => { const v = el.value.trim(); if (v) answers[el.name] = v; });
-      if (!answers.p1_name || !answers.p1_steps) { say('Please describe at least the first process: what it is called and the steps.', 'var(--red)'); return; }
-      btn.disabled = true; btn.textContent = 'Sending...'; say('');
+      if (!answers.p1_name || !answers.p1_steps) { say(isAr() ? 'يرجى وصف العملية الأولى على الأقل: اسمها وخطواتها.' : 'Please describe at least the first process: what it is called and the steps.', 'var(--red)'); return; }
+      btn.disabled = true; btn.textContent = isAr() ? 'جارٍ الإرسال...' : 'Sending...'; say('');
       fetch(API + '/form2', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, answers }) })
-        .then(async (res) => { if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data.error || 'Something went wrong. Please email hello@hallaai.com directly.'); }
+        .then(async (res) => { if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(formErrorText(res.status, data.error, 'Something went wrong. Please email hello@hallaai.com directly.')); }
           try { localStorage.removeItem(key); } catch (e2) { /* ignore */ }
           form.querySelectorAll('input[name], textarea[name], select[name]').forEach((el) => { el.value = ''; });
-          say('Thank you. We have your answers. We will study them and email you when your audit is ready.', 'var(--green, #2ecc71)'); })
-        .catch((err) => { say(err.message || 'Something went wrong. Please email hello@hallaai.com directly.', 'var(--red)'); })
-        .finally(() => { btn.textContent = 'Send my answers →'; btn.disabled = !valid; });
+          say(isAr() ? 'شكراً لك. وصلتنا إجاباتك. سندرسها ونراسلك عندما يكون تدقيقك جاهزاً.' : 'Thank you. We have your answers. We will study them and email you when your audit is ready.', 'var(--green, #2ecc71)'); })
+        .catch((err) => { say(err.message || (isAr() ? 'حدث خطأ ما. يُرجى مراسلتنا مباشرة على hello@hallaai.com.' : 'Something went wrong. Please email hello@hallaai.com directly.'), 'var(--red)'); })
+        .finally(() => { btn.textContent = isAr() ? 'أرسل إجاباتي ←' : 'Send my answers →'; btn.disabled = !valid; });
     });
   }
 
@@ -680,18 +690,18 @@ function initAuditPages() {
     checkLink().then((d) => {
       if (!(d && d.valid && d.kind === 'pay')) { info.style.color = 'var(--red)'; info.textContent = bad(d); return; }
       const until = new Date(d.expiresAt).toLocaleDateString();
-      if (!d.priceAvailable) { info.textContent = d.company + ': your audit is ready. We will send you an invoice by email.'; return; }
+      if (!d.priceAvailable) { info.textContent = isAr() ? d.company + ': تدقيقك جاهز. سنرسل لك فاتورة بالبريد الإلكتروني.' : d.company + ': your audit is ready. We will send you an invoice by email.'; return; }
       info.innerHTML = '';
       const a = document.createElement('div'); a.textContent = d.company; a.style.fontWeight = '700';
-      const b = document.createElement('div'); b.textContent = 'Opportunity Audit: ' + d.priceText; b.style.fontSize = '1.4rem'; b.style.margin = '8px 0';
-      const c = document.createElement('div'); c.textContent = 'Please pay by ' + until + ' to receive your audit. After that this order is closed.'; c.style.fontSize = '0.9rem';
+      const b = document.createElement('div'); b.textContent = (isAr() ? 'تدقيق الفرص: ' : 'Opportunity Audit: ') + d.priceText; b.style.fontSize = '1.4rem'; b.style.margin = '8px 0';
+      const c = document.createElement('div'); c.textContent = isAr() ? 'يرجى السداد قبل ' + new Date(d.expiresAt).toLocaleDateString('ar-AE') + ' لتستلم تدقيقك. بعد ذلك يُغلق هذا الطلب.' : 'Please pay by ' + until + ' to receive your audit. After that this order is closed.'; c.style.fontSize = '0.9rem';
       info.append(a, b, c);
       payBtn.style.display = '';
-    }).catch(() => { info.textContent = 'We could not check your link. Please try again.'; });
+    }).catch(() => { info.textContent = isAr() ? 'تعذّر التحقق من الرابط. يرجى المحاولة مرة أخرى.' : 'We could not check your link. Please try again.'; });
     payBtn.addEventListener('click', () => {
       payBtn.disabled = true; status.textContent = '';
       fetch(API + '/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) })
-        .then(async (res) => { const data = await res.json().catch(() => ({})); if (!res.ok || !data.url) throw new Error(data.error || 'We could not start the payment. Please write to hello@hallaai.com.'); window.location.href = data.url; })
+        .then(async (res) => { const data = await res.json().catch(() => ({})); if (!res.ok || !data.url) throw new Error(formErrorText(res.status, data.error, 'We could not start the payment. Please write to hello@hallaai.com.')); window.location.href = data.url; })
         .catch((err) => { status.style.color = 'var(--red)'; status.textContent = err.message; payBtn.disabled = false; });
     });
   }
