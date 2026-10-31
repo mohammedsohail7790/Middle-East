@@ -307,3 +307,7 @@ html body :is(#page-about,#page-terms,#page-privacy) .section{padding:36px 0 72p
 html body :is(#page-about,#page-terms,#page-privacy) .container-sm{max-width:1080px!important}
 html body :is(#page-about,#page-terms,#page-privacy) .container-sm>p,html body :is(#page-terms,#page-privacy) .container-sm>div>p{font-size:1.05rem;line-height:1.8}
 html[dir="rtl"] body :is(#page-about,#page-terms,#page-privacy) .page-hero .container{text-align:right!important}
+
+/* legal pages: their body container has an inline 720px cap, so widen it to match the title column */
+html body :is(#page-terms,#page-privacy) .section>.container{max-width:1080px!important;margin-inline:0!important;padding-inline:var(--gutter,28px)}
+@media (min-width:1160px){html body :is(#page-terms,#page-privacy) .section>.container{margin-inline:auto!important}}
