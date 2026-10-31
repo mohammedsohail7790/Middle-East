@@ -24,7 +24,7 @@ function sectionForPage(page) {
 // whole button reads right-to-left in RTL, matching every other
 // arrow-suffixed CTA on the site (see the hero's own lang-ar copy).
 const SECTION_CTA_TEXT = {
-  consultancy: { en: 'Book a Consultation →', ar: 'احجز استشارة ←' },
+  consultancy: { en: 'Book a Call →', ar: 'احجز مكالمة ←' },
   intelligence: { en: 'Book a Call →', ar: 'احجز مكالمة ←' },
   receptionist: { en: 'Start Free Trial →', ar: 'ابدأ التجربة المجانية ←' },
 };

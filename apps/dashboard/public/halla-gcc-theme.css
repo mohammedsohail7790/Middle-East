@@ -293,3 +293,6 @@ html body .brand-word span{color:#424245}
   :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-num{font-size:2.2rem}
   :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-lead{font-size:1.1rem}
 }
+
+/* --- nav: solid bar (no translucent blend over dark heroes) --- */
+html body #marketing-spa-root nav{background:#FAF9F6!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-bottom:1px solid rgba(18,20,23,.12)!important;box-shadow:0 1px 0 rgba(18,20,23,.04)}
