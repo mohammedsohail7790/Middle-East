@@ -26,7 +26,7 @@ for (const route of PUBLIC_ROUTES) {
 
 test('landing has primary CTA and nav links', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('link', { name: /book a consultation|sign in/i }).first()).toBeVisible({
+  await expect(page.getByRole('link', { name: /book a call|book a consultation|sign in/i }).first()).toBeVisible({
     timeout: 15000,
   });
 });
