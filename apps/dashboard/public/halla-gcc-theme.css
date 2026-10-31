@@ -70,7 +70,7 @@ html body .ticker-wrap,html body .ticker-wrap *{color:#E9E3D3!important}
   .roi-wrap{box-sizing:border-box;max-width:100%;padding:24px 20px}
   .roi-wrap *{min-width:0}
 }
-@media (min-width: 1380px) and (max-width: 1560px){
+@media (min-width: 1251px) and (max-width: 1560px){
   nav .nav-inner{gap:6px}
   nav .nav-links .nav-link,nav .nav-links > a,nav .nav-links > div{padding-inline:6px;font-size:.84rem}
   nav .section-switch button,nav .section-switch a{padding:6px 10px;font-size:.78rem}
@@ -80,7 +80,7 @@ html body .ticker-wrap,html body .ticker-wrap *{color:#E9E3D3!important}
 }
 
 /* --- nav: hamburger below 1366px (bilingual labels + currency selector need more room) --- */
-@media (max-width: 1379px){
+@media (max-width: 1250px){
   body[data-section="receptionist"] .nav-links.nav-group[data-section="receptionist"],
   body[data-section="consultancy"] .nav-links.nav-group[data-section="consultancy"],
   body[data-section="intelligence"] .nav-links.nav-group[data-section="intelligence"],
@@ -228,3 +228,28 @@ html body .brand-word span{color:#424245}
 :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations) .cx-dark .cx-faq{border-top:1px solid rgba(233,227,211,.24)}
 :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations) .cx-dark .cx-faq h3{color:#F4EFE4}
 :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations) .cx-dark .cx-faq p{color:#CFC9BB}
+
+/* Phones: a shorter top of page so the main button is in view, and links big enough to tap. */
+@media (max-width:640px){
+  :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-hero{padding:72px 0 56px}
+  :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) h1.cx-h1{font-size:clamp(2.1rem,9.5vw,2.9rem)}
+  :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-lead{font-size:1.05rem;margin-top:20px}
+  :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-triad{font-size:1.25rem;margin-top:22px}
+  :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-actions{margin-top:28px}
+  .mob-section-switch{flex-wrap:wrap}
+}
+.cx-link{display:inline-flex;align-items:center;min-height:44px}
+.flink,.footer-col a{display:inline-block;padding:6px 0}
+
+/* Laptop widths: the full menu stays, with tighter spacing so nothing runs off the bar. */
+@media (min-width: 1251px) and (max-width: 1400px){
+  nav .nav-inner{gap:4px}
+  nav .nav-links .nav-link,nav .nav-links > a,nav .nav-links > div{padding-inline:5px;font-size:.78rem}
+  nav .section-switch{margin-right:4px}
+  nav .section-switch button,nav .section-switch a{padding:5px 8px;font-size:.72rem}
+  nav .nav-actions{gap:4px}
+  nav .nav-actions .btn{padding:7px 10px;font-size:.76rem}
+  nav .cur-select{padding:5px 2px;font-size:.72rem;margin-inline-end:0}
+  nav .logo{margin-right:6px}
+  nav .halla-wordmark{font-size:1rem}
+}

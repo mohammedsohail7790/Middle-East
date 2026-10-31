@@ -4,6 +4,12 @@ export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
   "/home": "home",
   "/consultancy": "consultancy",
   "/ai-consultancy": "ai-consultancy",
+  "/automation": "intelligence",
+  "/solutions": "solutions",
+  "/blog/emergency-calls": "blog-emergency",
+  "/blog/ai-disclosure": "blog-ai-disclosure",
+  "/blog/crm-integrations": "blog-crm-integrations",
+  "/blog/per-minute-pricing": "blog-per-minute",
   "/consult-signup": "consult-signup",
   "/fit-check": "fit-check",
   "/audit": "audit",
@@ -52,4 +58,15 @@ export function resolveMarketingPage(pathname: string): string {
   if (solutionsMatch) return `solutions-${solutionsMatch[1]}`;
 
   return "consultancy";
+}
+
+/** The web address for a page id: the reverse of resolveMarketingPage. "/" is used for the home (consultancy) page. */
+export function pagePath(pageId: string): string | null {
+  if (pageId === "consultancy") return "/";
+  for (const [path, id] of Object.entries(MARKETING_PATH_TO_PAGE)) {
+    if (id === pageId) return path;
+  }
+  if (pageId.startsWith("industry-")) return `/industries/${pageId.slice("industry-".length)}`;
+  if (pageId.startsWith("solutions-")) return `/solutions/${pageId.slice("solutions-".length)}`;
+  return null;
 }

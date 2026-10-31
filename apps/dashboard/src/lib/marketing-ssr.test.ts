@@ -40,10 +40,17 @@ describe("marketingMetadata", () => {
   });
 
   it("leaves every other marketing page on its existing receptionist wording", () => {
-    const m = marketingMetadata("pricing", "/pricing");
+    const m = marketingMetadata("solutions-answering", "/solutions/answering");
     expect(m.title).toBe("Halla AI – Smart • Seamless • Always");
     expect(String(m.description)).toContain("answers every call 24/7");
     expect(m.alternates).toBeUndefined();
+  });
+
+  it("gives the main receptionist pages their own title, description and canonical address", () => {
+    const m = marketingMetadata("pricing", "/pricing");
+    expect(m.title).toEqual({ absolute: "AI Receptionist Pricing | Halla AI" });
+    expect(String(m.description)).toContain("from $39 a month");
+    expect(m.alternates?.canonical).toBe("/pricing");
   });
 
   it("gives the fit-check page its own title, description and canonical address", () => {
