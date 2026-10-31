@@ -177,7 +177,7 @@ export function createPublicAuditRouter(): Router {
         const session = await stripe.checkout.sessions.create({
           mode: 'payment',
           customer_email: p.email || undefined,
-          line_items: [{ quantity: 1, price_data: { currency: p.cur.toLowerCase(), unit_amount: minorUnits(p.cur, price), product_data: { name: 'Halla AI Opportunity Audit', description: `For ${p.company}` } } }],
+          line_items: [{ quantity: 1, price_data: { currency: p.cur.toLowerCase(), unit_amount: minorUnits(p.cur, price), product_data: { name: 'Halla AI Opportunity Audit', description: `For ${p.company}` } }, ...(process.env.AUDIT_TAX_RATE_ID ? { tax_rates: [process.env.AUDIT_TAX_RATE_ID] } : {}) }],
           metadata,
           payment_intent_data: { metadata },
           success_url: `${SITE}/audit/paid`,

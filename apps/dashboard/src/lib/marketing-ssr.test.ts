@@ -20,7 +20,7 @@ describe("extractPageHtml", () => {
   it("makes a page that is not active by default visible, because .page is hidden until .active", () => {
     const html = extractPageHtml(body, "consult-signup");
     expect(html).toMatch(/^<div id="page-consult-signup" class="page active"/);
-    expect(html).toContain("Book Your Diagnostic Call");
+    expect(html).toContain("Book a Call");
   });
 
   it("returns nothing for an unknown or unsafe page id rather than guessing", () => {

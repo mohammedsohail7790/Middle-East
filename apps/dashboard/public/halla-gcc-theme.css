@@ -293,3 +293,17 @@ html body .brand-word span{color:#424245}
   :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-num{font-size:2.2rem}
   :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-lead{font-size:1.1rem}
 }
+
+/* --- nav: solid bar (no translucent blend over dark heroes) --- */
+html body #marketing-spa-root nav{background:#FAF9F6!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-bottom:1px solid rgba(18,20,23,.12)!important;box-shadow:0 1px 0 rgba(18,20,23,.04)}
+
+/* --- legal + story pages: larger title, left-aligned, wider reading column, tighter gaps --- */
+html body :is(#page-about,#page-terms,#page-privacy) .page-hero{padding:104px 0 28px!important}
+html body :is(#page-about,#page-terms,#page-privacy) .page-hero .container{max-width:1080px!important;text-align:left!important}
+html body :is(#page-about,#page-terms,#page-privacy) .page-hero .label{font-size:.82rem;letter-spacing:.22em;text-transform:uppercase;color:#8a6a22;margin-bottom:10px}
+html body :is(#page-about,#page-terms,#page-privacy) .page-hero h1{font-size:clamp(2.6rem,1.6rem + 3.4vw,4.4rem)!important;line-height:1.05;margin-bottom:14px}
+html body :is(#page-about,#page-terms,#page-privacy) .page-hero p{max-width:760px!important;margin-left:0!important;margin-right:0!important;font-size:1.15rem!important}
+html body :is(#page-about,#page-terms,#page-privacy) .section{padding:36px 0 72px!important}
+html body :is(#page-about,#page-terms,#page-privacy) .container-sm{max-width:1080px!important}
+html body :is(#page-about,#page-terms,#page-privacy) .container-sm>p,html body :is(#page-terms,#page-privacy) .container-sm>div>p{font-size:1.05rem;line-height:1.8}
+html[dir="rtl"] body :is(#page-about,#page-terms,#page-privacy) .page-hero .container{text-align:right!important}
