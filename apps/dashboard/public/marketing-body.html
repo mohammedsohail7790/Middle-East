@@ -4030,14 +4030,14 @@
 <script>
 /* Currency display: rounded local prices (AED/SAR) for Halla plans; other USD figures converted at the peg and rounded. USD = reference. Prices exclude VAT. */
 (function(){
-  var MAP={'39':[150,149],'149':[550,559],'499':[1850,1849],'0.20':[0.75,0.75],'0.15':[0.55,0.55],'0.10':[0.40,0.40],
+  var MAP={'49':[180,184],'129':[475,484],'39':[150,149],'149':[550,559],'499':[1850,1849],'0.20':[0.75,0.75],'0.15':[0.55,0.55],'0.10':[0.40,0.40],
     '375':[1440,1430],'1430':[5280,5370],'4790':[17760,17750],'31.25':[120,119],'119.17':[440,447],'399.17':[1480,1479],
     '93':[360,358],'358':[1320,1338],'1198':[4440,4438]};
   var RATE={AED:3.6725,SAR:3.75,USD:1};
   var SYM={AED:['AED','د.إ'],SAR:['SAR','ر.س'],USD:['$','$']};
   var PLAN={AED:{base:550,over:0.55},SAR:{base:559,over:0.55},USD:{base:149,over:0.15}};
   var cur='AED'; try{cur=localStorage.getItem('halla_cur')||'AED';}catch(e){}
-  var orig=new WeakMap(), roots=['page-home','page-pricing','page-roi','page-ai-vs-human','page-vs-smith','page-vs-ruby'];
+  var orig=new WeakMap(), roots=['page-intelligence','page-home','page-pricing','page-roi','page-ai-vs-human','page-vs-smith','page-vs-ruby'];
   function ar(){var h=document.documentElement;return h.getAttribute('dir')==='rtl'||h.getAttribute('lang')==='ar';}
   function num(v){return Number(v).toLocaleString('en-US',{minimumFractionDigits:v%1?2:0,maximumFractionDigits:2});}
   function peg(u){var v=u*RATE[cur];if(v<10)return Math.round(v*20)/20;if(v<100)return Math.round(v);if(v<1000)return Math.round(v/5)*5;return Math.round(v/10)*10;}
