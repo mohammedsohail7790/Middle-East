@@ -712,7 +712,7 @@ function initAuditPages() {
         const first = !answers.p1_name ? 'p1_name' : 'p1_steps';
         ['p1_name', 'p1_steps'].filter((n) => !answers[n]).forEach((n) => { const q = form.querySelector('[data-q="' + n + '"]'); if (q) { q.style.outline = '2px solid var(--red)'; q.style.outlineOffset = '4px'; q.style.borderRadius = '8px'; } });
         const target = form.querySelector('[data-q="' + first + '"]');
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (target) target.scrollIntoView({ block: 'center' });
         say(isAr() ? 'يرجى وصف العملية الأولى على الأقل: اسمها وخطواتها.' : 'Please describe at least the first process: what it is called and the steps.', 'var(--red)');
         return;
       }
