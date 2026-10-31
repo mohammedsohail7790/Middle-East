@@ -9,10 +9,12 @@
 // The site is split into two audience-facing sections that swap in a
 // dedicated nav + footer: 'consultancy' (Halla AI Consultancy) and
 // 'receptionist' (the AI Receptionist product: Product/Solutions/
-// Industries/Pricing/Resources). page-consultancy is the only page in the
-// consultancy section; every other page belongs to the receptionist section.
+// Industries/Pricing/Resources). page-consultancy is the hub (umbrella hero +
+// three-pillar strip) and page-ai-consultancy is the consultancy spoke; both,
+// plus the service/audit/booking pages, belong to the consultancy section.
+// Every other page belongs to the receptionist section.
 function sectionForPage(page) {
-  const consultancyPages = ['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid'];
+  const consultancyPages = ['consultancy', 'ai-consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid'];
   const intelligencePages = ['intelligence'];
   if (consultancyPages.includes(page)) return 'consultancy';
   if (intelligencePages.includes(page)) return 'intelligence';
@@ -57,9 +59,9 @@ function logoClick() {
   const section = document.body.getAttribute('data-section') || 'consultancy';
   switchSection(section);
 }
-// Scroll to an anchor within the (already active) consultancy page.
+// Scroll to an anchor on the AI Consultancy spoke page (page-ai-consultancy).
 function scrollToConsultSection(anchorId) {
-  go('consultancy');
+  go('ai-consultancy', { noScroll: true });
   setTimeout(() => {
     const el = document.getElementById(anchorId);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -86,7 +88,7 @@ function scrollToIntelSection(anchorId) {
 
 // ============ ROUTING + DEEP LINKS ============
 const DEFAULT_PAGE = 'consultancy';
-const CONSULTANCY_PAGES = new Set(['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid']);
+const CONSULTANCY_PAGES = new Set(['consultancy', 'ai-consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid']);
 // The site is light-themed everywhere now, so no page runs the starfield
 // backdrop or glassmorphism card treatment — both were built for a dark
 // background (bright stars, translucent glass over near-black) and don't

@@ -3,6 +3,7 @@ export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
   "/": "consultancy",
   "/home": "home",
   "/consultancy": "consultancy",
+  "/ai-consultancy": "ai-consultancy",
   "/consult-signup": "consult-signup",
   "/fit-check": "fit-check",
   "/audit": "audit",

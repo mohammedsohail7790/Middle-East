@@ -19,6 +19,11 @@ export function marketingMetadata(pageId: string, path: string): Metadata {
       twitter: { card: "summary_large_image", title: CONSULTANCY_TITLE, description: CONSULTANCY_DESCRIPTION, images: ["/logo-consultancy.jpg"] },
     };
   }
+  if (pageId === "ai-consultancy") {
+    const title = "AI Consultancy for Small and Mid-Sized Businesses | Halla AI";
+    const description = "A fixed-price Opportunity Audit and a prioritised roadmap you own, then builds from AED 8,000 with a fixed price and timeline. Custom software and AI automation for owner-led businesses in the GCC.";
+    return { title: { absolute: title }, description, alternates: { canonical: path.replace(/\/$/, "") || "/" }, openGraph: { title, description, type: "website", url: path } };
+  }
   if (pageId === "fit-check") {
     const title = "Is Halla AI a fit for your business? | Halla AI Consultancy";
     const description = "Answer a few quick questions about your company and we will reply by email. No account, no password, no obligation.";
