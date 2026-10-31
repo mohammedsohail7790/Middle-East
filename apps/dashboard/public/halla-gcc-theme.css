@@ -253,3 +253,43 @@ html body .brand-word span{color:#424245}
   nav .logo{margin-right:6px}
   nav .halla-wordmark{font-size:1rem}
 }
+
+/* Hk, 31 Oct: bigger small text, a smaller headline, tighter gaps. One block so every short-style page changes together. */
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx{padding:84px 0}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-hero{padding:96px 0 80px}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-final{padding:96px 0}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-herogrid{gap:56px;align-items:center}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-eyebrow{font-size:1.05rem;letter-spacing:.14em;margin-bottom:20px}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) h1.cx-h1{font-size:clamp(2.2rem,1.2rem + 3.6vw,4.2rem);line-height:1.08}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) h1.cx-h1-sm,:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) h2.cx-h1-sm{font-size:clamp(2rem,1.2rem + 2.6vw,3.4rem)}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) h2.cx-h2{font-size:clamp(1.9rem,1.1rem + 2.4vw,3.1rem)}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-lead{font-size:1.3rem;margin-top:22px}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-triad{font-size:1.8rem;margin-top:26px}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-actions{margin-top:32px}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-ledger dt{font-size:.9rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-ledger dd{font-size:1.2rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-ledger dl>div{padding:18px 0}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-rows,:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-steps{margin-top:40px}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-row,:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-step{padding:28px 0}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-num{font-size:3rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-row h3,:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-step h3{font-size:1.65rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-row p,:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-step p,:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-obj p,:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-faq p{font-size:1.15rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-prose p{font-size:1.25rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-meta span{font-size:1.05rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-meta strong{font-size:1.3rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-phead{font-size:.9rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-q{font-size:.95rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-pscope,:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-ptime{font-size:1.05rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-pprice span{font-size:1rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-foot{font-size:1.05rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-chips li{font-size:1.08rem}
+:is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-faq h3{font-size:1.35rem}
+@media (max-width:900px){
+  :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx{padding:64px 0}
+  :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-hero{padding:80px 0 60px}
+}
+@media (max-width:640px){
+  :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-eyebrow{font-size:.95rem}
+  :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-num{font-size:2.2rem}
+  :is(#page-consultancy,#page-intelligence,#page-home,#page-features,#page-how-it-works,#page-pricing,#page-integrations,#page-ai-consultancy) .cx-lead{font-size:1.1rem}
+}

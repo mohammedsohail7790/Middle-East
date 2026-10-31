@@ -45,8 +45,8 @@ describe("marketing page behaviour in the browser", () => {
     // jsdom does not run inserted scripts, so run the same code here to prove what a browser will now do.
     new Function((after as HTMLScriptElement).text)();
     expect((window as unknown as { HallaCur?: { get(): string } }).HallaCur?.get()).toBe("AED");
-    expect(document.getElementById("p")?.textContent).toBe("AED 149");
-    expect(document.getElementById("x")?.textContent).toBe("250 min · AED 0.75/min extra");
+    expect(document.getElementById("p")?.textContent).toBe("AED 150");
+    expect(document.getElementById("x")?.textContent).toBe("250 min · 75 fils/min extra");
   });
 
   it("leaves module scripts alone", () => {
