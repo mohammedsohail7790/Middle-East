@@ -213,7 +213,7 @@ function faqToggle(el) { el.parentElement.classList.toggle('open'); }
 function calcROI() {
   const C = window.HallaCur;
   const cur = C ? C.get() : 'USD';
-  const PLAN_COST = { '39': { AED: 149, SAR: 149, USD: 39 }, '149': { AED: 549, SAR: 559, USD: 149 } };
+  const PLAN_COST = { '39': { AED: 150, SAR: 149, USD: 39 }, '149': { AED: 550, SAR: 559, USD: 149 } };
   const fmt = v => C ? C.money(v) : '$' + v.toLocaleString();
   const miss = +document.getElementById('r-miss').value || 0;
   const val = +document.getElementById('r-val').value || 0;
