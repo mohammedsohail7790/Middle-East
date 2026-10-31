@@ -9,10 +9,12 @@
 // The site is split into two audience-facing sections that swap in a
 // dedicated nav + footer: 'consultancy' (Halla AI Consultancy) and
 // 'receptionist' (the AI Receptionist product: Product/Solutions/
-// Industries/Pricing/Resources). page-consultancy is the only page in the
-// consultancy section; every other page belongs to the receptionist section.
+// Industries/Pricing/Resources). page-consultancy is the hub (umbrella hero +
+// three-pillar strip) and page-ai-consultancy is the consultancy spoke; both,
+// plus the service/audit/booking pages, belong to the consultancy section.
+// Every other page belongs to the receptionist section.
 function sectionForPage(page) {
-  const consultancyPages = ['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid'];
+  const consultancyPages = ['consultancy', 'ai-consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid'];
   const intelligencePages = ['intelligence'];
   if (consultancyPages.includes(page)) return 'consultancy';
   if (intelligencePages.includes(page)) return 'intelligence';
@@ -23,7 +25,7 @@ function sectionForPage(page) {
 // arrow-suffixed CTA on the site (see the hero's own lang-ar copy).
 const SECTION_CTA_TEXT = {
   consultancy: { en: 'Book a Consultation →', ar: 'احجز استشارة ←' },
-  intelligence: { en: 'Create Your Company →', ar: 'أنشئ شركتك ←' },
+  intelligence: { en: 'Book a Call →', ar: 'احجز مكالمة ←' },
   receptionist: { en: 'Start Free Trial →', ar: 'ابدأ التجربة المجانية ←' },
 };
 function applyPrimaryCtaText() {
@@ -57,9 +59,9 @@ function logoClick() {
   const section = document.body.getAttribute('data-section') || 'consultancy';
   switchSection(section);
 }
-// Scroll to an anchor within the (already active) consultancy page.
+// Scroll to an anchor on the AI Consultancy spoke page (page-ai-consultancy).
 function scrollToConsultSection(anchorId) {
-  go('consultancy');
+  go('ai-consultancy', { noScroll: true });
   setTimeout(() => {
     const el = document.getElementById(anchorId);
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -86,7 +88,7 @@ function scrollToIntelSection(anchorId) {
 
 // ============ ROUTING + DEEP LINKS ============
 const DEFAULT_PAGE = 'consultancy';
-const CONSULTANCY_PAGES = new Set(['consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid']);
+const CONSULTANCY_PAGES = new Set(['consultancy', 'ai-consultancy', 'svc-operations', 'svc-acquisition', 'svc-brand', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid']);
 // The site is light-themed everywhere now, so no page runs the starfield
 // backdrop or glassmorphism card treatment — both were built for a dark
 // background (bright stars, translucent glass over near-black) and don't
@@ -523,7 +525,11 @@ function initConsultForm() {
       emailInput.style.borderColor = 'var(--red)';
       valid = false;
     }
-    if (!valid) return;
+    if (!valid) {
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = isAr() ? 'يرجى إدخال اسمك وبريد إلكتروني صحيح.' : 'Please enter your name and a valid email address.';
+      return;
+    }
 
     btn.disabled = true;
     btn.textContent = isAr() ? 'جارٍ الإرسال...' : 'Sending...';
@@ -588,10 +594,22 @@ function initFitCheckForm() {
   const checked = (name) => Array.from(form.querySelectorAll('input[name="' + name + '"]:checked')).map((el) => el.value);
   const say = (text, color) => { statusEl.style.color = color || ''; statusEl.textContent = text; };
 
+  // Tie each label to its single field (so a click on the label focuses it and screen readers read it), and tell the browser what each field is so it can autofill.
+  const AUTOFILL = { name: 'name', email: 'email', phone: 'tel', company: 'organization', website: 'url', city: 'address-level2', country: 'country-name' };
+  form.querySelectorAll('[data-q]').forEach((q) => {
+    const controls = q.querySelectorAll('input:not([type="checkbox"]), select, textarea');
+    const label = q.querySelector('label');
+    if (controls.length === 1 && label && !q.querySelector('input[type="checkbox"]')) {
+      if (!controls[0].id) controls[0].id = 'fc-' + controls[0].name;
+      label.setAttribute('for', controls[0].id);
+    }
+  });
+  Object.keys(AUTOFILL).forEach((n) => { const el = field(n); if (el) el.setAttribute('autocomplete', AUTOFILL[n]); });
 
   btn.addEventListener('click', (e) => {
     e.preventDefault();
-    form.querySelectorAll('[data-q]').forEach((q) => { q.style.outline = ''; });
+    form.querySelectorAll('[data-q]').forEach((q) => { q.style.outline = ''; q.removeAttribute('aria-invalid'); });
+    form.querySelectorAll('.fit-err').forEach((n) => n.remove());
     const missing = [];
     REQUIRED.forEach((name) => {
       const el = field(name);
@@ -602,7 +620,16 @@ function initFitCheckForm() {
     if (checked('pain').length === 0) missing.push('pain');
     if (!field('consent').checked) missing.push('consent');
     if (missing.length) {
-      missing.forEach((name) => { const q = box(name); if (q) { q.style.outline = '2px solid var(--red)'; q.style.outlineOffset = '4px'; q.style.borderRadius = '8px'; } });
+      missing.forEach((name) => {
+        const q = box(name);
+        if (!q) return;
+        q.style.outline = '2px solid var(--red)'; q.style.outlineOffset = '4px'; q.style.borderRadius = '8px';
+        q.setAttribute('aria-invalid', 'true');
+        const msg = document.createElement('div');
+        msg.className = 'fit-err'; msg.setAttribute('role', 'alert'); msg.style.cssText = 'color:var(--red);font-size:0.8rem;margin-top:6px';
+        msg.textContent = isAr() ? 'يرجى الإجابة عن هذا السؤال.' : 'Please answer this question.';
+        q.appendChild(msg);
+      });
       const first = box(missing[0]);
       if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
       say(missing.includes('consent') && missing.length === 1 ? (isAr() ? 'يرجى تحديد خانة الموافقة حتى نتمكن من الرد عليك.' : 'Please tick the box to agree, so we can reply to you.') : (isAr() ? 'يرجى إكمال الأسئلة المحددة.' : 'Please complete the highlighted questions.'), 'var(--red)');
@@ -673,14 +700,22 @@ function initAuditPages() {
     checkLink().then((d) => {
       valid = !!(d && d.valid && d.kind === 'form2');
       if (valid) { note.textContent = isAr() ? 'أُعدّ لـ ' + d.company + '. هذا الرابط صالح حتى ' + new Date(d.expiresAt).toLocaleDateString('ar-AE') + '.' : 'Prepared for ' + d.company + '. This link is valid until ' + new Date(d.expiresAt).toLocaleDateString() + '.'; btn.disabled = false; }
-      else { note.style.color = 'var(--red)'; note.textContent = bad(d); }
+      else { note.style.color = 'var(--red)'; note.textContent = bad(d); form.style.display = 'none'; }
     }).catch(() => { note.style.color = 'var(--red)'; note.textContent = isAr() ? 'تعذّر التحقق من الرابط. يرجى المحاولة مرة أخرى.' : 'We could not check your link. Please try again.'; });
 
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const answers = {};
       fields().forEach((el) => { const v = el.value.trim(); if (v) answers[el.name] = v; });
-      if (!answers.p1_name || !answers.p1_steps) { say(isAr() ? 'يرجى وصف العملية الأولى على الأقل: اسمها وخطواتها.' : 'Please describe at least the first process: what it is called and the steps.', 'var(--red)'); return; }
+      form.querySelectorAll('[data-q]').forEach((q) => { q.style.outline = ''; });
+      if (!answers.p1_name || !answers.p1_steps) {
+        const first = !answers.p1_name ? 'p1_name' : 'p1_steps';
+        ['p1_name', 'p1_steps'].filter((n) => !answers[n]).forEach((n) => { const q = form.querySelector('[data-q="' + n + '"]'); if (q) { q.style.outline = '2px solid var(--red)'; q.style.outlineOffset = '4px'; q.style.borderRadius = '8px'; } });
+        const target = form.querySelector('[data-q="' + first + '"]');
+        if (target) target.scrollIntoView({ block: 'center' });
+        say(isAr() ? 'يرجى وصف العملية الأولى على الأقل: اسمها وخطواتها.' : 'Please describe at least the first process: what it is called and the steps.', 'var(--red)');
+        return;
+      }
       btn.disabled = true; btn.textContent = isAr() ? 'جارٍ الإرسال...' : 'Sending...'; say('');
       fetch(API + '/form2', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, answers }) })
         .then(async (res) => { if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(formErrorText(res.status, data.error, 'Something went wrong. Please email hello@hallaai.com directly.')); }

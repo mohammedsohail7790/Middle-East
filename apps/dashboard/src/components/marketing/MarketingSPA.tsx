@@ -7,6 +7,9 @@ import { MarketingPremiumLayer } from "@/components/marketing/premium/MarketingP
 import { MarketingConsultancyLayer } from "@/components/marketing/premium/MarketingConsultancyLayer";
 import { Dashboard3DMounts } from "@/components/marketing/premium/Dashboard3DMounts";
 import { MarketingAtmosphere } from "@/components/marketing/effects/MarketingAtmosphere";
+import { pagePath, resolveMarketingPage } from "@/lib/marketing-routes";
+import { linkifyPages, runInlineScripts, titleForPage } from "@/lib/marketing-dom";
+import { pageTitle } from "@/lib/marketing-metadata";
 
 interface Props {
   bodyHtml: string;
@@ -51,6 +54,7 @@ function loadScript(src: string): Promise<void> {
   });
 }
 
+
 /**
  * Renders the static Halla AI marketing SPA inside the Next.js app.
  *
@@ -68,14 +72,32 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ss
     const el = spaRootRef.current;
     if (!el || htmlInjected.current) return;
     el.innerHTML = bodyHtml;
+    runInlineScripts(el);
+    linkifyPages(el);
     htmlInjected.current = true;
     window.dispatchEvent(new CustomEvent("halla-marketing-mounted"));
   }, [bodyHtml]);
+
+  useEffect(() => {
+    const el = spaRootRef.current;
+    if (!el) return;
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as HTMLElement | null)?.closest?.("a[href^='/'][onclick]");
+      if (!a) return;
+      // Ctrl / Cmd / Shift / middle click: let the browser open the real address. A plain click: the page script already navigated, so do not reload.
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+    };
+    el.addEventListener("click", onClick);
+    return () => el.removeEventListener("click", onClick);
+  }, []);
 
   const ensureMarketingHtml = useCallback(() => {
     const el = spaRootRef.current;
     if (!el || htmlInjected.current) return;
     el.innerHTML = bodyHtml;
+    runInlineScripts(el);
+    linkifyPages(el);
     htmlInjected.current = true;
     window.dispatchEvent(new CustomEvent("halla-marketing-mounted"));
   }, [bodyHtml]);
@@ -89,6 +111,8 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ss
 
     bridgeInstalled.current = true;
 
+    let ready = false; // false while the first page is being shown
+    let pushing = true; // false while handling the back button, so going back does not add a new history entry
     halla.go = function go(page: string) {
       const nextHref = NEXT_ROUTES[page];
       if (nextHref) {
@@ -96,7 +120,18 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ss
         return;
       }
       spaGo(page);
+      if (!ready) return;
+      // Keep the address bar and the tab title in step with the page, so a page can be shared, bookmarked and reached with the back button.
+      const path = pagePath(page);
+      if (pushing && path && window.location.pathname !== path) window.history.pushState(null, "", path);
+      const title = pageTitle(page) ?? titleForPage(page);
+      if (title) document.title = title;
     };
+    window.addEventListener("popstate", () => {
+      pushing = false;
+      halla.go?.(resolveMarketingPage(window.location.pathname));
+      pushing = true;
+    });
 
     halla.setLang = function setLang(lang: string) {
       const root = document.getElementById("marketing-spa-root");
@@ -109,6 +144,11 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ss
       document.querySelectorAll(".lang-toggle button").forEach((b) => {
         b.classList.toggle("active", b.getAttribute("data-lang") === lang);
       });
+      // Dropdown options cannot hold two language spans, so they carry data-en / data-ar and are switched here.
+      document.querySelectorAll<HTMLElement>("[data-en][data-ar]").forEach((node) => {
+        node.textContent = (lang === "ar" ? node.dataset.ar : node.dataset.en) ?? node.textContent;
+      });
+      (window as unknown as { applyPrimaryCtaText?: () => void }).applyPrimaryCtaText?.();
       try {
         localStorage.setItem("halla_lang", lang);
       } catch {
@@ -124,6 +164,7 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ss
     }
     halla.setLang(saved);
     halla.go(safeInitialPage);
+    ready = true; // from here on, every page change is a visitor action
   }, [safeInitialPage]);
 
   const bootDecor = useCallback(() => {

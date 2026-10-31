@@ -3,13 +3,14 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { extractPageHtml } from "@/lib/marketing-ssr";
 import { marketingMetadata } from "@/lib/marketing-metadata";
+import { resolveMarketingPage } from "@/lib/marketing-routes";
 
 const body = readFileSync(path.resolve(__dirname, "../../public/marketing-body.html"), "utf8");
 
 describe("extractPageHtml", () => {
   it("returns the consultancy page with its real headline, visible, and none of the other pages", () => {
     const html = extractPageHtml(body, "consultancy");
-    expect(html).toContain("We Don't Sell AI");
+    expect(html).toContain("We design, build and run the AI systems your business depends on.");
     expect(html).toMatch(/^<div id="page-consultancy" class="page active"/);
     expect(html).not.toContain('id="page-pricing"');
     expect(html).not.toContain('id="page-security"');
@@ -39,10 +40,17 @@ describe("marketingMetadata", () => {
   });
 
   it("leaves every other marketing page on its existing receptionist wording", () => {
-    const m = marketingMetadata("pricing", "/pricing");
+    const m = marketingMetadata("solutions-answering", "/solutions/answering");
     expect(m.title).toBe("Halla AI – Smart • Seamless • Always");
     expect(String(m.description)).toContain("answers every call 24/7");
     expect(m.alternates).toBeUndefined();
+  });
+
+  it("gives the main receptionist pages their own title, description and canonical address", () => {
+    const m = marketingMetadata("pricing", "/pricing");
+    expect(m.title).toEqual({ absolute: "AI Receptionist Pricing | Halla AI" });
+    expect(String(m.description)).toContain("from $39 a month");
+    expect(m.alternates?.canonical).toBe("/pricing");
   });
 
   it("gives the fit-check page its own title, description and canonical address", () => {
@@ -57,5 +65,14 @@ describe("marketingMetadata", () => {
     expect(html).toMatch(/^<div id="page-fit-check" class="page active"/);
     expect(html).toContain("How many people work in the company?");
     expect(html).not.toContain('id="page-consult-signup"');
+  });
+  it("gives the AI Consultancy page its own address, title and first-HTML content", () => {
+    expect(resolveMarketingPage("/ai-consultancy")).toBe("ai-consultancy");
+    const m = marketingMetadata("ai-consultancy", "/ai-consultancy");
+    expect(m.title).toEqual({ absolute: "AI Consultancy for Small and Mid-Sized Businesses | Halla AI" });
+    expect(m.alternates?.canonical).toBe("/ai-consultancy");
+    const html = extractPageHtml(body, "ai-consultancy");
+    expect(html).toMatch(/^<div id="page-ai-consultancy" class="page active"/);
+    expect(html).toContain("Custom software");
   });
 });

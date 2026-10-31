@@ -21,19 +21,24 @@ export const PAGE_STRINGS = [
   'Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. Everything you send is covered by the NDA we signed.',
   'Your audit is ready', 'Pay the audit fee and we send you the full audit.', 'Checking your link…', 'Pay securely →',
   'Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.',
+  'Required. Everything else is optional.', 'What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 90 days.', 'Questions? Write to hello@hallaai.com.',
   'Thank you, payment received', 'We will send your audit to the email address you gave us. If you do not see it within one business day, write to hello@hallaai.com.',
 ];
 
 const LABEL = 'font-size:0.83rem;font-weight:600;color:var(--gray-700);display:block;margin-bottom:8px';
 const HINT = 'font-weight:400;color:var(--gray-500)';
 
+const REQUIRED_IDS = new Set(['p1_name', 'p1_steps']);
+
 function field(question: Question): string {
+  const required = REQUIRED_IDS.has(question.id);
+  const star = required ? ' <span style="color:var(--red)" aria-hidden="true">*</span>' : '';
   const hint = question.hint ? ` <span style="${HINT}">(${bi(question.hint)})</span>` : '';
-  const label = `<label style="${LABEL}">${bi(question.label)}${hint}</label>`;
+  const label = `<label style="${LABEL}">${bi(question.label)}${star}${hint}</label>`;
   let input: string;
-  if (question.type === 'textarea') input = `<textarea class="roi-input" name="${question.id}" rows="3" maxlength="4000"></textarea>`;
+  if (question.type === 'textarea') input = `<textarea class="roi-input" name="${question.id}" rows="3" maxlength="4000"${required ? ' aria-required="true"' : ''}></textarea>`;
   else if (question.type === 'select') input = `<select class="roi-select" name="${question.id}"><option value="" data-en="Choose…" data-ar="${escapeHtml(ar('Choose…'))}">Choose…</option>${(question.options ?? []).map((o) => `<option value="${escapeHtml(o)}" data-en="${escapeHtml(o)}" data-ar="${escapeHtml(ar(o))}">${escapeHtml(o)}</option>`).join('')}</select>`;
-  else input = `<input class="roi-input" type="text" name="${question.id}" maxlength="4000">`;
+  else input = `<input class="roi-input" type="text" name="${question.id}" maxlength="4000"${required ? ' aria-required="true"' : ''}>`;
   return `<div data-q="${question.id}">${label}${input}</div>`;
 }
 
@@ -60,6 +65,7 @@ export function renderAuditPages(): string {
       <div id="auditLinkNote" role="status" style="font-size:0.9rem;margin-bottom:16px"></div>
       <p style="font-size:0.875rem;margin-bottom:8px">${bi('Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. Everything you send is covered by the NDA we signed.')}</p>
       <form id="auditForm" novalidate style="display:grid;gap:22px">
+        <p style="font-size:0.85rem;margin:0"><span style="color:var(--red)" aria-hidden="true">*</span> ${bi('Required. Everything else is optional.')}</p>
         ${AUDIT_SECTIONS.map(section).join('\n        ')}
         <button type="button" class="btn btn-primary btn-lg" style="width:100%;font-size:1rem" id="auditSubmitBtn">${bi('Send my answers →')}</button>
         <div class="audit-status" role="status" aria-live="polite" style="font-size:0.9rem"></div>
@@ -72,9 +78,10 @@ export function renderAuditPages(): string {
   <section class="section"><div class="container" style="max-width:560px">
     <div class="card" style="padding:40px;text-align:center">
       <div id="auditPayInfo" style="font-size:1rem">${bi('Checking your link…')}</div>
+      <p style="font-size:0.9rem;margin-top:14px">${bi('What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 90 days.')}</p>
       <button type="button" class="btn btn-primary btn-lg" style="width:100%;font-size:1rem;margin-top:20px;display:none" id="auditPayBtn">${bi('Pay securely →')}</button>
       <div class="audit-pay-status" role="status" aria-live="polite" style="font-size:0.9rem;margin-top:12px"></div>
-      <p style="font-size:0.78rem;color:var(--gray-400);margin-top:16px">${bi('Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.')}</p>
+      <p style="font-size:0.78rem;color:var(--gray-400);margin-top:16px">${bi('Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.')} ${bi('Questions? Write to hello@hallaai.com.')}</p>
     </div>
   </div></section>
 </div>`;

@@ -7,7 +7,7 @@ const page = (id: string, next: string) => html.slice(html.indexOf(`id="page-${i
 // Visible text that is not wrapped in a lang-en / lang-ar pair (ignoring numbers, e-mail addresses, brand names and the placeholders inside inputs).
 function untranslated(block: string): string[] {
   const stripped = block.replace(/<span class="lang-en">[\s\S]*?<\/span><span class="lang-ar">[\s\S]*?<\/span>/g, '<T/>').replace(/<option[^>]*data-ar="[^"]*"[^>]*>[^<]*<\/option>/g, '<T/>').replace(/<script[\s\S]*?<\/script>/g, '');
-  return [...stripped.matchAll(/>([^<>]+)</g)].map((m) => m[1].trim()).filter((t) => t && !/^[\d\W]*$/.test(t) && !/^(QuickBooks|Xero|Zoho Books|Tally|SAP Business One|Odoo|NetSuite|Microsoft Dynamics|Zoho One|HubSpot|Zoho CRM|Salesforce|Google Workspace|Microsoft 365|hello@hallaai\.com|Stripe · Google Calendar · QuickBooks|Pipedrive|Zoho CRM|Acuity|Setmore|Slack|Microsoft Teams|Google Sheets|Airtable|Mailchimp|Asana|Trello|Notion)$/.test(t));
+  return [...stripped.matchAll(/>([^<>]+)</g)].map((m) => m[1].trim()).filter((t) => t && !/[\u0600-\u06FF]/.test(t) && !/^[\d\W]*$/.test(t) && !/^(QuickBooks|Xero|Zoho Books|Tally|SAP Business One|Odoo|NetSuite|Microsoft Dynamics|Zoho One|HubSpot|Zoho CRM|Salesforce|Google Workspace|Microsoft 365|hello@hallaai\.com|Stripe · Google Calendar · QuickBooks|Pipedrive|Zoho CRM|Acuity|Setmore|Slack|Microsoft Teams|Google Sheets|Airtable|Mailchimp|Asana|Trello|Notion)$/.test(t));
 }
 
 describe('Arabic on the new pages', () => {
@@ -34,7 +34,7 @@ const pageUntilNext = (id: string) => {
   return html.slice(start, html.indexOf('<div id="page-', start + 10));
 };
 describe('Arabic on the AI Receptionist section', () => {
-  for (const id of ['features', 'how-it-works', 'pricing', 'integrations']) {
+  for (const id of ['features', 'how-it-works', 'pricing', 'integrations', 'solutions', 'solutions-answering', 'solutions-scheduling', 'solutions-messages', 'solutions-routing', 'solutions-multilingual', 'solutions-afterhours', 'solutions-screening', 'solutions-leads', 'about', 'blog']) {
     it(`the ${id} page has Arabic for all of its text`, () => {
       expect(untranslated(pageUntilNext(id))).toEqual([]);
     });

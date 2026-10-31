@@ -20,7 +20,7 @@ describe("MarketingSPA on the server", () => {
     const before = renderToString(<MarketingSPA bodyHtml={body} initialPage="consultancy" />);
     const after = renderToString(<MarketingSPA bodyHtml={body} initialPage="consultancy" ssrHtml={extractPageHtml(body, "consultancy")} />);
     expect(visibleWords(before)).toBeLessThan(20);
-    expect(after).toContain("We Don&#x27;t Sell AI".replace("&#x27;", "'"));
+    expect(after).toContain("We design, build and run the AI systems your business depends on.");
     expect(after).toContain("<h1");
     expect(visibleWords(after)).toBeGreaterThan(300);
   });

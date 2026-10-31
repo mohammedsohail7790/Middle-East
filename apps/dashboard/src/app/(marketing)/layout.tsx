@@ -10,9 +10,8 @@ export const metadata: Metadata = {
   },
   description:
     "We don’t sell AI — we install it. Halla AI builds connected AI systems for operations, client acquisition and brand visibility for businesses in the UAE, Saudi Arabia and the wider GCC, plus a 24/7 Arabic and English AI receptionist.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.hallaai.com"
-  ),
+  // The marketing site's own address. NEXT_PUBLIC_SITE_URL is the app's address on production (used for sign-in redirects), so it must not decide where search engines send visitors.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_MARKETING_URL || "https://www.hallaai.com"),
   openGraph: {
     title: "Halla AI | AI Consultancy & AI Receptionist for the GCC",
     description:

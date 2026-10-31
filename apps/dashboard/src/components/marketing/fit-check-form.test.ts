@@ -25,7 +25,8 @@ function loadInit(): () => void {
     if (js[i] === "{") depth++;
     if (js[i] === "}" && --depth === 0) break;
   }
-  return new Function(`${js.slice(start, i + 1)}\nreturn initFitCheckForm;`)() as () => void;
+  const helper = js.indexOf("function formErrorText("); // the small message helper that sits just above the form function
+  return new Function(`${js.slice(helper, i + 1)}\nreturn initFitCheckForm;`)() as () => void;
 }
 
 const form = () => document.getElementById("fitCheckForm") as HTMLFormElement;
