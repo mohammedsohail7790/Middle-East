@@ -34,7 +34,8 @@ describe("marketingMetadata", () => {
   it("describes the home page as the consultancy, with its own canonical address and no doubled brand name", () => {
     const m = marketingMetadata("consultancy", "/en");
     expect(m.title).toEqual({ absolute: "Halla AI | AI Consultancy & AI Receptionist for the GCC" });
-    expect(String(m.description)).toContain("we install it");
+    expect(String(m.description)).toContain("connected AI systems");
+    expect(String(m.description).length).toBeLessThanOrEqual(160); // Bing flags longer descriptions
     expect(m.alternates?.canonical).toBe("/en");
     expect(m.openGraph?.url).toBe("/en");
   });
