@@ -37,10 +37,15 @@ function applyPrimaryCtaText() {
   const footerCtaBtn = document.getElementById('footerPrimaryCta');
   if (footerCtaBtn) footerCtaBtn.textContent = ctaText;
 }
-function setSectionMode(section) {
+// Company-wide pages (About, Terms, Privacy, Security) belong to no single
+// product. They keep whichever nav/footer the visitor arrived with (the
+// hub's consultancy set by default) but must not light up a product tab.
+const COMPANY_PAGES = new Set(['about', 'terms', 'privacy', 'security']);
+function setSectionMode(section, neutral) {
   document.body.setAttribute('data-section', section);
   document.querySelectorAll('.section-switch-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.section === section); if (b.tagName === 'BUTTON') b.setAttribute('aria-pressed', String(b.dataset.section === section));
+    const on = !neutral && b.dataset.section === section;
+    b.classList.toggle('active', on); if (b.tagName === 'BUTTON') b.setAttribute('aria-pressed', String(on));
   });
   applyPrimaryCtaText();
 }
@@ -154,7 +159,12 @@ function go(page, opts) {
     page = DEFAULT_PAGE;
   }
 
-  setSectionMode(sectionForPage(page));
+  if (COMPANY_PAGES.has(page)) {
+    const cur = document.body.getAttribute('data-section');
+    setSectionMode(cur || 'consultancy', true);
+  } else {
+    setSectionMode(sectionForPage(page));
+  }
   closeMob();
   closeAllDropdowns();
 
