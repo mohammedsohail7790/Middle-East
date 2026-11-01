@@ -27,6 +27,8 @@ export const metadata: Metadata = {
       "Connected AI systems for small business — and a 24/7 receptionist from $39/month.",
     images: ["/logo-consultancy.jpg"],
   },
+  // Meta Business domain verification for hallaai.com.
+  other: { "facebook-domain-verification": "jagyh6pbbt1oj4qxuvi8ubtn365ok6" },
   icons: {
     icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/logo-consultancy-favicon.jpg", type: "image/jpeg" }],
     apple: "/apple-touch-icon.png",
