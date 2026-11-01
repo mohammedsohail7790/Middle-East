@@ -7,7 +7,7 @@ import { extractPageHtml } from "@/lib/marketing-ssr";
 export const metadata: Metadata = {
   title: "Halla AI | AI Consultancy & AI Receptionist for the GCC",
   description:
-    "We don’t sell AI — we install it. Halla AI builds connected AI systems for operations, client acquisition and brand visibility for businesses in the UAE, Saudi Arabia and the wider GCC, plus a 24/7 Arabic and English AI receptionist.",
+    "We install connected AI systems for operations, client acquisition and brand, plus a 24/7 Arabic and English AI receptionist. Built for GCC businesses.",
   openGraph: {
     title: "Halla AI – Never Miss a Call",
     description:
