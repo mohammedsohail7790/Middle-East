@@ -66,9 +66,14 @@ export function createPublicConsultRequestRouter(): Router {
         { label: 'Notes', value: notes || '—' },
       ];
 
+      // The website's Contact page posts here too, marking itself with a "General enquiry" priority.
+      const isContactMessage = typeof priority === 'string' && priority.startsWith('General enquiry');
+
       const html = renderBrandedEmail({
-        eyebrow: 'New Diagnostic Call Request',
-        title: business ? `${business} wants a diagnostic call` : `${name} wants a diagnostic call`,
+        eyebrow: isContactMessage ? 'New Contact Message' : 'New Diagnostic Call Request',
+        title: isContactMessage
+          ? `${name} sent a message`
+          : business ? `${business} wants a diagnostic call` : `${name} wants a diagnostic call`,
         bodyHtml: renderDetailList(rows),
         ctaLabel: 'Reply to lead',
         ctaUrl: `mailto:${email}`,
@@ -79,7 +84,7 @@ export function createPublicConsultRequestRouter(): Router {
           from: `Halla AI <${process.env.EMAIL_FROM || 'noreply@hallaai.com'}>`,
           to: LEAD_NOTIFICATION_TO,
           replyTo: email,
-          subject: `New Diagnostic Call Request — ${business || name}`,
+          subject: isContactMessage ? `New Contact Message — ${name}` : `New Diagnostic Call Request — ${business || name}`,
           html,
           text: stripToPlainText(html),
         });

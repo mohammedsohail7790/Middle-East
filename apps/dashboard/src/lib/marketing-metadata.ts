@@ -19,6 +19,7 @@ const PAGE_META: Record<string, [string, string]> = {
   intelligence: ["AI Business Automation | Halla AI", "One AI layer for your leads, quotes and invoices. It proposes the next action, waits for your approval on anything that matters and logs everything it does."],
   "industries-all": ["AI Receptionist by Industry | Halla AI", "Pre-configured for clinics, real estate, legal, facilities, hotels, automotive, schools and insurance, answering in Arabic or English."],
   faq: ["Frequently Asked Questions | Halla AI", "Answers about how the Halla AI receptionist works, live agents, call recording, pricing and the free trial."],
+  contact: ["Contact Halla AI", "Send the Halla AI team a message or email hello@hallaai.com. We reply within one business day. Live chat 9am to 5pm UAE time."],
   about: ["About Halla AI", "Halla AI is built by business owners, for business owners: AI systems and an AI receptionist for the GCC."],
 };
 
