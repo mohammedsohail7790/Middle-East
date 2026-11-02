@@ -274,7 +274,7 @@ body[data-section="intelligence"] .footer-group[data-section="intelligence"] { d
 body[data-section="intelligence"] .footer-group[data-section="consultancy"],
 body[data-section="intelligence"] .footer-group[data-section="receptionist"] { display: none; }
 .flink-recv { display: none !important; }
-body[data-section="receptionist"] .flink-recv { display: inline-block !important; }
+body[data-section="receptionist"] .flink-recv { display: block !important; }
 
 .nav-actions .nav-group[data-section="receptionist"],
 .nav-actions .nav-group[data-section="intelligence"] { display: none; }
