@@ -40,7 +40,7 @@ function applyPrimaryCtaText() {
 // Company-wide pages (About, Terms, Privacy, Security) belong to no single
 // product. They keep whichever nav/footer the visitor arrived with (the
 // hub's consultancy set by default) but must not light up a product tab.
-const COMPANY_PAGES = new Set(['about', 'terms', 'privacy', 'security']);
+const COMPANY_PAGES = new Set(['about', 'contact', 'terms', 'privacy', 'security']);
 function setSectionMode(section, neutral) {
   document.body.setAttribute('data-section', section);
   document.querySelectorAll('.section-switch-btn').forEach(b => {
@@ -470,6 +470,7 @@ function hallaInit() {
   initPhone3D();
   initBrowserFrameTilt();
   initConsultForm();
+  initContactForm();
   initFitCheckForm();
   initAuditPages();
 
@@ -567,6 +568,77 @@ function initConsultForm() {
         statusEl.textContent = isAr() ? 'شكرًا لك! سنتواصل معك خلال يوم عمل واحد لتحديد موعد مكالمتك التشخيصية.' : 'Thank you! We will reach out within 1 business day to schedule your diagnostic call.';
         form.querySelectorAll('input, textarea').forEach((el) => { el.value = ''; });
         form.querySelectorAll('select').forEach((el) => { el.selectedIndex = 0; }); // back to the first choice, not a blank one
+        btn.innerHTML = btnDefaultText;
+        btn.disabled = false;
+      })
+      .catch((err) => {
+        statusEl.style.color = 'var(--red)';
+        statusEl.textContent = err.message || (isAr() ? 'حدث خطأ ما. يُرجى مراسلتنا مباشرة على hello@hallaai.com.' : 'Something went wrong. Please email hello@hallaai.com directly.');
+        btn.innerHTML = btnDefaultText;
+        btn.disabled = false;
+      });
+  });
+}
+
+function initContactForm() {
+  const btn = document.getElementById('contactSendBtn');
+  const form = document.getElementById('contactCard');
+  if (!btn || !form) return;
+
+  const nameInput = form.querySelector('input[name="name"]');
+  const emailInput = form.querySelector('input[name="email"]');
+  const messageInput = form.querySelector('textarea[name="message"]');
+
+  const statusEl = document.createElement('div');
+  statusEl.className = 'consult-form-status';
+  statusEl.style.marginTop = '12px';
+  statusEl.style.fontSize = '0.9rem';
+  btn.insertAdjacentElement('afterend', statusEl);
+
+  const btnDefaultText = btn.innerHTML;
+  const isAr = () => document.documentElement.lang === 'ar';
+
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    [nameInput, emailInput, messageInput].forEach((el) => { el.style.borderColor = ''; });
+    let valid = true;
+    [nameInput, emailInput, messageInput].forEach((el) => {
+      if (!el.value.trim()) { el.style.borderColor = 'var(--red)'; valid = false; }
+    });
+    if (emailInput.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+      emailInput.style.borderColor = 'var(--red)';
+      valid = false;
+    }
+    if (!valid) {
+      statusEl.style.color = 'var(--red)';
+      statusEl.textContent = isAr() ? 'يرجى إدخال اسمك وبريد إلكتروني صحيح ورسالتك.' : 'Please enter your name, a valid email address and your message.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = isAr() ? 'جارٍ الإرسال...' : 'Sending...';
+    statusEl.style.color = '';
+    statusEl.textContent = '';
+
+    // Same lead email as the booking form; the priority line tells us it came from the Contact page.
+    fetch('https://gateway.hallaai.com/api/v1/public/consult-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: nameInput.value.trim(),
+        email: emailInput.value.trim(),
+        priority: 'General enquiry (Contact page)',
+        notes: messageInput.value.trim(),
+      }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || (isAr() ? 'حدث خطأ ما. يُرجى مراسلتنا مباشرة على hello@hallaai.com.' : 'Something went wrong. Please email hello@hallaai.com directly.'));
+        }
+        statusEl.style.color = 'var(--green, #2ecc71)';
+        statusEl.textContent = isAr() ? 'شكرًا لك! وصلتنا رسالتك وسنرد خلال يوم عمل واحد.' : 'Thank you! We got your message and will reply within 1 business day.';
+        form.querySelectorAll('input, textarea').forEach((el) => { el.value = ''; });
         btn.innerHTML = btnDefaultText;
         btn.disabled = false;
       })

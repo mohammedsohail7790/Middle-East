@@ -24,6 +24,7 @@ export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
   "/blog": "blog",
   "/faq": "faq",
   "/about": "about",
+  "/contact": "contact",
   "/privacy": "privacy",
   "/terms": "terms",
   "/forwarding": "forwarding",
