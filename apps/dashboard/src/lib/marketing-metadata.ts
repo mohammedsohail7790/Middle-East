@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-/** The consultancy is the home page, so its search title, description and canonical address say what it is (the receptionist wording belongs to the receptionist pages). */
-const CONSULTANCY_TITLE = "Halla AI | AI Consultancy & AI Receptionist for the GCC";
+/** The hub (page id "consultancy") is the general Halla AI home page, so its search title, description and canonical address say what it is (the receptionist wording belongs to the receptionist pages). */
+const CONSULTANCY_TITLE = "Halla AI | End-to-End AI Systems for GCC Businesses";
 const CONSULTANCY_DESCRIPTION =
   "We install connected AI systems for operations, client acquisition and brand, plus a 24/7 Arabic and English AI receptionist. Built for GCC businesses.";
 
