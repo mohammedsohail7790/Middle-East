@@ -5,7 +5,7 @@ import "@/styles/apple-dashboard.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Halla AI | AI Consultancy & AI Receptionist for the GCC",
+    default: "Halla AI | End-to-End AI Systems for GCC Businesses",
     template: "%s | Halla AI",
   },
   description:
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   // The marketing site's own address. NEXT_PUBLIC_SITE_URL is the app's address on production (used for sign-in redirects), so it must not decide where search engines send visitors.
   metadataBase: new URL(process.env.NEXT_PUBLIC_MARKETING_URL || "https://www.hallaai.com"),
   openGraph: {
-    title: "Halla AI | AI Consultancy & AI Receptionist for the GCC",
+    title: "Halla AI | End-to-End AI Systems for GCC Businesses",
     description:
       "We install AI systems for operations, growth, and brand — plus a receptionist that never misses a call.",
     type: "website",
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Halla AI | AI Consultancy & AI Receptionist for the GCC",
+    title: "Halla AI | End-to-End AI Systems for GCC Businesses",
     description:
       "Connected AI systems for small business — and a 24/7 receptionist from $39/month.",
     images: ["/logo-consultancy.jpg"],

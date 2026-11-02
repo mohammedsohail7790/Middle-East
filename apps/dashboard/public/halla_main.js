@@ -37,7 +37,7 @@ function applyPrimaryCtaText() {
   const footerCtaBtn = document.getElementById('footerPrimaryCta');
   if (footerCtaBtn) footerCtaBtn.textContent = ctaText;
 }
-// Company-wide pages (About, Terms, Privacy, Security) belong to no single
+// The Halla AI home (page-consultancy) is neutral too. Company-wide pages (About, Terms, Privacy, Security) belong to no single
 // product. They keep whichever nav/footer the visitor arrived with (the
 // hub's consultancy set by default) but must not light up a product tab.
 const COMPANY_PAGES = new Set(['about', 'contact', 'terms', 'privacy', 'security']);
@@ -50,7 +50,7 @@ function setSectionMode(section, neutral) {
   applyPrimaryCtaText();
 }
 function switchSection(section) {
-  if (section === 'consultancy') { go('consultancy'); }
+  if (section === 'consultancy') { go('ai-consultancy'); }
   else if (section === 'intelligence') { go('intelligence'); }
   else { go('home'); }
 }
@@ -62,6 +62,8 @@ function navPrimaryCtaClick() {
 }
 function logoClick() {
   const section = document.body.getAttribute('data-section') || 'consultancy';
+  // The hub is the Halla AI home page; the Consultancy tab is its own page.
+  if (section === 'consultancy') { go('consultancy'); return; }
   switchSection(section);
 }
 // Scroll to an anchor on the AI Consultancy spoke page (page-ai-consultancy).
@@ -162,6 +164,9 @@ function go(page, opts) {
   if (COMPANY_PAGES.has(page)) {
     const cur = document.body.getAttribute('data-section');
     setSectionMode(cur || 'consultancy', true);
+  } else if (page === 'consultancy') {
+    // Halla AI home: the general landing page, so no product tab is lit.
+    setSectionMode('consultancy', true);
   } else {
     setSectionMode(sectionForPage(page));
   }
