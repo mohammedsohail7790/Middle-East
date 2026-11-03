@@ -304,6 +304,27 @@ export class WhatsAppStore {
       bookingsFromWhatsAppContacts: n(appt.rows[0]?.bookings),
     };
   }
+
+  async setStripeKey(tenantId: string, key: string | null): Promise<void> {
+    const enc = key ? encryptCredentials({ key }) : null;
+    await voiceDb.query(`UPDATE public.whatsapp_numbers SET stripe_key_enc = $2, updated_at = NOW() WHERE tenant_id = $1`, [tenantId, enc]);
+  }
+
+  async hasStripeKey(tenantId: string): Promise<boolean> {
+    const r = await voiceDb.query(`SELECT stripe_key_enc IS NOT NULL AS has FROM public.whatsapp_numbers WHERE tenant_id = $1`, [tenantId]);
+    return r.rows[0]?.has === true;
+  }
+
+  async getStripeKey(tenantId: string): Promise<string | null> {
+    const r = await voiceDb.query(`SELECT stripe_key_enc FROM public.whatsapp_numbers WHERE tenant_id = $1`, [tenantId]);
+    const enc = r.rows[0]?.stripe_key_enc as string | null | undefined;
+    if (!enc) return null;
+    try {
+      return decryptCredentials<{ key: string }>(enc).key;
+    } catch {
+      return null;
+    }
+  }
 }
 
 export interface WhatsAppStats {

@@ -21,6 +21,9 @@ import {
 } from './whatsapp.client.js';
 import { isWindowOpen, sendReply } from './whatsapp.outbound.js';
 import { processWebhook } from './whatsapp.service.js';
+import {
+  MAX_PAYMENT_AMOUNT, PAYMENT_CURRENCIES, StripeError, createPaymentLink, looksLikeStripeKey, verifyStripeKey, type PaymentCurrency,
+} from './whatsapp.payments.js';
 
 // ── public webhook ───────────────────────────────────────────────────────────
 
@@ -79,6 +82,18 @@ const signupSchema: ValidationSchema = {
     wabaId: { type: 'string', required: true, maxLength: 40 },
   },
 };
+const stripeKeySchema: ValidationSchema = {
+  allowOnlyBody: ['stripeKey'],
+  body: { stripeKey: { type: 'string', required: true, maxLength: 300 } },
+};
+const paymentLinkSchema: ValidationSchema = {
+  allowOnlyBody: ['amount', 'currency', 'description'],
+  body: {
+    amount: { type: 'number', required: true },
+    currency: { type: 'string', required: true, enum: [...PAYMENT_CURRENCIES] },
+    description: { type: 'string', required: true, maxLength: 120 },
+  },
+};
 const settingsSchema: ValidationSchema = {
   allowOnlyBody: ['aiEnabled', 'notifyCallers'],
   body: { aiEnabled: { type: 'boolean' }, notifyCallers: { type: 'boolean' } },
@@ -113,6 +128,7 @@ export function createWhatsAppRouter(): Router {
         webhookUrl: webhookUrl(),
         platformReady: !!appSecret() && !!process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN?.trim(),
         embeddedSignup: embeddedSignupConfig(),
+        paymentsConnected: !!num && (await whatsappStore.hasStripeKey(tenantId)),
       },
     });
   }));
@@ -177,6 +193,26 @@ export function createWhatsAppRouter(): Router {
     res.json({ success: true, data: { number: num } });
   }));
 
+  router.put('/payments', validate(stripeKeySchema), asyncHandler(async (req: any, res: any) => {
+    const tenantId = resolveTenantId(req);
+    const key = String(req.body.stripeKey).trim();
+    if (!(await whatsappStore.getNumber(tenantId))) return res.status(400).json({ error: 'Connect your WhatsApp number first.' });
+    if (!looksLikeStripeKey(key)) return res.status(400).json({ error: 'That does not look like a Stripe secret or restricted key (it starts with sk_ or rk_).' });
+    try {
+      await verifyStripeKey(key);
+    } catch (err) {
+      const msg = err instanceof StripeError ? err.message : 'Could not reach Stripe';
+      return res.status(400).json({ error: `Stripe rejected this key: ${msg}. It needs permission to read and write Payment Links and Products.` });
+    }
+    await whatsappStore.setStripeKey(tenantId, key);
+    res.json({ success: true });
+  }));
+
+  router.delete('/payments', asyncHandler(async (req: any, res: any) => {
+    await whatsappStore.setStripeKey(resolveTenantId(req), null);
+    res.json({ success: true });
+  }));
+
   router.patch('/settings', validate(settingsSchema), asyncHandler(async (req: any, res: any) => {
     const tenantId = resolveTenantId(req);
     if (typeof req.body.aiEnabled === 'boolean') await whatsappStore.setAiEnabled(tenantId, req.body.aiEnabled);
@@ -231,6 +267,35 @@ export function createWhatsAppRouter(): Router {
     await whatsappStore.flagAttention(conv.id, false);
     publishDashboardPushType(tenantId, 'whatsapp.message', [], { conversationId: conv.id });
     res.json({ success: true });
+  }));
+
+  router.post('/conversations/:id/payment-link', validate(paymentLinkSchema), asyncHandler(async (req: any, res: any) => {
+    const tenantId = resolveTenantId(req);
+    const conv = await whatsappStore.getConversation(tenantId, req.params.id);
+    if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+    const amount = Number(req.body.amount);
+    if (!Number.isFinite(amount) || amount <= 0 || amount > MAX_PAYMENT_AMOUNT) {
+      return res.status(400).json({ error: `Amount must be more than 0 and at most ${MAX_PAYMENT_AMOUNT}.` });
+    }
+    const description = String(req.body.description).trim();
+    if (!description) return res.status(400).json({ error: 'Add a short description, for example "Deposit for dental cleaning".' });
+    if (!isWindowOpen(conv)) {
+      return res.status(409).json({ error: 'The 24-hour reply window has closed. WhatsApp only allows an approved template until the customer writes again.' });
+    }
+    const key = await whatsappStore.getStripeKey(tenantId);
+    if (!key) return res.status(400).json({ error: 'Connect your Stripe account first.' });
+
+    let link;
+    try {
+      link = await createPaymentLink(key, { amount, currency: req.body.currency as PaymentCurrency, description, customerPhone: conv.customerPhone });
+    } catch (err) {
+      logger.warn('WHATSAPP_PAYMENT_LINK_FAILED', { tenantId, error: String(err).slice(0, 200) });
+      return res.status(400).json({ error: err instanceof StripeError ? `Stripe: ${err.message}` : 'Could not create the payment link.' });
+    }
+    const label = `${description}: ${amount.toFixed(2)} ${String(req.body.currency).toUpperCase()}`;
+    const r = await sendReply(tenantId, conv, `${label}\n${link.url}`, 'staff');
+    if (!r.ok) return res.status(409).json({ error: r.reason || 'The link was created but could not be sent.' });
+    res.json({ success: true, data: { url: link.url } });
   }));
 
   router.post('/conversations/:id/mode', validate(modeSchema), asyncHandler(async (req: any, res: any) => {

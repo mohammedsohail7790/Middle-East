@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { MessageCircle, Send, Bot, UserRound, Unplug, AlertTriangle } from "lucide-react";
+import { MessageCircle, Send, Bot, UserRound, Unplug, AlertTriangle, CreditCard } from "lucide-react";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { subscribeDashboardSync } from "@/lib/dashboard-sync";
@@ -18,6 +18,7 @@ interface Status {
   webhookUrl: string;
   platformReady: boolean;
   embeddedSignup?: { appId: string; configId: string } | null;
+  paymentsConnected?: boolean;
 }
 interface Conversation {
   id: string;
@@ -74,6 +75,13 @@ export default function WhatsAppPage() {
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  const [stripeKey, setStripeKey] = useState("");
+  const [stripeBusy, setStripeBusy] = useState(false);
+  const [stripeError, setStripeError] = useState<string | null>(null);
+  const [payOpen, setPayOpen] = useState(false);
+  const [pay, setPay] = useState({ amount: "", currency: "aed", description: "" });
+  const [payBusy, setPayBusy] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -154,6 +162,44 @@ export default function WhatsAppPage() {
   async function saveSetting(patch: { aiEnabled?: boolean; notifyCallers?: boolean }) {
     setStatus((s) => s && { ...s, notifyCallers: patch.notifyCallers ?? s.notifyCallers, number: s.number && { ...s.number, aiEnabled: patch.aiEnabled ?? s.number.aiEnabled } });
     try { await api.patch("/channels/whatsapp/settings", patch); } catch { await loadStatus(); }
+  }
+
+  async function saveStripeKey() {
+    setStripeBusy(true);
+    setStripeError(null);
+    try {
+      await api.put("/channels/whatsapp/payments", { stripeKey: stripeKey.trim() });
+      setStripeKey("");
+      await loadStatus();
+    } catch (e) {
+      setStripeError(e instanceof Error ? e.message : t("payments.keyFailed"));
+    } finally {
+      setStripeBusy(false);
+    }
+  }
+
+  async function removeStripeKey() {
+    if (!window.confirm(t("payments.removeConfirm"))) return;
+    await api.del("/channels/whatsapp/payments");
+    await loadStatus();
+  }
+
+  async function sendPaymentLink() {
+    if (!selected) return;
+    setPayBusy(true);
+    setPayError(null);
+    try {
+      await api.post(`/channels/whatsapp/conversations/${selected}/payment-link`, {
+        amount: Number(pay.amount), currency: pay.currency, description: pay.description.trim(),
+      });
+      setPay({ amount: "", currency: pay.currency, description: "" });
+      setPayOpen(false);
+      await Promise.all([loadThread(selected), loadConvs()]);
+    } catch (e) {
+      setPayError(e instanceof Error ? e.message : t("payments.failed"));
+    } finally {
+      setPayBusy(false);
+    }
   }
 
   async function send() {
@@ -237,6 +283,25 @@ export default function WhatsAppPage() {
               <Toggle checked={status?.number?.aiEnabled ?? true} onChange={(v) => void saveSetting({ aiEnabled: v })} label={t("aiReplies")} help={t("aiRepliesHelp")} />
               <Toggle checked={status?.notifyCallers ?? false} onChange={(v) => void saveSetting({ notifyCallers: v })} label={t("notifyCallers")} help={t("notifyCallersHelp")} />
             </div>
+            <div className="space-y-2 min-w-[16rem] max-w-md">
+              <div className="text-sm font-medium flex items-center gap-1.5"><CreditCard className="size-4" />{t("payments.title")}</div>
+              {status?.paymentsConnected ? (
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-emerald-600">{t("payments.connected")}</span>
+                  <button className={cn(BTN, "border border-border text-muted-foreground hover:text-foreground")} onClick={() => void removeStripeKey()}>{t("payments.remove")}</button>
+                </div>
+              ) : (
+                <>
+                  <p className="text-xs text-muted-foreground">{t("payments.help")}</p>
+                  <input className={INPUT} type="password" autoComplete="off" placeholder={t("payments.keyLabel")} value={stripeKey} onChange={(e) => setStripeKey(e.target.value)} />
+                  <p className="text-xs text-muted-foreground">{t("payments.keyHelp")}</p>
+                  {stripeError && <p className="text-xs text-red-500">{stripeError}</p>}
+                  <button className={cn(BTN, "bg-accent text-accent-foreground")} disabled={stripeBusy || !stripeKey.trim()} onClick={() => void saveStripeKey()}>
+                    {stripeBusy ? t("payments.saving") : t("payments.save")}
+                  </button>
+                </>
+              )}
+            </div>
             <div className="self-start">
               <button className={cn(BTN, "border border-border text-muted-foreground hover:text-foreground")} onClick={() => void disconnect()}>
                 <Unplug className="size-4" />{t("disconnect")}
@@ -293,6 +358,9 @@ export default function WhatsAppPage() {
                 <>
                   <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-3">
                     <span className="font-medium text-sm" dir="ltr">{thread.conversation.customerName || thread.conversation.customerPhone}</span>
+                    {status?.paymentsConnected && (
+                      <button className={cn(BTN, "border border-border")} onClick={() => setPayOpen((v) => !v)}><CreditCard className="size-4" />{t("payments.send")}</button>
+                    )}
                     {thread.conversation.mode === "ai" ? (
                       <button className={cn(BTN, "border border-border")} onClick={() => void setMode("human")}><UserRound className="size-4" />{t("takeOver")}</button>
                     ) : (
@@ -314,6 +382,21 @@ export default function WhatsAppPage() {
                     ))}
                     <div ref={bottomRef} />
                   </div>
+                  {payOpen && status?.paymentsConnected && (
+                    <div className="border-t border-border p-3 space-y-2 bg-muted/30">
+                      <div className="grid gap-2 sm:grid-cols-[8rem_6rem_1fr]">
+                        <input className={INPUT} inputMode="decimal" placeholder={t("payments.amount")} aria-label={t("payments.amount")} value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} />
+                        <select className={INPUT} aria-label={t("payments.currency")} value={pay.currency} onChange={(e) => setPay({ ...pay, currency: e.target.value })}>
+                          {["aed", "sar", "qar", "usd", "eur", "gbp"].map((c) => <option key={c} value={c}>{c.toUpperCase()}</option>)}
+                        </select>
+                        <input className={INPUT} maxLength={120} placeholder={t("payments.descriptionPlaceholder")} aria-label={t("payments.description")} value={pay.description} onChange={(e) => setPay({ ...pay, description: e.target.value })} />
+                      </div>
+                      {payError && <p className="text-xs text-red-500">{payError}</p>}
+                      <button className={cn(BTN, "bg-accent text-accent-foreground")} disabled={payBusy || !(Number(pay.amount) > 0) || !pay.description.trim() || !thread.conversation.windowOpen} onClick={() => void sendPaymentLink()}>
+                        {payBusy ? t("payments.sending") : t("payments.sendLink")}
+                      </button>
+                    </div>
+                  )}
                   <div className="border-t border-border p-3 space-y-2">
                     {!thread.conversation.windowOpen && <p className="text-xs text-amber-600">{t("windowClosed")}</p>}
                     {sendError && <p className="text-xs text-red-500">{sendError}</p>}
