@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { MarketingProviders } from "@/components/marketing/MarketingProviders";
+import { hallaFaqJsonLd } from "@/lib/halla-faq-jsonld";
 import "../globals.css";
 import "@/styles/apple-dashboard.css";
 
@@ -57,6 +58,7 @@ export default function MarketingRootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(hallaFaqJsonLd).replace(/</g, "\\u003c") }} />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
