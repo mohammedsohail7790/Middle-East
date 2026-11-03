@@ -143,6 +143,12 @@ export function createWhatsAppRouter(): Router {
     res.json({ success: true });
   }));
 
+  router.get('/stats', asyncHandler(async (req: any, res: any) => {
+    const tenantId = resolveTenantId(req);
+    const days = Math.min(90, Math.max(1, Number.parseInt(String(req.query.days ?? '30'), 10) || 30));
+    res.json({ success: true, data: await whatsappStore.getStats(tenantId, days) });
+  }));
+
   router.get('/conversations', asyncHandler(async (req: any, res: any) => {
     const tenantId = resolveTenantId(req);
     const rows = await whatsappStore.listConversations(tenantId, Number(req.query.limit) || 50);
