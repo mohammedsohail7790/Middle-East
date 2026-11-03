@@ -94,6 +94,8 @@ async function resolveText(num: WhatsAppNumber, m: InboundMessage): Promise<{ te
 async function processMessage(num: WhatsAppNumber, m: InboundMessage): Promise<void> {
   const tenantId = num.tenantId;
   let conv = await whatsappStore.upsertConversation(tenantId, m.from, m.name);
+  // First message from this number: make sure they exist in the CRM. Never blocks the reply.
+  if (!conv.lastInboundAt) void whatsappStore.ensureCrmContact(tenantId, m.from, m.name).catch((err) => logger.warn('WHATSAPP_CRM_CONTACT_FAILED', { tenantId, error: String(err).slice(0, 160) }));
 
   const resolved = await resolveText(num, m);
   const stored = resolved.text || (resolved.failedVoice ? '[voice message]' : `[${m.type}]`);

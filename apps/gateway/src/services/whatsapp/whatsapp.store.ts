@@ -244,6 +244,71 @@ export class WhatsAppStore {
       templateName: x.template_name, status: x.status, error: x.error, createdAt: x.created_at,
     }));
   }
+
+  /** Adds the WhatsApp customer to the tenant's CRM once (matched on digits of the phone). Returns true when a contact was created. */
+  async ensureCrmContact(tenantId: string, customerPhone: string, name?: string | null): Promise<boolean> {
+    const digits = customerPhone.replace(/\D/g, '');
+    if (!digits) return false;
+    const r = await voiceDb.query(
+      `INSERT INTO public.crm_contacts (tenant_id, name, phone, notes)
+       SELECT $1, $2, $3, 'Source: WhatsApp'
+       WHERE NOT EXISTS (
+         SELECT 1 FROM public.crm_contacts
+         WHERE tenant_id = $1 AND regexp_replace(COALESCE(phone, ''), '\\D', '', 'g') = $4
+       )`,
+      [tenantId, name?.trim() || `+${digits}`, `+${digits}`, digits]
+    );
+    return (r.rowCount ?? 0) > 0;
+  }
+
+  /** Counts for the dashboard report over the last `days` days. */
+  async getStats(tenantId: string, days: number): Promise<WhatsAppStats> {
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const [conv, msg, appt] = await Promise.all([
+      voiceDb.query(
+        `SELECT COUNT(*) FILTER (WHERE created_at >= $2) AS new_conversations,
+                COUNT(*) FILTER (WHERE needs_attention) AS needing_attention,
+                COUNT(*) FILTER (WHERE opted_out) AS opted_out
+         FROM public.whatsapp_conversations WHERE tenant_id = $1`,
+        [tenantId, since]
+      ),
+      voiceDb.query(
+        `SELECT COUNT(*) FILTER (WHERE direction = 'inbound') AS inbound,
+                COUNT(*) FILTER (WHERE direction = 'outbound' AND sender = 'ai') AS ai_replies,
+                COUNT(*) FILTER (WHERE direction = 'outbound' AND sender = 'staff') AS staff_replies,
+                COUNT(*) FILTER (WHERE direction = 'outbound' AND sender = 'system') AS reminders_and_confirmations
+         FROM public.whatsapp_messages WHERE tenant_id = $1 AND created_at >= $2`,
+        [tenantId, since]
+      ),
+      voiceDb.query(
+        `SELECT COUNT(*) AS bookings FROM public.appointments a
+         WHERE a.tenant_id = $1 AND a.created_at >= $2 AND a.status <> 'cancelled'
+           AND EXISTS (
+             SELECT 1 FROM public.whatsapp_conversations c
+             WHERE c.tenant_id = a.tenant_id
+               AND regexp_replace(c.customer_phone, '\\D', '', 'g') = regexp_replace(COALESCE(a.phone, ''), '\\D', '', 'g')
+           )`,
+        [tenantId, since]
+      ),
+    ]);
+    const n = (v: unknown) => Number(v ?? 0);
+    return {
+      days,
+      newConversations: n(conv.rows[0]?.new_conversations),
+      needingAttention: n(conv.rows[0]?.needing_attention),
+      optedOut: n(conv.rows[0]?.opted_out),
+      inboundMessages: n(msg.rows[0]?.inbound),
+      aiReplies: n(msg.rows[0]?.ai_replies),
+      staffReplies: n(msg.rows[0]?.staff_replies),
+      remindersAndConfirmations: n(msg.rows[0]?.reminders_and_confirmations),
+      bookingsFromWhatsAppContacts: n(appt.rows[0]?.bookings),
+    };
+  }
+}
+
+export interface WhatsAppStats {
+  days: number; newConversations: number; needingAttention: number; optedOut: number;
+  inboundMessages: number; aiReplies: number; staffReplies: number; remindersAndConfirmations: number; bookingsFromWhatsAppContacts: number;
 }
 
 export const whatsappStore = new WhatsAppStore();
