@@ -645,7 +645,22 @@
         "staff": "Team",
         "system": "Auto",
         "customer": ""
-      }
+      },
+      "report": {
+        "title": "Last 30 days",
+        "newConversations": "New conversations",
+        "inbound": "Messages received",
+        "aiReplies": "AI replies",
+        "staffReplies": "Team replies",
+        "auto": "Reminders and confirmations",
+        "bookings": "Bookings from WhatsApp contacts",
+        "needingAttention": "Need your attention",
+        "optedOut": "Opted out"
+      },
+      "connectWithFacebook": "Connect with Facebook",
+      "connectWithFacebookHelp": "Sign in with Facebook, pick your business and your WhatsApp number. No tokens to copy.",
+      "signupFailed": "We could not finish connecting. Please try again.",
+      "orPaste": "Or enter the details yourself"
     }
   },
   "gates": {

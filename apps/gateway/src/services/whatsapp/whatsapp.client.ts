@@ -252,3 +252,33 @@ export async function transcribeAudio(data: Buffer, mime: string): Promise<strin
   const text = typeof json?.text === 'string' ? json.text.trim() : '';
   return text || null;
 }
+
+// ── Embedded Signup (Meta Tech Provider onboarding) ─────────────────────────
+
+export function metaAppId(): string | null {
+  return process.env.META_APP_ID?.trim() || null;
+}
+
+/** Trades the short-lived `code` from the Embedded Signup pop-up for the client's business token. */
+export async function exchangeSignupCode(code: string): Promise<string> {
+  const id = metaAppId();
+  const secret = appSecret();
+  if (!id || !secret) throw new WhatsAppApiError('Embedded Signup is not configured on the gateway', 503);
+  const url = `${GRAPH_BASE}/oauth/access_token?${new URLSearchParams({ client_id: id, client_secret: secret, code })}`;
+  const res: any = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+  const json: any = await res.json().catch(() => ({}));
+  if (!res.ok || !json?.access_token) {
+    throw new WhatsAppApiError(json?.error?.message || `Graph API ${res.status}`, res.status, json?.error?.code);
+  }
+  return String(json.access_token);
+}
+
+/** Points the client's WhatsApp Business Account at our webhook. */
+export async function subscribeWabaToApp(wabaId: string, token: string): Promise<void> {
+  await graph(`${wabaId}/subscribed_apps`, token, { method: 'POST' });
+}
+
+/** Registers the number for the Cloud API. Needed for numbers added through Embedded Signup. */
+export async function registerPhoneNumber(phoneNumberId: string, token: string, pin: string): Promise<void> {
+  await graph(`${phoneNumberId}/register`, token, { body: { messaging_product: 'whatsapp', pin } });
+}

@@ -9,6 +9,7 @@ import { subscribeDashboardSync } from "@/lib/dashboard-sync";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
+import { EmbeddedSignupButton } from "@/components/whatsapp-embedded-signup";
 
 interface Status {
   connected: boolean;
@@ -16,6 +17,7 @@ interface Status {
   notifyCallers: boolean;
   webhookUrl: string;
   platformReady: boolean;
+  embeddedSignup?: { appId: string; configId: string } | null;
 }
 interface Conversation {
   id: string;
@@ -27,6 +29,10 @@ interface Conversation {
   lastMessageAt: string;
   preview: string | null;
   windowOpen: boolean;
+}
+interface Stats {
+  days: number; newConversations: number; needingAttention: number; optedOut: number;
+  inboundMessages: number; aiReplies: number; staffReplies: number; remindersAndConfirmations: number; bookingsFromWhatsAppContacts: number;
 }
 interface Message {
   id: string;
@@ -59,6 +65,7 @@ export default function WhatsAppPage() {
 
   const [status, setStatus] = useState<Status | null>(null);
   const [convs, setConvs] = useState<Conversation[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [thread, setThread] = useState<{ conversation: Conversation; messages: Message[] } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -89,6 +96,14 @@ export default function WhatsAppPage() {
     }
   }, []);
 
+  const loadStats = useCallback(async () => {
+    try {
+      setStats(await api.get<Stats>("/channels/whatsapp/stats?days=30", { fresh: true }));
+    } catch {
+      /* the report is optional; the inbox still works */
+    }
+  }, []);
+
   const loadThread = useCallback(async (id: string) => {
     try {
       setThread(await api.get<{ conversation: Conversation; messages: Message[] }>(`/channels/whatsapp/conversations/${id}/messages`, { fresh: true }));
@@ -102,12 +117,12 @@ export default function WhatsAppPage() {
   const connected = !!status?.connected;
   useEffect(() => {
     if (!connected) return;
-    const tick = () => { void loadConvs(); if (selected) void loadThread(selected); };
+    const tick = () => { void loadConvs(); void loadStats(); if (selected) void loadThread(selected); };
     tick();
     const timer = setInterval(tick, 10_000);
     const unsub = subscribeDashboardSync((scopes) => { if (scopes.includes("whatsapp")) tick(); });
     return () => { clearInterval(timer); unsub(); };
-  }, [connected, selected, loadConvs, loadThread]);
+  }, [connected, selected, loadConvs, loadStats, loadThread]);
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ block: "end" }); }, [thread?.messages.length]);
 
@@ -167,6 +182,21 @@ export default function WhatsAppPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-border bg-card p-5 space-y-4">
             <h2 className="font-semibold">{t("connectTitle")}</h2>
+            {status?.embeddedSignup && (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">{t("connectWithFacebookHelp")}</p>
+                <EmbeddedSignupButton
+                  appId={status.embeddedSignup.appId}
+                  configId={status.embeddedSignup.configId}
+                  onConnected={loadStatus}
+                  onError={setFormError}
+                  label={t("connectWithFacebook")}
+                  failedMessage={t("signupFailed")}
+                  className={cn(BTN, "bg-accent text-accent-foreground")}
+                />
+                <p className="text-xs text-muted-foreground pt-2">{t("orPaste")}</p>
+              </div>
+            )}
             <p className="text-sm text-muted-foreground">{t("connectIntro")}</p>
             <label className="block text-sm">
               <span className="font-medium">{t("phoneNumberId")}</span>
@@ -213,6 +243,29 @@ export default function WhatsAppPage() {
               </button>
             </div>
           </div>
+
+          {stats && (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <h2 className="text-sm font-semibold mb-3">{t("report.title")}</h2>
+              <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+                {([
+                  ["newConversations", stats.newConversations],
+                  ["inbound", stats.inboundMessages],
+                  ["aiReplies", stats.aiReplies],
+                  ["staffReplies", stats.staffReplies],
+                  ["auto", stats.remindersAndConfirmations],
+                  ["bookings", stats.bookingsFromWhatsAppContacts],
+                  ["needingAttention", stats.needingAttention],
+                  ["optedOut", stats.optedOut],
+                ] as const).map(([key, value]) => (
+                  <div key={key} className="rounded-lg bg-muted/50 px-3 py-2">
+                    <div className="text-xl font-semibold tabular-nums">{value}</div>
+                    <div className="text-xs text-muted-foreground">{t(`report.${key}`)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="grid gap-4 lg:grid-cols-[22rem_1fr] min-h-[28rem]">
             <div className="rounded-xl border border-border bg-card overflow-hidden flex flex-col">
