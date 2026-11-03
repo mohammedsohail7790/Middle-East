@@ -15,7 +15,10 @@ import { logger } from '../logger.js';
 import { channelsService } from '../channels/channels.service.js';
 import { publishDashboardPushType } from '../dashboard/dashboard-events.js';
 import { whatsappStore } from './whatsapp.store.js';
-import { WhatsAppApiError, fetchPhoneNumber, appSecret, parseWebhook, verifySignature } from './whatsapp.client.js';
+import {
+  WhatsAppApiError, fetchPhoneNumber, appSecret, parseWebhook, verifySignature,
+  exchangeSignupCode, metaAppId, registerPhoneNumber, subscribeWabaToApp,
+} from './whatsapp.client.js';
 import { isWindowOpen, sendReply } from './whatsapp.outbound.js';
 import { processWebhook } from './whatsapp.service.js';
 
@@ -68,6 +71,14 @@ const connectSchema: ValidationSchema = {
     notifyCallers: { type: 'boolean' },
   },
 };
+const signupSchema: ValidationSchema = {
+  allowOnlyBody: ['code', 'phoneNumberId', 'wabaId'],
+  body: {
+    code: { type: 'string', required: true, maxLength: 1000 },
+    phoneNumberId: { type: 'string', required: true, maxLength: 40 },
+    wabaId: { type: 'string', required: true, maxLength: 40 },
+  },
+};
 const settingsSchema: ValidationSchema = {
   allowOnlyBody: ['aiEnabled', 'notifyCallers'],
   body: { aiEnabled: { type: 'boolean' }, notifyCallers: { type: 'boolean' } },
@@ -78,6 +89,13 @@ const modeSchema: ValidationSchema = { allowOnlyBody: ['mode'], body: { mode: { 
 function webhookUrl(): string {
   const base = process.env.PUBLIC_GATEWAY_URL?.trim() || process.env.TWILIO_STREAM_WSS_URL?.replace(/^wss:/, 'https:') || 'https://gateway.hallaai.com';
   return `${base.replace(/\/$/, '')}/api/v1/channels/whatsapp/webhook`;
+}
+
+/** What the dashboard needs to show the "Connect with Facebook" button; null until Meta approves us as a Tech Provider. */
+function embeddedSignupConfig(): { appId: string; configId: string } | null {
+  const appId = metaAppId();
+  const configId = process.env.WHATSAPP_EMBEDDED_CONFIG_ID?.trim();
+  return appId && configId && appSecret() ? { appId, configId } : null;
 }
 
 export function createWhatsAppRouter(): Router {
@@ -94,6 +112,7 @@ export function createWhatsAppRouter(): Router {
         notifyCallers: conn?.config?.notifyCallers === true,
         webhookUrl: webhookUrl(),
         platformReady: !!appSecret() && !!process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN?.trim(),
+        embeddedSignup: embeddedSignupConfig(),
       },
     });
   }));
@@ -124,6 +143,38 @@ export function createWhatsAppRouter(): Router {
       config: { ...(prev?.config ?? {}), displayPhone: info.displayPhone, verifiedName: info.verifiedName, ...(notifyCallers !== undefined ? { notifyCallers } : {}) },
     });
     res.json({ success: true, data: { number: num, webhookUrl: webhookUrl() } });
+  }));
+
+  router.post('/embedded-signup', validate(signupSchema), asyncHandler(async (req: any, res: any) => {
+    const tenantId = resolveTenantId(req);
+    if (!embeddedSignupConfig()) return res.status(503).json({ error: 'Connect with Facebook is not available yet.' });
+    const phoneNumberId = String(req.body.phoneNumberId).trim();
+    const wabaId = String(req.body.wabaId).trim();
+
+    const taken = await whatsappStore.findNumberByPhoneNumberId(phoneNumberId);
+    if (taken && taken.tenantId !== tenantId) return res.status(409).json({ error: 'That WhatsApp number is already connected to another account.' });
+
+    let token: string;
+    let info;
+    try {
+      token = await exchangeSignupCode(String(req.body.code));
+      info = await fetchPhoneNumber(phoneNumberId, token);
+    } catch (err) {
+      logger.warn('WHATSAPP_EMBEDDED_SIGNUP_FAILED', { tenantId, error: String(err).slice(0, 200) });
+      return res.status(400).json({ error: 'WhatsApp did not accept the sign-in. Please try again.' });
+    }
+    // Both are best effort: the number can already be registered, and a retry re-runs them.
+    await subscribeWabaToApp(wabaId, token).catch((err) => logger.warn('WHATSAPP_SUBSCRIBE_FAILED', { tenantId, error: String(err).slice(0, 200) }));
+    await registerPhoneNumber(phoneNumberId, token, process.env.WHATSAPP_REGISTER_PIN?.trim() || '000000')
+      .catch((err) => logger.warn('WHATSAPP_REGISTER_FAILED', { tenantId, error: String(err).slice(0, 200) }));
+
+    const num = await whatsappStore.connectNumber(tenantId, { phoneNumberId, wabaId, displayPhone: info.displayPhone, accessToken: token });
+    const prev = await channelsService.getConnection(tenantId, 'whatsapp');
+    await channelsService.upsertConnection(tenantId, 'whatsapp', {
+      status: 'connected',
+      config: { ...(prev?.config ?? {}), displayPhone: info.displayPhone, verifiedName: info.verifiedName, connectedVia: 'embedded_signup' },
+    });
+    res.json({ success: true, data: { number: num } });
   }));
 
   router.patch('/settings', validate(settingsSchema), asyncHandler(async (req: any, res: any) => {

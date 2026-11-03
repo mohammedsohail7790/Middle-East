@@ -127,6 +127,10 @@ const nextConfig = {
         const connectSrc = `'self' https://gateway.hallaai.com https://*.supabase.co wss://gateway.hallaai.com wss://*.supabase.co${tawkConnectSrc}${localGatewayConnect}`;
         // Marketing page's Tabler icon webfont is loaded from jsDelivr.
         const jsdelivrSrc = ' https://cdn.jsdelivr.net';
+        // Meta's Facebook SDK and Embedded Signup pop-up (WhatsApp "Connect with Facebook"), dashboard only.
+        const metaScriptSrc = ' https://connect.facebook.net';
+        const metaConnectSrc = ' https://graph.facebook.com https://www.facebook.com';
+        const metaFrameSrc = ' https://www.facebook.com https://web.facebook.com';
 
         /** Marketing SPA is embedded in an iframe on `/` — must allow same-origin framing. */
         const marketingSpaCsp = [
@@ -143,13 +147,13 @@ const nextConfig = {
 
         const appCsp = [
             "default-src 'self'",
-            `script-src 'self' 'unsafe-inline' 'unsafe-eval'${tawkScriptSrc}${jsdelivrSrc}`,
+            `script-src 'self' 'unsafe-inline' 'unsafe-eval'${tawkScriptSrc}${jsdelivrSrc}${metaScriptSrc}`,
             `style-src 'self' 'unsafe-inline'${tawkStyleSrc}${jsdelivrSrc}`,
             `font-src 'self' data:${tawkFontSrc}${jsdelivrSrc}`,
             "img-src 'self' data: https:",
             "media-src 'self' blob:",
-            `connect-src ${connectSrc}`,
-            `frame-src 'self'${tawkFrameSrc}`,
+            `connect-src ${connectSrc}${metaConnectSrc}`,
+            `frame-src 'self'${tawkFrameSrc}${metaFrameSrc}`,
             "frame-ancestors 'none'",
         ].join('; ');
 
