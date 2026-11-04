@@ -2,8 +2,12 @@
 export const AGENT_LANGUAGES = [
   { id: "ar-SA", name: "Arabic (Saudi)" },
   { id: "en", name: "English" },
-  { id: "hi", name: "Hindi" },
+  { id: "ur", name: "Urdu" },
+  { id: "fr", name: "French" },
+  { id: "zh", name: "Mandarin Chinese" },
   { id: "ru", name: "Russian" },
+  { id: "fa", name: "Persian (Farsi)" },
+  { id: "hi", name: "Hindi" },
 ] as const;
 
 export type AgentLanguageId = (typeof AGENT_LANGUAGES)[number]["id"];

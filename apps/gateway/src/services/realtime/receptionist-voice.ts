@@ -84,6 +84,10 @@ const LANGUAGE_NAMES: Record<string, string> = {
   ar: 'Arabic',
   hi: 'Hindi',
   ru: 'Russian',
+  ur: 'Urdu',
+  fr: 'French',
+  zh: 'Mandarin Chinese',
+  fa: 'Persian (Farsi)',
 };
 
 /**
@@ -201,6 +205,10 @@ const PREVIEW_GREETING_BY_LANG: Record<string, (agentName: string) => string> = 
   ar: (agent) => `هلا والله، ${agent} تتكلم. كيف أقدر أخدمك؟`,
   ru: (agent) => `Спасибо за звонок. Вас приветствует ${agent}. Чем могу помочь?`,
   hi: (agent) => `धन्यवाद, कॉल करने के लिए। मैं ${agent} बोल रहा हूँ। मैं आपकी कैसे मदद कर सकता हूँ?`,
+  ur: (agent) => `کال کرنے کا شکریہ۔ میں ${agent} بول رہی ہوں۔ میں آپ کی کیسے مدد کر سکتی ہوں؟`,
+  fr: (agent) => `Merci de votre appel. Ici ${agent}. Comment puis-je vous aider ?`,
+  zh: (agent) => `感谢您的来电，我是${agent}。请问有什么可以帮您？`,
+  fa: (agent) => `از تماس شما متشکرم. من ${agent} هستم. چطور می‌توانم کمکتان کنم؟`,
 };
 
 /** Main role block for Realtime system prompt (language-aware) */
