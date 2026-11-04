@@ -43,6 +43,22 @@ function push(tenantId: string, conversationId: string): void {
   }
 }
 
+/** First message from a number: save them in Halla's CRM and send the lead to the client's connected CRM (HubSpot, Pipedrive, Salesforce, Zapier). Never blocks the reply. */
+async function logNewContact(tenantId: string, conversationId: string, phone: string, name?: string): Promise<void> {
+  try {
+    const created = await whatsappStore.ensureCrmContact(tenantId, phone, name);
+    if (!created) return;
+    const { integrationService } = await import('../integrations/integration.service.js');
+    await integrationService.sendRealtime(tenantId, {
+      callId: `whatsapp:${conversationId}`,
+      type: 'lead',
+      lead: { name: name?.trim() || undefined, phone: `+${phone.replace(/\D/g, '')}`, notes: 'New WhatsApp conversation' },
+    });
+  } catch (err) {
+    logger.warn('WHATSAPP_CRM_CONTACT_FAILED', { tenantId, error: String(err).slice(0, 160) });
+  }
+}
+
 const lang = (conv: Conversation): 'ar' | 'en' => languageCodeFor(conv.language);
 
 async function handleButton(tenantId: string, conv: Conversation, buttonId: string): Promise<'handled' | 'to_agent'> {
@@ -95,7 +111,7 @@ async function processMessage(num: WhatsAppNumber, m: InboundMessage): Promise<v
   const tenantId = num.tenantId;
   let conv = await whatsappStore.upsertConversation(tenantId, m.from, m.name);
   // First message from this number: make sure they exist in the CRM. Never blocks the reply.
-  if (!conv.lastInboundAt) void whatsappStore.ensureCrmContact(tenantId, m.from, m.name).catch((err) => logger.warn('WHATSAPP_CRM_CONTACT_FAILED', { tenantId, error: String(err).slice(0, 160) }));
+  if (!conv.lastInboundAt) void logNewContact(tenantId, conv.id, m.from, m.name);
 
   const resolved = await resolveText(num, m);
   const stored = resolved.text || (resolved.failedVoice ? '[voice message]' : `[${m.type}]`);
