@@ -132,7 +132,7 @@ export const AUDIT_AR: Record<string, string> = {
   'Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.':
     'تتم معالجة الدفع بالبطاقة عبر Stripe. رسوم التدقيق منفصلة عن أي مشروع بناء. بعد تسليم التدقيق لا يمكن استرداد الرسوم.',
   'Required. Everything else is optional.': 'مطلوب. كل ما عدا ذلك اختياري.',
-  'What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 90 days.': 'ما تحصل عليه: خارطة طريق مرتبة بالأولوية مع تقديرات العائد وسعر بناء ثابت لكل فرصة، صالحة لمدة 90 يوماً.',
+  'What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 30 days.': 'ما تحصل عليه: خارطة طريق مرتبة بالأولوية مع تقديرات العائد وسعر بناء ثابت لكل فرصة، صالحة لمدة 30 يوماً.',
   'Questions? Write to hello@hallaai.com.': 'أسئلة؟ راسلنا على hello@hallaai.com.',
   'Thank you, payment received': 'شكراً لك، وصلنا الدفع',
   'We will send your audit to the email address you gave us. If you do not see it within one business day, write to hello@hallaai.com.':
