@@ -230,13 +230,14 @@ export class RealtimeToolsManager {
     const lang = String(params.language || 'en').trim().toLowerCase().slice(0, 2);
     const { billingService } = await import('../billing/billing.service.js');
     const { PLAN_FEATURES, isLanguageAllowed } = await import('../../config/plan-config.js');
+    type LanguageCode = import('../../config/plan-config.js').LanguageCode;
     const sub = await billingService.getSubscription(session.tenantId);
     const plan = sub?.status === 'trialing' ? 'trial' : (sub?.plan || 'essential');
 
     if (!PLAN_FEATURES[plan]?.multiLanguageSwitching) {
       return { success: false, error: 'Mid-call language switching is not currently available on any plan' };
     }
-    if (!isLanguageAllowed(plan, lang as 'ar-SA' | 'en' | 'hi' | 'ru')) {
+    if (!isLanguageAllowed(plan, lang as LanguageCode)) {
       return { success: false, error: `Language "${lang}" is not included on your plan` };
     }
 

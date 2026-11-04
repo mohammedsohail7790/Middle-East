@@ -17,13 +17,18 @@
 
 // ─── Supported Languages ────────────────────────────────────────────────────
 // GCC / Middle East market languages.
-// Saudi Arabic first (primary market), then English, Hindi, Russian.
+// The seven languages we sell (English, Arabic, Urdu, French, Mandarin, Russian, Farsi), Saudi Arabic first as the
+// standard dialect. Hindi stays supported for tenants that already use it, but it is not one of the advertised seven.
 
 export const SUPPORTED_LANGUAGES = [
   { code: 'ar-SA', name: 'Arabic (Saudi)' },
   { code: 'en',    name: 'English' },
-  { code: 'hi',    name: 'Hindi' },
+  { code: 'ur',    name: 'Urdu' },
+  { code: 'fr',    name: 'French' },
+  { code: 'zh',    name: 'Mandarin Chinese' },
   { code: 'ru',    name: 'Russian' },
+  { code: 'fa',    name: 'Persian (Farsi)' },
+  { code: 'hi',    name: 'Hindi' },
 ] as const;
 
 export type LanguageCode = typeof SUPPORTED_LANGUAGES[number]['code'];
@@ -114,7 +119,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     includedMinutes: 250,
     overageRate: 0.74,          // AED per minute (~$0.20 USD)
     maxPhoneNumbers: 1,
-    languages: ['ar-SA', 'en'],  // Saudi Arabic + English on entry plan
+    languages: ['ar-SA', 'en', 'ur', 'fr', 'zh', 'ru', 'fa'],  // all seven advertised languages on every plan
     customVoice: false,
     crmIntegrations: false,
     advancedAnalytics: false,
@@ -134,7 +139,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     includedMinutes: 750,
     overageRate: 0.55,          // AED per minute (~$0.15 USD)
     maxPhoneNumbers: 3,
-    languages: ['ar-SA', 'en', 'hi', 'ru'],  // all 4 supported languages
+    languages: ['ar-SA', 'en', 'ur', 'fr', 'zh', 'ru', 'fa', 'hi'],  // every supported language
     customVoice: true,
     crmIntegrations: true,
     advancedAnalytics: true,
@@ -155,7 +160,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     includedMinutes: 60,
     overageRate: 0,
     maxPhoneNumbers: 3,
-    languages: ['ar-SA', 'en', 'hi', 'ru'],  // all 4 supported languages
+    languages: ['ar-SA', 'en', 'ur', 'fr', 'zh', 'ru', 'fa', 'hi'],  // every supported language
     customVoice: true,
     crmIntegrations: true,
     advancedAnalytics: true,

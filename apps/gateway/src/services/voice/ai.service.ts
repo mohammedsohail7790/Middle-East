@@ -1104,8 +1104,8 @@ CALLER PAST: {callerMemory}`;
         try {
             const parsed = JSON.parse(content) as { language?: string };
             const language = (parsed.language || fallbackLanguage || 'en').toLowerCase();
-            // Support 8 languages: English, Spanish, French, Mandarin, Russian, Arabic, Hindi, Urdu
-            if (['en', 'es', 'fr', 'zh', 'ru', 'ar', 'hi', 'ur'].includes(language)) return language;
+            // Detected languages: English, Spanish, French, Mandarin, Russian, Arabic, Hindi, Urdu, Farsi
+            if (['en', 'es', 'fr', 'zh', 'ru', 'ar', 'hi', 'ur', 'fa'].includes(language)) return language;
             return fallbackLanguage || 'en';
         } catch {
             return fallbackLanguage || 'en';
