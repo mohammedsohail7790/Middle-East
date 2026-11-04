@@ -660,7 +660,27 @@
       "connectWithFacebook": "Connect with Facebook",
       "connectWithFacebookHelp": "Sign in with Facebook, pick your business and your WhatsApp number. No tokens to copy.",
       "signupFailed": "We could not finish connecting. Please try again.",
-      "orPaste": "Or enter the details yourself"
+      "orPaste": "Or enter the details yourself",
+      "payments": {
+        "title": "Payment links",
+        "help": "Connect your own Stripe account so your team can send a payment link inside a chat. The money goes straight to your Stripe account.",
+        "keyLabel": "Stripe restricted key",
+        "keyHelp": "In Stripe, create a restricted key with write access to Payment Links and Products only. It starts with rk_.",
+        "save": "Save key",
+        "saving": "Saving...",
+        "connected": "Stripe connected",
+        "remove": "Remove key",
+        "removeConfirm": "Remove your Stripe key? Staff will no longer be able to send payment links.",
+        "keyFailed": "Could not save the key.",
+        "send": "Payment link",
+        "amount": "Amount",
+        "currency": "Currency",
+        "description": "What is it for?",
+        "descriptionPlaceholder": "Deposit for dental cleaning",
+        "sendLink": "Send link",
+        "sending": "Sending...",
+        "failed": "Could not send the payment link."
+      }
     }
   },
   "gates": {
