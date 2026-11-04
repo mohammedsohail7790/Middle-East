@@ -21,7 +21,7 @@ export const PAGE_STRINGS = [
   'Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. Everything you send is covered by the NDA we signed.',
   'Your audit is ready', 'Pay the audit fee and we send you the full audit.', 'Checking your link…', 'Pay securely →',
   'Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.',
-  'Required. Everything else is optional.', 'What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 90 days.', 'Questions? Write to hello@hallaai.com.',
+  'Required. Everything else is optional.', 'What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 30 days.', 'Questions? Write to hello@hallaai.com.',
   'Thank you, payment received', 'We will send your audit to the email address you gave us. If you do not see it within one business day, write to hello@hallaai.com.',
 ];
 
@@ -78,7 +78,7 @@ export function renderAuditPages(): string {
   <section class="section"><div class="container" style="max-width:560px">
     <div class="card" style="padding:40px;text-align:center">
       <div id="auditPayInfo" style="font-size:1rem">${bi('Checking your link…')}</div>
-      <p style="font-size:0.9rem;margin-top:14px">${bi('What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 90 days.')}</p>
+      <p style="font-size:0.9rem;margin-top:14px">${bi('What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 30 days.')}</p>
       <button type="button" class="btn btn-primary btn-lg" style="width:100%;font-size:1rem;margin-top:20px;display:none" id="auditPayBtn">${bi('Pay securely →')}</button>
       <div class="audit-pay-status" role="status" aria-live="polite" style="font-size:0.9rem;margin-top:12px"></div>
       <p style="font-size:0.78rem;color:var(--gray-400);margin-top:16px">${bi('Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.')} ${bi('Questions? Write to hello@hallaai.com.')}</p>
