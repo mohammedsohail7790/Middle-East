@@ -321,5 +321,5 @@ html body :is(#page-terms,#page-privacy) .section>.container{max-width:1080px!im
 @media (max-width:900px){.hub-stats{grid-template-columns:1fr 1fr}.hub-stat:nth-child(3){padding-inline-start:0;border-inline-start:0}.hub-stat:nth-child(n+3){border-top:1px solid rgba(18,20,23,.14);margin-top:16px;padding-top:24px}}
 
 /* Header logo: Halla AI dark lockup image */
-.logo .brand-logo-img{display:block;height:40px;width:auto;border-radius:8px}
-@media (max-width:900px){.logo .brand-logo-img{height:34px}}
+.logo .brand-logo-img{display:block;height:50px;width:auto;border-radius:8px}
+@media (max-width:900px){.logo .brand-logo-img{height:42px}}
