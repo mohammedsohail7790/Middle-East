@@ -323,3 +323,7 @@ html body :is(#page-terms,#page-privacy) .section>.container{max-width:1080px!im
 /* Header logo: Halla AI dark lockup image */
 .logo .brand-logo-img{display:block;height:50px;width:auto;border-radius:8px}
 @media (max-width:900px){.logo .brand-logo-img{height:42px}}
+
+/* Legal pages (Security, Privacy, Terms): tighter space between the title block and the first card. */
+#page-security .page-hero, #page-privacy .page-hero, #page-terms .page-hero { padding-bottom: 8px; }
+#page-security .section, #page-privacy .section, #page-terms .section { padding-top: 32px; }
