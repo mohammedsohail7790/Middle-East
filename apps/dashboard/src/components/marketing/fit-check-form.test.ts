@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { BUDGET_ANSWERS, COMPANY_SIZES, COUNTRIES, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, START_ANSWERS } from "../../../../gateway/src/services/leads/fit-check";
+import { BUDGET_ANSWERS, COMPANY_SIZES, COMPLIANCE_ANSWERS, COUNTRIES, DATA_LOCATION_ANSWERS, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, START_ANSWERS } from "../../../../gateway/src/services/leads/fit-check";
 
 /**
  * Form 1 (the fit check) is plain browser JavaScript in public/halla_main.js. This loads the real form markup and the real initFitCheckForm() into jsdom, and checks the
@@ -43,7 +43,7 @@ const send = () => document.getElementById("fitCheckBtn")!.dispatchEvent(new Eve
 
 function fillRequired() {
   set("name", "Jordan Smith"); set("email", "jordan@example.com"); set("role", "owner"); set("decider", "yes"); set("company", "Smith & Co");
-  set("size", "16-50"); set("industry", "Trading or wholesale"); set("country", "United Arab Emirates"); set("accounting", "QuickBooks"); set("erp", "Odoo");
+  set("size", "16-50"); set("industry", "Trading or wholesale"); set("country", "United Arab Emirates"); set("accounting", "QuickBooks"); set("erp", "Odoo"); set("dataLocation", "spreadsheets");
   tick("pain", "Quotes and invoices"); set("problem", "Invoices are typed by hand from emails."); set("start", "1-3-months");
   el("consent").checked = true;
 }
@@ -58,13 +58,14 @@ beforeEach(() => {
 });
 
 describe("Fit check form", () => {
-  it("offers exactly the answers the gateway accepts for size, decision, hours, timing and budget", () => {
+  it("offers exactly the answers the gateway accepts for size, decision, data, hosting, timing and budget", () => {
     const values = (name: string) => Array.from((el(name) as HTMLSelectElement).options).map((o) => o.value).filter(Boolean);
     expect(values("size")).toEqual([...COMPANY_SIZES]);
     expect(values("office")).toEqual([...OFFICE_SIZES]);
     expect(values("country")).toEqual([...COUNTRIES]);
     expect(values("decider")).toEqual([...DECIDER_ANSWERS]);
-    expect(values("hours")).toEqual([...HOURS_ANSWERS]);
+    expect(values("dataLocation")).toEqual([...DATA_LOCATION_ANSWERS]);
+    expect(values("compliance")).toEqual([...COMPLIANCE_ANSWERS]);
     expect(values("start")).toEqual([...START_ANSWERS]);
     expect(values("budget")).toEqual([...BUDGET_ANSWERS]);
   });
@@ -129,6 +130,94 @@ describe("Fit check form", () => {
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(body).toMatchObject({ size: "150+", office: "16-50", country: "Saudi Arabia", city: "Riyadh", departments: "Finance and accounts, Warehouse or logistics" });
+  });
+
+  it("asks for hours per area: one answer for each ticked area, offering exactly the hours the gateway accepts, and sends the total and the breakdown", async () => {
+    expect(form().querySelectorAll("[data-hours-list] select")).toHaveLength(0);
+    fillRequired();
+    tick("pain", "Scheduling");
+    const rows = () => Array.from(form().querySelectorAll("[data-hours-list] select")) as HTMLSelectElement[];
+    expect(rows()).toHaveLength(2);
+    expect(Array.from(rows()[0].options).map((o) => o.value).filter(Boolean)).toEqual([...HOURS_ANSWERS]);
+    rows()[0].value = "5-20"; // Quotes and invoices
+    rows()[1].value = "5-20"; // Scheduling
+    send();
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body.painHours).toBe("Quotes and invoices: 5 to 20; Scheduling: 5 to 20");
+    expect(body.hours).toBe("20-50"); // 12.5 + 12.5 hours added up
+  });
+
+  it("keeps the hours already given when another area is ticked, and drops the row when an area is unticked", () => {
+    tick("pain", "Quotes and invoices");
+    (form().querySelector('[data-hours-list] select') as HTMLSelectElement).value = "20-50";
+    tick("pain", "Scheduling");
+    expect((form().querySelector('[data-hours-list] select') as HTMLSelectElement).value).toBe("20-50");
+    const box = form().querySelector('input[name="pain"][value="Scheduling"]') as HTMLInputElement;
+    box.checked = false;
+    box.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(form().querySelectorAll("[data-hours-list] select")).toHaveLength(1);
+  });
+
+  it("opens a country list when Other is chosen, with every world country but the six already listed, and sends the name", async () => {
+    const q = form().querySelector('[data-q="countryName"]') as HTMLElement;
+    expect(q.hidden).toBe(true);
+    fillRequired();
+    set("country", "Other");
+    el("country").dispatchEvent(new Event("change", { bubbles: true }));
+    expect(q.hidden).toBe(false);
+    const names = Array.from((el("countryName") as HTMLSelectElement).options).map((o) => o.value).filter(Boolean);
+    expect(names.length).toBeGreaterThan(180);
+    expect(names).toEqual(expect.arrayContaining(["Türkiye", "Egypt", "Nigeria", "Pakistan"]));
+    expect(names).not.toContain("Qatar");
+    send(); // no country chosen yet
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(q.style.outline).toContain("var(--red)");
+    set("countryName", "Egypt");
+    send();
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({ country: "Other", countryName: "Egypt" });
+  });
+
+  it("opens a box for the software name when Other is chosen for accounting, ERP or CRM, requires it, and sends it with the answer", async () => {
+    fillRequired();
+    set("accounting", "Other");
+    el("accounting").dispatchEvent(new Event("change", { bubbles: true }));
+    expect((form().querySelector('[data-q="accountingOther"]') as HTMLElement).hidden).toBe(false);
+    send();
+    expect(fetchMock).not.toHaveBeenCalled(); // the name is missing
+    set("accountingOther", "Sage 50");
+    set("crm", "Other");
+    el("crm").dispatchEvent(new Event("change", { bubbles: true }));
+    set("crmOther", "Pipedrive");
+    send();
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({ accounting: "Other: Sage 50", crm: "Other: Pipedrive", erp: "Odoo" });
+  });
+
+  it("lists Monday.com as a CRM, so a company that uses it can say so", () => {
+    expect(Array.from((el("crm") as HTMLSelectElement).options).map((o) => o.value)).toContain("Monday.com");
+  });
+
+  it("requires where the data lives, treats the hosting question as optional, and sends both", async () => {
+    fillRequired();
+    set("dataLocation", "");
+    send();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect((form().querySelector('[data-q="dataLocation"]') as HTMLElement).style.outline).toContain("var(--red)");
+    set("dataLocation", "paper");
+    send();
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    let body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body).toMatchObject({ dataLocation: "paper" });
+    expect(body).not.toHaveProperty("compliance");
+    fetchMock.mockClear();
+    fillRequired();
+    set("compliance", "local-hosting");
+    send();
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    expect(body).toMatchObject({ dataLocation: "spreadsheets", compliance: "local-hosting" });
   });
 
   it("thanks the visitor and resets the form, keeping every dropdown on a real first choice", async () => {
