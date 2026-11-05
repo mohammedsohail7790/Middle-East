@@ -327,3 +327,7 @@ html body :is(#page-terms,#page-privacy) .section>.container{max-width:1080px!im
 /* Legal pages (Security, Privacy, Terms): tighter space between the title block and the first card. */
 #page-security .page-hero, #page-privacy .page-hero, #page-terms .page-hero { padding-bottom: 8px; }
 #page-security .section, #page-privacy .section, #page-terms .section { padding-top: 32px; }
+
+/* --- fit check: no big empty band between the intro and the form --- */
+html body #page-fit-check .page-hero{padding:104px 0 16px!important}
+html body #page-fit-check .section{padding:20px 0 72px!important}

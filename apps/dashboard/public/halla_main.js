@@ -674,12 +674,85 @@ function initFitCheckForm() {
   const statusEl = form.querySelector('.fit-form-status');
   const btnDefaultText = btn.innerHTML;
   const GATEWAY = 'https://gateway.hallaai.com/api/v1/public/fit-check';
-  const REQUIRED = ['name', 'email', 'role', 'decider', 'company', 'size', 'industry', 'country', 'accounting', 'erp', 'problem', 'start'];
+  const REQUIRED = ['name', 'email', 'role', 'decider', 'company', 'size', 'industry', 'country', 'accounting', 'erp', 'dataLocation', 'problem', 'start'];
   const isAr = () => document.documentElement.lang === 'ar';
   const field = (name) => form.querySelector('[name="' + name + '"]');
   const box = (name) => form.querySelector('[data-q="' + name + '"]');
   const checked = (name) => Array.from(form.querySelectorAll('input[name="' + name + '"]:checked')).map((el) => el.value);
   const say = (text, color) => { statusEl.style.color = color || ''; statusEl.textContent = text; };
+
+  // Every country in the world for "Other", named in the visitor's language by the browser. The GCC countries are already listed in the main question.
+  const GCC = ['AE', 'SA', 'QA', 'KW', 'BH', 'OM'];
+  const REGIONS = ('AF AL DZ AD AO AG AR AM AU AT AZ BS BD BB BY BE BZ BJ BT BO BA BW BR BN BG BF BI CV KH CM CA CF TD CL CN CO KM CG CD CR CI HR CU CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FJ FI FR GA GM GE DE GH GR GD GT GN GW GY HT HN HU IS IN ID IR IQ IE IL IT JM JP JO KZ KE KI XK KG LA LV LB LS LR LY LI LT LU MG MW MY MV ML MT MH MR MU MX FM MD MC MN ME MA MZ MM NA NR NP NL NZ NI NE NG KP MK NO PK PW PS PA PG PY PE PH PL PT RO RU RW KN LC VC WS SM ST SN RS SC SL SG SK SI SB SO ZA KR SS ES LK SD SR SE CH SY TW TJ TZ TH TL TG TO TT TN TR TM TV UG UA GB US UY UZ VU VA VE VN YE ZM ZW').split(' ').filter((c) => !GCC.includes(c));
+  const countrySelect = field('countryName');
+  if (countrySelect && countrySelect.options.length <= 1) {
+    let en = null, ar = null;
+    try { en = new Intl.DisplayNames(['en'], { type: 'region' }); ar = new Intl.DisplayNames(['ar'], { type: 'region' }); } catch (e) { /* very old browser: the list falls back to codes */ }
+    REGIONS.map((code) => ({ code, en: (en && en.of(code)) || code, ar: (ar && ar.of(code)) || code })).sort((a, b) => a.en.localeCompare(b.en)).forEach((r) => {
+      const o = document.createElement('option');
+      o.value = r.en; o.setAttribute('data-en', r.en); o.setAttribute('data-ar', r.ar); o.textContent = isAr() ? r.ar : r.en;
+      countrySelect.appendChild(o);
+    });
+  }
+
+  // "Other" opens a box where the visitor names the software or country, so we know what they actually use.
+  const OTHER_BOXES = { country: 'countryName', accounting: 'accountingOther', erp: 'erpOther', crm: 'crmOther' };
+  const syncOther = () => {
+    Object.keys(OTHER_BOXES).forEach((name) => {
+      const q = box(OTHER_BOXES[name]); const sel = field(name);
+      if (!q || !sel) return;
+      const on = sel.value === 'Other';
+      q.hidden = !on;
+      if (!on) { const inner = field(OTHER_BOXES[name]); if (inner) inner.value = ''; }
+    });
+  };
+  Object.keys(OTHER_BOXES).forEach((name) => { const sel = field(name); if (sel) sel.addEventListener('change', syncOther); });
+
+  // One hours-a-week answer for every area the visitor ticked, so we can see where the time actually goes.
+  const HOURS_CHOICES = [['under-5', 'Under 5', 'أقل من 5', 2.5], ['5-20', '5 to 20', 'من 5 إلى 20', 12.5], ['20-50', '20 to 50', 'من 20 إلى 50', 35], ['over-50', 'Over 50', 'أكثر من 50', 60], ['unsure', 'Not sure', 'لست متأكداً', 0]];
+  const hoursList = form.querySelector('[data-hours-list]');
+  const hoursHint = form.querySelector('[data-hours-hint]');
+  const syncHours = () => {
+    if (!hoursList) return;
+    const kept = {};
+    hoursList.querySelectorAll('select').forEach((sel) => { kept[sel.getAttribute('data-area')] = sel.value; });
+    hoursList.innerHTML = '';
+    const boxes = Array.from(form.querySelectorAll('input[name="pain"]:checked'));
+    boxes.forEach((cb) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:grid;grid-template-columns:1fr minmax(120px,40%);gap:10px;align-items:center';
+      const name = document.createElement('span');
+      const labelSpans = cb.parentElement.querySelectorAll('span > span');
+      name.style.fontSize = '0.9rem';
+      labelSpans.forEach((sp) => { name.appendChild(sp.cloneNode(true)); });
+      const sel = document.createElement('select');
+      sel.className = 'roi-select'; sel.setAttribute('data-area', cb.value); sel.setAttribute('aria-label', cb.value);
+      const blank = document.createElement('option'); blank.value = ''; blank.setAttribute('data-en', 'Hours…'); blank.setAttribute('data-ar', 'الساعات…'); blank.textContent = isAr() ? 'الساعات…' : 'Hours…'; sel.appendChild(blank);
+      HOURS_CHOICES.forEach((h) => { const o = document.createElement('option'); o.value = h[0]; o.setAttribute('data-en', h[1]); o.setAttribute('data-ar', h[2]); o.textContent = isAr() ? h[2] : h[1]; sel.appendChild(o); });
+      if (kept[cb.value]) sel.value = kept[cb.value];
+      row.appendChild(name); row.appendChild(sel); hoursList.appendChild(row);
+    });
+    if (hoursHint) hoursHint.style.display = boxes.length ? 'none' : '';
+  };
+  form.addEventListener('change', (e) => { if (e.target && e.target.name === 'pain') syncHours(); });
+  // Overall weekly hours for the verdict, added up from the areas; the per-area answers go to us as text.
+  const hoursSummary = () => {
+    const picks = Array.from(form.querySelectorAll('[data-hours-list] select')).filter((sel) => sel.value);
+    if (!picks.length) return { hours: undefined, painHours: undefined };
+    const label = (code) => HOURS_CHOICES.find((h) => h[0] === code)[1];
+    const painHours = picks.map((sel) => sel.getAttribute('data-area') + ': ' + label(sel.value)).join('; ');
+    if (picks.every((sel) => sel.value === 'unsure')) return { hours: 'unsure', painHours };
+    const total = picks.reduce((sum, sel) => sum + HOURS_CHOICES.find((h) => h[0] === sel.value)[3], 0);
+    return { hours: total < 5 ? 'under-5' : total < 20 ? '5-20' : total < 50 ? '20-50' : 'over-50', painHours };
+  };
+  // A software answer of "Other" is sent as "Other: <what they typed>".
+  const named = (name, otherName) => {
+    const el = field(name); const v = el && el.value.trim();
+    if (!v) return undefined;
+    if (v !== 'Other') return v;
+    const t = field(otherName); return t && t.value.trim() ? 'Other: ' + t.value.trim() : v;
+  };
+  syncOther(); syncHours();
 
   // Tie each label to its single field (so a click on the label focuses it and screen readers read it), and tell the browser what each field is so it can autofill.
   const AUTOFILL = { name: 'name', email: 'email', phone: 'tel', company: 'organization', website: 'url', city: 'address-level2', country: 'country-name' };
@@ -701,6 +774,11 @@ function initFitCheckForm() {
     REQUIRED.forEach((name) => {
       const el = field(name);
       if (el && !el.value.trim()) missing.push(name);
+    });
+    if (field('country').value === 'Other' && !field('countryName').value.trim()) missing.push('countryName');
+    [['accounting', 'accountingOther'], ['erp', 'erpOther'], ['crm', 'crmOther']].forEach((pair) => {
+      const sel = field(pair[0]);
+      if (sel && sel.value === 'Other' && !field(pair[1]).value.trim()) missing.push(pair[1]);
     });
     const email = field('email');
     if (email && email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()) && !missing.includes('email')) missing.push('email');
@@ -734,8 +812,9 @@ function initFitCheckForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: val('name'), email: val('email'), phone: val('phone'), role: val('role'), decider: val('decider'), company: val('company'), website: val('website'),
-        size: val('size'), office: val('office'), departments: list('departments'), industry: val('industry'), country: val('country'), city: val('city'), years: val('years'), accounting: val('accounting'), erp: val('erp'), crm: val('crm'),
-        channels: list('channels'), tools: list('tools'), pain: list('pain'), problem: val('problem'), hours: val('hours'), tried: val('tried'),
+        size: val('size'), office: val('office'), departments: list('departments'), industry: val('industry'), country: val('country'), countryName: val('country') === 'Other' ? val('countryName') : undefined, city: val('city'), years: val('years'),
+        accounting: named('accounting', 'accountingOther'), erp: named('erp', 'erpOther'), crm: named('crm', 'crmOther'),
+        channels: list('channels'), tools: list('tools'), pain: list('pain'), problem: val('problem'), hours: hoursSummary().hours, painHours: hoursSummary().painHours, dataLocation: val('dataLocation'), compliance: val('compliance'), tried: val('tried'),
         start: val('start'), budget: val('budget'), heard: val('heard'), consent: true,
       }),
     })
@@ -748,6 +827,7 @@ function initFitCheckForm() {
         form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach((el) => { el.value = ''; });
         form.querySelectorAll('input[type="checkbox"]').forEach((el) => { el.checked = false; });
         form.querySelectorAll('select').forEach((el) => { el.selectedIndex = 0; });
+        syncOther(); syncHours();
       })
       .catch((err) => { say(err.message || (isAr() ? 'حدث خطأ ما. يُرجى مراسلتنا مباشرة على hello@hallaai.com.' : 'Something went wrong. Please email hello@hallaai.com directly.'), 'var(--red)'); })
       .finally(() => { btn.innerHTML = btnDefaultText; btn.disabled = false; });
