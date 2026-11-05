@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { throwIfRejected } from '../email-delivery.js';
 import { renderBrandedEmail, stripToPlainText } from '../automation/email-template.js';
 
 /**
@@ -16,13 +17,13 @@ export async function sendAuditMail(opts: { eyebrow: string; title: string; subj
   if (!process.env.RESEND_API_KEY) return 'not-configured';
   const resend = new Resend(process.env.RESEND_API_KEY);
   const html = renderBrandedEmail({ eyebrow: opts.eyebrow, title: opts.title, bodyHtml: opts.bodyHtml });
-  await resend.emails.send({
+  throwIfRejected(await resend.emails.send({
     from: `Halla AI <${process.env.EMAIL_FROM || 'noreply@hallaai.com'}>`,
     to: auditRecipients(),
     replyTo: opts.replyTo,
     subject: opts.subject,
     html,
     text: stripToPlainText(html),
-  });
+  }));
   return 'sent';
 }
