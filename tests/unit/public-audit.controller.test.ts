@@ -64,6 +64,11 @@ describe('Form 2', () => {
     expect(mail.subject).toBe('Form 2 received — Smith & Co');
     expect(mail.text).toContain('Invoicing');
   });
+  it('does not say the answers were received when Resend refuses the email (it returns an error instead of throwing)', async () => {
+    send.mockResolvedValue({ data: null, error: { name: 'validation_error', statusCode: 403, message: 'The hallaai.com domain is not verified.' } });
+    const res = await post('/form2', { token: form2(), answers: { p1_name: 'Invoicing', p1_steps: 'Type it up' } });
+    expect(res.status).toBe(502);
+  });
   it('refuses an unknown question, a wrong-kind link and an empty first process', async () => {
     expect((await post('/form2', { token: form2(), answers: { evil: 'x', p1_name: 'a', p1_steps: 'b' } })).status).toBe(400);
     expect((await post('/form2', { token: pay(), answers: { p1_name: 'a', p1_steps: 'b' } })).status).toBe(400);

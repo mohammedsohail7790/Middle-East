@@ -4,6 +4,7 @@ import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
 import { renderBrandedEmail, renderDetailList, stripToPlainText } from '../automation/email-template.js';
 import { Resend } from 'resend';
+import { throwIfRejected } from '../email-delivery.js';
 
 // Public, unauthenticated endpoint — throttle per IP to prevent spam/cost-exhaustion abuse.
 const consultRequestRateLimit = MiddlewareFactory.createRateLimit({
@@ -80,14 +81,14 @@ export function createPublicConsultRequestRouter(): Router {
       });
 
       try {
-        await resend.emails.send({
+        throwIfRejected(await resend.emails.send({
           from: `Halla AI <${process.env.EMAIL_FROM || 'noreply@hallaai.com'}>`,
           to: LEAD_NOTIFICATION_TO,
           replyTo: email,
           subject: isContactMessage ? `New Contact Message — ${name}` : `New Diagnostic Call Request — ${business || name}`,
           html,
           text: stripToPlainText(html),
-        });
+        }));
       } catch (error) {
         logger.error(
           '[ConsultRequest] Failed to send lead notification email',

@@ -127,6 +127,13 @@ describe('POST /public/fit-check', () => {
     expect((await res.json()).error).toContain('hello@hallaai.com');
   });
 
+  it('tells the visitor when Resend refuses the email (it returns an error instead of throwing), rather than saying it was sent', async () => {
+    send.mockResolvedValue({ data: null, error: { name: 'validation_error', statusCode: 403, message: 'The hallaai.com domain is not verified.' } });
+    const res = await post(valid);
+    expect(res.status).toBe(502);
+    expect((await res.json()).error).toContain('hello@hallaai.com');
+  });
+
   it('stops one visitor after 5 requests in 15 minutes', async () => {
     for (let i = 0; i < 5; i++) expect((await post(valid)).status).toBe(200);
     expect((await post(valid)).status).toBe(429);

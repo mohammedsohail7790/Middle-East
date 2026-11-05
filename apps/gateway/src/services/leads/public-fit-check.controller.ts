@@ -4,6 +4,7 @@ import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
 import { escapeHtml, renderBrandedEmail, renderDetailList, stripToPlainText } from '../automation/email-template.js';
 import { Resend } from 'resend';
+import { throwIfRejected } from '../email-delivery.js';
 import { assessFit, BUDGET_ANSWERS, COMPANY_SIZES, COMPLIANCE_ANSWERS, COUNTRIES, DATA_LOCATION_ANSWERS, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, QUOTE_CURRENCY, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
 
 // Public, unauthenticated endpoint: throttle per IP, like the diagnostic-call form.
@@ -143,14 +144,14 @@ export function createPublicFitCheckRouter(): Router {
       });
 
       try {
-        await resend.emails.send({
+        throwIfRejected(await resend.emails.send({
           from: `Halla AI <${process.env.EMAIL_FROM || 'noreply@hallaai.com'}>`,
           to: LEAD_NOTIFICATION_TO,
           replyTo: b.email,
           subject: `New Fit Check — ${fit.verdict.toUpperCase()} — ${b.company}`,
           html,
           text: stripToPlainText(html),
-        });
+        }));
       } catch (error) {
         logger.error('[FitCheck] Failed to send request email', undefined, error instanceof Error ? error : new Error(String(error)));
         res.status(502).json({ error: 'Could not deliver your request. Please email hello@hallaai.com directly.' });
