@@ -81,9 +81,9 @@ ${preheaderBlock}
       <td align="center" style="padding: 36px 16px;">
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background: ${BRAND.white}; border: 1px solid ${BRAND.line}; border-radius: 14px; overflow: hidden;">
           <tr>
-            <td style="background: ${BRAND.ink}; padding: 22px 40px;">
+            <td bgcolor="${BRAND.ink}" style="background: ${BRAND.ink}; padding: 14px 40px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-                <td align="left"><img src="${logoUrl}" alt="Halla AI" width="96" style="width: 96px; height: auto; display: block; border: 0;"></td>
+                <td align="left"><img src="${logoUrl}" alt="Halla AI" width="120" style="width: 120px; height: auto; display: block; border: 0; font-family: ${FONT_DISPLAY}; font-size: 24px; font-weight: 600; color: ${BRAND.paper};"></td>
                 <td align="right" style="font-family: ${FONT}; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${BRAND.gold};">AI Consultancy &middot; GCC</td>
               </tr></table>
             </td>
