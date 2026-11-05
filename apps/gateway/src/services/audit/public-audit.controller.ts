@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { asyncHandler, MiddlewareFactory } from '../../middleware/index.js';
 import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
-import { escapeHtml, renderDetailList } from '../automation/email-template.js';
+import { renderCallout, renderDetailList, renderSummaryStrip } from '../automation/email-template.js';
 import { verifyLink, type LinkPayload } from './signed-link.js';
 import { auditPrices, formatPrice, isAuditCurrency, minorUnits } from './audit-pricing.js';
 import { AUDIT_FIELD_IDS, AUDIT_QUESTIONS, AUDIT_SECTIONS } from './audit-form-definition.js';
@@ -125,10 +125,17 @@ export function createPublicAuditRouter(): Router {
             const prefix = m ? `${m[1] === 'p' ? 'Process' : 'System'} ${m[2]}: ` : '';
             return { label: prefix + question.label, value: answers[question.id] };
           });
-        return rows.length ? `<h3 style="margin: 22px 0 0; font-size: 15px;">${escapeHtml(section.title)}</h3>${renderDetailList(rows)}` : '';
+        return rows.length ? renderDetailList(rows, section.title) : '';
       }).join('');
       const answered = Object.keys(answers).length;
-      const intro = `<p style="margin: 0 0 6px;"><b>${escapeHtml(p.company)}</b> submitted the audit questionnaire.</p><p style="margin: 0 0 6px;">Contact: ${escapeHtml(p.email)}. Reference: ${escapeHtml(p.id)}. ${answered} of ${AUDIT_QUESTIONS.length} questions answered.</p><p style="margin: 0 0 6px;"><b>Next:</b> do the analysis (about one week), then email the client the payment link. The audit is delivered once it is paid. The link is valid for ${PAYMENT_WINDOW_DAYS} days.</p>`;
+      const intro =
+        renderCallout({ tone: 'warn', label: 'Next step', headline: 'Do the analysis (about one week), then email the client the payment link.', points: [`The audit is delivered once it is paid. The payment link is valid for ${PAYMENT_WINDOW_DAYS} days.`] })
+        + renderSummaryStrip([
+          { label: 'Company', value: p.company },
+          { label: 'Answered', value: `${answered} of ${AUDIT_QUESTIONS.length}` },
+          { label: 'Contact', value: p.email },
+          { label: 'Reference', value: p.id },
+        ]);
 
       try {
         const sent = await sendAuditMail({ eyebrow: 'Audit questionnaire', title: `${p.company} submitted Form 2`, subject: `Form 2 received — ${p.company}`, bodyHtml: intro + sections, replyTo: p.email });
@@ -235,7 +242,7 @@ export async function handleAuditStripeWebhook(req: any, res: any): Promise<void
           eyebrow: 'Audit paid',
           title: `${session.metadata.company ?? 'A client'} paid for the audit`,
           subject: `Audit PAID — ${session.metadata.company ?? 'client'} (${paid})`,
-          bodyHtml: `<p style="margin: 0 0 6px; font-size: 16px; font-weight: 700;">Payment received. Deliver the audit to the client.</p>${renderDetailList(rows)}`,
+          bodyHtml: renderCallout({ tone: 'good', label: 'Payment received', headline: 'Deliver the audit to the client.' }) + renderSummaryStrip([{ label: 'Paid', value: paid }, { label: 'Company', value: session.metadata.company ?? '—' }]) + renderDetailList(rows, 'Payment details'),
           replyTo: session.customer_details?.email ?? undefined,
         });
       } catch (error) {
