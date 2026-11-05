@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { asyncHandler, MiddlewareFactory } from '../../middleware/index.js';
 import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
-import { escapeHtml, renderBrandedEmail, renderDetailList, stripToPlainText } from '../automation/email-template.js';
+import { renderBrandedEmail, renderCallout, renderDetailList, stripToPlainText, type CalloutTone } from '../automation/email-template.js';
 import { Resend } from 'resend';
 import { throwIfRejected } from '../email-delivery.js';
 import { assessFit, BUDGET_ANSWERS, COMPANY_SIZES, COMPLIANCE_ANSWERS, COUNTRIES, DATA_LOCATION_ANSWERS, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, QUOTE_CURRENCY, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
@@ -101,45 +101,72 @@ export function createPublicFitCheckRouter(): Router {
       }
 
       const fit = assessFit(b);
-      const rows = [
-        { label: 'Name', value: b.name },
-        { label: 'Email', value: b.email },
-        { label: 'Phone', value: b.phone || '—' },
-        { label: 'Role', value: ROLE_LABEL[b.role] ?? b.role },
-        { label: 'Decides?', value: DECIDER_LABEL[b.decider] ?? b.decider },
-        { label: 'Company', value: b.company },
-        { label: 'Website', value: b.website || '—' },
-        { label: 'People', value: b.office ? `${b.size} (${b.office} in the office or deciding)` : b.size },
-        { label: 'Departments', value: b.departments || '—' },
-        { label: 'Industry', value: b.industry },
-        { label: 'Country', value: `${b.country === 'Other' && b.countryName ? b.countryName : b.country}${b.city ? `, ${b.city}` : ''}` },
-        { label: 'Quote in', value: QUOTE_CURRENCY[b.country] },
-        { label: 'Years operating', value: b.years || '—' },
-        { label: 'Accounting', value: b.accounting },
-        { label: 'ERP', value: b.erp },
-        { label: 'CRM', value: b.crm || '—' },
-        { label: 'Channels', value: b.channels || '—' },
-        { label: 'Other tools', value: b.tools || '—' },
-        { label: 'Biggest drain', value: b.pain },
-        { label: 'The problem', value: b.problem },
-        { label: 'Hours a week', value: b.hours ? HOURS_LABEL[b.hours] ?? b.hours : '—' },
-        { label: 'Hours by area', value: b.painHours || '—' },
-        { label: 'Where the data lives', value: b.dataLocation ? DATA_LABEL[b.dataLocation] ?? b.dataLocation : '—' },
-        { label: 'Data or hosting rules', value: b.compliance ? COMPLIANCE_LABEL[b.compliance] ?? b.compliance : '—' },
-        { label: 'Tried before', value: b.tried || '—' },
-        { label: 'Start', value: START_LABEL[b.start] ?? b.start },
-        { label: 'Budget', value: b.budget ? BUDGET_LABEL[b.budget] ?? b.budget : '—' },
-        { label: 'Heard about us', value: b.heard || '—' },
+      const country = `${b.country === 'Other' && b.countryName ? b.countryName : b.country}${b.city ? `, ${b.city}` : ''}`;
+      const sections: Array<{ heading: string; rows: Array<{ label: string; value: string }> }> = [
+        {
+          heading: 'Contact',
+          rows: [
+            { label: 'Name', value: b.name },
+            { label: 'Email', value: b.email },
+            { label: 'Phone', value: b.phone || '—' },
+            { label: 'Role', value: ROLE_LABEL[b.role] ?? b.role },
+            { label: 'Decides?', value: DECIDER_LABEL[b.decider] ?? b.decider },
+          ],
+        },
+        {
+          heading: 'Company',
+          rows: [
+            { label: 'Company', value: b.company },
+            { label: 'Website', value: b.website || '—' },
+            { label: 'Industry', value: b.industry },
+            { label: 'Country', value: country },
+            { label: 'Quote in', value: QUOTE_CURRENCY[b.country] },
+            { label: 'People', value: b.office ? `${b.size} (${b.office} in the office or deciding)` : b.size },
+            { label: 'Departments', value: b.departments || '—' },
+            { label: 'Years operating', value: b.years || '—' },
+          ],
+        },
+        {
+          heading: 'Systems and data',
+          rows: [
+            { label: 'Accounting', value: b.accounting },
+            { label: 'ERP', value: b.erp },
+            { label: 'CRM', value: b.crm || '—' },
+            { label: 'Channels', value: b.channels || '—' },
+            { label: 'Other tools', value: b.tools || '—' },
+            { label: 'Where the data lives', value: b.dataLocation ? DATA_LABEL[b.dataLocation] ?? b.dataLocation : '—' },
+            { label: 'Data or hosting rules', value: b.compliance ? COMPLIANCE_LABEL[b.compliance] ?? b.compliance : '—' },
+          ],
+        },
+        {
+          heading: 'The problem',
+          rows: [
+            { label: 'Biggest drain', value: b.pain },
+            { label: 'In their words', value: b.problem },
+            { label: 'Hours a week', value: b.hours ? HOURS_LABEL[b.hours] ?? b.hours : '—' },
+            { label: 'Hours by area', value: b.painHours || '—' },
+            { label: 'Tried before', value: b.tried || '—' },
+          ],
+        },
+        {
+          heading: 'Timing and budget',
+          rows: [
+            { label: 'Start', value: START_LABEL[b.start] ?? b.start },
+            { label: 'Budget', value: b.budget ? BUDGET_LABEL[b.budget] ?? b.budget : '—' },
+            { label: 'Heard about us', value: b.heard || '—' },
+          ],
+        },
       ];
 
-      const reasonsHtml = `<ul style="margin: 8px 0 0; padding-left: 18px;">${fit.reasons.map((r) => `<li>${escapeHtml(r)}</li>`).join('')}</ul>`;
-      const verdictHtml = `<p style="margin: 0 0 4px; font-size: 16px; font-weight: 700;">${escapeHtml(VERDICT_LABEL[fit.verdict])}</p>${reasonsHtml}`;
+      const VERDICT_TONE: Record<typeof fit.verdict, CalloutTone> = { green: 'good', amber: 'warn', red: 'bad' };
+      const verdictHtml = renderCallout({ tone: VERDICT_TONE[fit.verdict], label: 'First read', headline: VERDICT_LABEL[fit.verdict], points: fit.reasons });
 
       const html = renderBrandedEmail({
-        eyebrow: `Fit check: ${fit.verdict.toUpperCase()}`,
+        eyebrow: `New fit check · ${fit.verdict.toUpperCase()}`,
         title: `${b.company} filled in the fit check`,
-        bodyHtml: verdictHtml + renderDetailList(rows),
-        ctaLabel: 'Reply',
+        preheader: `${VERDICT_LABEL[fit.verdict]} ${b.name}, ${country}.`,
+        bodyHtml: verdictHtml + sections.map((section) => renderDetailList(section.rows, section.heading)).join(''),
+        ctaLabel: `Reply to ${b.name.split(/\s+/)[0]}`,
         ctaUrl: `mailto:${encodeURIComponent(b.email)}`,
       });
 
