@@ -77,6 +77,35 @@ describe('assessFit', () => {
   });
 });
 
+describe('where the data lives and hosting rules', () => {
+  it('stays green when the data is in software, spreadsheets or documents and standard cloud is fine', () => {
+    for (const dataLocation of ['structured', 'spreadsheets', 'documents'] as const) {
+      expect(assessFit({ ...good, dataLocation, compliance: 'cloud-ok' }).verdict).toBe('green');
+    }
+  });
+
+  it('is amber when the data is on paper or the prospect is not sure where it lives, and says why', () => {
+    const paper = assessFit({ ...good, dataLocation: 'paper' });
+    expect(paper.verdict).toBe('amber');
+    expect(paper.reasons.join(' ')).toContain('clean-up work');
+    const unsure = assessFit({ ...good, dataLocation: 'unsure' });
+    expect(unsure.verdict).toBe('amber');
+    expect(unsure.reasons.join(' ')).toContain('not sure where the information lives');
+  });
+
+  it('is amber when UAE/GCC hosting is required, and notes that local hosting is set up separately on request', () => {
+    const r = assessFit({ ...good, compliance: 'local-hosting' });
+    expect(r.verdict).toBe('amber');
+    expect(r.reasons.join(' ')).toContain('UAE/GCC');
+    expect(r.reasons.join(' ')).toContain('on request');
+  });
+
+  it('does not change the verdict when the prospect is unsure about hosting rules, and treats both answers as optional', () => {
+    expect(assessFit({ ...good, compliance: 'unsure' }).verdict).toBe('green');
+    expect(assessFit(good).verdict).toBe('green');
+  });
+});
+
 describe('quote currency', () => {
   it('has a currency for every GCC country we ask about, and quotes anything else in US dollars', () => {
     expect(QUOTE_CURRENCY['United Arab Emirates']).toBe('AED');

@@ -65,6 +65,33 @@ describe('POST /public/fit-check', () => {
     expect(mail.text).toContain('Sales, Finance and accounts');
   });
 
+  it('names the country when "Other" is chosen, quoted in US dollars', async () => {
+    const res = await post({ ...valid, country: 'Other', countryName: 'Türkiye', city: 'Istanbul' });
+    expect(res.status).toBe(200);
+    const mail = send.mock.calls[0][0];
+    expect(mail.text).toContain('Türkiye, Istanbul');
+    expect(mail.text).toContain('USD');
+  });
+
+  it('carries the hours per area, where the data lives and any hosting rules into the email', async () => {
+    const res = await post({
+      ...valid, pain: 'Quotes and invoices, Scheduling', painHours: 'Quotes and invoices: 5 to 20; Scheduling: Under 5',
+      dataLocation: 'spreadsheets', compliance: 'local-hosting',
+    });
+    expect(res.status).toBe(200);
+    const mail = send.mock.calls[0][0];
+    expect(mail.text).toContain('Quotes and invoices: 5 to 20; Scheduling: Under 5');
+    expect(mail.text).toContain('In spreadsheets');
+    expect(mail.text).toContain('Must be hosted in the UAE/GCC');
+    expect(mail.subject).toContain('AMBER');
+  });
+
+  it('refuses a data-location or hosting answer outside the list', async () => {
+    expect((await post({ ...valid, dataLocation: 'cloud' })).status).toBe(400);
+    expect((await post({ ...valid, compliance: 'maybe' })).status).toBe(400);
+    expect(send).not.toHaveBeenCalled();
+  });
+
   it('needs only the required answers: phone, website, CRM, hours and budget are optional', async () => {
     const { hours: _h, budget: _b, office: _o, departments: _d, city: _c, ...minimal } = valid;
     expect((await post(minimal)).status).toBe(200);

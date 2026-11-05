@@ -4,7 +4,7 @@ import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
 import { escapeHtml, renderBrandedEmail, renderDetailList, stripToPlainText } from '../automation/email-template.js';
 import { Resend } from 'resend';
-import { assessFit, BUDGET_ANSWERS, COMPANY_SIZES, COUNTRIES, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, QUOTE_CURRENCY, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
+import { assessFit, BUDGET_ANSWERS, COMPANY_SIZES, COMPLIANCE_ANSWERS, COUNTRIES, DATA_LOCATION_ANSWERS, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, QUOTE_CURRENCY, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
 
 // Public, unauthenticated endpoint: throttle per IP, like the diagnostic-call form.
 const fitCheckRateLimit = MiddlewareFactory.createRateLimit({
@@ -34,6 +34,7 @@ const fitCheckBodySchema = {
     departments: { type: 'string', required: false, maxLength: 400 },
     industry: { type: 'string', required: true, minLength: 1, maxLength: 100 },
     country: { type: 'string', required: true, enum: [...COUNTRIES], maxLength: 40 },
+    countryName: { type: 'string', required: false, maxLength: 80 },
     city: { type: 'string', required: false, maxLength: 100 },
     years: { type: 'string', required: false, maxLength: 30 },
     accounting: { type: 'string', required: true, minLength: 1, maxLength: 120 },
@@ -44,6 +45,9 @@ const fitCheckBodySchema = {
     pain: { type: 'string', required: true, minLength: 1, maxLength: 300 },
     problem: { type: 'string', required: true, minLength: 1, maxLength: 2000 },
     hours: { type: 'string', required: false, enum: [...HOURS_ANSWERS], maxLength: 20 },
+    painHours: { type: 'string', required: false, maxLength: 700 },
+    dataLocation: { type: 'string', required: false, enum: [...DATA_LOCATION_ANSWERS], maxLength: 20 },
+    compliance: { type: 'string', required: false, enum: [...COMPLIANCE_ANSWERS], maxLength: 20 },
     tried: { type: 'string', required: false, maxLength: 2000 },
     start: { type: 'string', required: true, enum: [...START_ANSWERS], maxLength: 20 },
     budget: { type: 'string', required: false, enum: [...BUDGET_ANSWERS], maxLength: 20 },
@@ -51,19 +55,22 @@ const fitCheckBodySchema = {
     consent: { type: 'boolean', required: true },
   },
   allowOnlyBody: [
-    'name', 'email', 'phone', 'role', 'decider', 'company', 'website', 'size', 'office', 'departments', 'industry', 'country', 'city', 'years', 'accounting', 'erp', 'crm',
-    'channels', 'tools', 'pain', 'problem', 'hours', 'tried', 'start', 'budget', 'heard', 'consent',
+    'name', 'email', 'phone', 'role', 'decider', 'company', 'website', 'size', 'office', 'departments', 'industry', 'country', 'countryName', 'city', 'years', 'accounting', 'erp', 'crm',
+    'channels', 'tools', 'pain', 'problem', 'hours', 'painHours', 'dataLocation', 'compliance', 'tried', 'start', 'budget', 'heard', 'consent',
   ],
 };
 
 type FitBody = FitInput & {
-  name: string; email: string; phone?: string; role: string; company: string; website?: string; industry: string; country: (typeof COUNTRIES)[number]; city?: string; years?: string;
+  name: string; email: string; phone?: string; role: string; company: string; website?: string; industry: string; country: (typeof COUNTRIES)[number]; countryName?: string; city?: string; years?: string;
+  painHours?: string;
   accounting: string; crm?: string; channels?: string; tools?: string; tried?: string; heard?: string; consent: boolean;
 };
 
 const ROLE_LABEL: Record<string, string> = { owner: 'Owner or founder', manager: 'Manager', other: 'Other' };
 const DECIDER_LABEL: Record<string, string> = { yes: 'Yes', shared: 'Decides with others', no: 'No, gathering information' };
 const HOURS_LABEL: Record<string, string> = { 'under-5': 'Under 5', '5-20': '5 to 20', '20-50': '20 to 50', 'over-50': 'Over 50', unsure: 'Not sure' };
+const DATA_LABEL: Record<string, string> = { structured: 'In business software (CRM, ERP or shop)', spreadsheets: 'In spreadsheets', documents: 'In emails and digital documents', paper: 'On paper or in manual files', unsure: 'Not sure' };
+const COMPLIANCE_LABEL: Record<string, string> = { 'cloud-ok': 'Standard cloud is fine', 'local-hosting': 'Must be hosted in the UAE/GCC', unsure: 'Not sure' };
 const START_LABEL: Record<string, string> = { 'this-month': 'This month', '1-3-months': 'In 1 to 3 months', later: 'Later', exploring: 'Just exploring' };
 const BUDGET_LABEL: Record<string, string> = { 'under-5000': 'Under 5,000 AED', '5000-15000': '5,000 to 15,000 AED', '15000-60000': '15,000 to 60,000 AED', 'over-60000': 'Over 60,000 AED', unsure: 'Not sure yet' };
 
@@ -104,7 +111,7 @@ export function createPublicFitCheckRouter(): Router {
         { label: 'People', value: b.office ? `${b.size} (${b.office} in the office or deciding)` : b.size },
         { label: 'Departments', value: b.departments || '—' },
         { label: 'Industry', value: b.industry },
-        { label: 'Country', value: `${b.country}${b.city ? `, ${b.city}` : ''}` },
+        { label: 'Country', value: `${b.country === 'Other' && b.countryName ? b.countryName : b.country}${b.city ? `, ${b.city}` : ''}` },
         { label: 'Quote in', value: QUOTE_CURRENCY[b.country] },
         { label: 'Years operating', value: b.years || '—' },
         { label: 'Accounting', value: b.accounting },
@@ -115,6 +122,9 @@ export function createPublicFitCheckRouter(): Router {
         { label: 'Biggest drain', value: b.pain },
         { label: 'The problem', value: b.problem },
         { label: 'Hours a week', value: b.hours ? HOURS_LABEL[b.hours] ?? b.hours : '—' },
+        { label: 'Hours by area', value: b.painHours || '—' },
+        { label: 'Where the data lives', value: b.dataLocation ? DATA_LABEL[b.dataLocation] ?? b.dataLocation : '—' },
+        { label: 'Data or hosting rules', value: b.compliance ? COMPLIANCE_LABEL[b.compliance] ?? b.compliance : '—' },
         { label: 'Tried before', value: b.tried || '—' },
         { label: 'Start', value: START_LABEL[b.start] ?? b.start },
         { label: 'Budget', value: b.budget ? BUDGET_LABEL[b.budget] ?? b.budget : '—' },

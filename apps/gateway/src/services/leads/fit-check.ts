@@ -14,6 +14,10 @@ export const HOURS_ANSWERS = ['under-5', '5-20', '20-50', 'over-50', 'unsure'] a
 export const START_ANSWERS = ['this-month', '1-3-months', 'later', 'exploring'] as const;
 /** Bands in UAE dirhams. The audit is 5,000 AED and a build is 8,000 to 60,000 AED, so a first engagement is audit plus build: from about 13,000 AED. */
 export const BUDGET_ANSWERS = ['under-5000', '5000-15000', '15000-60000', 'over-60000', 'unsure'] as const;
+/** Where the information for the task lives today. Messy paper or "not sure" means clean-up work before any automation. */
+export const DATA_LOCATION_ANSWERS = ['structured', 'spreadsheets', 'documents', 'paper', 'unsure'] as const;
+/** Data privacy, local hosting or security rules the company must follow. "local-hosting" means UAE/GCC hosting, which we set up separately on request. */
+export const COMPLIANCE_ANSWERS = ['cloud-ok', 'local-hosting', 'unsure'] as const;
 /** GCC countries, and the currency we quote in for each. Anything else is quoted in US dollars. */
 export const COUNTRIES = ['United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Kuwait', 'Bahrain', 'Oman', 'Other'] as const;
 
@@ -46,6 +50,8 @@ export interface FitInput {
   start: (typeof START_ANSWERS)[number];
   budget?: (typeof BUDGET_ANSWERS)[number];
   erp?: string;
+  dataLocation?: (typeof DATA_LOCATION_ANSWERS)[number];
+  compliance?: (typeof COMPLIANCE_ANSWERS)[number];
 }
 
 export interface FitResult {
@@ -67,6 +73,14 @@ const SIZE_LABEL: Record<CompanySize, string> = {
   '16-50': '16 to 50 people',
   '51-150': '51 to 150 people',
   '150+': 'more than 150 people',
+};
+
+const DATA_LOCATION_LABEL: Record<(typeof DATA_LOCATION_ANSWERS)[number], string> = {
+  structured: 'in business software (CRM, ERP or shop)',
+  spreadsheets: 'in spreadsheets',
+  documents: 'in emails and digital documents',
+  paper: 'on paper or in manual files',
+  unsure: 'not sure',
 };
 
 export function assessFit(input: FitInput): FitResult {
@@ -102,6 +116,23 @@ export function assessFit(input: FitInput): FitResult {
     if (HEAVY_ERP.test(input.erp)) amber = true;
   } else {
     reasons.push('ERP: none.');
+  }
+
+  if (input.dataLocation === 'paper') {
+    reasons.push('Data: messy paper or manual files, so expect clean-up work before automating.');
+    amber = true;
+  } else if (input.dataLocation === 'unsure') {
+    reasons.push('Data: they are not sure where the information lives, so scope it on the call.');
+    amber = true;
+  } else if (input.dataLocation) {
+    reasons.push(`Data: ${DATA_LOCATION_LABEL[input.dataLocation]}.`);
+  }
+
+  if (input.compliance === 'local-hosting') {
+    reasons.push('Hosting: must be hosted in the UAE/GCC. Standard setup runs outside the UAE; local hosting is set up separately on request.');
+    amber = true;
+  } else if (input.compliance === 'unsure') {
+    reasons.push('Hosting: not sure about data or hosting rules, so ask on the call.');
   }
 
   if (input.decider === 'no') {
