@@ -5,7 +5,9 @@
  */
 import { getDashboardBaseUrl } from '../integrations/oauth-redirect.js';
 
-const FONT = "'Segoe UI', Helvetica, Arial, sans-serif";
+const FONT = "'Plus Jakarta Sans', 'Segoe UI', Helvetica, Arial, sans-serif";
+/** Display face of the website headings (Cormorant Garamond); Georgia is what most mail clients fall back to. */
+const FONT_DISPLAY = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
 
 /** Escapes HTML-significant characters so untrusted input can't inject markup into emails. */
 export function escapeHtml(value: string): string {
@@ -69,6 +71,7 @@ export function renderBrandedEmail(options: EmailLayoutOptions): string {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light">
 <meta name="supported-color-schemes" content="light">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <title>${escapeHtml(title)}</title>
 </head>
 <body style="margin: 0; padding: 0; background: ${BRAND.sand}; font-family: ${FONT};">
@@ -79,7 +82,10 @@ ${preheaderBlock}
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background: ${BRAND.white}; border: 1px solid ${BRAND.line}; border-radius: 14px; overflow: hidden;">
           <tr>
             <td style="background: ${BRAND.ink}; padding: 22px 40px;">
-              <img src="${logoUrl}" alt="Halla AI" width="96" style="width: 96px; height: auto; display: block; border: 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+                <td align="left"><img src="${logoUrl}" alt="Halla AI" width="96" style="width: 96px; height: auto; display: block; border: 0;"></td>
+                <td align="right" style="font-family: ${FONT}; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${BRAND.gold};">AI Consultancy &middot; GCC</td>
+              </tr></table>
             </td>
           </tr>
           <tr>
@@ -88,7 +94,7 @@ ${preheaderBlock}
           <tr>
             <td style="padding: 40px 40px 12px;">
               ${eyebrowBlock}
-              <h1 style="margin: 0 0 22px; font-family: ${FONT}; font-size: 24px; line-height: 1.25; font-weight: 700; letter-spacing: -0.015em; color: ${BRAND.ink};">${escapeHtml(title)}</h1>
+              <h1 style="margin: 0 0 24px; font-family: ${FONT_DISPLAY}; font-size: 32px; line-height: 1.12; font-weight: 600; letter-spacing: -0.01em; color: ${BRAND.ink};">${escapeHtml(title)}</h1>
               <div style="font-family: ${FONT}; font-size: 15px; line-height: 1.65; color: ${BRAND.body};">
                 ${bodyHtml}
               </div>
@@ -130,12 +136,13 @@ export function renderDetailList(rows: Array<{ label: string; value: string }>, 
   return `${headingHtml}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: ${heading ? '10px' : '18px'} 0 0; background: ${BRAND.paper}; border: 1px solid ${BRAND.line}; border-radius: 10px;"><tbody><tr><td style="padding: 4px 18px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tbody>${items}</tbody></table></td></tr></tbody></table>`;
 }
 
-export type CalloutTone = 'good' | 'warn' | 'bad';
+export type CalloutTone = 'good' | 'warn' | 'bad' | 'info';
 
 const CALLOUT_TONES: Record<CalloutTone, { bar: string; bg: string; label: string }> = {
   good: { bar: '#1B7A33', bg: '#F1F8F2', label: '#1B7A33' },
   warn: { bar: BRAND.gold, bg: '#FBF6EC', label: BRAND.goldText },
   bad: { bar: '#B3261E', bg: '#FCF3F2', label: '#B3261E' },
+  info: { bar: BRAND.ink, bg: BRAND.paper, label: BRAND.muted },
 };
 
 /** Highlighted summary box with a coloured edge: a headline plus optional bullet points (plain text, escaped here). */
@@ -148,6 +155,27 @@ export function renderCallout(options: { tone: CalloutTone; label: string; headl
     <p style="margin: 0 0 6px; font-family: ${FONT}; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: ${t.label};">${escapeHtml(options.label)}</p>
     <p style="margin: 0; font-family: ${FONT}; font-size: 16px; line-height: 1.4; font-weight: 700; color: ${BRAND.ink};">${escapeHtml(options.headline)}</p>${points}
   </td></tr></tbody></table>`;
+}
+
+/** A row of up to four headline facts (label over value) shown under the callout, so the key points are visible without scrolling. */
+export function renderSummaryStrip(items: Array<{ label: string; value: string }>): string {
+  const shown = items.slice(0, 4);
+  const width = Math.floor(100 / shown.length);
+  const cells = shown
+    .map(
+      (item, i) => `<td width="${width}%" valign="top" style="padding: 14px 16px; border-left: ${i === 0 ? 'none' : `1px solid ${BRAND.line}`};">
+      <p style="margin: 0 0 4px; font-family: ${FONT}; font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: ${BRAND.muted};">${escapeHtml(item.label)}</p>
+      <p style="margin: 0; font-family: ${FONT}; font-size: 14px; line-height: 1.4; font-weight: 700; color: ${BRAND.ink};">${escapeHtml(item.value)}</p>
+    </td>`
+    )
+    .join('');
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 14px 0 0; border: 1px solid ${BRAND.line}; border-radius: 10px;"><tbody><tr>${cells}</tr></tbody></table>`;
+}
+
+/** The sender's own words, set apart as a quotation (newlines kept). */
+export function renderQuote(heading: string, text: string): string {
+  return `<p style="margin: 28px 0 0; font-family: ${FONT}; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: ${BRAND.goldText};">${escapeHtml(heading)}</p>
+  <div style="margin: 10px 0 0; padding: 4px 0 4px 18px; border-left: 3px solid ${BRAND.gold}; font-family: ${FONT_DISPLAY}; font-size: 20px; line-height: 1.5; color: ${BRAND.ink}; white-space: pre-wrap;">${escapeHtml(text)}</div>`;
 }
 
 /** Plain-text fallback so clients without HTML rendering (and spam filters) see clean content too. */

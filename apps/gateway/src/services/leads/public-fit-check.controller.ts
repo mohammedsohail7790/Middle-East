@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { asyncHandler, MiddlewareFactory } from '../../middleware/index.js';
 import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
-import { renderBrandedEmail, renderCallout, renderDetailList, stripToPlainText, type CalloutTone } from '../automation/email-template.js';
+import { renderBrandedEmail, renderCallout, renderDetailList, renderQuote, renderSummaryStrip, stripToPlainText, type CalloutTone } from '../automation/email-template.js';
 import { Resend } from 'resend';
 import { throwIfRejected } from '../email-delivery.js';
 import { assessFit, BUDGET_ANSWERS, COMPANY_SIZES, COMPLIANCE_ANSWERS, COUNTRIES, DATA_LOCATION_ANSWERS, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, QUOTE_CURRENCY, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
@@ -142,7 +142,6 @@ export function createPublicFitCheckRouter(): Router {
           heading: 'The problem',
           rows: [
             { label: 'Biggest drain', value: b.pain },
-            { label: 'In their words', value: b.problem },
             { label: 'Hours a week', value: b.hours ? HOURS_LABEL[b.hours] ?? b.hours : '—' },
             { label: 'Hours by area', value: b.painHours || '—' },
             { label: 'Tried before', value: b.tried || '—' },
@@ -165,7 +164,15 @@ export function createPublicFitCheckRouter(): Router {
         eyebrow: `New fit check · ${fit.verdict.toUpperCase()}`,
         title: `${b.company} filled in the fit check`,
         preheader: `${VERDICT_LABEL[fit.verdict]} ${b.name}, ${country}.`,
-        bodyHtml: verdictHtml + sections.map((section) => renderDetailList(section.rows, section.heading)).join(''),
+        bodyHtml: verdictHtml
+          + renderSummaryStrip([
+            { label: 'Country', value: country },
+            { label: 'Team size', value: b.size },
+            { label: 'Start', value: START_LABEL[b.start] ?? b.start },
+            { label: 'Budget', value: b.budget ? BUDGET_LABEL[b.budget] ?? b.budget : 'Not given' },
+          ])
+          + renderQuote('The problem, in their words', b.problem)
+          + sections.map((section) => renderDetailList(section.rows, section.heading)).join(''),
         ctaLabel: `Reply to ${b.name.split(/\s+/)[0]}`,
         ctaUrl: `mailto:${encodeURIComponent(b.email)}`,
       });
