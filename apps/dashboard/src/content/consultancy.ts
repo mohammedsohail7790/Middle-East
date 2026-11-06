@@ -3,11 +3,8 @@ import type { Capability, ServiceItem, TimelineStep, ComparisonRow } from "./typ
 export const CAPABILITIES: Capability[] = [
   "Process Mapping",
   "Workflow Automation",
-  "Lead Engines",
   "CRM Integration",
   "AI Receptionist",
-  "Brand Systems",
-  "Review Automation",
   "Live Dashboards",
 ];
 
@@ -26,38 +23,6 @@ export const SERVICES: ServiceItem[] = [
     ],
     href: "/services/operations",
     exploreLabel: "Operations",
-  },
-  {
-    label: "Revenue",
-    icon: "trending-up",
-    title: "Client Acquisition & Growth",
-    description:
-      "We build systems that find, qualify, and follow up with new customers — automatically, within seconds.",
-    bullets: [
-      "AI lead generation & qualification",
-      "Instant lead follow-up systems",
-      "Sales outreach automation",
-      "CRM & pipeline integration",
-    ],
-    href: "/services/acquisition",
-    exploreLabel: "Acquisition",
-    featured: true,
-    featuredBadge: "Most requested",
-  },
-  {
-    label: "Visibility",
-    icon: "sparkles",
-    title: "AI-Powered Brand & Social",
-    description:
-      "We use AI to keep your business consistently visible, without it becoming another job on your plate.",
-    bullets: [
-      "AI-assisted content & posting",
-      "Social media growth systems",
-      "Review & reputation management",
-      "On-brand messaging at scale",
-    ],
-    href: "/services/brand",
-    exploreLabel: "Brand",
   },
 ];
 

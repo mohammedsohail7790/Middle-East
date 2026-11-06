@@ -34,8 +34,9 @@ export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
   "/security": "security",
   "/industries": "industries-all",
   "/services/operations": "svc-operations",
-  "/services/acquisition": "svc-acquisition",
-  "/services/brand": "svc-brand",
+  // Retired services: old links and search results land on the operations page.
+  "/services/acquisition": "svc-operations",
+  "/services/brand": "svc-operations",
 };
 
 /** True for public marketing SPA paths (no /en prefix). */

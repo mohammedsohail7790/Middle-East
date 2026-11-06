@@ -8,8 +8,6 @@ const CONSULTANCY_COLUMNS: FooterColumn[] = [
     heading: "Services",
     links: [
       { label: "Operations Automation", href: "/services/operations" },
-      { label: "Client Acquisition & Growth", href: "/services/acquisition" },
-      { label: "AI-Powered Brand & Social", href: "/services/brand" },
     ],
   },
   {
