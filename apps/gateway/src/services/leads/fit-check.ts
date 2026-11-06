@@ -50,7 +50,8 @@ export interface FitInput {
   start: (typeof START_ANSWERS)[number];
   budget?: (typeof BUDGET_ANSWERS)[number];
   erp?: string;
-  dataLocation?: (typeof DATA_LOCATION_ANSWERS)[number];
+  /** One or more of DATA_LOCATION_ANSWERS, separated by commas (the visitor can tick several places). */
+  dataLocation?: string;
   compliance?: (typeof COMPLIANCE_ANSWERS)[number];
 }
 
@@ -82,6 +83,14 @@ const DATA_LOCATION_LABEL: Record<(typeof DATA_LOCATION_ANSWERS)[number], string
   paper: 'on paper or in manual files',
   unsure: 'not sure',
 };
+
+/** The valid places in a comma separated answer; null when the answer contains something that is not an option. */
+export function parseDataLocations(value: string | undefined): Array<(typeof DATA_LOCATION_ANSWERS)[number]> | null {
+  if (!value) return [];
+  const parts = value.split(',').map((p) => p.trim()).filter(Boolean);
+  const valid = parts.filter((p): p is (typeof DATA_LOCATION_ANSWERS)[number] => (DATA_LOCATION_ANSWERS as readonly string[]).includes(p));
+  return valid.length === parts.length ? Array.from(new Set(valid)) : null;
+}
 
 export function assessFit(input: FitInput): FitResult {
   const reasons: string[] = [];
@@ -118,14 +127,15 @@ export function assessFit(input: FitInput): FitResult {
     reasons.push('ERP: none.');
   }
 
-  if (input.dataLocation === 'paper') {
+  const places = parseDataLocations(input.dataLocation) ?? [];
+  if (places.includes('paper')) {
     reasons.push('Data: messy paper or manual files, so expect clean-up work before automating.');
     amber = true;
-  } else if (input.dataLocation === 'unsure') {
+  } else if (places.includes('unsure')) {
     reasons.push('Data: they are not sure where the information lives, so scope it on the call.');
     amber = true;
-  } else if (input.dataLocation) {
-    reasons.push(`Data: ${DATA_LOCATION_LABEL[input.dataLocation]}.`);
+  } else if (places.length) {
+    reasons.push(`Data: ${places.map((p) => DATA_LOCATION_LABEL[p]).join(', ')}.`);
   }
 
   if (input.compliance === 'local-hosting') {

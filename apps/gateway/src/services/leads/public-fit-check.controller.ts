@@ -5,7 +5,7 @@ import { logger } from '../logger.js';
 import { renderBrandedEmail, renderCallout, renderDetailList, renderQuote, renderSummaryStrip, stripToPlainText, type CalloutTone } from '../automation/email-template.js';
 import { Resend } from 'resend';
 import { throwIfRejected } from '../email-delivery.js';
-import { assessFit, BUDGET_ANSWERS, COMPANY_SIZES, COMPLIANCE_ANSWERS, COUNTRIES, DATA_LOCATION_ANSWERS, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, QUOTE_CURRENCY, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
+import { assessFit, parseDataLocations, BUDGET_ANSWERS, COMPANY_SIZES, COMPLIANCE_ANSWERS, COUNTRIES, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, QUOTE_CURRENCY, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
 
 // Public, unauthenticated endpoint: throttle per IP, like the diagnostic-call form.
 const fitCheckRateLimit = MiddlewareFactory.createRateLimit({
@@ -47,7 +47,7 @@ const fitCheckBodySchema = {
     problem: { type: 'string', required: true, minLength: 1, maxLength: 2000 },
     hours: { type: 'string', required: false, enum: [...HOURS_ANSWERS], maxLength: 20 },
     painHours: { type: 'string', required: false, maxLength: 700 },
-    dataLocation: { type: 'string', required: false, enum: [...DATA_LOCATION_ANSWERS], maxLength: 20 },
+    dataLocation: { type: 'string', required: false, maxLength: 120 },
     compliance: { type: 'string', required: false, enum: [...COMPLIANCE_ANSWERS], maxLength: 20 },
     tried: { type: 'string', required: false, maxLength: 2000 },
     start: { type: 'string', required: true, enum: [...START_ANSWERS], maxLength: 20 },
@@ -71,7 +71,7 @@ const ROLE_LABEL: Record<string, string> = { owner: 'Owner or founder', manager:
 const DECIDER_LABEL: Record<string, string> = { yes: 'Yes', shared: 'Decides with others', no: 'No, gathering information' };
 const HOURS_LABEL: Record<string, string> = { 'under-5': 'Under 5', '5-20': '5 to 20', '20-50': '20 to 50', 'over-50': 'Over 50', unsure: 'Not sure' };
 const DATA_LABEL: Record<string, string> = { structured: 'In business software (CRM, ERP or shop)', spreadsheets: 'In spreadsheets', documents: 'In emails and digital documents', paper: 'On paper or in manual files', unsure: 'Not sure' };
-const COMPLIANCE_LABEL: Record<string, string> = { 'cloud-ok': 'Standard cloud is fine', 'local-hosting': 'Must be hosted in the UAE/GCC', unsure: 'Not sure' };
+const COMPLIANCE_LABEL: Record<string, string> = { 'cloud-ok': 'No strict requirements (standard cloud is fine)', 'local-hosting': 'Must be hosted in the UAE/GCC', unsure: 'Not sure' };
 const START_LABEL: Record<string, string> = { 'this-month': 'This month', '1-3-months': 'In 1 to 3 months', later: 'Later', exploring: 'Just exploring' };
 const BUDGET_LABEL: Record<string, string> = { 'under-5000': 'Under 5,000 AED', '5000-15000': '5,000 to 15,000 AED', '15000-60000': '15,000 to 60,000 AED', 'over-60000': 'Over 60,000 AED', unsure: 'Not sure yet' };
 
@@ -97,6 +97,11 @@ export function createPublicFitCheckRouter(): Router {
       if (!resend) {
         logger.error('[FitCheck] RESEND_API_KEY not configured, cannot deliver request');
         res.status(503).json({ error: 'Email delivery is not configured. Please email hello@hallaai.com directly.' });
+        return;
+      }
+
+      if (b.dataLocation && parseDataLocations(b.dataLocation) === null) {
+        res.status(400).json({ error: 'Invalid answer for where the information lives.' });
         return;
       }
 
@@ -134,7 +139,7 @@ export function createPublicFitCheckRouter(): Router {
             { label: 'CRM', value: b.crm || '—' },
             { label: 'Channels', value: b.channels || '—' },
             { label: 'Other tools', value: b.tools || '—' },
-            { label: 'Where the data lives', value: b.dataLocation ? DATA_LABEL[b.dataLocation] ?? b.dataLocation : '—' },
+            { label: 'Where the data lives', value: b.dataLocation ? (parseDataLocations(b.dataLocation) ?? []).map((p) => DATA_LABEL[p] ?? p).join('; ') || '—' : '—' },
             { label: 'Data or hosting rules', value: b.compliance ? COMPLIANCE_LABEL[b.compliance] ?? b.compliance : '—' },
           ],
         },

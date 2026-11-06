@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { assessFit, QUOTE_CURRENCY, COUNTRIES, type FitInput } from '../../apps/gateway/src/services/leads/fit-check.js';
+import { assessFit, parseDataLocations, QUOTE_CURRENCY, COUNTRIES, type FitInput } from '../../apps/gateway/src/services/leads/fit-check.js';
 
 const good: FitInput = {
   size: '16-50',
@@ -85,6 +85,10 @@ describe('where the data lives and hosting rules', () => {
   });
 
   it('is amber when the data is on paper or the prospect is not sure where it lives, and says why', () => {
+    expect(assessFit({ ...good, dataLocation: 'spreadsheets, documents', compliance: 'cloud-ok' }).reasons.join(' ')).toContain('Data: in spreadsheets, in emails and digital documents');
+    expect(assessFit({ ...good, dataLocation: 'spreadsheets, paper' }).verdict).toBe('amber');
+    expect(parseDataLocations('spreadsheets, documents')).toEqual(['spreadsheets', 'documents']);
+    expect(parseDataLocations('spreadsheets, cloud')).toBeNull();
     const paper = assessFit({ ...good, dataLocation: 'paper' });
     expect(paper.verdict).toBe('amber');
     expect(paper.reasons.join(' ')).toContain('clean-up work');

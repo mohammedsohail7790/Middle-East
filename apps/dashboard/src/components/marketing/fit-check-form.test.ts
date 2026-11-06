@@ -43,7 +43,7 @@ const send = () => document.getElementById("fitCheckBtn")!.dispatchEvent(new Eve
 
 function fillRequired() {
   set("name", "Jordan Smith"); set("email", "jordan@example.com"); set("role", "owner"); set("decider", "yes"); set("company", "Smith & Co");
-  set("size", "16-50"); set("industry", "Trading or wholesale"); set("country", "United Arab Emirates"); set("accounting", "QuickBooks"); set("erp", "Odoo"); set("dataLocation", "spreadsheets");
+  set("size", "16-50"); set("industry", "Trading or wholesale"); set("country", "United Arab Emirates"); set("accounting", "QuickBooks"); set("erp", "Odoo"); tick("dataLocation", "spreadsheets");
   tick("pain", "Quotes and invoices"); set("problem", "Invoices are typed by hand from emails."); set("start", "1-3-months");
   el("consent").checked = true;
 }
@@ -64,7 +64,7 @@ describe("Fit check form", () => {
     expect(values("office")).toEqual([...OFFICE_SIZES]);
     expect(values("country")).toEqual([...COUNTRIES]);
     expect(values("decider")).toEqual([...DECIDER_ANSWERS]);
-    expect(values("dataLocation")).toEqual([...DATA_LOCATION_ANSWERS]);
+    expect(Array.from(form().querySelectorAll('input[name="dataLocation"]')).map((c) => (c as HTMLInputElement).value)).toEqual([...DATA_LOCATION_ANSWERS]);
     expect(values("compliance")).toEqual([...COMPLIANCE_ANSWERS]);
     expect(values("start")).toEqual([...START_ANSWERS]);
     expect(values("budget")).toEqual([...BUDGET_ANSWERS]);
@@ -201,15 +201,15 @@ describe("Fit check form", () => {
 
   it("requires where the data lives, treats the hosting question as optional, and sends both", async () => {
     fillRequired();
-    set("dataLocation", "");
+    form().querySelectorAll('input[name="dataLocation"]').forEach((c) => { (c as HTMLInputElement).checked = false; });
     send();
     expect(fetchMock).not.toHaveBeenCalled();
     expect((form().querySelector('[data-q="dataLocation"]') as HTMLElement).style.outline).toContain("var(--red)");
-    set("dataLocation", "paper");
+    tick("dataLocation", "paper");
     send();
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     let body = JSON.parse(fetchMock.mock.calls[0][1].body);
-    expect(body).toMatchObject({ dataLocation: "paper" });
+    expect(body).toMatchObject({ dataLocation: "spreadsheets, paper" });
     expect(body).not.toHaveProperty("compliance");
     fetchMock.mockClear();
     fillRequired();
@@ -218,6 +218,21 @@ describe("Fit check form", () => {
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     body = JSON.parse(fetchMock.mock.calls[0][1].body);
     expect(body).toMatchObject({ dataLocation: "spreadsheets", compliance: "local-hosting" });
+  });
+
+  it("lets the visitor tick several places for the data, and \"Not sure\" replaces them", () => {
+    tick("dataLocation", "spreadsheets"); tick("dataLocation", "documents");
+    const checkedNow = () => Array.from(form().querySelectorAll('input[name="dataLocation"]:checked')).map((c) => (c as HTMLInputElement).value);
+    expect(checkedNow()).toEqual(["spreadsheets", "documents"]);
+    tick("dataLocation", "unsure");
+    expect(checkedNow()).toEqual(["unsure"]);
+    tick("dataLocation", "paper");
+    expect(checkedNow()).toEqual(["paper"]);
+  });
+
+  it("answers the hosting question with a clear No", () => {
+    const labels = Array.from((el("compliance") as HTMLSelectElement).options).map((o) => o.textContent);
+    expect(labels).toContain("No, standard cloud is fine");
   });
 
   it("thanks the visitor and resets the form, keeping every dropdown on a real first choice", async () => {
