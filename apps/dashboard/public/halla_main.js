@@ -674,7 +674,7 @@ function initFitCheckForm() {
   const statusEl = form.querySelector('.fit-form-status');
   const btnDefaultText = btn.innerHTML;
   const GATEWAY = 'https://gateway.hallaai.com/api/v1/public/fit-check';
-  const REQUIRED = ['name', 'email', 'role', 'decider', 'company', 'size', 'industry', 'country', 'accounting', 'erp', 'dataLocation', 'problem', 'start'];
+  const REQUIRED = ['name', 'email', 'role', 'decider', 'company', 'size', 'industry', 'country', 'accounting', 'erp', 'problem', 'start'];
   const isAr = () => document.documentElement.lang === 'ar';
   const field = (name) => form.querySelector('[name="' + name + '"]');
   const box = (name) => form.querySelector('[data-q="' + name + '"]');
@@ -766,6 +766,16 @@ function initFitCheckForm() {
   });
   Object.keys(AUTOFILL).forEach((n) => { const el = field(n); if (el) el.setAttribute('autocomplete', AUTOFILL[n]); });
 
+  // "Not sure" excludes the other places, and ticking a real place clears "Not sure".
+  form.querySelectorAll('input[name="dataLocation"]').forEach((cb) => {
+    cb.addEventListener('change', () => {
+      if (!cb.checked) return;
+      form.querySelectorAll('input[name="dataLocation"]').forEach((other) => {
+        if (other !== cb && ((cb.value === 'unsure') || other.value === 'unsure')) other.checked = false;
+      });
+    });
+  });
+
   btn.addEventListener('click', (e) => {
     e.preventDefault();
     form.querySelectorAll('[data-q]').forEach((q) => { q.style.outline = ''; q.removeAttribute('aria-invalid'); });
@@ -783,6 +793,7 @@ function initFitCheckForm() {
     const email = field('email');
     if (email && email.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim()) && !missing.includes('email')) missing.push('email');
     if (checked('pain').length === 0) missing.push('pain');
+    if (checked('dataLocation').length === 0) missing.push('dataLocation');
     if (!field('consent').checked) missing.push('consent');
     if (missing.length) {
       missing.forEach((name) => {
@@ -814,7 +825,7 @@ function initFitCheckForm() {
         name: val('name'), email: val('email'), phone: val('phone'), role: val('role'), decider: val('decider'), company: val('company'), website: val('website'),
         size: val('size'), office: val('office'), departments: list('departments'), industry: val('industry'), country: val('country'), countryName: val('country') === 'Other' ? val('countryName') : undefined, city: val('city'), years: val('years'),
         accounting: named('accounting', 'accountingOther'), erp: named('erp', 'erpOther'), crm: named('crm', 'crmOther'),
-        channels: list('channels'), tools: list('tools'), pain: list('pain'), problem: val('problem'), hours: hoursSummary().hours, painHours: hoursSummary().painHours, dataLocation: val('dataLocation'), compliance: val('compliance'), tried: val('tried'),
+        channels: list('channels'), tools: list('tools'), pain: list('pain'), problem: val('problem'), hours: hoursSummary().hours, painHours: hoursSummary().painHours, dataLocation: list('dataLocation'), compliance: val('compliance'), tried: val('tried'),
         start: val('start'), budget: val('budget'), heard: val('heard'), consent: true,
       }),
     })

@@ -88,8 +88,17 @@ describe('POST /public/fit-check', () => {
 
   it('refuses a data-location or hosting answer outside the list', async () => {
     expect((await post({ ...valid, dataLocation: 'cloud' })).status).toBe(400);
+    expect((await post({ ...valid, dataLocation: 'spreadsheets, cloud' })).status).toBe(400);
     expect((await post({ ...valid, compliance: 'maybe' })).status).toBe(400);
     expect(send).not.toHaveBeenCalled();
+  });
+
+  it('accepts several places for where the data lives and lists them all in the email', async () => {
+    const res = await post({ ...valid, dataLocation: 'spreadsheets, documents' });
+    expect(res.status).toBe(200);
+    const mail = send.mock.calls[0][0];
+    expect(mail.text).toContain('In spreadsheets');
+    expect(mail.text).toContain('In emails and digital documents');
   });
 
   it('needs only the required answers: phone, website, CRM, hours and budget are optional', async () => {
