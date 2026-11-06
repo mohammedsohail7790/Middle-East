@@ -209,7 +209,7 @@ describe("Fit check form", () => {
     send();
     await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     let body = JSON.parse(fetchMock.mock.calls[0][1].body);
-    expect(body).toMatchObject({ dataLocation: "spreadsheets, paper" });
+    expect(body).toMatchObject({ dataLocation: "paper" });
     expect(body).not.toHaveProperty("compliance");
     fetchMock.mockClear();
     fillRequired();
