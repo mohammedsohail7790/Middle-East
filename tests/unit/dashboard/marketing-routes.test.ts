@@ -26,11 +26,18 @@ describe("resolveMarketingPage", () => {
   });
 });
 
+describe("retired services", () => {
+  it("send old brand and acquisition links to the operations page", () => {
+    expect(resolveMarketingPage("/services/brand")).toBe("svc-operations");
+    expect(resolveMarketingPage("/services/acquisition")).toBe("svc-operations");
+  });
+});
+
 describe("isMarketingHref", () => {
   it("recognises consultancy and service paths", () => {
     expect(isMarketingHref("/")).toBe(true);
     expect(isMarketingHref("/consult-signup")).toBe(true);
-    expect(isMarketingHref("/services/brand")).toBe(true);
+    expect(isMarketingHref("/services/operations")).toBe(true);
     expect(isMarketingHref("/industries/hvac")).toBe(true);
     expect(isMarketingHref("/dashboard")).toBe(false);
   });
