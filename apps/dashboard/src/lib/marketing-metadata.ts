@@ -16,7 +16,7 @@ const PAGE_META: Record<string, [string, string]> = {
   pricing: ["AI Receptionist Pricing | Halla AI", "Essential, Professional and Enterprise plans from $39 a month. 14-day free trial, no credit card, and annual billing saves 20%."],
   "how-it-works": ["How the AI Receptionist Works | Halla AI", "Set up in under 15 minutes: choose a plan, configure your agent, connect your calendar and CRM, forward your number and go live."],
   integrations: ["AI Receptionist Integrations | Halla AI", "Connect to Google Calendar, Calendly, HubSpot, Salesforce and more than 5,000 other apps through Zapier."],
-  intelligence: ["AI Business Automation | Halla AI", "One AI layer for your leads, quotes and invoices. It proposes the next action, waits for your approval on anything that matters and logs everything it does."],
+  intelligence: ["AI Business Automation | Halla AI", "Automation built around one job in your business, connected to the tools you already use. About 10 days and AED 5,000 per automation, fixed."],
   "industries-all": ["AI Receptionist by Industry | Halla AI", "Pre-configured for clinics, real estate, legal, facilities, hotels, automotive, schools and insurance, answering in Arabic or English."],
   faq: ["Frequently Asked Questions | Halla AI", "Answers about how the Halla AI receptionist works, live agents, call recording, pricing and the free trial."],
   contact: ["Contact Halla AI", "Send the Halla AI team a message or email hello@hallaai.com. We reply within one business day. Live chat 9am to 5pm UAE time."],
