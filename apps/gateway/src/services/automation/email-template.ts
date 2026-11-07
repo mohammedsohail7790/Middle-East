@@ -41,11 +41,14 @@ export interface EmailLayoutOptions {
   ctaUrl?: string;
   /** Hidden preview text shown next to the subject in inbox lists. */
   preheader?: string;
+  /** Small label at the right of the header bar. Defaults to "AI Consultancy"; pass an empty string for none. */
+  headerLabel?: string;
 }
 
 export function renderBrandedEmail(options: EmailLayoutOptions): string {
   const logoUrl = `${getDashboardBaseUrl()}/logo-halla-dark.png`;
   const { eyebrow, title, bodyHtml, ctaLabel, ctaUrl, preheader } = options;
+  const headerLabel = options.headerLabel ?? 'AI Consultancy';
 
   const ctaBlock = ctaLabel && ctaUrl
     ? `
@@ -84,7 +87,7 @@ ${preheaderBlock}
             <td bgcolor="${BRAND.ink}" style="background: ${BRAND.ink}; padding: 14px 40px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
                 <td align="left"><img src="${logoUrl}" alt="Halla AI" width="120" style="width: 120px; height: auto; display: block; border: 0; font-family: ${FONT_DISPLAY}; font-size: 24px; font-weight: 600; color: ${BRAND.paper};"></td>
-                <td align="right" style="font-family: ${FONT}; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${BRAND.gold};">AI Consultancy</td>
+                <td align="right" style="font-family: ${FONT}; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${BRAND.gold};">${escapeHtml(headerLabel)}</td>
               </tr></table>
             </td>
           </tr>
@@ -104,7 +107,7 @@ ${preheaderBlock}
           <tr>
             <td style="background: ${BRAND.paper}; padding: 24px 40px; border-top: 1px solid ${BRAND.line};">
               <p style="margin: 0; font-family: ${FONT}; font-size: 12px; line-height: 1.7; color: ${BRAND.muted};">
-                <strong style="color: ${BRAND.ink};">Halla AI</strong> &middot; AI consultancy and automation for businesses in the GCC and beyond
+                <strong style="color: ${BRAND.ink};">Halla AI</strong> &middot; End-to-end AI systems for businesses
                 <br>
                 <a href="${getDashboardBaseUrl()}" style="color: ${BRAND.goldText}; text-decoration: none;">hallaai.com</a> &middot;
                 <a href="mailto:hello@hallaai.com" style="color: ${BRAND.goldText}; text-decoration: none;">hello@hallaai.com</a>
