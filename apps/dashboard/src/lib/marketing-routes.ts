@@ -73,3 +73,18 @@ export function pagePath(pageId: string): string | null {
   if (pageId.startsWith("solutions-")) return `/solutions/${pageId.slice("solutions-".length)}`;
   return null;
 }
+
+/**
+ * True when the path is a real marketing page, so an unknown address can answer 404 instead of showing the home page.
+ * A leading /en or /ar language segment is allowed. `pageIds` are the ids of the pages that exist in marketing-body.html.
+ */
+export function isKnownMarketingPath(pathname: string, pageIds: ReadonlySet<string>): boolean {
+  let path = pathname.replace(/\/+$/, "") || "/";
+  const locale = path.match(/^\/(en|ar)(\/.*)?$/);
+  if (locale) path = locale[2] || "/";
+  if (path === "/") return true;
+  if (MARKETING_PATH_TO_PAGE[path]) return true;
+  const dynamic = path.match(/^\/(industries|solutions)\/([a-z0-9-]+)$/i);
+  if (dynamic) return pageIds.has(`${dynamic[1] === "industries" ? "industry" : "solutions"}-${dynamic[2]}`);
+  return false;
+}
