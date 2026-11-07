@@ -40,11 +40,19 @@ describe("marketingMetadata", () => {
     expect(m.openGraph?.url).toBe("/en");
   });
 
-  it("leaves every other marketing page on its existing receptionist wording", () => {
+  it("gives every solutions, blog, industry and legal page its own title and canonical address", () => {
     const m = marketingMetadata("solutions-answering", "/solutions/answering");
+    expect(m.title).toEqual({ absolute: "24/7 AI Answering Service | Halla AI" });
+    expect(m.alternates?.canonical).toBe("/solutions/answering");
+    for (const id of ["blog-emergency", "industry-clinics", "vs-smith", "forwarding", "security", "privacy", "terms"]) {
+      const t = marketingMetadata(id, "/x").title as { absolute: string };
+      expect(t.absolute).not.toContain("Smart • Seamless");
+    }
+  });
+
+  it("falls back to the default title for a page that has none", () => {
+    const m = marketingMetadata("no-such-page", "/no-such-page");
     expect(m.title).toBe("Halla AI – Smart • Seamless • Always");
-    expect(String(m.description)).toContain("answers every call 24/7");
-    expect(m.alternates).toBeUndefined();
   });
 
   it("gives the main receptionist pages their own title, description and canonical address", () => {

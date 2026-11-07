@@ -64,7 +64,7 @@ export function renderAuditPages(): string {
     <div class="card" style="padding:40px">
       <div id="auditLinkNote" role="status" style="font-size:0.9rem;margin-bottom:16px"></div>
       <p style="font-size:0.875rem;margin-bottom:8px">${bi('Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. Everything you send is covered by the NDA we signed.')}</p>
-      <form id="auditForm" novalidate style="display:grid;gap:22px">
+      <form id="auditForm" onsubmit="return false" novalidate style="display:grid;gap:22px">
         <p style="font-size:0.85rem;margin:0"><span style="color:var(--red)" aria-hidden="true">*</span> ${bi('Required. Everything else is optional.')}</p>
         ${AUDIT_SECTIONS.map(section).join('\n        ')}
         <button type="button" class="btn btn-primary btn-lg" style="width:100%;font-size:1rem" id="auditSubmitBtn">${bi('Send my answers →')}</button>
