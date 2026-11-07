@@ -1561,14 +1561,9 @@ export function createTenantsRouter(): express.Router {
                     const dow = dayMap[dayName];
                     if (dow === undefined) continue;
                     try {
-                        await voiceDb.query(
-                            `INSERT INTO public.business_hours
-                             (tenant_id, day_of_week, start_time, end_time, is_open, timezone)
-                             VALUES ($1, $2, $3, $4, true, $5)
-                             ON CONFLICT (tenant_id, day_of_week)
-                             DO UPDATE SET start_time = $3, end_time = $4, is_open = true, timezone = $5`,
-                            [tenant.id, dow, bh.start, bh.end, tz]
-                        );
+                        // The shared hours service knows which column layout this database has, so setup hours are stored the same way as hours saved on the dashboard.
+                        const { businessHoursService } = await import('../business-hours/business-hours.service.js');
+                        await businessHoursService.updateBusinessHours(tenant.id, dow, bh.start, bh.end, true, tz);
                     } catch (bhErr) {
                         logger.warn('Failed to seed business hours for tenant', {
                             tenantId: tenant.id,
