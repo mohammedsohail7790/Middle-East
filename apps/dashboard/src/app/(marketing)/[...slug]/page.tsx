@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { readFileSync } from "fs";
 import { join } from "path";
 import MarketingSPA from "@/components/marketing/MarketingSPA";
-import { isKnownMarketingPath, resolveMarketingPage } from "@/lib/marketing-routes";
+import { isKnownMarketingPath, plainAppPath, resolveMarketingPage } from "@/lib/marketing-routes";
 import { marketingMetadata } from "@/lib/marketing-metadata";
 import { extractPageHtml } from "@/lib/marketing-ssr";
 
@@ -35,6 +35,8 @@ export default async function MarketingCatchAllPage({
 }) {
   const { slug } = await params;
   const path = slug?.length ? `/${slug.join("/")}` : "/";
+  const plain = plainAppPath(path);
+  if (plain) redirect(plain);
   const bodyHtml = getMarketingBodyHtml();
   const pageIds = new Set(Array.from(bodyHtml.matchAll(/<div id="page-([\w-]+)"/g), (m) => m[1]));
   if (!isKnownMarketingPath(path, pageIds)) notFound();

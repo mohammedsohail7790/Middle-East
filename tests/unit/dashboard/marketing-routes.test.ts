@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isKnownMarketingPath,
+  plainAppPath,
   isMarketingHref,
   resolveMarketingPage,
 } from "../../../apps/dashboard/src/lib/marketing-routes";
@@ -55,5 +56,18 @@ describe("isKnownMarketingPath", () => {
     for (const p of ["/unknown-page", "/industries/nope", "/solutions/nope", "/pricing/extra", "/en/unknown"]) {
       expect(isKnownMarketingPath(p, ids), p).toBe(false);
     }
+  });
+});
+
+describe("plainAppPath", () => {
+  it("sends language-prefixed app pages to their plain address", () => {
+    expect(plainAppPath("/en/onboarding")).toBe("/onboarding");
+    expect(plainAppPath("/ar/login/")).toBe("/login");
+    expect(plainAppPath("/en/signup")).toBe("/signup");
+  });
+  it("leaves everything else alone", () => {
+    expect(plainAppPath("/en/pricing")).toBeNull();
+    expect(plainAppPath("/onboarding")).toBeNull();
+    expect(plainAppPath("/en/dashboard")).toBeNull();
   });
 });

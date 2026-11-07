@@ -88,3 +88,12 @@ export function isKnownMarketingPath(pathname: string, pageIds: ReadonlySet<stri
   if (dynamic) return pageIds.has(`${dynamic[1] === "industries" ? "industry" : "solutions"}-${dynamic[2]}`);
   return false;
 }
+
+/** App pages that exist without a language segment. A language-aware link such as /en/onboarding must land on the plain address. */
+const APP_PAGES = ["login", "signup", "onboarding", "forgot-password"];
+
+/** For "/en/onboarding" and similar, the plain address ("/onboarding"); null for anything else. */
+export function plainAppPath(pathname: string): string | null {
+  const m = pathname.replace(/\/+$/, "").match(/^\/(?:en|ar)\/([a-z-]+)$/);
+  return m && APP_PAGES.includes(m[1]) ? `/${m[1]}` : null;
+}
