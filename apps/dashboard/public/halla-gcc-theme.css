@@ -331,3 +331,10 @@ html body :is(#page-terms,#page-privacy) .section>.container{max-width:1080px!im
 /* --- fit check: no big empty band between the intro and the form --- */
 html body #page-fit-check .page-hero{padding:104px 0 16px!important}
 html body #page-fit-check .section{padding:20px 0 72px!important}
+
+/* Footer logo: the same Halla AI logo as the top bar, on every section. */
+.footer-logo .brand-logo-img{display:block;height:44px;width:auto;border-radius:8px}
+/* Security page: left-aligned and wide, like the other pages. */
+#page-security .page-hero .container,#page-security .section .container{max-width:1180px;margin:0 auto;padding:0 28px;text-align:left}
+#page-security .page-hero p{margin-left:0!important;margin-right:0!important;max-width:680px!important}
+@media (max-width:900px){#page-security .page-hero .container,#page-security .section .container{padding:0 20px}}

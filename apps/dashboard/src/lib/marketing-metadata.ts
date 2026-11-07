@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 /** The hub (page id "consultancy") is the general Halla AI home page, so its search title, description and canonical address say what it is (the receptionist wording belongs to the receptionist pages). */
-const CONSULTANCY_TITLE = "Halla AI | End-to-End AI Systems for GCC Businesses";
+const CONSULTANCY_TITLE = "Halla AI | End-to-End AI Systems for Businesses";
 const CONSULTANCY_DESCRIPTION =
-  "We install connected AI systems for operations, client acquisition and brand, plus a 24/7 Arabic and English AI receptionist. Built for GCC businesses.";
+  "We design, build and run connected AI systems for your operations, plus a 24/7 Arabic and English AI receptionist.";
 
 const DEFAULT_TITLE = "Halla AI – Smart • Seamless • Always";
 const DEFAULT_DESCRIPTION = "Halla AI answers every call 24/7, books appointments, captures leads, and routes emergencies — automatically.";
@@ -36,7 +36,7 @@ export function marketingMetadata(pageId: string, path: string): Metadata {
   }
   if (pageId === "ai-consultancy") {
     const title = "AI Consultancy for Small and Mid-Sized Businesses | Halla AI";
-    const description = "A fixed-price audit and a roadmap you own, then builds from AED 8,000 at a fixed price and timeline. Custom software and AI automation for GCC businesses.";
+    const description = "A fixed-price audit and a roadmap you own, then builds from AED 8,000 at a fixed price and timeline. Custom software and AI automation for businesses.";
     return { title: { absolute: title }, description, alternates: { canonical: path.replace(/\/$/, "") || "/" }, openGraph: { title, description, type: "website", url: path } };
   }
   if (pageId === "fit-check") {
