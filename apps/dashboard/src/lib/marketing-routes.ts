@@ -12,6 +12,7 @@ export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
   "/blog/per-minute-pricing": "blog-per-minute",
   "/consult-signup": "consult-signup",
   "/fit-check": "fit-check",
+  "/opportunity-audit": "audit-info",
   "/audit": "audit",
   "/audit/pay": "audit-pay",
   "/audit/paid": "audit-paid",
