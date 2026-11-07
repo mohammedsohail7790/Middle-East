@@ -5,9 +5,9 @@ import MarketingSPA from "@/components/marketing/MarketingSPA";
 import { extractPageHtml } from "@/lib/marketing-ssr";
 
 export const metadata: Metadata = {
-  title: "Halla AI | End-to-End AI Systems for GCC Businesses",
+  title: "Halla AI | End-to-End AI Systems for Businesses",
   description:
-    "We install connected AI systems for operations, client acquisition and brand, plus a 24/7 Arabic and English AI receptionist. Built for GCC businesses.",
+    "We design, build and run connected AI systems for your operations, plus a 24/7 Arabic and English AI receptionist.",
   openGraph: {
     title: "Halla AI – Never Miss a Call",
     description:
