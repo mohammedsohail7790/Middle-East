@@ -14,7 +14,11 @@ const consultRequestRateLimit = MiddlewareFactory.createRateLimit({
 });
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const LEAD_NOTIFICATION_TO = process.env.CONSULT_LEAD_EMAIL || 'hello@hallaai.com';
+// CONSULT_LEAD_EMAIL takes one or more addresses separated by commas (so Hk and the owner both get the mail); Resend needs them as a list, not one text.
+const LEAD_NOTIFICATION_TO = (process.env.CONSULT_LEAD_EMAIL || 'hello@hallaai.com')
+  .split(',')
+  .map((address) => address.trim())
+  .filter((address) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address));
 
 const consultRequestBodySchema = {
   body: {
