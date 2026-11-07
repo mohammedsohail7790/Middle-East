@@ -44,6 +44,11 @@ export function marketingMetadata(pageId: string, path: string): Metadata {
     const description = "Answer a few quick questions about your company and we will reply by email. No account, no password, no obligation.";
     return { title: { absolute: title }, description, alternates: { canonical: path.replace(/\/$/, "") || "/" } };
   }
+  if (pageId === "audit-info") {
+    const title = "Opportunity Audit: what to automate first | Halla AI Consultancy";
+    const description = "A fixed-price audit (AED 5,000, about one week) that gives you a prioritised roadmap with a payoff estimate and a fixed build price for every opportunity.";
+    return { title: { absolute: title }, description, alternates: { canonical: path.replace(/\/$/, "") || "/" }, openGraph: { title, description, type: "website", url: path } };
+  }
   if (pageId === "audit" || pageId === "audit-pay" || pageId === "audit-paid") {
     // Private pages that open from an emailed link: never in search results.
     return { title: { absolute: "Opportunity Audit | Halla AI Consultancy" }, robots: { index: false, follow: false } };

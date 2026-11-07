@@ -14,7 +14,7 @@
 // plus the service/audit/booking pages, belong to the consultancy section.
 // Every other page belongs to the receptionist section.
 function sectionForPage(page) {
-  const consultancyPages = ['consultancy', 'ai-consultancy', 'svc-operations', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid'];
+  const consultancyPages = ['consultancy', 'ai-consultancy', 'svc-operations', 'consult-signup', 'fit-check', 'audit-info', 'audit', 'audit-pay', 'audit-paid'];
   const intelligencePages = ['intelligence'];
   if (consultancyPages.includes(page)) return 'consultancy';
   if (intelligencePages.includes(page)) return 'intelligence';
@@ -95,7 +95,7 @@ function scrollToIntelSection(anchorId) {
 
 // ============ ROUTING + DEEP LINKS ============
 const DEFAULT_PAGE = 'consultancy';
-const CONSULTANCY_PAGES = new Set(['consultancy', 'ai-consultancy', 'svc-operations', 'consult-signup', 'fit-check', 'audit', 'audit-pay', 'audit-paid']);
+const CONSULTANCY_PAGES = new Set(['consultancy', 'ai-consultancy', 'svc-operations', 'consult-signup', 'fit-check', 'audit-info', 'audit', 'audit-pay', 'audit-paid']);
 // The site is light-themed everywhere now, so no page runs the starfield
 // backdrop or glassmorphism card treatment — both were built for a dark
 // background (bright stars, translucent glass over near-black) and don't

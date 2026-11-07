@@ -67,6 +67,16 @@ describe("marketingMetadata", () => {
     expect(html).toContain("How many people work in the company?");
     expect(html).not.toContain('id="page-consult-signup"');
   });
+  it("has a public Opportunity Audit page with its own address, in English and Arabic", () => {
+    expect(resolveMarketingPage("/opportunity-audit")).toBe("audit-info");
+    const m = marketingMetadata("audit-info", "/opportunity-audit");
+    expect(m.alternates?.canonical).toBe("/opportunity-audit");
+    expect(m.robots).toBeUndefined();
+    const html = extractPageHtml(body, "audit-info");
+    expect(html).toContain("AED 5,000");
+    expect(html).toContain("تدقيق الفرص");
+    expect(html).toContain("go('fit-check')");
+  });
   it("gives the AI Consultancy page its own address, title and first-HTML content", () => {
     expect(resolveMarketingPage("/ai-consultancy")).toBe("ai-consultancy");
     const m = marketingMetadata("ai-consultancy", "/ai-consultancy");
