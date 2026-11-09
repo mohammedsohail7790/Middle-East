@@ -19,6 +19,11 @@ describe('public routes that need no login', () => {
     expect(passes('POST', '/public/audit/form2')).toBe(true);
     expect(passes('POST', '/public/audit/pay')).toBe(true);
   });
+  it('lets the send-the-questionnaire page from our fit-check email through, for reading only', () => {
+    expect(passes('GET', '/public/audit/approve?t=abc')).toBe(true);
+    expect(passes('GET', '/public/audit/approve?t=abc&confirm=1')).toBe(true);
+    expect(passes('POST', '/public/audit/approve')).toBe(false);
+  });
   it('lets the fit check through', () => {
     expect(passes('POST', '/public/fit-check')).toBe(true);
   });
