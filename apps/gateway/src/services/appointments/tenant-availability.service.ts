@@ -107,6 +107,25 @@ export function invalidateTenantAvailabilityCache(tenantId: string): void {
  * against the connected external calendar's real busy times (Google or Outlook) when one
  * is connected and reachable within the timeout.
  */
+/** "YYYY-MM-DD" from the local calendar parts of a date: the same view of the day the slot loop uses for its weekday. */
+export function toDateKey(d: Date): string {
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+/** The dates a business is closed for a holiday, as "YYYY-MM-DD" keys. */
+export function closedHolidayKeys(rows: Array<{ date: unknown; is_closed?: unknown }>): Set<string> {
+  const keys = new Set<string>();
+  for (const row of rows) {
+    if (row.is_closed === false) continue;
+    const raw = row.date;
+    const key = raw instanceof Date ? toDateKey(raw) : String(raw ?? '').slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(key)) keys.add(key);
+  }
+  return keys;
+}
+
 export async function getTenantAvailabilitySlots(
   tenantId: string,
   options?: { date?: string; durationMinutes?: number; horizonDays?: number }
@@ -143,7 +162,7 @@ export async function getTenantAvailabilitySlots(
   type HourRow = { day_of_week: number; start_time: string; end_time: string; is_open: boolean };
 
   const columns = await getBusinessHoursColumnSet(voiceDb);
-  const [timezone, bhResult, bookedResult] = await Promise.all([
+  const [timezone, bhResult, bookedResult, holidayResult] = await Promise.all([
     getTenantTimezone(tenantId),
     voiceDb.query(
       `SELECT day_of_week,
@@ -163,7 +182,15 @@ export async function getTenantAvailabilitySlots(
          AND status NOT IN ('cancelled', 'canceled')`,
       [tenantId, rangeStart.toISOString(), rangeEnd.toISOString()]
     ),
+    // Holidays the business marked as closed. A database without the table (or any failure) must not stop booking.
+    voiceDb
+      .query(
+        `SELECT date, is_closed FROM public.holidays WHERE tenant_id = $1 AND date >= $2::date AND date <= $3::date`,
+        [tenantId, rangeStart.toISOString().slice(0, 10), rangeEnd.toISOString().slice(0, 10)]
+      )
+      .catch(() => ({ rows: [] as Array<{ date: unknown; is_closed?: unknown }> })),
   ]);
+  const closedDays = closedHolidayKeys(holidayResult.rows as Array<{ date: unknown; is_closed?: unknown }>);
 
   const hours: HourRow[] = (bhResult.rows as Array<Record<string, unknown>>).map((row) => ({
     day_of_week: Number(row.day_of_week),
@@ -219,7 +246,7 @@ export async function getTenantAvailabilitySlots(
   while (cursor < rangeEnd && slots.length < 12) {
     const dow = cursor.getDay();
     const dayHours = hours.find((h) => h.day_of_week === dow && h.is_open);
-    if (dayHours) {
+    if (dayHours && !closedDays.has(toDateKey(cursor))) {
       const [sh, sm] = dayHours.start_time.split(':').map(Number);
       const [eh, em] = dayHours.end_time.split(':').map(Number);
       const slotStart = new Date(cursor);

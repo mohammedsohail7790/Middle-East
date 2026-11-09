@@ -102,3 +102,31 @@ export function renderCallSummaryEmail(input: CallSummaryInput): { subject: stri
 
   return { subject: callSummarySubject(input), html };
 }
+
+export interface EmergencyAlertInput {
+  companyName: string;
+  /** Left out when the caller did not consent to their details being kept. */
+  callerPhone?: string;
+  /** A short label such as "Possible emergency detected". Never what the caller said. */
+  reasonLabel: string;
+}
+
+/** Sent while the call is still going, so the business can act at once. */
+export function renderEmergencyAlertEmail(input: EmergencyAlertInput): { subject: string; html: string } {
+  const points = [
+    'The AI receptionist has treated this as urgent.',
+    input.callerPhone ? `Call back now: ${input.callerPhone}` : 'Open the call in your dashboard to see the caller.',
+  ];
+  const html = renderBrandedEmail({
+    eyebrow: 'Urgent call',
+    title: `Urgent call for ${input.companyName}`,
+    preheader: `${input.reasonLabel}. Please check now.`,
+    bodyHtml:
+      renderCallout({ tone: 'bad', label: 'Needs attention now', headline: input.reasonLabel, points }) +
+      `<p style="margin: 18px 0 0; font-size: 13px; color: #6B6B70;">A full summary follows by email when the call ends.</p>`,
+    ctaLabel: 'Open the call in your dashboard',
+    ctaUrl: `${getDashboardBaseUrl()}/en/dashboard/calls`,
+    headerLabel: '',
+  });
+  return { subject: `URGENT: a caller needs help now (${input.companyName})`, html };
+}
