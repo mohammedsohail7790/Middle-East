@@ -251,6 +251,23 @@ export async function finalizeRuntimeSession(
                 .catch(() => {});
             }).catch(() => {});
 
+            // Tell the business about the call by email (never blocks or fails the call). Without consent to keep personal data the email carries no details.
+            import('../automation/automation.service.js').then(({ automationService }) => {
+              void automationService.sendOwnerCallSummary(state.tenantId!, {
+                callerName: leadForEval.name,
+                callerPhone: leadForEval.phone || state.callerPhone || undefined,
+                service: leadForEval.service,
+                summary: evaluation.summary,
+                outcome: callOutcome,
+                durationMs,
+                sentiment: evaluation.sentiment,
+                leadQuality: evaluation.leadQuality,
+                appointment: bookedAppointment ? String(bookedAppointment.value ?? '').trim() || undefined : undefined,
+                urgent: Boolean(session.safety?.emergencyHandled),
+                includePersonalDetails: !noPersonalDataConsent,
+              });
+            }).catch(() => {});
+
             // Derived entirely from the real evaluation plus ai_agent_configs.requiredFields
             // - never invented. See qualification-mapper.ts for the mapping rules.
             const { aiConfigService } = await import('../ai-config/ai-config.service.js');
@@ -274,6 +291,18 @@ export async function finalizeRuntimeSession(
             });
           };
         } else if (!noPersonalDataConsent) {
+          // A call with no conversation to evaluate (very short, or no transcript): still tell the business, unless it was a hang-up.
+          if (durationMs > 10_000) {
+            import('../automation/automation.service.js').then(({ automationService }) => {
+              void automationService.sendOwnerCallSummary(state.tenantId!, {
+                callerPhone: (typeof customerPhone === 'string' ? customerPhone : undefined) || state.callerPhone || undefined,
+                outcome: callOutcome,
+                durationMs,
+                urgent: Boolean(session.safety?.emergencyHandled),
+                includePersonalDetails: true,
+              });
+            }).catch(() => {});
+          }
           import('../slack/slack.service.js').then(({ slackService }) => {
             slackService
               .sendNewCallNotification(state.tenantId!, {
