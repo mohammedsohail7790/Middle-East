@@ -43,16 +43,40 @@ const valid = {
 const post = (body: unknown) => fetch(base, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
 describe('POST /public/fit-check', () => {
-  it('emails the request to us with the verdict first, and sends nothing to the prospect', async () => {
+  it('emails the request to us with the verdict first, and sends the prospect a short confirmation without the verdict', async () => {
     const res = await post(valid);
     expect(res.status).toBe(200);
-    expect(send).toHaveBeenCalledTimes(1);
+    expect(send).toHaveBeenCalledTimes(2);
     const mail = send.mock.calls[0][0];
     expect(mail.to).toEqual(['leads@example.com']);
     expect(mail.replyTo).toBe('jordan@example.com');
     expect(mail.subject).toBe('New Fit Check — GREEN — Smith & Co');
     expect(mail.text).toContain('GREEN: a good fit');
     expect(mail.text.indexOf('GREEN')).toBeLessThan(mail.text.indexOf('Jordan Smith'));
+    const confirmation = send.mock.calls[1][0];
+    expect(confirmation.to).toEqual(['jordan@example.com']);
+    expect(confirmation.subject).toBe('We received your fit check');
+    expect(confirmation.text).not.toMatch(/GREEN|good fit|amber|red/i);
+  });
+
+  it('puts a one-click "send the audit questionnaire" button in our email when audit links are set up', async () => {
+    process.env.AUDIT_LINK_SECRET = 'a-test-secret';
+    vi.resetModules();
+    const { createPublicFitCheckRouter } = await import('../../apps/gateway/src/services/leads/public-fit-check.controller.js');
+    const app = express();
+    app.use(express.json());
+    app.use('/fit-check', createPublicFitCheckRouter());
+    const second = await new Promise<Server>((resolve) => { const srv = app.listen(0, '127.0.0.1', () => resolve(srv)); });
+    try {
+      const res = await fetch(`http://127.0.0.1:${(second.address() as AddressInfo).port}/fit-check`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(valid) });
+      expect(res.status).toBe(200);
+      const html = send.mock.calls[0][0].html as string;
+      expect(html).toContain('/api/v1/public/audit/approve?t=');
+      expect(html).toContain('Send the audit questionnaire');
+    } finally {
+      second.close();
+      delete process.env.AUDIT_LINK_SECRET;
+    }
   });
 
   it('accepts a company of any size, and tells us the currency to quote in for its country', async () => {
@@ -146,7 +170,7 @@ describe('POST /public/fit-check', () => {
   it('stops one visitor after 5 requests in 15 minutes', async () => {
     for (let i = 0; i < 5; i++) expect((await post(valid)).status).toBe(200);
     expect((await post(valid)).status).toBe(429);
-    expect(send).toHaveBeenCalledTimes(5);
+    expect(send).toHaveBeenCalledTimes(10); // the request to us and the confirmation to the visitor, five times
   });
 
   it('sends the request to every address in FIT_CHECK_LEAD_EMAILS, so Hk and the owner both receive it, and skips anything that is not an address', async () => {
