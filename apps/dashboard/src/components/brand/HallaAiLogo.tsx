@@ -54,18 +54,33 @@ export function HallaAiLogo({
 }: HallaAiLogoProps) {
   const s = SIZES[size];
 
+  // The current Halla AI logo images (the same ones the website uses). Two images swap with the theme so the dashboard's dark mode stays readable.
+  const imageHeight = { sm: 32, md: 40, lg: 48, sidebar: 40 }[size];
   const content = iconOnly ? (
-    <HallaAiTile size={s.tile} />
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/logo-icon.png" alt="" aria-hidden="true" width={s.tile} height={s.tile} style={{ width: s.tile, height: s.tile }} className="rounded-[22%]" />
   ) : (
     <span className={cn("inline-flex flex-col", centered ? "items-center text-center" : "items-start")}>
-      <span className="inline-flex items-center gap-2.5">
-        <HallaAiTile size={s.tile} className={tone === "light" ? "!bg-white !text-[#1d1d1f]" : undefined} />
-        <span className={cn("font-semibold leading-none tracking-[-0.02em]", s.text, tone === "light" ? "text-white" : "text-foreground")}>
-          Halla <span className={tone === "light" ? "text-white/70" : "text-muted-foreground"}>AI</span>
-        </span>
-      </span>
+      {/* eslint-disable @next/next/no-img-element */}
+      <img
+        src="/logo-halla-light.png"
+        alt="Halla AI"
+        width={Math.round(imageHeight * 1.83)}
+        height={imageHeight}
+        style={{ height: imageHeight, width: "auto" }}
+        className={cn(tone === "light" ? "hidden" : "block dark:hidden")}
+      />
+      <img
+        src="/logo-halla-dark.png"
+        alt="Halla AI"
+        width={Math.round(imageHeight * 1.83)}
+        height={imageHeight}
+        style={{ height: imageHeight, width: "auto" }}
+        className={cn(tone === "light" ? "block" : "hidden dark:block")}
+      />
+      {/* eslint-enable @next/next/no-img-element */}
       {showTagline && (
-        <span className="mt-1.5 text-[11px] tracking-wide text-muted-foreground">Smart · Seamless · Always</span>
+        <span className="mt-1.5 text-[11px] tracking-wide text-muted-foreground">End-to-end AI systems for businesses</span>
       )}
     </span>
   );

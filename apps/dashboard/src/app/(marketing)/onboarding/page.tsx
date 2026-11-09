@@ -424,16 +424,16 @@ export default function OnboardingPage() {
                   <h2 className="text-xl font-bold">Tell us about your business</h2>
                   <p className="text-sm text-foreground-secondary mt-1">We&apos;ll personalize your AI receptionist.</p>
                   <p className="text-xs text-foreground-secondary/70 mt-2">
-                    Halla AI — American-built AI receptionist technology, made for businesses across the Middle East.
+                    Halla AI answers your calls and messages in Arabic and English.
                   </p>
                 </div>
                 <div>
                   <label className="text-sm text-foreground-secondary mb-1.5 block">Company name *</label>
-                  <input value={company} onChange={(e) => setCompany(e.target.value)} className="input" placeholder="Rivera HVAC Services" />
+                  <input value={company} onChange={(e) => setCompany(e.target.value)} className="input" placeholder="Glow Clinic" />
                 </div>
                 <div>
                   <label className="text-sm text-foreground-secondary mb-1.5 block">Services (comma-separated)</label>
-                  <input value={services} onChange={(e) => setServices(e.target.value)} className="input" placeholder="AC Repair, Furnace Install" />
+                  <input value={services} onChange={(e) => setServices(e.target.value)} className="input" placeholder="Skin consultation, Laser hair removal, Facial treatment" />
                 </div>
                 <div>
                   <label className="text-sm text-foreground-secondary mb-1.5 block">Timezone</label>
