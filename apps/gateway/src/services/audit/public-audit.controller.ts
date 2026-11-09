@@ -9,7 +9,7 @@ import { auditPrices, formatPrice, isAuditCurrency, minorUnits } from './audit-p
 import { AUDIT_FIELD_IDS, AUDIT_QUESTIONS, AUDIT_SECTIONS } from './audit-form-definition.js';
 import { sendAuditMail } from './audit-mail.js';
 import { sendClientAuditMail, para } from './audit-client-mail.js';
-import { firstName, paymentUrl, questionnaireUrl, PAYMENT_WINDOW_DAYS, QUESTIONNAIRE_DAYS } from './audit-links.js';
+import { paymentUrl, questionnaireUrl, PAYMENT_WINDOW_DAYS, QUESTIONNAIRE_DAYS } from './audit-links.js';
 
 /**
  * The paid Opportunity Audit. The flow runs on its own: the fit-check email has a button that emails the client a private link to Form 2 (the audit questionnaire); submitting it
