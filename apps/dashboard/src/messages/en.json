@@ -234,7 +234,7 @@
       "noAppsDesc": "Your workspace has no direct apps configured yet. Ask an admin to enable one of the apps above."
     },
     "leads": {
-      "description": "Pipeline from calls, SMS, and manual entry",
+      "description": "Pipeline from calls, WhatsApp, and manual entry",
       "newLead": "New Lead",
       "createLead": "Create Lead",
       "creating": "Creating...",
@@ -321,7 +321,7 @@
       "today": "Today",
       "upcoming": "Upcoming",
       "noAppointments": "No appointments yet",
-      "noAppointmentsDesc": "Bookings appear here after a successful call booking or when you add one below. Turn on Book Appointments under AI Agent.",
+      "noAppointmentsDesc": "Bookings appear here after your AI receptionist books an appointment on a call. Turn on Book Appointments under Voice Agents.",
       "noUpcoming": "No upcoming appointments",
       "noUpcomingDesc": "Synced calendar events will appear here once connected.",
       "noDayAppointments": "No appointments this day",
@@ -395,10 +395,10 @@
       "agentName": "Agent Name",
       "phoneGreeting": "Phone Greeting",
       "emergencyTransfer": "Emergency / transfer number",
-      "transferHint": "Required for call transfers. Use E.164 format (e.g. +19175551234).",
+      "transferHint": "Required for call transfers. Use E.164 format (e.g. +971501234567).",
       "voice": "Voice",
       "language": "Language",
-      "languageDesc": "Live calls use this language end-to-end. Arabic and English on Starter; Hindi and Russian on Professional.",
+      "languageDesc": "Live calls use this language end-to-end. Hindi is available on Professional.",
       "tone": "Tone",
       "customInstructions": "Custom instructions",
       "customInstructionsPlaceholder": "Add specific instructions for your AI agent...",
@@ -543,7 +543,7 @@
       "companyName": "Company name",
       "companyNamePlaceholder": "Your Company Name",
       "services": "Services (comma-separated)",
-      "servicesPlaceholder": "AC repair, furnace install, maintenance plans",
+      "servicesPlaceholder": "Skin consultation, laser hair removal, facial treatment",
       "servicesHint": "The AI uses this list when callers ask what you offer.",
       "description": "Business description",
       "descriptionPlaceholder": "Brief overview of your business for the AI receptionist...",
@@ -693,8 +693,8 @@
       "message": "This feature requires the Professional plan or higher."
     },
     "outbound": {
-      "title": "Upgrade to Starter",
-      "message": "This feature requires the Starter plan or higher."
+      "title": "Upgrade to Essential",
+      "message": "This feature requires the Essential plan or higher."
     },
     "customVoice": {
       "title": "Upgrade to Professional",
@@ -705,8 +705,8 @@
       "message": "This feature requires the Professional plan or higher."
     },
     "campaigns": {
-      "title": "Upgrade to Starter",
-      "message": "This feature requires the Starter plan or higher."
+      "title": "Upgrade to Essential",
+      "message": "This feature requires the Essential plan or higher."
     }
   },
   "support": {

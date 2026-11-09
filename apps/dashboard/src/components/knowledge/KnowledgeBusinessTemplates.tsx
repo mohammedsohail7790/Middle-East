@@ -50,7 +50,7 @@ function buildRowsFromTemplates(templates: KnowledgeTemplates): ServiceRow[] {
   return rows;
 }
 
-/** One service per line: "AC repair - $89" or just "AC repair" (no price). */
+/** One service per line: "Consultation - AED 200" or just "Consultation" (no price). */
 function rowsToText(rows: ServiceRow[]): string {
   return rows
     .filter((r) => r.name.trim())
@@ -340,7 +340,7 @@ export function KnowledgeBusinessTemplates() {
                 onChange={(e) => setServicesText(e.target.value)}
                 rows={10}
                 placeholder={
-                  "One service per line. Add a price if you want the AI to quote it:\n\nAC repair - $89\nFurnace installation\nMaintenance plan - $19/month"
+                  "One service per line. Add a price if you want the AI to quote it:\n\nConsultation (30 min) - AED 200\nFollow-up visit - AED 120\nAnnual check-up"
                 }
                 className="input text-sm resize-y font-mono leading-relaxed"
                 aria-label="Services and pricing, one per line"

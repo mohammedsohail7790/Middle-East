@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isLocalDashboard } from "@/lib/phone-setup";
 import { useTranslations, useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import {
@@ -213,7 +214,7 @@ export default function CalendarPage() {
       {error && (
         <div className="dashboard-alert dashboard-alert-error mb-6">
           <p className="text-sm">{error}</p>
-          <p className="text-xs mt-2 opacity-90">{t("errorHint")}</p>
+          {isLocalDashboard() && <p className="text-xs mt-2 opacity-90">{t("errorHint")}</p>}
         </div>
       )}
 
@@ -221,9 +222,11 @@ export default function CalendarPage() {
         <div className="dashboard-alert border-amber-200 bg-amber-50 dark:bg-amber-950/20 mb-6">
           <p className="text-sm text-amber-900 dark:text-amber-200 font-medium">{t("noAppointments")}</p>
           <p className="text-xs text-amber-800 dark:text-amber-300 mt-1">{t("noAppointmentsDesc")}</p>
-          <button type="button" onClick={() => void addTestAppointment()} className="btn-primary mt-3 text-sm">
-            {t("addTest")}
-          </button>
+          {isLocalDashboard() && (
+            <button type="button" onClick={() => void addTestAppointment()} className="btn-primary mt-3 text-sm">
+              {t("addTest")}
+            </button>
+          )}
         </div>
       )}
 
