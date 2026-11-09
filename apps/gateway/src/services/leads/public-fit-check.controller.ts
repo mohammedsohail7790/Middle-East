@@ -2,9 +2,12 @@ import { Router } from 'express';
 import { asyncHandler, MiddlewareFactory } from '../../middleware/index.js';
 import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
-import { renderBrandedEmail, renderCallout, renderDetailList, renderQuote, renderSummaryStrip, stripToPlainText, type CalloutTone } from '../automation/email-template.js';
+import { escapeHtml, renderBrandedEmail, renderCallout, renderDetailList, renderQuote, renderSummaryStrip, stripToPlainText, type CalloutTone } from '../automation/email-template.js';
 import { Resend } from 'resend';
 import { throwIfRejected } from '../email-delivery.js';
+import { approveUrl, firstName } from '../audit/audit-links.js';
+import { isAuditCurrency } from '../audit/audit-pricing.js';
+import { sendClientAuditMail, para } from '../audit/audit-client-mail.js';
 import { assessFit, parseDataLocations, BUDGET_ANSWERS, COMPANY_SIZES, COMPLIANCE_ANSWERS, COUNTRIES, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, QUOTE_CURRENCY, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
 
 // Public, unauthenticated endpoint: throttle per IP, like the diagnostic-call form.
@@ -162,8 +165,12 @@ export function createPublicFitCheckRouter(): Router {
         },
       ];
 
+      // The button for us: one click emails the company the audit questionnaire. Without AUDIT_LINK_SECRET there is no button and the email only offers a reply.
+      const quoteCurrency = QUOTE_CURRENCY[b.country];
+      const approve = approveUrl({ company: b.company, email: b.email, name: firstName(b.name), cur: isAuditCurrency(quoteCurrency) ? quoteCurrency : undefined });
       const VERDICT_TONE: Record<typeof fit.verdict, CalloutTone> = { green: 'good', amber: 'warn', red: 'bad' };
-      const verdictHtml = renderCallout({ tone: VERDICT_TONE[fit.verdict], label: 'First read', headline: VERDICT_LABEL[fit.verdict], points: fit.reasons });
+      const verdictHtml = renderCallout({ tone: VERDICT_TONE[fit.verdict], label: 'First read', headline: VERDICT_LABEL[fit.verdict], points: fit.reasons })
+        + (approve ? renderCallout({ tone: 'info', label: 'Next step', headline: 'If this is a fit, press the button to email the company their audit questionnaire.', points: ['Reply to this email first if you want to talk to them. The button works for 14 days and sends once.', isAuditCurrency(quoteCurrency) ? `The payment link will be in ${quoteCurrency}.` : 'No audit price exists in their currency, so you will send the payment link yourself.'] }) : '');
 
       const html = renderBrandedEmail({
         eyebrow: `New fit check · ${fit.verdict.toUpperCase()}`,
@@ -178,8 +185,8 @@ export function createPublicFitCheckRouter(): Router {
           ])
           + renderQuote('The problem, in their words', b.problem)
           + sections.map((section) => renderDetailList(section.rows, section.heading)).join(''),
-        ctaLabel: `Reply to ${b.name.split(/\s+/)[0]}`,
-        ctaUrl: `mailto:${encodeURIComponent(b.email)}`,
+        ctaLabel: approve ? 'Send the audit questionnaire' : `Reply to ${b.name.split(/\s+/)[0]}`,
+        ctaUrl: approve ?? `mailto:${encodeURIComponent(b.email)}`,
       });
 
       try {
@@ -195,6 +202,24 @@ export function createPublicFitCheckRouter(): Router {
         logger.error('[FitCheck] Failed to send request email', undefined, error instanceof Error ? error : new Error(String(error)));
         res.status(502).json({ error: 'Could not deliver your request. Please email hello@hallaai.com directly.' });
         return;
+      }
+
+      // A short confirmation to the company, so they are not left waiting in silence. It never blocks the request and says nothing about the verdict.
+      try {
+        await sendClientAuditMail({
+          to: b.email,
+          eyebrow: 'Fit check received',
+          title: 'Thank you, we have your answers',
+          subject: 'We received your fit check',
+          preheader: 'We will reply with the next step within one business day.',
+          bodyHtml:
+            para(`Hi ${escapeHtml(firstName(b.name) ?? 'there')},`) +
+            para(`Thank you for filling in the fit check for ${escapeHtml(b.company)}. We read every one.`) +
+            para('We will reply within one business day with the next step. If we are a good match, that is a private link to a short questionnaire about how your business runs, followed by the Opportunity Audit.') +
+            para('If you have anything to add in the meantime, just reply to this email.'),
+        });
+      } catch (error) {
+        logger.error('[FitCheck] Confirmation to the company failed', undefined, error instanceof Error ? error : new Error(String(error)));
       }
 
       res.status(200).json({ ok: true });

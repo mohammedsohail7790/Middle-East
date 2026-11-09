@@ -899,7 +899,14 @@ function initAuditPages() {
         .then(async (res) => { if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(formErrorText(res.status, data.error, 'Something went wrong. Please email hello@hallaai.com directly.')); }
           try { localStorage.removeItem(key); } catch (e2) { /* ignore */ }
           form.querySelectorAll('input[name], textarea[name], select[name]').forEach((el) => { el.value = ''; });
-          say(isAr() ? 'شكراً لك. وصلتنا إجاباتك. سندرسها ونراسلك عندما يكون تدقيقك جاهزاً.' : 'Thank you. We have your answers. We will study them and email you when your audit is ready.', 'var(--green, #2ecc71)'); })
+          const done = await res.json().catch(() => ({}));
+          if (done && done.payUrl) {
+            say(isAr() ? 'شكراً لك. وصلتنا إجاباتك. سننقلك الآن إلى الدفع لنبدأ تدقيقك، وأرسلنا لك الرابط بالبريد الإلكتروني أيضاً.' : 'Thank you. We have your answers. Taking you to payment so we can start your audit. We also emailed you the link.', 'var(--green, #2ecc71)');
+            btn.style.display = 'none';
+            setTimeout(() => { window.location.href = done.payUrl; }, 2500);
+          } else {
+            say(isAr() ? 'شكراً لك. وصلتنا إجاباتك. سنراسلك بالخطوة التالية.' : 'Thank you. We have your answers. We will email you the next step.', 'var(--green, #2ecc71)');
+          } })
         .catch((err) => { say(err.message || (isAr() ? 'حدث خطأ ما. يُرجى مراسلتنا مباشرة على hello@hallaai.com.' : 'Something went wrong. Please email hello@hallaai.com directly.'), 'var(--red)'); })
         .finally(() => { btn.textContent = isAr() ? 'أرسل إجاباتي ←' : 'Send my answers →'; btn.disabled = !valid; });
     });
@@ -912,11 +919,11 @@ function initAuditPages() {
     checkLink().then((d) => {
       if (!(d && d.valid && d.kind === 'pay')) { info.style.color = 'var(--red)'; info.textContent = bad(d); return; }
       const until = new Date(d.expiresAt).toLocaleDateString();
-      if (!d.priceAvailable) { info.textContent = isAr() ? d.company + ': تدقيقك جاهز. سنرسل لك فاتورة بالبريد الإلكتروني.' : d.company + ': your audit is ready. We will send you an invoice by email.'; return; }
+      if (!d.priceAvailable) { info.textContent = isAr() ? d.company + ': سنرسل لك فاتورة بالبريد الإلكتروني لنبدأ تدقيقك.' : d.company + ': we will send you an invoice by email so we can start your audit.'; return; }
       info.innerHTML = '';
       const a = document.createElement('div'); a.textContent = d.company; a.style.fontWeight = '700';
       const b = document.createElement('div'); b.textContent = (isAr() ? 'تدقيق الفرص: ' : 'Opportunity Audit: ') + d.priceText; b.style.fontSize = '1.4rem'; b.style.margin = '8px 0';
-      const c = document.createElement('div'); c.textContent = isAr() ? 'يرجى السداد قبل ' + new Date(d.expiresAt).toLocaleDateString('ar-AE') + ' لتستلم تدقيقك. بعد ذلك يُغلق هذا الطلب.' : 'Please pay by ' + until + ' to receive your audit. After that this order is closed.'; c.style.fontSize = '0.9rem';
+      const c = document.createElement('div'); c.textContent = isAr() ? 'يرجى السداد قبل ' + new Date(d.expiresAt).toLocaleDateString('ar-AE') + ' لنبدأ تدقيقك. بعد ذلك يُغلق هذا الطلب.' : 'Please pay by ' + until + ' to start your audit. After that this order is closed.'; c.style.fontSize = '0.9rem';
       info.append(a, b, c);
       payBtn.style.display = '';
     }).catch(() => { info.textContent = isAr() ? 'تعذّر التحقق من الرابط. يرجى المحاولة مرة أخرى.' : 'We could not check your link. Please try again.'; });

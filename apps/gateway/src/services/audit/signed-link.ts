@@ -2,10 +2,10 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 
 /**
  * Private links for the paid audit. There is no account and no database: a link is a small signed message that says who it is for, what it opens and when it stops working.
- * Two kinds: `form2` opens the audit questionnaire (after the NDA), and `pay` opens the payment page (sent with the "audit ready" email, valid for 5 days).
+ * Three kinds: `approve` is for us (the "send the questionnaire" button in the fit-check email), `form2` opens the audit questionnaire, and `pay` opens the payment page (valid for 5 days).
  * The signature uses AUDIT_LINK_SECRET, so a link cannot be forged or changed; changing the secret switches every link off at once.
  */
-export type LinkKind = 'form2' | 'pay';
+export type LinkKind = 'form2' | 'pay' | 'approve';
 
 export interface LinkPayload {
   /** Kind of link. */
@@ -17,8 +17,10 @@ export interface LinkPayload {
   email: string;
   /** Expiry, seconds since 1970. */
   x: number;
-  /** Currency for a payment link (AED, SAR, ...). */
+  /** Currency for the payment (AED, SAR, ...). Carried from the fit check through the questionnaire to the payment link. */
   cur?: string;
+  /** The client's first name, used to address the emails. */
+  name?: string;
 }
 
 export type VerifyResult =
@@ -53,8 +55,8 @@ export function verifyLink(token: string, secret: string, nowMs: number = Date.n
     return { ok: false, reason: 'malformed' };
   }
   const valid =
-    p && (p.k === 'form2' || p.k === 'pay') && typeof p.id === 'string' && typeof p.company === 'string' && typeof p.email === 'string' && typeof p.x === 'number' && Number.isFinite(p.x) &&
-    (p.cur === undefined || typeof p.cur === 'string');
+    p && (p.k === 'form2' || p.k === 'pay' || p.k === 'approve') && typeof p.id === 'string' && typeof p.company === 'string' && typeof p.email === 'string' && typeof p.x === 'number' && Number.isFinite(p.x) &&
+    (p.cur === undefined || typeof p.cur === 'string') && (p.name === undefined || typeof p.name === 'string');
   if (!valid) return { ok: false, reason: 'malformed' };
   if (p.x * 1000 <= nowMs) return { ok: false, reason: 'expired' };
   return { ok: true, payload: p };

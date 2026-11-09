@@ -8,8 +8,8 @@ export const AUDIT_AR: Record<string, string> = {
   'Opportunity Audit questionnaire': 'استبيان تدقيق الفرص',
   'The details we need to study your business. It takes about 30 to 45 minutes. Your answers are saved on this device as you type, so you can close the page and come back.':
     'التفاصيل التي نحتاجها لدراسة عملك. يستغرق الأمر نحو 30 إلى 45 دقيقة. تُحفظ إجاباتك على هذا الجهاز أثناء الكتابة، فيمكنك إغلاق الصفحة والعودة لاحقاً.',
-  'Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. Everything you send is covered by the NDA we signed.':
-    'أجب بما تستطيع واترك الباقي فارغاً؛ و"لست متأكداً" إجابة مقبولة. يرجى عدم كتابة كلمات المرور أو أرقام البطاقات أو أرقام الهوية. كل ما ترسله مشمول باتفاقية عدم الإفصاح التي وقّعناها.',
+  'Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. We treat everything you send as confidential. If you would like an NDA signed before you send it, write to hello@hallaai.com first.':
+    'أجب بما تستطيع واترك الباقي فارغاً؛ و"لست متأكداً" إجابة مقبولة. يرجى عدم كتابة كلمات المرور أو أرقام البطاقات أو أرقام الهوية. نتعامل مع كل ما ترسله بسرية. وإن أردت توقيع اتفاقية عدم إفصاح قبل أن ترسله، راسل hello@hallaai.com أولاً.',
   'Send my answers →': 'أرسل إجاباتي ←',
   'Choose…': 'اختر…',
   Process: 'العملية',
@@ -125,8 +125,8 @@ export const AUDIT_AR: Record<string, string> = {
   'Who can approve giving us access, and how long does that usually take?': 'من يمكنه الموافقة على منحنا الوصول، وكم يستغرق ذلك عادةً؟',
   'Does your company need a purchase order, a vendor registration, or a particular invoicing process?': 'هل تحتاج شركتك إلى أمر شراء، أو تسجيل كمورّد، أو إجراء فوترة معيّن؟',
   // payment + thank-you pages
-  'Your audit is ready': 'تدقيقك جاهز',
-  'Pay the audit fee and we send you the full audit.': 'ادفع رسوم التدقيق ونرسل لك التدقيق الكامل.',
+  'Start your audit': 'ابدأ تدقيقك',
+  'Pay the audit fee and we start your audit. You receive it by email in about a week.': 'ادفع رسوم التدقيق ونبدأ تدقيقك. ستستلمه بالبريد الإلكتروني خلال نحو أسبوع.',
   'Checking your link…': 'جارٍ التحقق من الرابط…',
   'Pay securely →': 'ادفع بأمان ←',
   'Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.':
@@ -135,6 +135,5 @@ export const AUDIT_AR: Record<string, string> = {
   'What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 30 days.': 'ما تحصل عليه: خارطة طريق مرتبة بالأولوية مع تقديرات العائد وسعر بناء ثابت لكل فرصة، صالحة لمدة 30 يوماً.',
   'Questions? Write to hello@hallaai.com.': 'أسئلة؟ راسلنا على hello@hallaai.com.',
   'Thank you, payment received': 'شكراً لك، وصلنا الدفع',
-  'We will send your audit to the email address you gave us. If you do not see it within one business day, write to hello@hallaai.com.':
-    'سنرسل التدقيق إلى عنوان البريد الإلكتروني الذي زوّدتنا به. إن لم تجده خلال يوم عمل واحد، راسل hello@hallaai.com.',
+  'We have started your audit. You will receive it at the email address you gave us in about a week. If you do not hear from us, write to hello@hallaai.com.': 'بدأنا تدقيقك. ستصلك النتيجة على عنوان البريد الإلكتروني الذي زوّدتنا به خلال نحو أسبوع. إن لم نتواصل معك، راسل hello@hallaai.com.',
 };

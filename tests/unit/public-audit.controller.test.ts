@@ -99,5 +99,68 @@ describe('payment', () => {
     expect(send).not.toHaveBeenCalled();
     expect((await hook(evt({ kind: 'audit', company: 'Smith & Co', link_id: 'r1' }))).status).toBe(200);
     expect(send.mock.calls[0][0].subject).toContain('Audit PAID — Smith & Co');
+    // and the client gets a short confirmation that the audit has started
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send.mock.calls[1][0].to).toEqual(['j@example.com']);
+    expect(send.mock.calls[1][0].subject).toContain('payment');
+  });
+});
+
+describe('the live flow', () => {
+  const approve = () => sign({ k: 'approve', id: 'r9', company: 'Smith & Co', email: 'j@example.com', name: 'Jordan', cur: 'AED', x: exp() }, secret);
+  const form2cur = (cur?: string) => sign({ k: 'form2', id: 'r2', company: 'Smith & Co', email: 'j@example.com', name: 'Jordan', x: exp(), ...(cur ? { cur } : {}) }, secret);
+
+  it('shows a page first and sends nothing until the button is pressed', async () => {
+    const res = await fetch(`${base}/approve?t=${approve()}`);
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain('Send the audit questionnaire?');
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('emails the client their questionnaire link once, even if the button is pressed twice', async () => {
+    const t = approve();
+    const first = await fetch(`${base}/approve?t=${t}&confirm=1`);
+    expect(first.status).toBe(200);
+    expect(send).toHaveBeenCalledTimes(1);
+    const mail = send.mock.calls[0][0];
+    expect(mail.to).toEqual(['j@example.com']);
+    expect(mail.subject).toContain('questionnaire');
+    expect(mail.html).toContain('/audit?t=');
+    const again = await fetch(`${base}/approve?t=${t}&confirm=1`);
+    expect(await again.text()).toContain('Already sent');
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses an approve link of the wrong kind or a bad one', async () => {
+    expect((await fetch(`${base}/approve?t=${form2()}&confirm=1`)).status).toBe(400);
+    expect((await fetch(`${base}/approve?t=${'x'.repeat(40)}&confirm=1`)).status).toBe(400);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('hands the client the payment link as soon as the questionnaire is sent, when the link carries a currency', async () => {
+    const res = await post('/form2', { token: form2cur('AED'), answers: { p1_name: 'Invoicing', p1_steps: 'Type it up' } });
+    expect(res.status).toBe(200);
+    const j = await res.json();
+    expect(j.payUrl).toContain('/audit/pay?t=');
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send.mock.calls[0][0].to).toEqual(['a@example.com', 'b@example.com']);
+    expect(send.mock.calls[0][0].text).toContain('payment link');
+    expect(send.mock.calls[1][0].to).toEqual(['j@example.com']);
+    expect(send.mock.calls[1][0].html).toContain('/audit/pay?t=');
+  });
+
+  it('sends no payment link when the link has no currency, and tells us to make one', async () => {
+    const res = await post('/form2', { token: form2cur(), answers: { p1_name: 'Invoicing', p1_steps: 'Type it up' } });
+    expect(res.status).toBe(200);
+    expect((await res.json()).payUrl).toBeUndefined();
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send.mock.calls[0][0].text).toContain('No payment link was sent');
+  });
+
+  it('still reports success to the client if the payment-link email fails after our own email went out', async () => {
+    send.mockResolvedValueOnce({ id: 'x' }).mockRejectedValueOnce(new Error('boom'));
+    const res = await post('/form2', { token: form2cur('AED'), answers: { p1_name: 'Invoicing', p1_steps: 'Type it up' } });
+    expect(res.status).toBe(200);
+    expect((await res.json()).payUrl).toContain('/audit/pay?t=');
   });
 });
