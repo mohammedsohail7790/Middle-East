@@ -56,6 +56,8 @@ const PUBLIC_POST_ROUTES = new Set([
 const PUBLIC_GET_ROUTES = new Set([
   // Checks a private audit link and says what it is for.
   '/public/audit/link',
+  // The "send the audit questionnaire" page opened from the button in our fit-check email. It is protected by a signed, expiring link, and sends only when its confirm button is pressed.
+  '/public/audit/approve',
   '/calendar/google/callback',
   '/calendar/outlook/callback',
   '/calendar/calendly/callback',
