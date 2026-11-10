@@ -35,7 +35,7 @@ export function approveUrl(who: LinkWho): string | null {
   return t ? `${GATEWAY}/api/v1/public/audit/approve?t=${encodeURIComponent(t)}` : null;
 }
 
-/** The button in the questionnaire email for us: once the audit is ready, one click emails the client the payment link. */
+/** The button in the "questionnaire received" email for us: once the audit is ready, one click emails the client the payment link. */
 export function sendPaymentUrl(who: LinkWho): string | null {
   const t = make('sendpay', who, SEND_PAYMENT_DAYS);
   return t ? `${GATEWAY}/api/v1/public/audit/send-payment?t=${encodeURIComponent(t)}` : null;
