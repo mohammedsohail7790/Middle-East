@@ -420,10 +420,16 @@ function BillingPageContent() {
                 </span>
               </div>
               <p className="text-sm text-foreground-secondary mb-4">
-                {t("renews", {
-                  price: subscription.price,
-                  date: new Date(subscription.current_period_end).toLocaleDateString(),
-                })}
+                {(() => {
+                  const periodEnd = new Date(subscription.current_period_end);
+                  const hasDate = !Number.isNaN(periodEnd.getTime());
+                  // A renewal date in the past is stale data: say the period ended instead of promising a renewal.
+                  const ended = hasDate && periodEnd.getTime() < Date.now();
+                  return t(ended ? "periodEnded" : "renews", {
+                    price: subscription.price,
+                    date: hasDate ? periodEnd.toLocaleDateString() : "—",
+                  });
+                })()}
               </p>
               <div className="flex gap-2">
                 <button type="button" onClick={() => setShowPlanModal(true)} className="btn-primary text-xs">
