@@ -239,7 +239,7 @@ describe("Fit check form", () => {
     fillRequired();
     send();
     await vi.waitFor(() => expect(el("name").value).toBe(""));
-    expect(status()).toBe("Thank you. We have your answers and will reply by email within 1 business day.");
+    expect(status()).toBe("Thank you. We have your answers and will reply by email within 3 business days.");
     expect(el("size").selectedIndex).toBe(0);
     expect(el("consent").checked).toBe(false);
   });

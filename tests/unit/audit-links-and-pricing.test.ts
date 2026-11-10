@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { signLink, verifyLink } from '../../apps/gateway/src/services/audit/signed-link.js';
-import { auditPrices, minorUnits } from '../../apps/gateway/src/services/audit/audit-pricing.js';
+import { auditPrices, minorUnits, priceText } from '../../apps/gateway/src/services/audit/audit-pricing.js';
 
 const secret = 'test-secret-at-least-long-enough';
 const now = Date.UTC(2026, 10, 1);
@@ -40,5 +40,13 @@ describe('audit pricing', () => {
     expect(minorUnits('AED', 5000)).toBe(500000);
     expect(minorUnits('OMR', 520)).toBe(520000);
     expect(minorUnits('KWD', 410.5)).toBe(410500);
+  });
+});
+
+describe('how a client reads the price', () => {
+  it('is plain in dirhams and carries the dirham equivalent in every other currency', () => {
+    expect(priceText('AED')).toBe('AED 5,000');
+    expect(priceText('SAR')).toBe('SAR 5,100 (equivalent to AED 5,000)');
+    expect(priceText('OMR')).toBe('OMR 525 (equivalent to AED 5,000)');
   });
 });

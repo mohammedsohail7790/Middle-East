@@ -834,7 +834,7 @@ function initFitCheckForm() {
           const data = await res.json().catch(() => ({}));
           throw new Error(formErrorText(res.status, data.error, 'Something went wrong. Please email hello@hallaai.com directly.'));
         }
-        say(isAr() ? 'شكراً لك. وصلتنا إجاباتك وسنرد عليك بالبريد الإلكتروني خلال يوم عمل واحد.' : 'Thank you. We have your answers and will reply by email within 1 business day.', 'var(--green, #2ecc71)');
+        say(isAr() ? 'شكراً لك. وصلتنا إجاباتك وسنرد عليك بالبريد الإلكتروني خلال 3 أيام عمل.' : 'Thank you. We have your answers and will reply by email within 3 business days.', 'var(--green, #2ecc71)');
         form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], textarea').forEach((el) => { el.value = ''; });
         form.querySelectorAll('input[type="checkbox"]').forEach((el) => { el.checked = false; });
         form.querySelectorAll('select').forEach((el) => { el.selectedIndex = 0; });
@@ -850,7 +850,20 @@ function initFitCheckForm() {
 function initAuditPages() {
   const API = 'https://gateway.hallaai.com/api/v1/public/audit';
   const token = new URLSearchParams(window.location.search).get('t') || '';
-  const checkLink = () => token ? fetch(API + '/link?t=' + encodeURIComponent(token)).then((r) => r.json().catch(() => ({ valid: false }))) : Promise.resolve({ valid: false });
+  // The server can be asleep for the first request, so a failed check is tried again a few times before the page gives up. Both pages share one check.
+  let linkCheck = null;
+  const checkLink = () => {
+    if (!token) return Promise.resolve({ valid: false });
+    if (linkCheck) return linkCheck;
+    const attempt = (n) => fetch(API + '/link?t=' + encodeURIComponent(token), { cache: 'no-store' })
+      .then((r) => {
+        if (r.status >= 500 || r.status === 304) throw new Error('retry');
+        return r.json().catch(() => ({ valid: false }));
+      })
+      .catch((err) => (n >= 4 ? Promise.reject(err) : new Promise((resolve) => setTimeout(resolve, 1500 * (n + 1))).then(() => attempt(n + 1))));
+    linkCheck = attempt(0);
+    return linkCheck;
+  };
   const isAr = () => document.documentElement.lang === 'ar';
   const bad = (d) => d && d.expired ? (isAr() ? 'انتهت صلاحية هذا الرابط. يرجى مراسلتنا على hello@hallaai.com وسنساعدك.' : 'This link has expired. Please email hello@hallaai.com and we will help.') : (isAr() ? 'هذا الرابط غير صالح. يرجى فتح الرابط كاملاً من رسالتنا، أو مراسلتنا على hello@hallaai.com.' : 'This link is not valid. Please open the whole link from our email, or write to hello@hallaai.com.');
 
@@ -886,12 +899,12 @@ function initAuditPages() {
       const answers = {};
       fields().forEach((el) => { const v = el.value.trim(); if (v) answers[el.name] = v; });
       form.querySelectorAll('[data-q]').forEach((q) => { q.style.outline = ''; });
-      if (!answers.p1_name || !answers.p1_steps) {
-        const first = !answers.p1_name ? 'p1_name' : 'p1_steps';
-        ['p1_name', 'p1_steps'].filter((n) => !answers[n]).forEach((n) => { const q = form.querySelector('[data-q="' + n + '"]'); if (q) { q.style.outline = '2px solid var(--red)'; q.style.outlineOffset = '4px'; q.style.borderRadius = '8px'; } });
+      if (!answers.a_company || !answers.b_process) {
+        const first = !answers.a_company ? 'a_company' : 'b_process';
+        ['a_company', 'b_process'].filter((n) => !answers[n]).forEach((n) => { const q = form.querySelector('[data-q="' + n + '"]'); if (q) { q.style.outline = '2px solid var(--red)'; q.style.outlineOffset = '4px'; q.style.borderRadius = '8px'; } });
         const target = form.querySelector('[data-q="' + first + '"]');
         if (target) target.scrollIntoView({ block: 'center' });
-        say(isAr() ? 'يرجى وصف العملية الأولى على الأقل: اسمها وخطواتها.' : 'Please describe at least the first process: what it is called and the steps.', 'var(--red)');
+        say(isAr() ? 'يرجى إخبارنا عن شركتك، ووصف كيفية تنفيذ العملية حالياً.' : 'Please tell us about your company, and describe how the process is handled today.', 'var(--red)');
         return;
       }
       btn.disabled = true; btn.textContent = isAr() ? 'جارٍ الإرسال...' : 'Sending...'; say('');
@@ -899,14 +912,7 @@ function initAuditPages() {
         .then(async (res) => { if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(formErrorText(res.status, data.error, 'Something went wrong. Please email hello@hallaai.com directly.')); }
           try { localStorage.removeItem(key); } catch (e2) { /* ignore */ }
           form.querySelectorAll('input[name], textarea[name], select[name]').forEach((el) => { el.value = ''; });
-          const done = await res.json().catch(() => ({}));
-          if (done && done.payUrl) {
-            say(isAr() ? 'شكراً لك. وصلتنا إجاباتك. سننقلك الآن إلى الدفع لنبدأ تدقيقك، وأرسلنا لك الرابط بالبريد الإلكتروني أيضاً.' : 'Thank you. We have your answers. Taking you to payment so we can start your audit. We also emailed you the link.', 'var(--green, #2ecc71)');
-            btn.style.display = 'none';
-            setTimeout(() => { window.location.href = done.payUrl; }, 2500);
-          } else {
-            say(isAr() ? 'شكراً لك. وصلتنا إجاباتك. سنراسلك بالخطوة التالية.' : 'Thank you. We have your answers. We will email you the next step.', 'var(--green, #2ecc71)');
-          } })
+          say(isAr() ? 'شكراً لك. وصلتنا إجاباتك. سنعدّ تدقيقك ونراسلك عندما يكون جاهزاً.' : 'Thank you. We have your answers. We will prepare your audit and email you when it is ready.', 'var(--green, #2ecc71)'); })
         .catch((err) => { say(err.message || (isAr() ? 'حدث خطأ ما. يُرجى مراسلتنا مباشرة على hello@hallaai.com.' : 'Something went wrong. Please email hello@hallaai.com directly.'), 'var(--red)'); })
         .finally(() => { btn.textContent = isAr() ? 'أرسل إجاباتي ←' : 'Send my answers →'; btn.disabled = !valid; });
     });
@@ -919,11 +925,11 @@ function initAuditPages() {
     checkLink().then((d) => {
       if (!(d && d.valid && d.kind === 'pay')) { info.style.color = 'var(--red)'; info.textContent = bad(d); return; }
       const until = new Date(d.expiresAt).toLocaleDateString();
-      if (!d.priceAvailable) { info.textContent = isAr() ? d.company + ': سنرسل لك فاتورة بالبريد الإلكتروني لنبدأ تدقيقك.' : d.company + ': we will send you an invoice by email so we can start your audit.'; return; }
+      if (!d.priceAvailable) { info.textContent = isAr() ? d.company + ': تدقيقك جاهز. سنرسل لك فاتورة بالبريد الإلكتروني.' : d.company + ': your audit is ready. We will send you an invoice by email.'; return; }
       info.innerHTML = '';
       const a = document.createElement('div'); a.textContent = d.company; a.style.fontWeight = '700';
       const b = document.createElement('div'); b.textContent = (isAr() ? 'تدقيق الفرص: ' : 'Opportunity Audit: ') + d.priceText; b.style.fontSize = '1.4rem'; b.style.margin = '8px 0';
-      const c = document.createElement('div'); c.textContent = isAr() ? 'يرجى السداد قبل ' + new Date(d.expiresAt).toLocaleDateString('ar-AE') + ' لنبدأ تدقيقك. بعد ذلك يُغلق هذا الطلب.' : 'Please pay by ' + until + ' to start your audit. After that this order is closed.'; c.style.fontSize = '0.9rem';
+      const c = document.createElement('div'); c.textContent = isAr() ? 'يرجى السداد قبل ' + new Date(d.expiresAt).toLocaleDateString('ar-AE') + ' لتستلم تدقيقك. بعد ذلك يُغلق هذا الطلب.' : 'Please pay by ' + until + ' to receive your audit. After that this order is closed.'; c.style.fontSize = '0.9rem';
       info.append(a, b, c);
       payBtn.style.display = '';
     }).catch(() => { info.textContent = isAr() ? 'تعذّر التحقق من الرابط. يرجى المحاولة مرة أخرى.' : 'We could not check your link. Please try again.'; });

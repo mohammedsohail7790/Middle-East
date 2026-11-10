@@ -211,12 +211,12 @@ export function createPublicFitCheckRouter(): Router {
           eyebrow: 'Fit check received',
           title: 'Thank you, we have your answers',
           subject: 'We received your fit check',
-          preheader: 'We will reply with the next step within one business day.',
+          preheader: 'We will respond within 3 business days.',
           bodyHtml:
             para(`Hi ${escapeHtml(firstName(b.name) ?? 'there')},`) +
-            para(`Thank you for filling in the fit check for ${escapeHtml(b.company)}. We read every one.`) +
-            para('We will reply within one business day with the next step. If we are a good match, that is a private link to a short questionnaire about how your business runs, followed by the Opportunity Audit.') +
-            para('If you have anything to add in the meantime, just reply to this email.'),
+            para(`Thank you for completing the fit check for ${escapeHtml(b.company)}.`) +
+            para('We will respond within 3 business days. If we are a good match, we will share a private link to the Opportunity Audit with you.') +
+            para('If you have anything to add in the meantime, please reply to this email.'),
         });
       } catch (error) {
         logger.error('[FitCheck] Confirmation to the company failed', undefined, error instanceof Error ? error : new Error(String(error)));

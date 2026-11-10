@@ -57,22 +57,22 @@ describe('audit link check', () => {
 
 describe('Form 2', () => {
   it('emails the answers to every recipient', async () => {
-    const res = await post('/form2', { token: form2(), answers: { p1_name: 'Invoicing', p1_steps: 'Type it up' } });
+    const res = await post('/form2', { token: form2(), answers: { a_company: 'Smith Trading, wholesale', b_process: 'Type it up' } });
     expect(res.status).toBe(200);
     const mail = send.mock.calls[0][0];
     expect(mail.to).toEqual(['a@example.com', 'b@example.com']);
     expect(mail.subject).toBe('Form 2 received — Smith & Co');
-    expect(mail.text).toContain('Invoicing');
+    expect(mail.text).toContain('Smith Trading, wholesale');
   });
   it('does not say the answers were received when Resend refuses the email (it returns an error instead of throwing)', async () => {
     send.mockResolvedValue({ data: null, error: { name: 'validation_error', statusCode: 403, message: 'The hallaai.com domain is not verified.' } });
-    const res = await post('/form2', { token: form2(), answers: { p1_name: 'Invoicing', p1_steps: 'Type it up' } });
+    const res = await post('/form2', { token: form2(), answers: { a_company: 'Smith Trading, wholesale', b_process: 'Type it up' } });
     expect(res.status).toBe(502);
   });
   it('refuses an unknown question, a wrong-kind link and an empty first process', async () => {
-    expect((await post('/form2', { token: form2(), answers: { evil: 'x', p1_name: 'a', p1_steps: 'b' } })).status).toBe(400);
-    expect((await post('/form2', { token: pay(), answers: { p1_name: 'a', p1_steps: 'b' } })).status).toBe(400);
-    expect((await post('/form2', { token: form2(), answers: { p1_name: 'a' } })).status).toBe(400);
+    expect((await post('/form2', { token: form2(), answers: { evil: 'x', a_company: 'a', b_process: 'b' } })).status).toBe(400);
+    expect((await post('/form2', { token: pay(), answers: { a_company: 'a', b_process: 'b' } })).status).toBe(400);
+    expect((await post('/form2', { token: form2(), answers: { a_company: 'a' } })).status).toBe(400);
     expect(send).not.toHaveBeenCalled();
   });
 });
@@ -137,30 +137,77 @@ describe('the live flow', () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it('hands the client the payment link as soon as the questionnaire is sent, when the link carries a currency', async () => {
-    const res = await post('/form2', { token: form2cur('AED'), answers: { p1_name: 'Invoicing', p1_steps: 'Type it up' } });
-    expect(res.status).toBe(200);
-    const j = await res.json();
-    expect(j.payUrl).toContain('/audit/pay?t=');
-    expect(send).toHaveBeenCalledTimes(2);
-    expect(send.mock.calls[0][0].to).toEqual(['a@example.com', 'b@example.com']);
-    expect(send.mock.calls[0][0].text).toContain('payment link');
-    expect(send.mock.calls[1][0].to).toEqual(['j@example.com']);
-    expect(send.mock.calls[1][0].html).toContain('/audit/pay?t=');
-  });
-
-  it('sends no payment link when the link has no currency, and tells us to make one', async () => {
-    const res = await post('/form2', { token: form2cur(), answers: { p1_name: 'Invoicing', p1_steps: 'Type it up' } });
+  it('thanks the client without a payment link, and gives us a button to send it once the audit is ready', async () => {
+    const res = await post('/form2', { token: form2cur('AED'), answers: { a_company: 'Smith Trading, wholesale', b_process: 'Type it up' } });
     expect(res.status).toBe(200);
     expect((await res.json()).payUrl).toBeUndefined();
-    expect(send).toHaveBeenCalledTimes(1);
-    expect(send.mock.calls[0][0].text).toContain('No payment link was sent');
+    expect(send).toHaveBeenCalledTimes(2);
+    const team = send.mock.calls[0][0];
+    expect(team.to).toEqual(['a@example.com', 'b@example.com']);
+    expect(team.html).toContain('/api/v1/public/audit/send-payment?t=');
+    expect(team.text).toContain('Audit is ready: send the payment link');
+    const client = send.mock.calls[1][0];
+    expect(client.to).toEqual(['j@example.com']);
+    expect(client.subject).toContain('We received your questionnaire');
+    expect(client.html).not.toContain('/audit/pay?t=');
   });
 
-  it('still reports success to the client if the payment-link email fails after our own email went out', async () => {
+  it('still reports success if the thank-you email to the client fails after our own email went out', async () => {
     send.mockResolvedValueOnce({ id: 'x' }).mockRejectedValueOnce(new Error('boom'));
-    const res = await post('/form2', { token: form2cur('AED'), answers: { p1_name: 'Invoicing', p1_steps: 'Type it up' } });
+    const res = await post('/form2', { token: form2cur('AED'), answers: { a_company: 'Smith Trading, wholesale', b_process: 'Type it up' } });
     expect(res.status).toBe(200);
-    expect((await res.json()).payUrl).toContain('/audit/pay?t=');
+  });
+
+  it('puts "equivalent to AED 5,000" next to a price in another currency, and never caches the link check', async () => {
+    const t = sign({ k: 'pay', id: 'r5', company: 'Smith & Co', email: 'j@example.com', x: exp(), cur: 'SAR' }, secret);
+    const res = await fetch(`${base}/link?t=${t}`);
+    expect(res.headers.get('cache-control')).toContain('no-store');
+    expect((await res.json()).priceText).toBe('SAR 5,100 (equivalent to AED 5,000)');
+    const aed = await (await fetch(`${base}/link?t=${pay('AED')}`)).json();
+    expect(aed.priceText).toBe('AED 5,000');
+  });
+
+  it('words the questionnaire email as Hk asked: payment link after the audit, not at submit', async () => {
+    await fetch(`${base}/approve?t=${approve()}&confirm=1`);
+    const mail = send.mock.calls[0][0];
+    expect(mail.text).toContain('proceed with the Opportunity Audit');
+    expect(mail.text).toContain('We will then send you a payment link');
+    expect(mail.text).toContain('AED 5,000');
+    expect(mail.text).not.toContain('When you send it, you receive the payment link');
+  });
+});
+
+describe('sending the payment link once the audit is ready', () => {
+  const sendpay = (cur?: string) => sign({ k: 'sendpay', id: 'r7', company: 'Smith & Co', email: 'j@example.com', name: 'Jordan', x: exp(), ...(cur ? { cur } : {}) }, secret);
+
+  it('shows a page first and sends nothing until the button is pressed', async () => {
+    const res = await fetch(`${base}/send-payment?t=${sendpay('AED')}`);
+    expect(res.status).toBe(200);
+    expect(await res.text()).toContain('Is the audit ready?');
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('emails the client a payment link once, saying the audit is ready, with the dirham equivalent', async () => {
+    const t = sendpay('SAR');
+    expect((await fetch(`${base}/send-payment?t=${t}&confirm=1`)).status).toBe(200);
+    expect(send).toHaveBeenCalledTimes(1);
+    const mail = send.mock.calls[0][0];
+    expect(mail.to).toEqual(['j@example.com']);
+    expect(mail.subject).toContain('Your Opportunity Audit is ready');
+    expect(mail.text).toContain('SAR 5,100 (equivalent to AED 5,000)');
+    expect(mail.html).toContain('/audit/pay?t=');
+    expect(await (await fetch(`${base}/send-payment?t=${t}&confirm=1`)).text()).toContain('Already sent');
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
+  it('says so, and sends nothing, when the link has no payment currency', async () => {
+    const text = await (await fetch(`${base}/send-payment?t=${sendpay()}&confirm=1`)).text();
+    expect(text).toContain('No payment currency');
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('refuses a link of the wrong kind', async () => {
+    expect((await fetch(`${base}/send-payment?t=${form2()}&confirm=1`)).status).toBe(400);
+    expect(send).not.toHaveBeenCalled();
   });
 });

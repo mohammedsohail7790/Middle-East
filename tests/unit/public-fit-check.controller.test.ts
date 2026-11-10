@@ -57,6 +57,9 @@ describe('POST /public/fit-check', () => {
     expect(confirmation.to).toEqual(['jordan@example.com']);
     expect(confirmation.subject).toBe('We received your fit check');
     expect(confirmation.text).not.toMatch(/GREEN|good fit|amber|red/i);
+    expect(confirmation.text).toContain('We will respond within 3 business days.');
+    expect(confirmation.text).toContain('private link to the Opportunity Audit');
+    expect(confirmation.text).not.toMatch(/We read every one|questionnaire/);
   });
 
   it('puts a one-click "send the audit questionnaire" button in our email when audit links are set up', async () => {
