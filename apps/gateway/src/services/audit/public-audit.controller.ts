@@ -33,7 +33,18 @@ const writeLimit = MiddlewareFactory.createRateLimit({ windowMs: 15 * 60 * 1000,
 const MAX_ANSWER_CHARS = 4000;
 const MAX_TOTAL_CHARS = 60000;
 
-const stripeClient = (): Stripe | null => (process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2026-08-26.dahlia' }) : null);
+/**
+ * The Stripe key for audit payments. AUDIT_STRIPE_SECRET_KEY lets the audit be paid into its own Stripe account (and the AUDIT_STRIPE_WEBHOOK_SECRET must come from that same account);
+ * without it the shared STRIPE_SECRET_KEY is used. The subscription billing keeps using STRIPE_SECRET_KEY only.
+ */
+export function auditStripeKey(env: NodeJS.ProcessEnv = process.env): string | undefined {
+  return env.AUDIT_STRIPE_SECRET_KEY?.trim() || env.STRIPE_SECRET_KEY?.trim() || undefined;
+}
+
+const stripeClient = (): Stripe | null => {
+  const key = auditStripeKey();
+  return key ? new Stripe(key, { apiVersion: '2026-08-26.dahlia' }) : null;
+};
 
 type Checked = { ok: boolean; payload?: LinkPayload; status?: number; error?: string };
 
