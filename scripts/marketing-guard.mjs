@@ -113,21 +113,34 @@ async function main() {
 
   const results = [];
   let next = 0;
+  // One stuck page must not freeze the whole run: every page gets its own time limit, and a fresh tab after a failure.
+  const PAGE_LIMIT_MS = 75000;
+  async function checkPage(page, path) {
+    // domcontentloaded, not load: a stalled third-party widget (chat, social) must not hold up a layout check.
+    const r = await page.goto(base + path, { waitUntil: 'domcontentloaded', timeout: 45000 });
+    if (cssFile) await page.addStyleTag({ content: readFileSync(cssFile, 'utf8') });
+    await page.waitForTimeout(2000);
+    return r && r.status() >= 400 ? [`HTTP ${r.status()}`] : await page.evaluate(inspectPage);
+  }
   async function worker() {
-    const page = await context.newPage();
+    let page = await context.newPage();
     while (next < paths.length) {
       const path = paths[next++];
+      let timer;
+      const limit = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`no answer after ${PAGE_LIMIT_MS / 1000}s`)), PAGE_LIMIT_MS);
+      });
       try {
-        const r = await page.goto(base + path, { waitUntil: 'load', timeout: 60000 });
-        if (cssFile) await page.addStyleTag({ content: readFileSync(cssFile, 'utf8') });
-        await page.waitForTimeout(1200);
-        const problems = r && r.status() >= 400 ? [`HTTP ${r.status()}`] : await page.evaluate(inspectPage);
-        results.push({ path, problems });
+        results.push({ path, problems: await Promise.race([checkPage(page, path), limit]) });
       } catch (e) {
-        results.push({ path, problems: [`could not load: ${String(e).slice(0, 80)}`] });
+        results.push({ path, problems: [`could not check: ${String(e).slice(0, 80)}`] });
+        await page.close().catch(() => {});
+        page = await context.newPage();
+      } finally {
+        clearTimeout(timer);
       }
     }
-    await page.close();
+    await page.close().catch(() => {});
   }
   await Promise.all([worker(), worker(), worker()]);
   await browser.close();
