@@ -37,6 +37,16 @@ export function minorUnits(currency: AuditCurrency, amount: number): number {
   return Math.round(amount * 100);
 }
 
+/** The price as a client reads it. In the Gulf currencies other than AED it also says what that is in dirhams, since the audit is priced at AED 5,000. */
+export function priceText(currency: AuditCurrency, env: NodeJS.ProcessEnv = process.env): string | undefined {
+  const prices = auditPrices(env);
+  const amount = prices[currency];
+  if (amount === undefined) return undefined;
+  if (currency === 'AED') return formatPrice('AED', amount);
+  const aed = prices.AED;
+  return aed === undefined ? formatPrice(currency, amount) : `${formatPrice(currency, amount)} (equivalent to ${formatPrice('AED', aed)})`;
+}
+
 export function formatPrice(currency: AuditCurrency, amount: number): string {
   const decimals = THREE_DECIMALS.has(currency) ? 3 : 2;
   const text = Number.isInteger(amount) ? amount.toLocaleString('en-US') : amount.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });

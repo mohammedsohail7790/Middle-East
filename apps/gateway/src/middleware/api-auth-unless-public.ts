@@ -58,6 +58,8 @@ const PUBLIC_GET_ROUTES = new Set([
   '/public/audit/link',
   // The "send the audit questionnaire" page opened from the button in our fit-check email. It is protected by a signed, expiring link, and sends only when its confirm button is pressed.
   '/public/audit/approve',
+  // The "audit is ready, send the payment link" page from the questionnaire email for us. Same protection as the approve page.
+  '/public/audit/send-payment',
   '/calendar/google/callback',
   '/calendar/outlook/callback',
   '/calendar/calendly/callback',

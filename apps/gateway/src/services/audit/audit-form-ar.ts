@@ -3,137 +3,118 @@
  * The page shows both languages (lang-en / lang-ar) and the site's language switch picks one. A test fails if an English string has no Arabic here.
  */
 export const AUDIT_AR: Record<string, string> = {
-  // Form 2 page
-  'Halla AI Consultancy': 'استشارات Halla AI',
-  'Opportunity Audit questionnaire': 'استبيان تدقيق الفرص',
-  'The details we need to study your business. It takes about 30 to 45 minutes. Your answers are saved on this device as you type, so you can close the page and come back.':
-    'التفاصيل التي نحتاجها لدراسة عملك. يستغرق الأمر نحو 30 إلى 45 دقيقة. تُحفظ إجاباتك على هذا الجهاز أثناء الكتابة، فيمكنك إغلاق الصفحة والعودة لاحقاً.',
+  'Halla AI Consultancy':
+    'استشارات Halla AI',
+  'Opportunity Audit questionnaire':
+    'استبيان تدقيق الفرص',
+  'Send my answers →':
+    'أرسل إجاباتي ←',
+  'Choose…':
+    'اختر…',
+  'Process':
+    'العملية',
+  'System':
+    'النظام',
+  'Add another process':
+    'أضف عملية أخرى',
+  'Add another system':
+    'أضف نظاماً آخر',
   'Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. We treat everything you send as confidential. If you would like an NDA signed before you send it, write to hello@hallaai.com first.':
     'أجب بما تستطيع واترك الباقي فارغاً؛ و"لست متأكداً" إجابة مقبولة. يرجى عدم كتابة كلمات المرور أو أرقام البطاقات أو أرقام الهوية. نتعامل مع كل ما ترسله بسرية. وإن أردت توقيع اتفاقية عدم إفصاح قبل أن ترسله، راسل hello@hallaai.com أولاً.',
-  'Send my answers →': 'أرسل إجاباتي ←',
-  'Choose…': 'اختر…',
-  Process: 'العملية',
-  System: 'النظام',
-  'Add another process': 'أضف عملية أخرى',
-  'Add another system': 'أضف نظاماً آخر',
-  // sections
-  'A. The people': 'أ. الأشخاص',
-  'B. The process that hurts most': 'ب. العملية الأكثر إيلاماً',
-  'Start with the one that costs the most time or money. You can add up to three.': 'ابدأ بالعملية التي تكلّفك أكبر قدر من الوقت أو المال. يمكنك إضافة ما يصل إلى ثلاث.',
-  'C. Your systems and data': 'ج. أنظمتك وبياناتك',
-  'One short block per system: accounting, ERP, CRM, email, calendar, website, phone system, WhatsApp, spreadsheets. You can add up to six.':
-    'فقرة قصيرة لكل نظام: المحاسبة، تخطيط الموارد، إدارة العملاء، البريد الإلكتروني، التقويم، الموقع الإلكتروني، نظام الهاتف، واتساب، جداول البيانات. يمكنك إضافة ما يصل إلى ستة.',
-  'D. Customers, calls and messages': 'د. العملاء والمكالمات والرسائل',
-  'Only if this is part of the problem.': 'فقط إن كان هذا جزءاً من المشكلة.',
-  'E. Documents and information the AI would read': 'هـ. المستندات والمعلومات التي سيقرؤها الذكاء الاصطناعي',
-  'F. Rules and risk': 'و. القواعد والمخاطر',
-  'G. Goals, limits and the way you work': 'ز. الأهداف والحدود وطريقة عملكم',
-  'H. The people who will use it': 'ح. من سيستخدمونه',
-  'I. Practical': 'ط. الجوانب العملية',
-  // A
-  'Company legal name, registered address and tax or VAT number': 'الاسم القانوني للشركة وعنوانها المسجّل والرقم الضريبي أو رقم ضريبة القيمة المضافة',
-  'For the contract and the invoice.': 'للعقد والفاتورة.',
-  'Who signs off a project, who is our day-to-day contact, and who else must agree?': 'من يعتمد المشروع، ومن جهة الاتصال اليومية لدينا، ومن يجب أن يوافق أيضاً؟',
-  'Who inside the company will own this after we finish, and how many hours a week could they give?': 'من داخل الشركة سيتولى هذا النظام بعد أن ننتهي، وكم ساعة أسبوعياً يمكنه تخصيصها؟',
-  'Who looks after IT or the software, inside the company or outside?': 'من يتولى تقنية المعلومات أو البرمجيات، داخل الشركة أو خارجها؟',
-  // B
-  'What is it called, and what starts it?': 'ما اسمها، وما الذي يبدأها؟',
-  'For example: month-end invoicing, started when the month closes.': 'مثال: فوترة نهاية الشهر، تبدأ عند إغلاق الشهر.',
-  'Walk us through the steps in order. Who does each, and which tool or paper do they use?': 'اشرح لنا الخطوات بالترتيب. من ينفّذ كل خطوة، وما الأداة أو الورق الذي يستخدمه؟',
-  'How often does it happen (per day, week or month), and how long does one take from start to finish?': 'كم مرة تحدث (يومياً أو أسبوعياً أو شهرياً)، وكم يستغرق تنفيذها الواحد من البداية إلى النهاية؟',
-  'How many people touch it, and about how many hours a week in total?': 'كم شخصاً يتعامل معها، وكم ساعة أسبوعياً تقريباً في المجموع؟',
-  'How often does it go wrong or need redoing, and what does a mistake cost?': 'كم مرة تسوء أو تحتاج إلى إعادة، وكم تكلّف الأخطاء؟',
-  'Are there busy periods or deadlines? What happens when the person who does it is away?': 'هل هناك فترات ذروة أو مواعيد نهائية؟ وماذا يحدث حين يغيب الشخص الذي ينفّذها؟',
-  'What does the finished result look like, and who receives it?': 'كيف تبدو النتيجة النهائية، ومن يستلمها؟',
-  'Are there odd cases that need a person to decide? How common are they?': 'هل توجد حالات استثنائية تحتاج إلى قرار من شخص؟ وما مدى تكرارها؟',
-  'What would "fixed" look like, in numbers?': 'كيف سيبدو "الحل" بالأرقام؟',
-  'For example: invoices out in 2 days instead of 6.': 'مثال: فواتير تصدر خلال يومين بدلاً من 6.',
-  // C
-  'Name and version, and what you use it for': 'الاسم والإصدار، وفيمَ تستخدمه',
-  'Accounting, ERP, CRM, email, calendar, website or store, phone system, WhatsApp, spreadsheets, shared drive.': 'المحاسبة، ERP، إدارة العملاء، البريد الإلكتروني، التقويم، الموقع أو المتجر، نظام الهاتف، واتساب، جداول البيانات، مساحة التخزين المشتركة.',
-  'How many people use it, and who administers it?': 'كم شخصاً يستخدمه، ومن يديره؟',
-  'Is it in the cloud or on your own server?': 'هل هو على السحابة أم على خادم خاص بكم؟',
-  'In the cloud': 'على السحابة',
-  'On our own server': 'على خادم خاص بنا',
-  Both: 'كلاهما',
-  'Not sure': 'لست متأكداً',
-  'Can you export data, or does it connect to other tools (API, Zapier, built-in links)?': 'هل يمكنك تصدير البيانات، أم أنه يتصل بأدوات أخرى (API أو Zapier أو روابط مدمجة)؟',
-  'It connects to other tools': 'يتصل بأدوات أخرى',
-  'We can export data only': 'نستطيع تصدير البيانات فقط',
-  Neither: 'لا هذا ولا ذاك',
-  'How clean is the data?': 'ما مدى نظافة البيانات؟',
-  Tidy: 'مرتبة',
-  'Mostly tidy': 'مرتبة في الغالب',
-  Messy: 'فوضوية',
-  'Duplicated across places': 'مكررة في أماكن متعددة',
-  'How many records are there (customers, products, invoices)?': 'كم عدد السجلات (عملاء، منتجات، فواتير)؟',
-  'For an ERP: how customised is it, and does the vendor still support it? Anything else we should know?': 'إن كان نظام ERP: ما مدى تخصيصه، وهل ما زال المورّد يدعمه؟ وأي شيء آخر ينبغي أن نعرفه؟',
-  // D
-  'Which channels, and roughly how many calls or messages per day?': 'ما القنوات، وكم مكالمة أو رسالة تقريباً في اليوم؟',
-  'Opening hours, and what happens after hours?': 'ما ساعات العمل، وماذا يحدث خارجها؟',
-  'Which languages do your customers use (Arabic, English, others)?': 'ما اللغات التي يستخدمها عملاؤك (العربية، الإنجليزية، غيرها)؟',
-  'The ten questions customers ask most': 'أكثر عشرة أسئلة يطرحها العملاء',
-  'What should always go to a person, and to whom?': 'ما الذي يجب أن يُحال دائماً إلى شخص، وإلى من؟',
-  'Do you already have written answers, price lists or a FAQ?': 'هل لديك إجابات مكتوبة أو قوائم أسعار أو أسئلة شائعة؟',
-  'The tone you want, and whether you record calls': 'النبرة التي تريدها، وهل تسجّلون المكالمات',
-  // E
-  'What kinds? (invoices, purchase orders, contracts, forms, emails, spreadsheets, reports)': 'ما أنواعها؟ (فواتير، أوامر شراء، عقود، نماذج، رسائل بريد، جداول بيانات، تقارير)',
-  'How many per month, and in which languages?': 'كم عددها شهرياً، وبأي لغات؟',
-  'Are they digital, scanned or handwritten?': 'هل هي رقمية أم ممسوحة ضوئياً أم مكتوبة بخط اليد؟',
-  Digital: 'رقمية',
-  Scanned: 'ممسوحة ضوئياً',
-  Handwritten: 'بخط اليد',
-  'A mix': 'مزيج',
-  'Do they follow a standard layout, or vary by supplier or customer?': 'هل تتبع تصميماً موحداً، أم تختلف حسب المورّد أو العميل؟',
-  'Standard layout': 'تصميم موحد',
-  'Varies a little': 'يختلف قليلاً',
-  'Varies a lot': 'يختلف كثيراً',
-  'Can you send two or three redacted examples by replying to our email?': 'هل يمكنك إرسال مثالين أو ثلاثة بعد حجب البيانات الحساسة، بالرد على رسالتنا؟',
-  Yes: 'نعم',
-  No: 'لا',
-  // F
-  'Do you handle personal data? Which kinds: contact details, national ID numbers, health data, payment cards?': 'هل تتعامل مع بيانات شخصية؟ وما أنواعها: بيانات الاتصال، أرقام الهوية الوطنية، البيانات الصحية، بطاقات الدفع؟',
-  'Does your industry have rules we must follow? (health, finance, legal, education, government)': 'هل لقطاعك قواعد يجب الالتزام بها؟ (الصحة، المالية، القانون، التعليم، الجهات الحكومية)',
-  'Must data stay in a country, or with a specific cloud provider?': 'هل يجب أن تبقى البيانات داخل دولة معينة، أو لدى مزوّد سحابي محدد؟',
-  'Are you comfortable with a cloud AI service reading your documents?': 'هل تقبل أن تقرأ خدمة ذكاء اصطناعي سحابية مستنداتك؟',
-  'Yes, with some exceptions': 'نعم، مع بعض الاستثناءات',
-  'What must a person always approve before the AI acts, and who approves?': 'ما الذي يجب أن يوافق عليه شخص دائماً قبل أن يتصرف الذكاء الاصطناعي، ومن يوافق؟',
-  'Do customers need to be told they are talking to an AI?': 'هل يجب إبلاغ العملاء بأنهم يتحدثون إلى ذكاء اصطناعي؟',
-  // G
-  'Your top three outcomes in 90 days, each with a number if possible': 'أهم ثلاث نتائج تريدها خلال 90 يوماً، كلٌّ منها برقم إن أمكن',
-  'What is a must-have, and what is nice to have?': 'ما الأمور الضرورية، وما الأمور المرغوبة فقط؟',
-  'Your deadline or busy season': 'موعدك النهائي أو موسم الذروة لديك',
-  'The budget range for a first build, and how you prefer to pay (deposit, milestones)': 'نطاق الميزانية لأول بناء، وطريقة الدفع التي تفضلها (دفعة مقدمة، مراحل)',
-  'What have you tried before, and why did it not work?': 'ما الذي جرّبته من قبل، ولماذا لم ينجح؟',
-  'How does your team feel about new tools? Who would resist, and who would champion it?': 'كيف يشعر فريقك تجاه الأدوات الجديدة؟ من قد يقاوم، ومن سيتبنّاها؟',
-  // H
-  'How many staff will use the new system, and in what roles?': 'كم موظفاً سيستخدم النظام الجديد، وبأي أدوار؟',
-  'How comfortable are they with software?': 'ما مدى ارتياحهم للبرمجيات؟',
-  Low: 'منخفض',
-  Medium: 'متوسط',
-  High: 'مرتفع',
-  'It varies a lot': 'يختلف كثيراً',
-  'Which languages should the training and playbooks be in?': 'بأي لغات ينبغي أن يكون التدريب وأدلة العمل؟',
-  'Which training format do you prefer?': 'ما صيغة التدريب التي تفضلها؟',
-  'A half-day workshop': 'ورشة نصف يوم',
-  'Short sessions': 'جلسات قصيرة',
-  'Recorded guides': 'أدلة مسجّلة',
-  'No preference': 'لا تفضيل',
-  // I
-  'Can we get a test environment or read-only access to your main systems?': 'هل يمكننا الحصول على بيئة اختبار أو وصول للقراءة فقط إلى أنظمتكم الرئيسية؟',
-  'Possibly, we need to check': 'محتمل، علينا التحقق',
-  'Who can approve giving us access, and how long does that usually take?': 'من يمكنه الموافقة على منحنا الوصول، وكم يستغرق ذلك عادةً؟',
-  'Does your company need a purchase order, a vendor registration, or a particular invoicing process?': 'هل تحتاج شركتك إلى أمر شراء، أو تسجيل كمورّد، أو إجراء فوترة معيّن؟',
-  // payment + thank-you pages
-  'Start your audit': 'ابدأ تدقيقك',
-  'Pay the audit fee and we start your audit. You receive it by email in about a week.': 'ادفع رسوم التدقيق ونبدأ تدقيقك. ستستلمه بالبريد الإلكتروني خلال نحو أسبوع.',
-  'Checking your link…': 'جارٍ التحقق من الرابط…',
-  'Pay securely →': 'ادفع بأمان ←',
+  'Checking your link…':
+    'جارٍ التحقق من الرابط…',
+  'Pay securely →':
+    'ادفع بأمان ←',
   'Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.':
     'تتم معالجة الدفع بالبطاقة عبر Stripe. رسوم التدقيق منفصلة عن أي مشروع بناء. بعد تسليم التدقيق لا يمكن استرداد الرسوم.',
-  'Required. Everything else is optional.': 'مطلوب. كل ما عدا ذلك اختياري.',
-  'What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 30 days.': 'ما تحصل عليه: خارطة طريق مرتبة بالأولوية مع تقديرات العائد وسعر بناء ثابت لكل فرصة، صالحة لمدة 30 يوماً.',
-  'Questions? Write to hello@hallaai.com.': 'أسئلة؟ راسلنا على hello@hallaai.com.',
-  'Thank you, payment received': 'شكراً لك، وصلنا الدفع',
-  'We have started your audit. You will receive it at the email address you gave us in about a week. If you do not hear from us, write to hello@hallaai.com.': 'بدأنا تدقيقك. ستصلك النتيجة على عنوان البريد الإلكتروني الذي زوّدتنا به خلال نحو أسبوع. إن لم نتواصل معك، راسل hello@hallaai.com.',
+  'Required. Everything else is optional.':
+    'مطلوب. كل ما عدا ذلك اختياري.',
+  'What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 30 days.':
+    'ما تحصل عليه: خارطة طريق مرتبة بالأولوية مع تقديرات العائد وسعر بناء ثابت لكل فرصة، صالحة لمدة 30 يوماً.',
+  'Questions? Write to hello@hallaai.com.':
+    'أسئلة؟ راسلنا على hello@hallaai.com.',
+  'Thank you, payment received':
+    'شكراً لك، وصلنا الدفع',
+  'The details we need to study your business. It takes about 20 minutes. Your answers are saved on this device as you type, so you can close the page and come back.':
+    'التفاصيل التي نحتاجها لدراسة عملك. يستغرق الأمر نحو 20 دقيقة. تُحفظ إجاباتك على هذا الجهاز أثناء الكتابة، فيمكنك إغلاق الصفحة والعودة لاحقاً.',
+  'Your audit is ready':
+    'تدقيقك جاهز',
+  'Pay the audit fee and we send you the full audit.':
+    'ادفع رسوم التدقيق ونرسل لك التدقيق الكامل.',
+  'We will send your audit to the email address you gave us. If you do not see it within one business day, write to hello@hallaai.com.':
+    'سنرسل التدقيق إلى عنوان البريد الإلكتروني الذي زوّدتنا به. إن لم تجده خلال يوم عمل واحد، راسل hello@hallaai.com.',
+  'A. Business overview and goals':
+    'أ. نظرة عامة على النشاط والأهداف',
+  'What is your company name and what is your core business?':
+    'ما اسم شركتك وما نشاطك الأساسي؟',
+  'Who is the primary contact person for this project?':
+    'من هو الشخص الرئيسي للتواصل بشأن هذا المشروع؟',
+  'What is the main goal or outcome you want to achieve with this automation or AI project?':
+    'ما الهدف أو النتيجة الرئيسية التي تريد تحقيقها من مشروع الأتمتة أو الذكاء الاصطناعي هذا؟',
+  'For example: reduce manual data entry, or speed up customer support response times.':
+    'مثال: تقليل إدخال البيانات يدوياً، أو تسريع الرد على استفسارات العملاء.',
+  'What does success look like for this project?':
+    'كيف يبدو النجاح في هذا المشروع؟',
+  'For example: saving 10 hours a week, zero data entry errors, or handling 500 more inquiries a month.':
+    'مثال: توفير 10 ساعات أسبوعياً، أو عدم وجود أخطاء في إدخال البيانات، أو التعامل مع 500 استفسار إضافي شهرياً.',
+  'B. Current process and workflows':
+    'ب. العملية الحالية وسير العمل',
+  'How is this process currently handled today?':
+    'كيف تُنفَّذ هذه العملية حالياً؟',
+  'Please walk us through it step by step.':
+    'يرجى شرحها لنا خطوة بخطوة.',
+  'How much time does your team spend on this manual process each week?':
+    'كم من الوقت يقضيه فريقك في هذه العملية اليدوية كل أسبوع؟',
+  'Roughly how many transactions, documents or customer inquiries do you process per month?':
+    'تقريباً كم عدد المعاملات أو المستندات أو استفسارات العملاء التي تعالجونها شهرياً؟',
+  'What percentage of these items follow a standard format, and what percentage are messy or unpredictable?':
+    'ما نسبة هذه البنود التي تتبع صيغة موحدة، وما نسبة غير المنظم أو غير المتوقع منها؟',
+  'Standard: uniform invoices, structured forms. Messy: handwritten notes, random emails.':
+    'موحد: فواتير متماثلة أو نماذج منظمة. غير منظم: ملاحظات بخط اليد أو رسائل بريد عشوائية.',
+  'What is your current error rate or manual exception rate, and where does the process usually break down?':
+    'ما معدل الأخطاء أو الحالات الاستثنائية اليدوية لديكم حالياً، وأين تتعطل العملية عادةً؟',
+  'C. Software, systems and data':
+    'ج. البرمجيات والأنظمة والبيانات',
+  'What software, CRM or tools are you currently using to run this process?':
+    'ما البرمجيات أو نظام إدارة العملاء أو الأدوات التي تستخدمونها حالياً لتشغيل هذه العملية؟',
+  'Are your current software tools cloud-based with accessible APIs or webhooks, or are they older on-premise legacy systems?':
+    'هل أدواتكم الحالية سحابية وتتيح واجهات برمجة التطبيقات (API) أو خطافات الويب، أم أنها أنظمة قديمة تعمل داخل مقر الشركة؟',
+  'Do you currently have developer documentation, admin access, or IT support available to help connect these tools?':
+    'هل لديكم حالياً وثائق للمطورين أو صلاحيات إدارية أو دعم تقني يساعد في ربط هذه الأدوات؟',
+  'Where is your data currently stored?':
+    'أين تُحفظ بياناتكم حالياً؟',
+  'For example: Google Sheets, a cloud database, local servers, or physical filing cabinets.':
+    'مثال: جداول Google، أو قاعدة بيانات سحابية، أو خوادم محلية، أو ملفات ورقية.',
+  'D. Security, privacy and compliance':
+    'د. الأمان والخصوصية والامتثال',
+  'Does this process involve sensitive or regulated data?':
+    'هل تتضمن هذه العملية بيانات حساسة أو خاضعة للتنظيم؟',
+  'For example: customer financial records, health data, or passwords.':
+    'مثال: السجلات المالية للعملاء، أو البيانات الصحية، أو كلمات المرور.',
+  'Are there any local data privacy laws, industry regulations or company policies we need to follow?':
+    'هل هناك قوانين محلية لخصوصية البيانات أو لوائح قطاعية أو سياسات داخلية يجب أن نلتزم بها؟',
+  'For example: UAE or KSA data regulations, or GDPR.':
+    'مثال: أنظمة البيانات في الإمارات أو السعودية، أو اللائحة العامة لحماية البيانات (GDPR).',
+  'Do you require user data to be encrypted or hosted in a specific geographic region?':
+    'هل تشترطون تشفير بيانات المستخدمين أو استضافتها في منطقة جغرافية محددة؟',
+  'E. Human oversight and exceptions':
+    'هـ. الإشراف البشري والحالات الاستثنائية',
+  'Can this workflow run fully automated from start to finish, or does a human need to review and approve certain steps?':
+    'هل يمكن تشغيل سير العمل هذا آلياً بالكامل من البداية إلى النهاية، أم يلزم أن يراجع شخص بعض الخطوات ويوافق عليها؟',
+  'If the system encounters an error or an unusual request, how should it notify your team?':
+    'إذا واجه النظام خطأً أو طلباً غير معتاد، فكيف ينبغي أن يُخطر فريقكم؟',
+  'For example: by email, Slack, or a dashboard alert.':
+    'مثال: بالبريد الإلكتروني، أو عبر Slack، أو بتنبيه على لوحة التحكم.',
+  'F. Timeline, budget and next steps':
+    'و. الجدول الزمني والميزانية والخطوات التالية',
+  'Who is the ultimate project sponsor or decision-maker for this build?':
+    'من الراعي النهائي للمشروع أو صاحب القرار فيه؟',
+  'What is your target go-live date or deadline for this project?':
+    'ما تاريخ التشغيل المستهدف أو الموعد النهائي لهذا المشروع؟',
+  'What is your allocated budget range for this build?':
+    'ما نطاق الميزانية المخصصة لهذا المشروع؟',
+  'For example: under AED 10k, AED 10k to 30k, or AED 30k and above.':
+    'مثال: أقل من 10 آلاف درهم، أو من 10 إلى 30 ألف درهم، أو 30 ألف درهم فأكثر.',
+  'Are there any other specific requirements, constraints or tools you want us to keep in mind?':
+    'هل هناك متطلبات أو قيود أو أدوات أخرى محددة تريدون أن نضعها في الاعتبار؟',
 };

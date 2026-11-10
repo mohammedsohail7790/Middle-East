@@ -5,11 +5,11 @@ import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
 import { escapeHtml, renderCallout, renderDetailList, renderSummaryStrip } from '../automation/email-template.js';
 import { verifyLink, type LinkPayload } from './signed-link.js';
-import { auditPrices, formatPrice, isAuditCurrency, minorUnits } from './audit-pricing.js';
+import { auditPrices, formatPrice, isAuditCurrency, minorUnits, priceText } from './audit-pricing.js';
 import { AUDIT_FIELD_IDS, AUDIT_QUESTIONS, AUDIT_SECTIONS } from './audit-form-definition.js';
 import { sendAuditMail } from './audit-mail.js';
 import { sendClientAuditMail, para } from './audit-client-mail.js';
-import { paymentUrl, questionnaireUrl, PAYMENT_WINDOW_DAYS, QUESTIONNAIRE_DAYS } from './audit-links.js';
+import { paymentUrl, questionnaireUrl, sendPaymentUrl, PAYMENT_WINDOW_DAYS, QUESTIONNAIRE_DAYS, SEND_PAYMENT_DAYS } from './audit-links.js';
 
 /**
  * The paid Opportunity Audit. The flow runs on its own: the fit-check email has a button that emails the client a private link to Form 2 (the audit questionnaire); submitting it
@@ -19,8 +19,9 @@ import { paymentUrl, questionnaireUrl, PAYMENT_WINDOW_DAYS, QUESTIONNAIRE_DAYS }
 
 const SITE = process.env.PUBLIC_SITE_URL || 'https://hallaai.com';
 
-/** Questionnaires already sent from an approve link, so a second click does not email the client twice. Lives in memory, so a restart forgets it; the links also expire. */
+/** Emails already sent from our buttons, so a second click does not email the client twice. They live in memory, so a restart forgets them; the links also expire. */
 const approvedIds = new Set<string>();
+const paymentSentIds = new Set<string>();
 
 const page = (title: string, bodyHtml: string): string =>
   `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${escapeHtml(title)}</title></head>` +
@@ -52,6 +53,10 @@ function checkToken(token: unknown, kind: LinkPayload['k']): Checked {
 
 export function createPublicAuditRouter(): Router {
   const router = Router();
+  router.use((_req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+  });
 
   // Is this link good, and what is it for? Used by the pages to show the company name and the price before anything is submitted.
   router.get(
@@ -77,7 +82,7 @@ export function createPublicAuditRouter(): Router {
       if (p.k === 'pay') {
         const prices = auditPrices();
         const price = isAuditCurrency(p.cur) ? prices[p.cur] : undefined;
-        res.json({ ...base, currency: p.cur ?? null, priceAvailable: price !== undefined, priceText: price !== undefined && isAuditCurrency(p.cur) ? formatPrice(p.cur, price) : null, windowDays: PAYMENT_WINDOW_DAYS });
+        res.json({ ...base, currency: p.cur ?? null, priceAvailable: price !== undefined, priceText: isAuditCurrency(p.cur) ? priceText(p.cur) ?? null : null, windowDays: PAYMENT_WINDOW_DAYS });
         return;
       }
       res.json(base);
@@ -105,7 +110,7 @@ export function createPublicAuditRouter(): Router {
         const href = `${req.originalUrl.split('?')[0]}?t=${encodeURIComponent(String(req.query.t))}&confirm=1`;
         res.type('html').send(page('Send the audit questionnaire?',
           `<p>This emails <b>${who}</b> a private link to the audit questionnaire.</p>` +
-          `<p style="color:#5b6472">After they submit it, they receive the payment link${isAuditCurrency(p.cur) && price !== undefined ? ` for ${escapeHtml(formatPrice(p.cur, price))}` : ' (no payment currency is set for this country, so you will send that one yourself)'}. The audit starts once they pay.</p>` +
+          `<p style="color:#5b6472">After they submit it, you prepare the audit (about one week). A button in the questionnaire email then sends them the payment link${isAuditCurrency(p.cur) && price !== undefined ? ` for ${escapeHtml(priceText(p.cur) ?? '')}` : ' (no payment currency is set for this country, so you will send that one yourself)'}. The full audit goes out once they pay.</p>` +
           `<p><a href="${escapeHtml(href)}" style="display:inline-block;background:#1b1f27;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600">Send the questionnaire</a></p>`));
         return;
       }
@@ -118,7 +123,7 @@ export function createPublicAuditRouter(): Router {
         res.status(503).type('html').send(page('Not set up', '<p>AUDIT_LINK_SECRET is not set on the server, so links cannot be made. Use the command-line script instead.</p>'));
         return;
       }
-      const price = isAuditCurrency(p.cur) ? auditPrices()[p.cur] : undefined;
+      const fee = isAuditCurrency(p.cur) ? priceText(p.cur) : undefined;
       try {
         const sent = await sendClientAuditMail({
           to: p.email,
@@ -128,10 +133,10 @@ export function createPublicAuditRouter(): Router {
           preheader: 'The next step: tell us how your business runs today.',
           bodyHtml:
             para(`Hi ${escapeHtml(p.name || 'there')},`) +
-            para(`Thank you for the fit check for ${escapeHtml(p.company)}. We would like to go ahead with the Opportunity Audit.`) +
-            para('The next step is a questionnaire about how your business runs today: your processes and your systems. It saves your answers on this device as you type, so you can come back to it.') +
-            para(`When you send it, you receive the payment link${isAuditCurrency(p.cur) && price !== undefined ? ` for the audit fee (${escapeHtml(formatPrice(p.cur, price))})` : ''}. We start the audit once it is paid, and you receive it in about a week.`) +
-            para('If you would like an NDA signed first, just reply to this email.'),
+            para(`Thank you for completing the fit check for ${escapeHtml(p.company)}. We would like to proceed with the Opportunity Audit.`) +
+            para('The next step is a questionnaire about your business, your current processes and your systems. Your answers are saved on this device as you type, so you can return to it at any time.') +
+            para(`Once you submit it, we will prepare your audit, which takes about one week. We will then send you a payment link for the audit fee${fee ? ` (${escapeHtml(fee)})` : ''}, and you receive the full audit once the payment is made.`) +
+            para('If you would like an NDA signed first, please reply to this email.'),
           ctaLabel: 'Open the questionnaire',
           ctaUrl: link,
         });
@@ -146,6 +151,72 @@ export function createPublicAuditRouter(): Router {
       }
       approvedIds.add(p.id);
       res.type('html').send(page('Sent', `<p>The questionnaire link was emailed to <b>${who}</b>. It works for ${QUESTIONNAIRE_DAYS} days.</p>`));
+    })
+  );
+
+  // The "audit is ready, send the payment link" button in the questionnaire email for us. Same safety as the approve page: the first visit only shows a page, and the
+  // email goes out when its button is pressed, once.
+  router.get(
+    '/send-payment',
+    readLimit,
+    validate({ query: { t: { type: 'string', required: true, maxLength: 2000 }, confirm: { type: 'string', required: false, maxLength: 2 } }, allowOnlyQuery: ['t', 'confirm'] }),
+    asyncHandler(async (req: any, res: any) => {
+      res.set('Cache-Control', 'no-store');
+      res.set('X-Robots-Tag', 'noindex');
+      const checked = checkToken(req.query.t, 'sendpay');
+      if (!checked.ok) {
+        res.status(checked.status).type('html').send(page('This link does not work', `<p>${escapeHtml(String(checked.error))}</p>`));
+        return;
+      }
+      const p = checked.payload as LinkPayload;
+      const who = `${escapeHtml(p.company)} (${escapeHtml(p.email)})`;
+      const fee = isAuditCurrency(p.cur) ? priceText(p.cur) : undefined;
+      if (!fee) {
+        res.type('html').send(page('No payment currency', `<p>There is no audit price for ${who}'s currency, so the payment link cannot be made here. Send it by hand with apps/gateway/scripts/create-audit-link.ts.</p>`));
+        return;
+      }
+      if (req.query.confirm !== '1') {
+        const href = `${req.originalUrl.split('?')[0]}?t=${encodeURIComponent(String(req.query.t))}&confirm=1`;
+        res.type('html').send(page('Is the audit ready?',
+          `<p>This emails <b>${who}</b> a payment link for <b>${escapeHtml(fee)}</b>. Only do this once the audit report is finished and ready to send.</p>` +
+          `<p style="color:#5b6472">The client pays, then you send them the full audit. The payment link works for ${PAYMENT_WINDOW_DAYS} days.</p>` +
+          `<p><a href="${escapeHtml(href)}" style="display:inline-block;background:#1b1f27;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600">Send the payment link</a></p>`));
+        return;
+      }
+      if (paymentSentIds.has(p.id)) {
+        res.type('html').send(page('Already sent', `<p>The payment link was already sent to <b>${who}</b>.</p>`));
+        return;
+      }
+      const link = paymentUrl({ id: p.id, company: p.company, email: p.email, name: p.name, cur: p.cur });
+      if (!link) {
+        res.status(503).type('html').send(page('Not set up', '<p>AUDIT_LINK_SECRET is not set on the server, so links cannot be made. Use the command-line script instead.</p>'));
+        return;
+      }
+      try {
+        const sent = await sendClientAuditMail({
+          to: p.email,
+          eyebrow: 'Opportunity Audit',
+          title: 'Your audit is ready',
+          subject: `Your Opportunity Audit is ready, ${p.company}`,
+          preheader: 'Pay the audit fee to receive your audit.',
+          bodyHtml:
+            para(`Hi ${escapeHtml(p.name || 'there')},`) +
+            para(`Your Opportunity Audit for ${escapeHtml(p.company)} is ready. To receive it, please pay the audit fee (${escapeHtml(fee)}) using the secure link below within ${PAYMENT_WINDOW_DAYS} days.`) +
+            para('We will send you the full audit by email as soon as your payment arrives. The audit fee is separate from any build, and it is not refundable once the audit has been delivered.'),
+          ctaLabel: 'Pay the audit fee',
+          ctaUrl: link,
+        });
+        if (sent === 'not-configured') {
+          res.status(503).type('html').send(page('Email is not set up', '<p>RESEND_API_KEY is not set on the server, so the email could not be sent.</p>'));
+          return;
+        }
+      } catch (error) {
+        logger.error('[Audit] Failed to send the payment link email', undefined, error instanceof Error ? error : new Error(String(error)));
+        res.status(502).type('html').send(page('Could not send', '<p>The email did not go out. Please try the button again, or send the link by hand with the script.</p>'));
+        return;
+      }
+      paymentSentIds.add(p.id);
+      res.type('html').send(page('Sent', `<p>The payment link was emailed to <b>${who}</b>. It works for ${PAYMENT_WINDOW_DAYS} days. You will get an "Audit PAID" email when they pay.</p>`));
     })
   );
 
@@ -186,8 +257,8 @@ export function createPublicAuditRouter(): Router {
         res.status(400).json({ error: 'The answers are too long to send in one go. Please shorten them or send details by email.' });
         return;
       }
-      if (!answers.p1_name || !answers.p1_steps) {
-        res.status(400).json({ error: 'Please describe at least the first process: what it is called and the steps.' });
+      if (!answers.a_company || !answers.b_process) {
+        res.status(400).json({ error: 'Please tell us about your company, and describe how the process is handled today.' });
         return;
       }
 
@@ -202,11 +273,11 @@ export function createPublicAuditRouter(): Router {
         return rows.length ? renderDetailList(rows, section.title) : '';
       }).join('');
       const answered = Object.keys(answers).length;
-      const payUrl = isAuditCurrency(p.cur) && auditPrices()[p.cur] !== undefined ? paymentUrl({ id: p.id, company: p.company, email: p.email, name: p.name, cur: p.cur }) : null;
+      const sendPay = sendPaymentUrl({ id: p.id, company: p.company, email: p.email, name: p.name, cur: p.cur });
       const intro =
-        (payUrl
-          ? renderCallout({ tone: 'good', label: 'Next step', headline: 'The client has been sent the payment link. Start the analysis when the "Audit PAID" email arrives.', points: [`The link is valid for ${PAYMENT_WINDOW_DAYS} days. The audit is delivered about a week after payment.`] })
-          : renderCallout({ tone: 'warn', label: 'Next step', headline: 'No payment link was sent: this link has no payment currency. Make a payment link and email it to the client.', points: ['Use apps/gateway/scripts/create-audit-link.ts with the pay option and the client\'s currency.'] }))
+        (sendPay
+          ? renderCallout({ tone: 'warn', label: 'Next step', headline: 'Do the analysis (about one week). When the audit is ready, press the button to send the client the payment link.', points: [`The button works for ${SEND_PAYMENT_DAYS} days and sends once. The payment link then works for ${PAYMENT_WINDOW_DAYS} days.`, 'Send the full audit to the client once they have paid.'] })
+          : renderCallout({ tone: 'warn', label: 'Next step', headline: 'Do the analysis (about one week), then email the client the payment link.', points: ['There is no button because AUDIT_LINK_SECRET is not set: use apps/gateway/scripts/create-audit-link.ts with the pay option and the client\'s currency.'] }))
         + renderSummaryStrip([
           { label: 'Company', value: p.company },
           { label: 'Answered', value: `${answered} of ${AUDIT_QUESTIONS.length}` },
@@ -215,7 +286,7 @@ export function createPublicAuditRouter(): Router {
         ]);
 
       try {
-        const sent = await sendAuditMail({ eyebrow: 'Audit questionnaire', title: `${p.company} submitted Form 2`, subject: `Form 2 received — ${p.company}`, bodyHtml: intro + sections, replyTo: p.email });
+        const sent = await sendAuditMail({ eyebrow: 'Audit questionnaire', title: `${p.company} submitted Form 2`, subject: `Form 2 received — ${p.company}`, bodyHtml: intro + sections, replyTo: p.email, ...(sendPay ? { ctaLabel: 'Audit is ready: send the payment link', ctaUrl: sendPay } : {}) });
         if (sent === 'not-configured') {
           logger.error('[Audit] RESEND_API_KEY not configured, cannot deliver Form 2');
           res.status(503).json({ error: 'Email delivery is not configured. Please email hello@hallaai.com directly.' });
@@ -226,27 +297,23 @@ export function createPublicAuditRouter(): Router {
         res.status(502).json({ error: 'Could not deliver your answers. Please email hello@hallaai.com directly.' });
         return;
       }
-      if (payUrl) {
-        const price = auditPrices()[p.cur as keyof ReturnType<typeof auditPrices>];
-        try {
-          await sendClientAuditMail({
-            to: p.email,
-            eyebrow: 'Opportunity Audit',
-            title: 'Thank you, here is your payment link',
-            subject: `Your Opportunity Audit payment link, ${p.company}`,
-            preheader: 'Pay the audit fee and we start your audit.',
-            bodyHtml:
-              para(`Hi ${escapeHtml(p.name || 'there')},`) +
-              para(`Thank you for your answers for ${escapeHtml(p.company)}. To start your Opportunity Audit, please pay the audit fee${price !== undefined && isAuditCurrency(p.cur) ? ` (${escapeHtml(formatPrice(p.cur, price))})` : ''} within ${PAYMENT_WINDOW_DAYS} days.`) +
-              para('We start as soon as the payment arrives, and you receive your audit in about a week. The fee is separate from any build and is not refundable once the audit has been delivered.'),
-            ctaLabel: 'Pay the audit fee',
-            ctaUrl: payUrl,
-          });
-        } catch (error) {
-          logger.error('[Audit] Failed to send the payment link email', undefined, error instanceof Error ? error : new Error(String(error)));
-        }
+      // A plain thank-you, so the client knows what happens next. The payment link comes later, once the audit is ready.
+      try {
+        await sendClientAuditMail({
+          to: p.email,
+          eyebrow: 'Opportunity Audit',
+          title: 'Thank you, we have your answers',
+          subject: `We received your questionnaire, ${p.company}`,
+          preheader: 'We will prepare your audit and email you when it is ready.',
+          bodyHtml:
+            para(`Hi ${escapeHtml(p.name || 'there')},`) +
+            para(`Thank you for completing the questionnaire for ${escapeHtml(p.company)}.`) +
+            para('We will now prepare your Opportunity Audit, which takes about one week. When it is ready, we will email you a payment link for the audit fee, and you receive the full audit once the payment is made.'),
+        });
+      } catch (error) {
+        logger.error('[Audit] Failed to send the questionnaire confirmation', undefined, error instanceof Error ? error : new Error(String(error)));
       }
-      res.status(200).json({ ok: true, ...(payUrl ? { payUrl } : {}) });
+      res.status(200).json({ ok: true });
     })
   );
 
@@ -354,11 +421,11 @@ export async function handleAuditStripeWebhook(req: any, res: any): Promise<void
             to: clientEmail,
             eyebrow: 'Opportunity Audit',
             title: 'Payment received',
-            subject: 'We received your payment, your audit has started',
-            preheader: 'You will receive your audit in about a week.',
+            subject: 'We received your payment',
+            preheader: 'We will send you your audit shortly.',
             bodyHtml:
               para('Thank you. We received your payment for the Opportunity Audit' + (session.metadata.company ? ` for ${escapeHtml(session.metadata.company)}` : '') + '.') +
-              para('We have started. You will receive your audit by email in about a week. If you have anything to add in the meantime, just reply to this email.'),
+              para('We will email your full audit to this address within one business day. If you have any questions in the meantime, please reply to this email.'),
           });
         } catch (error) {
           logger.error('[Audit] Payment confirmation to the client failed', undefined, error instanceof Error ? error : new Error(String(error)));

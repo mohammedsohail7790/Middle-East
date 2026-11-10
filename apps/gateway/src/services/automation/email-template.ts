@@ -53,7 +53,7 @@ export function renderBrandedEmail(options: EmailLayoutOptions): string {
   const ctaBlock = ctaLabel && ctaUrl
     ? `
     <tr>
-      <td style="padding: 8px 40px 40px;">
+      <td class="px" style="padding: 8px 40px 36px;">
         <a href="${ctaUrl}" target="_blank" style="display: inline-block; background: ${BRAND.ink}; color: ${BRAND.white}; text-decoration: none; font-family: ${FONT}; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 8px; border-bottom: 3px solid ${BRAND.gold};">${escapeHtml(ctaLabel)} <span style="color: ${BRAND.gold};">&rarr;</span></a>
       </td>
     </tr>`
@@ -76,15 +76,22 @@ export function renderBrandedEmail(options: EmailLayoutOptions): string {
 <meta name="supported-color-schemes" content="light">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <title>${escapeHtml(title)}</title>
+<style>
+@media only screen and (max-width: 520px) {
+  .outer { padding: 12px 6px !important; }
+  .px { padding-left: 20px !important; padding-right: 20px !important; }
+  .h1 { font-size: 26px !important; line-height: 1.15 !important; margin-bottom: 16px !important; }
+}
+</style>
 </head>
 <body style="margin: 0; padding: 0; background: ${BRAND.sand}; font-family: ${FONT};">
 ${preheaderBlock}
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: ${BRAND.sand};">
     <tr>
-      <td align="center" style="padding: 36px 16px;">
+      <td align="center" class="outer" style="padding: 36px 16px;">
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%; background: ${BRAND.white}; border: 1px solid ${BRAND.line}; border-radius: 14px; overflow: hidden;">
           <tr>
-            <td bgcolor="${BRAND.ink}" style="background: ${BRAND.ink}; padding: 14px 40px;">
+            <td bgcolor="${BRAND.ink}" class="px" style="background: ${BRAND.ink}; padding: 14px 40px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
                 <td align="left"><img src="${logoUrl}" alt="Halla AI" width="120" style="width: 120px; height: auto; display: block; border: 0; font-family: ${FONT_DISPLAY}; font-size: 24px; font-weight: 600; color: ${BRAND.paper};"></td>
                 <td align="right" style="font-family: ${FONT}; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: ${BRAND.gold};">${escapeHtml(headerLabel)}</td>
@@ -95,9 +102,9 @@ ${preheaderBlock}
             <td style="height: 3px; line-height: 3px; font-size: 0; background: ${BRAND.gold};">&nbsp;</td>
           </tr>
           <tr>
-            <td style="padding: 40px 40px 12px;">
+            <td class="px" style="padding: 36px 40px 12px;">
               ${eyebrowBlock}
-              <h1 style="margin: 0 0 24px; font-family: ${FONT_DISPLAY}; font-size: 32px; line-height: 1.12; font-weight: 600; letter-spacing: -0.01em; color: ${BRAND.ink};">${escapeHtml(title)}</h1>
+              <h1 class="h1" style="margin: 0 0 20px; font-family: ${FONT_DISPLAY}; font-size: 32px; line-height: 1.12; font-weight: 600; letter-spacing: -0.01em; color: ${BRAND.ink};">${escapeHtml(title)}</h1>
               <div style="font-family: ${FONT}; font-size: 15px; line-height: 1.65; color: ${BRAND.body};">
                 ${bodyHtml}
               </div>
@@ -105,7 +112,7 @@ ${preheaderBlock}
           </tr>
           ${ctaBlock}
           <tr>
-            <td style="background: ${BRAND.paper}; padding: 24px 40px; border-top: 1px solid ${BRAND.line};">
+            <td class="px" style="background: ${BRAND.paper}; padding: 24px 40px; border-top: 1px solid ${BRAND.line};">
               <p style="margin: 0; font-family: ${FONT}; font-size: 12px; line-height: 1.7; color: ${BRAND.muted};">
                 <strong style="color: ${BRAND.ink};">Halla AI</strong> &middot; End-to-end AI systems for businesses
                 <br>

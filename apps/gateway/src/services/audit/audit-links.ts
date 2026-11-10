@@ -12,6 +12,8 @@ const GATEWAY = process.env.GATEWAY_PUBLIC_URL || 'https://gateway.hallaai.com';
 export const APPROVE_DAYS = 14;
 export const QUESTIONNAIRE_DAYS = 30;
 export const PAYMENT_WINDOW_DAYS = 5;
+/** How long the "audit is ready, send the payment link" button works: the analysis takes about a week, so it has to outlive that with room to spare. */
+export const SEND_PAYMENT_DAYS = 45;
 
 export const newLinkId = (): string => randomBytes(4).toString('hex');
 const expiry = (days: number): number => Math.floor(Date.now() / 1000 + days * 86400);
@@ -31,6 +33,12 @@ function make(kind: LinkPayload['k'], who: LinkWho, days: number): string | null
 export function approveUrl(who: LinkWho): string | null {
   const t = make('approve', who, APPROVE_DAYS);
   return t ? `${GATEWAY}/api/v1/public/audit/approve?t=${encodeURIComponent(t)}` : null;
+}
+
+/** The button in the questionnaire email for us: once the audit is ready, one click emails the client the payment link. */
+export function sendPaymentUrl(who: LinkWho): string | null {
+  const t = make('sendpay', who, SEND_PAYMENT_DAYS);
+  return t ? `${GATEWAY}/api/v1/public/audit/send-payment?t=${encodeURIComponent(t)}` : null;
 }
 
 export function questionnaireUrl(who: LinkWho): string | null {
