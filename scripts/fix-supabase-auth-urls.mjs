@@ -15,9 +15,8 @@
 const token = process.env.SUPABASE_ACCESS_TOKEN?.trim();
 const ref = process.env.SUPABASE_PROJECT_REF?.trim() || "xzhxnxxlbiiidipcgfrv";
 
-const SITE_URL = "https://app.hallaai.com";
+const SITE_URL = "https://www.hallaai.com";
 const REDIRECT_URLS = [
-  "https://app.hallaai.com/auth/callback",
   "https://www.hallaai.com/auth/callback",
   "https://hallaai.com/auth/callback",
   "http://localhost:3000/auth/callback",

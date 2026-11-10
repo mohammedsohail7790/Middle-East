@@ -40,7 +40,7 @@ DEEPGRAM_API_KEY=...                            # If using Deepgram transcriptio
 ELEVENLABS_API_KEY=...                          # If using ElevenLabs voice cloning
 PG_POOL_MAX=8                                   # Default: 8. Raise to 15 at >500 tenants
 NODE_ENV=production                             # Critical — affects security behavior
-ALLOWED_ORIGINS=https://www.hallaai.com,https://app.hallaai.com  # CORS — add dashboard domain
+ALLOWED_ORIGINS=https://www.hallaai.com  # CORS — add dashboard domain
 
 # === EMERGENCY OVERRIDES (leave unset in normal operation) ===
 # ALLOWLIST_FAIL_OPEN=true                      # Only set during DB maintenance
@@ -159,7 +159,7 @@ curl https://gateway.hallaai.com/debug/env
 
 ```bash
 # Vercel: auto-deploys on push to main
-# Verify: dashboard loads at https://app.hallaai.com
+# Verify: dashboard loads at https://www.hallaai.com
 # Test: signup flow, login, dashboard access
 ```
 

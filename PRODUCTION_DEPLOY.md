@@ -8,7 +8,7 @@ Production stack is only `apps/gateway` + `apps/dashboard`. Legacy Vite/Python/m
 
 ## Vercel (dashboard) + Render (gateway)
 
-See **[DEPLOY_VERCEL.md](./DEPLOY_VERCEL.md)** for app.hallaai.com on Vercel.
+See **[DEPLOY_VERCEL.md](./DEPLOY_VERCEL.md)** for www.hallaai.com on Vercel.
 
 ## Render (gateway)
 

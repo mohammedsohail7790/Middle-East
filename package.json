@@ -46,7 +46,7 @@
     "test:e2e": "playwright test",
     "test:e2e:flows": "node scripts/ensure-local-redis.mjs && playwright test e2e/journeys/dashboard-dataflow.spec.ts e2e/journeys/callflow.spec.ts e2e/journeys/workflow.spec.ts e2e/journeys/dashboard-realtime.spec.ts e2e/api/gateway-dataflow.spec.ts e2e/api/dashboard-realtime-api.spec.ts",
     "test:e2e:local": "node scripts/ensure-local-redis.mjs && playwright test",
-    "test:e2e:prod": "npx --yes cross-env PLAYWRIGHT_SKIP_WEBSERVER=1 PLAYWRIGHT_BASE_URL=https://app.hallaai.com PLAYWRIGHT_GATEWAY_URL=https://gateway.hallaai.com playwright test e2e/journeys/dashboard-dataflow.spec.ts e2e/journeys/callflow.spec.ts e2e/journeys/workflow.spec.ts e2e/journeys/dashboard-realtime.spec.ts e2e/api/dashboard-realtime-api.spec.ts",
+    "test:e2e:prod": "npx --yes cross-env PLAYWRIGHT_SKIP_WEBSERVER=1 PLAYWRIGHT_BASE_URL=https://www.hallaai.com PLAYWRIGHT_GATEWAY_URL=https://gateway.hallaai.com playwright test e2e/journeys/dashboard-dataflow.spec.ts e2e/journeys/callflow.spec.ts e2e/journeys/workflow.spec.ts e2e/journeys/dashboard-realtime.spec.ts e2e/api/dashboard-realtime-api.spec.ts",
     "verify:prod": "node scripts/production-audit.mjs && node scripts/verify-dashboard-realtime.mjs && node scripts/smoke-production.mjs",
     "validate:prod": "npm run typecheck && npm run test && npm run build && npm run verify:prod",
     "videos:studio": "npm run studio -w halla-ai-videos",

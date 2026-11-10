@@ -178,7 +178,7 @@ Call IQ is a production-grade, multi-tenant AI voice receptionist SaaS platform 
 
 1. Configure all secrets in Render dashboard (via `sync: false` env vars)
 2. Point DNS `gateway.hallaai.com` → Render gateway
-3. Point DNS `app.hallaai.com` → Vercel dashboard
+3. Point DNS `www.hallaai.com` → Vercel dashboard
 4. Configure Twilio webhook URL → `https://gateway.hallaai.com/api/v1/voice/incoming-call`
 5. Run `supabase/migrations/` against production database
 6. Configure Stripe webhook → `https://gateway.hallaai.com/api/v1/billing/webhook`

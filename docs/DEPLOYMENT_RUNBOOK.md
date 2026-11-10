@@ -41,7 +41,7 @@ curl -X POST "https://api.render.com/deploy/srv-{GATEWAY_SRV_ID}?key={DEPLOY_HOO
 **Via Vercel:**
 1. Push to `main` branch (auto-deploy enabled)
 2. Monitor build logs in Vercel dashboard
-3. Verify: open `https://app.hallaai.com` in browser
+3. Verify: open `https://www.hallaai.com` in browser
 
 ### Step 4: Run Migrations
 
@@ -75,7 +75,7 @@ curl -f https://gateway.hallaai.com/voice-health
 curl https://gateway.hallaai.com/metrics | head -20
 
 # Dashboard
-curl -f https://app.hallaai.com/api/health
+curl -f https://www.hallaai.com/api/health
 ```
 
 ---

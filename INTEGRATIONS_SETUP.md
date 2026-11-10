@@ -4,7 +4,7 @@
 > where to get credentials, and the exact redirect URIs to register.
 >
 > **Gateway:** `https://gateway.hallaai.com`  
-> **Dashboard:** `https://app.hallaai.com`  
+> **Dashboard:** `https://www.hallaai.com`  
 > **Market:** GCC / Middle East
 
 ---
@@ -181,10 +181,10 @@ switch their language from the Agent settings page in the dashboard.
    -- Creates: Halla AI Demo Business, +97145551234, Asia/Dubai, AED, Arabic
    ```
 6. **Authentication → URL Configuration:**
-   - Site URL: `https://app.hallaai.com`
+   - Site URL: `https://www.hallaai.com`
    - Redirect URLs:
      ```
-     https://app.hallaai.com/auth/callback
+     https://www.hallaai.com/auth/callback
      http://localhost:3000/auth/callback
      https://*.vercel.app/auth/callback
      ```

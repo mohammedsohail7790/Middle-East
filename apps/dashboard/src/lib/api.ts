@@ -207,7 +207,7 @@ function unreachableApiMessage(_apiBase?: string): string {
     return "Cannot reach the Halla AI API. From the project folder run npm run dev and keep that terminal open, then use http://localhost:3000.";
   }
   if (isVercelPreviewDashboardHost()) {
-    return `Cannot reach the Halla AI backend (${gateway}). Use https://app.hallaai.com for production, or wait for the gateway to wake up and refresh.`;
+    return `Cannot reach the Halla AI backend (${gateway}). Use https://www.hallaai.com for production, or wait for the gateway to wake up and refresh.`;
   }
   return `Cannot reach the Halla AI backend (${gateway}). The server may be waking up — wait 30 seconds and refresh. If this keeps happening, contact ${SUPPORT_EMAIL}.`;
 }

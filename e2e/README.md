@@ -62,7 +62,7 @@ Without Supabase secrets, CI uses placeholders and runs **public-route** tests o
 
 ```bash
 copy .env.e2e.example .env.e2e   # add real SMOKE_TEST_PASSWORD
-npm run smoke:prod:full          # API smoke + knowledge Playwright on app.hallaai.com
+npm run smoke:prod:full          # API smoke + knowledge Playwright on www.hallaai.com
 ```
 
 | Script | What it runs |
