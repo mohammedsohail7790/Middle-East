@@ -9,8 +9,7 @@ export function isProductionDashboardHostname(hostname: string): boolean {
   const h = hostname.toLowerCase();
   return (
     h === "hallaai.com" ||
-    h === "www.hallaai.com" ||
-    h === "app.hallaai.com"
+    h === "www.hallaai.com"
   );
 }
 

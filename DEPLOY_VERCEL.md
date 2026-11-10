@@ -1,4 +1,4 @@
-# Deploy dashboard on Vercel (app.hallaai.com)
+# Deploy dashboard on Vercel (www.hallaai.com)
 
 ## Migrating from the old static site (HTML + CSS + JS)
 
@@ -22,15 +22,15 @@ Previously the landing may have served three static files (`index.html`, `hallaa
 
 ### Wrong Vercel project got the deploy?
 
-If git pushes show up on `something.vercel.app` but **app.hallaai.com** looks unchanged:
+If git pushes show up on `something.vercel.app` but **www.hallaai.com** looks unchanged:
 
-1. [vercel.com/dashboard](https://vercel.com/dashboard) → open the project that lists **app.hallaai.com** under **Domains**.
+1. [vercel.com/dashboard](https://vercel.com/dashboard) → open the project that lists **www.hallaai.com** under **Domains**.
 2. **Settings → Git → Production Branch** → set to **`main`**.
 3. **Settings → General → Root Directory** → **`apps/dashboard`**.
 4. **Deployments** → find the latest **`main`** deployment → **⋯ → Promote to Production**.
-5. Hard-refresh `https://app.hallaai.com` (Ctrl+Shift+R).
+5. Hard-refresh `https://www.hallaai.com` (Ctrl+Shift+R).
 
-Remove **app.hallaai.com** from any other Vercel project (only one project may own a domain).
+Remove **www.hallaai.com** from any other Vercel project (only one project may own a domain).
 
 ---
 
@@ -39,7 +39,7 @@ Remove **app.hallaai.com** from any other Vercel project (only one project may o
 | Component | Host | URL |
 |-----------|------|-----|
 | Gateway (API + Twilio + WebSockets) | Render | `https://gateway.hallaai.com` |
-| Dashboard (marketing + app) | Vercel | `https://app.hallaai.com` |
+| Dashboard (marketing + app) | Vercel | `https://www.hallaai.com` |
 | Marketing site | Netlify | `https://www.hallaai.com` |
 | Auth + DB | Supabase | — |
 | Realtime cache | Render Redis | via `REDIS_URL` on gateway |
@@ -64,7 +64,7 @@ Remove **app.hallaai.com** from any other Vercel project (only one project may o
 |---------|-----|
 | `Your project's URL and API key are required` | Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel → Environment Variables (Production), then **Redeploy**. |
 | Log shows build building **gateway + dashboard** | Set **Root Directory** to `apps/dashboard`. |
-| Dashboard says **Cannot reach the Halla AI backend** | Set `NEXT_PUBLIC_GATEWAY_API_URL=https://gateway.hallaai.com` on Vercel. On **Render**, set `ALLOWED_ORIGINS` to include `https://app.hallaai.com` and preview `*.vercel.app` URLs. Redeploy both. |
+| Dashboard says **Cannot reach the Halla AI backend** | Set `NEXT_PUBLIC_GATEWAY_API_URL=https://gateway.hallaai.com` on Vercel. On **Render**, set `ALLOWED_ORIGINS` to include `https://www.hallaai.com` and preview `*.vercel.app` URLs. Redeploy both. |
 | AI Agent save / voice preview fails | Redeploy **Render gateway** (needs `OPENAI_API_KEY` for preview + `REDIS_URL` for CSRF). |
 
 ---
@@ -94,7 +94,7 @@ Optional Preview: add each `https://your-project-*.vercel.app` origin to Render 
 
 ## 3. Custom domains (Vercel)
 
-1. **Domains** → add `app.hallaai.com` (primary for the SaaS app).
+1. **Domains** → add `www.hallaai.com` (primary for the SaaS app).
 2. Optionally add `www.hallaai.com` if using Vercel for the marketing site (otherwise use Netlify).
 3. DNS (at your registrar):
 
@@ -110,11 +110,11 @@ Optional Preview: add each `https://your-project-*.vercel.app` origin to Render 
 In **halla-ai-gateway** on Render, set or confirm:
 
 ```env
-DASHBOARD_URL=https://app.hallaai.com
+DASHBOARD_URL=https://www.hallaai.com
 
-ALLOWED_ORIGINS=https://www.hallaai.com,https://hallaai.com,https://app.hallaai.com
+ALLOWED_ORIGINS=https://www.hallaai.com,https://hallaai.com
 
-VOICE_WS_ALLOWED_ORIGINS=https://www.hallaai.com,https://app.hallaai.com
+VOICE_WS_ALLOWED_ORIGINS=https://www.hallaai.com
 
 GATEWAY_PUBLIC_URL=https://gateway.hallaai.com
 TWILIO_STREAM_WSS_URL=wss://gateway.hallaai.com
@@ -130,20 +130,20 @@ Health check: `/ready`.
 
 | Field | Value |
 |-------|--------|
-| Site URL | `https://app.hallaai.com` |
-| Redirect URLs | `https://app.hallaai.com/auth/callback` |
+| Site URL | `https://www.hallaai.com` |
+| Redirect URLs | `https://www.hallaai.com/auth/callback` |
 | | `https://www.hallaai.com/auth/callback` |
 | | `http://localhost:3000/auth/callback` |
 | | `https://*.vercel.app/auth/callback` (for preview deploys) |
 
-**Email signup confirmation** — if the confirm link opens `localhost` and fails, Supabase **Site URL** is still set to `http://localhost:3000`. Change it to `https://app.hallaai.com` and save.
+**Email signup confirmation** — if the confirm link opens `localhost` and fails, Supabase **Site URL** is still set to `http://localhost:3000`. Change it to `https://www.hallaai.com` and save.
 
 **Google sign-in (Supabase)**:
 
 | Where | URI |
 |-------|-----|
 | Google Cloud → Authorized redirect URIs | `https://<project-ref>.supabase.co/auth/v1/callback` |
-| Supabase → Redirect URLs | `https://app.hallaai.com/auth/callback`, `http://localhost:3000/auth/callback` |
+| Supabase → Redirect URLs | `https://www.hallaai.com/auth/callback`, `http://localhost:3000/auth/callback` |
 
 ---
 
@@ -159,7 +159,7 @@ CRM + calendar OAuth callbacks stay on **Render gateway**:
 | WhatsApp Business (META) | `https://gateway.hallaai.com/api/v1/channels/whatsapp/webhook` |
 
 On Render, set `GOOGLE_REDIRECT_URI` to the same URI as in Google Cloud (or omit — gateway derives from `GATEWAY_PUBLIC_URL`).  
-After OAuth connect, users return to `https://app.hallaai.com/dashboard/integrations` via `DASHBOARD_URL`.
+After OAuth connect, users return to `https://www.hallaai.com/dashboard/integrations` via `DASHBOARD_URL`.
 
 ---
 
@@ -175,7 +175,7 @@ SMOKE_TEST_EMAIL=you@hallaai.com SMOKE_TEST_PASSWORD=*** npm run smoke:prod
 
 Manual:
 
-1. Open `https://app.hallaai.com` → Sign up / Log in.
+1. Open `https://www.hallaai.com` → Sign up / Log in.
 2. Complete onboarding → dashboard loads.
 3. Browser DevTools → Network: API calls go to `gateway.hallaai.com`, SSE `/api/v1/dashboard/stream`, WS `wss://gateway.hallaai.com/ws/ai-config/...`.
 
@@ -189,8 +189,8 @@ Manual:
 | `JWT_SECRET` | Random secret for API tokens |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google Cloud → Web client |
 | `GOOGLE_REDIRECT_URI` | `https://gateway.hallaai.com/api/v1/calendar/google/callback` |
-| `DASHBOARD_URL` | `https://app.hallaai.com` |
-| `ALLOWED_ORIGINS` | `https://www.hallaai.com,https://app.hallaai.com` |
+| `DASHBOARD_URL` | `https://www.hallaai.com` |
+| `ALLOWED_ORIGINS` | `https://www.hallaai.com` |
 | `DEFAULT_TIMEZONE` | `Asia/Dubai` |
 | `DEFAULT_CURRENCY` | `AED` |
 | `DEFAULT_LANGUAGE` | `ar` |

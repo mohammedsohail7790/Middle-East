@@ -113,7 +113,7 @@ export default function SignupPage() {
       return;
     }
     setNotice(
-      `We sent a new confirmation link to ${pendingEmail}. It should open https://app.hallaai.com — not localhost.`
+      `We sent a new confirmation link to ${pendingEmail}. It should open https://www.hallaai.com — not localhost.`
     );
   }
 
