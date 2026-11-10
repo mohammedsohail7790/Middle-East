@@ -10,7 +10,7 @@
 # halla-ai-redis    — FREE Render Key Value (one free Key Value per workspace; keep staging on its external Upstash
 #                       Redis, never share a Redis between staging and production). Internal URL, not persistent.
 #
-# Dashboard (app): deploy on Vercel → app.hallaai.com
+# Dashboard (app): deploy on Vercel → www.hallaai.com
 # Marketing site:  deploy on Netlify → www.hallaai.com
 
 services:
@@ -60,11 +60,11 @@ services:
         value: ""
       # Halla AI production domains
       - key: ALLOWED_ORIGINS
-        value: https://www.hallaai.com,https://hallaai.com,https://app.hallaai.com
+        value: https://www.hallaai.com,https://hallaai.com
       - key: VOICE_WS_ALLOWED_ORIGINS
-        value: https://www.hallaai.com,https://app.hallaai.com
+        value: https://www.hallaai.com
       - key: DASHBOARD_URL
-        value: https://app.hallaai.com
+        value: https://www.hallaai.com
       - key: GATEWAY_PUBLIC_URL
         value: https://gateway.hallaai.com
       - key: REDIS_URL

@@ -52,6 +52,37 @@ export function computeMissingFields(
   return requiredFields.filter((field) => have[field] === false);
 }
 
+/**
+ * Medical Tourism qualification (tenants that opted in to consent capture). It is ADMINISTRATIVE COMPLETENESS ONLY: it says whether the
+ * enquiry has what a human coordinator needs to take it forward. It is never a clinical, eligibility or suitability judgement, and it
+ * deliberately ignores the generic sales-style AI evaluation (callSuccess / leadQuality), which was built for lead scoring.
+ *
+ *  - `qualified`          = every required field is present AND consent to keep personal data is recorded AND nothing about the call
+ *                           called for a person (no transfer, call-back request, emergency or unsafe-statement flag).
+ *  - `needs_human_review` = anything else.
+ *  - It never returns `not_qualified`: nothing in an intake call can reject a patient.
+ * The reason is a fixed sentence: no model summary, so nothing the caller said about their health leaves Halla through this field.
+ */
+export function mapMedicalTourismQualification(context: {
+  missingFields: string[];
+  needsHuman: boolean;
+  personalDataConsent: boolean;
+}): QualificationResult {
+  const reasons: string[] = [];
+  if (!context.personalDataConsent) reasons.push('consent to keep personal data is not recorded');
+  if (context.missingFields.length > 0) reasons.push(`required information missing: ${context.missingFields.join(', ')}`);
+  if (context.needsHuman) reasons.push('the call called for a person (transfer, call-back, emergency or safety flag)');
+  if (reasons.length > 0) {
+    return { status: 'needs_human_review', confidence: 1, reason: `Needs human review: ${reasons.join('; ')}.`, missingFields: context.missingFields };
+  }
+  return {
+    status: 'qualified',
+    confidence: 1,
+    reason: 'Administrative completeness only: required contact and enquiry fields are present and consent is recorded. Not a clinical or eligibility assessment.',
+    missingFields: [],
+  };
+}
+
 export function mapEvaluationToQualification(
   evaluation: CallEvaluationLike,
   context: { missingFields: string[]; escalated: boolean }

@@ -322,7 +322,7 @@ export default function LeadsPage() {
           <EmptyState
             icon={Users}
             title={t("noLeads")}
-            description="New leads from calls, SMS, and manual entry will appear in your pipeline."
+            description="New leads from calls, WhatsApp, and manual entry will appear in your pipeline."
           />
         ) : (
           <>

@@ -39,9 +39,27 @@ const PUBLIC_POST_ROUTES = new Set([
   // Consultancy marketing site's "Book a Diagnostic Call" form — submitted
   // by a prospect who has no account yet, so no tenant JWT exists.
   '/public/consult-request',
+  // The short "fit check" form on the same site: same trust model, a prospect with no account.
+  '/public/fit-check',
+  // The paid audit: Form 2 and the payment page open from a private signed link we email, not a login. (The Stripe webhook for it is mounted before this layer, in index.ts.)
+  '/public/audit/form2',
+  '/public/audit/pay',
+  // Klaros asks Halla to create a business's receptionist. Server-to-server: it carries no tenant JWT and authenticates itself
+  // with the platform secret in the route (404 unless KLAROS_PROVISIONING_SECRET is set).
+  '/platform/klaros/provision',
+  // The same platform-secret route family: Klaros asks for a business's phone number (search, buy, existing business number, status).
+  '/platform/klaros/phone',
+  // And the template roll-out to an existing business (agent prompts only).
+  '/platform/klaros/refresh',
 ]);
 
 const PUBLIC_GET_ROUTES = new Set([
+  // Checks a private audit link and says what it is for.
+  '/public/audit/link',
+  // The "send the audit questionnaire" page opened from the button in our fit-check email. It is protected by a signed, expiring link, and sends only when its confirm button is pressed.
+  '/public/audit/approve',
+  // The "audit is ready, send the payment link" page from the questionnaire email for us. Same protection as the approve page.
+  '/public/audit/send-payment',
   '/calendar/google/callback',
   '/calendar/outlook/callback',
   '/calendar/calendly/callback',

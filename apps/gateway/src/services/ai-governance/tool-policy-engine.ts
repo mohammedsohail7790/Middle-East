@@ -35,6 +35,13 @@ const DEFAULT_TOOL_POLICIES: Record<
     maxExecutionsPerCall: 3,
     constraints: { preventDuplicateExecution: false },
   },
+  // Explicit consent decision; offered only to tenants with a configured wording version and re-checked server-side.
+  record_consent: {
+    enabled: true,
+    riskLevel: 'low',
+    maxExecutionsPerCall: 12,
+    constraints: { preventDuplicateExecution: false },
+  },
   create_lead: {
     enabled: true,
     riskLevel: 'low',

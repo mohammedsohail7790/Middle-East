@@ -24,6 +24,8 @@ process.on('unhandledRejection', (reason) => {
 import { createServer } from 'http';
 import express from 'express';
 import { handleStripeBillingWebhook } from './services/billing/stripe-webhook.js';
+import { handleAuditStripeWebhook } from './services/audit/public-audit.controller.js';
+import { handleWhatsAppWebhook, verifyWhatsAppWebhook } from './services/whatsapp/whatsapp.controller.js';
 import cors from 'cors';
 
 import {
@@ -91,6 +93,13 @@ import('./events/platform-event-bus.js')
     logger.warn('PLATFORM_EVENT_BUS_START_FAILED', { error: String(err) });
   });
 
+// Retry undelivered Medical Tourism consent-change notifications (no-op when none are pending or the table does not exist yet).
+import('./services/consent/consent-evidence.js')
+  .then(({ startConsentOutboxSweeper }) => startConsentOutboxSweeper())
+  .catch((err) => {
+    logger.warn('CONSENT_OUTBOX_SWEEPER_START_FAILED', { error: String(err) });
+  });
+
 if ((process.env.ENABLE_KNOWLEDGE_INGESTION || 'true').toLowerCase() === 'true') {
     knowledgeService.ingestFromFileOnce().catch((error) => {
         logger.error('Knowledge ingestion failed', { error: String(error) });
@@ -123,6 +132,14 @@ app.use(MiddlewareFactory.requestId());
 app.post('/api/v1/billing/webhook', express.raw({ type: 'application/json' }), (req, res) => {
     void handleStripeBillingWebhook(req, res);
 });
+// Stripe tells us a client paid for the Opportunity Audit (its own signing secret; the subscription webhook above is untouched).
+app.post('/api/v1/public/audit/stripe-webhook', express.raw({ type: 'application/json' }), (req, res) => {
+    void handleAuditStripeWebhook(req, res);
+});
+
+// WhatsApp (Meta) webhook: HMAC is computed over the raw bytes, so it also bypasses the JSON parser. Authenticated by signature.
+app.get('/api/v1/channels/whatsapp/webhook', verifyWhatsAppWebhook);
+app.post('/api/v1/channels/whatsapp/webhook', express.raw({ type: '*/*', limit: '2mb' }), handleWhatsAppWebhook);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(requestHardeningMiddleware);

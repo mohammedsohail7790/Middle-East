@@ -8,6 +8,9 @@
  * the per-event contract that those do not enumerate.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+// These tests cover event shape/ordering for a tenant that did not opt in to consent capture; the delivery-time personal-data gate
+// (consent-gate.ts, tested in klaros-consent-evidence-delivery.test.ts) lets everything through for such a tenant.
+vi.mock('../../../apps/gateway/src/services/consent/consent-gate.js', () => ({ personalDataMayBeDelivered: vi.fn(async () => true) }));
 
 const dispatched: Array<{ tenantId: string; steps: Array<{ type: string; eventId: string; data: Record<string, unknown> }>; opts: unknown }> = [];
 

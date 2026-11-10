@@ -21,7 +21,7 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
       shimmerSize = "0.05em",
       shimmerDuration = "3s",
       borderRadius = "100px",
-      background = "linear-gradient(160deg, #2B2D2A 0%, #121212 100%)",
+      background = "#0066CC",
       className,
       children,
       asChild = false,
@@ -39,30 +39,14 @@ export const ShimmerButton = React.forwardRef<HTMLButtonElement, ShimmerButtonPr
     } as CSSProperties;
 
     const buttonClassName = cn(
-      "group relative z-0 inline-flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap border border-white/10 px-6 py-2.5 text-sm font-semibold text-white no-underline [background:var(--bg)] [border-radius:var(--radius)]",
+      "group relative z-0 inline-flex cursor-pointer items-center justify-center overflow-hidden whitespace-nowrap px-6 py-2.5 text-sm font-medium text-white hover:brightness-90 no-underline [background:var(--bg)] [border-radius:var(--radius)]",
       "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
       className,
     );
 
-    const shimmerLayers = (
-      <>
-        <div className="absolute inset-0 -z-30 overflow-visible blur-[2px]">
-          <div className="animate-shimmer-slide absolute inset-0 aspect-square h-full rounded-none [mask:none]">
-            <div className="animate-spin-around absolute -inset-full w-auto rotate-0 [background:conic-gradient(from_calc(270deg-(var(--spread)*0.5)),transparent_0,var(--shimmer-color)_var(--spread),transparent_var(--spread))]" />
-          </div>
-        </div>
-        <div
-          className={cn(
-            "pointer-events-none absolute inset-0 size-full rounded-[inherit]",
-            "shadow-[inset_0_-8px_10px_#ffffff1f]",
-            "transform-gpu transition-all duration-300 ease-in-out",
-            "group-hover:shadow-[inset_0_-6px_10px_#ffffff3f]",
-            "group-active:shadow-[inset_0_-10px_10px_#ffffff3f]",
-          )}
-        />
-        <div className="absolute inset-[var(--cut)] -z-20 rounded-[var(--radius)] [background:var(--bg)]" />
-      </>
-    );
+    // Apple surface system: a flat blue pill. The shimmer sweep and inner glow were removed;
+    // the props are kept so existing call sites stay valid.
+    const shimmerLayers = null;
 
     if (asChild) {
       return (

@@ -42,6 +42,10 @@ function normalizeCategory(category: unknown): KnowledgeCategory {
     : 'general';
 }
 
+
+/** What a customer sees when saving knowledge fails. Provider and database details stay in the server logs. */
+const CUSTOMER_SAVE_ERROR = 'We could not save this right now. Please try again in a moment, or contact hello@hallaai.com if it keeps happening.';
+
 export function createKnowledgeRouter(): express.Router {
   const router = express.Router();
 
@@ -74,8 +78,7 @@ export function createKnowledgeRouter(): express.Router {
       res.json({ success: true, data });
     } catch (error) {
       logger.error('Failed to save knowledge templates', { error: String(error) });
-      const msg = error instanceof Error ? error.message : 'Failed to save templates';
-      res.status(500).json({ success: false, error: msg });
+      res.status(500).json({ success: false, error: CUSTOMER_SAVE_ERROR });
     }
   });
 
@@ -93,8 +96,7 @@ export function createKnowledgeRouter(): express.Router {
       res.json({ success: true, data });
     } catch (error) {
       logger.error('Failed to sync knowledge templates', { error: String(error) });
-      const msg = error instanceof Error ? error.message : 'Failed to sync templates';
-      res.status(500).json({ success: false, error: msg });
+      res.status(500).json({ success: false, error: CUSTOMER_SAVE_ERROR });
     }
   });
 
@@ -132,8 +134,7 @@ export function createKnowledgeRouter(): express.Router {
       res.json({ success: true });
     } catch (error) {
       logger.error('Failed to ingest knowledge', { error: String(error) });
-      const msg = error instanceof Error ? error.message : String(error);
-      res.status(500).json({ success: false, error: msg || 'Failed to ingest knowledge' });
+      res.status(500).json({ success: false, error: CUSTOMER_SAVE_ERROR });
     }
   });
 
@@ -164,9 +165,10 @@ export function createKnowledgeRouter(): express.Router {
       const msg = error instanceof Error ? error.message : String(error);
       const status =
         /invalid url|url required|not allowed|only http/i.test(msg) ? 400 : 500;
+      // Only the address checks (400) say what was wrong; any other failure gets a plain message, with the detail kept in the logs.
       res.status(status).json({
         success: false,
-        error: msg || 'Failed to import website',
+        error: status === 400 ? msg : CUSTOMER_SAVE_ERROR,
       });
     }
   });
@@ -250,8 +252,7 @@ export function createKnowledgeRouter(): express.Router {
       }
     } catch (error) {
       logger.error('Failed to upload knowledge file', { error: String(error) });
-      const msg = error instanceof Error ? error.message : String(error);
-      res.status(500).json({ success: false, error: msg || 'Failed to upload file' });
+      res.status(500).json({ success: false, error: CUSTOMER_SAVE_ERROR });
     }
   });
 

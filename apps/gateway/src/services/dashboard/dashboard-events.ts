@@ -12,6 +12,7 @@ export type DashboardPushType =
   | 'call.updated'
   | 'sms.inbound'
   | 'sms.outbound'
+  | 'whatsapp.message'
   | 'lead.created'
   | 'lead.updated'
   | 'calendar.updated'
@@ -64,6 +65,8 @@ export function scopesForPushType(type: DashboardPushType): string[] {
     case 'sms.inbound':
     case 'sms.outbound':
       return ['sms', 'calls'];
+    case 'whatsapp.message':
+      return ['whatsapp'];
     case 'lead.created':
     case 'lead.updated':
       return ['leads', 'metrics', 'analytics'];

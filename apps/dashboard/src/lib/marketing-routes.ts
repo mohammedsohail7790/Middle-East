@@ -3,7 +3,19 @@ export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
   "/": "consultancy",
   "/home": "home",
   "/consultancy": "consultancy",
+  "/ai-consultancy": "ai-consultancy",
+  "/automation": "intelligence",
+  "/solutions": "solutions",
+  "/blog/emergency-calls": "blog-emergency",
+  "/blog/ai-disclosure": "blog-ai-disclosure",
+  "/blog/crm-integrations": "blog-crm-integrations",
+  "/blog/per-minute-pricing": "blog-per-minute",
   "/consult-signup": "consult-signup",
+  "/fit-check": "fit-check",
+  "/opportunity-audit": "audit-info",
+  "/audit": "audit",
+  "/audit/pay": "audit-pay",
+  "/audit/paid": "audit-paid",
   "/pricing": "pricing",
   "/features": "features",
   "/how-it-works": "how-it-works",
@@ -13,6 +25,7 @@ export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
   "/blog": "blog",
   "/faq": "faq",
   "/about": "about",
+  "/contact": "contact",
   "/privacy": "privacy",
   "/terms": "terms",
   "/forwarding": "forwarding",
@@ -22,8 +35,9 @@ export const MARKETING_PATH_TO_PAGE: Record<string, string> = {
   "/security": "security",
   "/industries": "industries-all",
   "/services/operations": "svc-operations",
-  "/services/acquisition": "svc-acquisition",
-  "/services/brand": "svc-brand",
+  // Retired services: old links and search results land on the operations page.
+  "/services/acquisition": "svc-operations",
+  "/services/brand": "svc-operations",
 };
 
 /** True for public marketing SPA paths (no /en prefix). */
@@ -47,4 +61,39 @@ export function resolveMarketingPage(pathname: string): string {
   if (solutionsMatch) return `solutions-${solutionsMatch[1]}`;
 
   return "consultancy";
+}
+
+/** The web address for a page id: the reverse of resolveMarketingPage. "/" is used for the home (consultancy) page. */
+export function pagePath(pageId: string): string | null {
+  if (pageId === "consultancy") return "/";
+  for (const [path, id] of Object.entries(MARKETING_PATH_TO_PAGE)) {
+    if (id === pageId) return path;
+  }
+  if (pageId.startsWith("industry-")) return `/industries/${pageId.slice("industry-".length)}`;
+  if (pageId.startsWith("solutions-")) return `/solutions/${pageId.slice("solutions-".length)}`;
+  return null;
+}
+
+/**
+ * True when the path is a real marketing page, so an unknown address can answer 404 instead of showing the home page.
+ * A leading /en or /ar language segment is allowed. `pageIds` are the ids of the pages that exist in marketing-body.html.
+ */
+export function isKnownMarketingPath(pathname: string, pageIds: ReadonlySet<string>): boolean {
+  let path = pathname.replace(/\/+$/, "") || "/";
+  const locale = path.match(/^\/(en|ar)(\/.*)?$/);
+  if (locale) path = locale[2] || "/";
+  if (path === "/") return true;
+  if (MARKETING_PATH_TO_PAGE[path]) return true;
+  const dynamic = path.match(/^\/(industries|solutions)\/([a-z0-9-]+)$/i);
+  if (dynamic) return pageIds.has(`${dynamic[1] === "industries" ? "industry" : "solutions"}-${dynamic[2]}`);
+  return false;
+}
+
+/** App pages that exist without a language segment. A language-aware link such as /en/onboarding must land on the plain address. */
+const APP_PAGES = ["login", "signup", "onboarding", "forgot-password"];
+
+/** For "/en/onboarding" and similar, the plain address ("/onboarding"); null for anything else. */
+export function plainAppPath(pathname: string): string | null {
+  const m = pathname.replace(/\/+$/, "").match(/^\/(?:en|ar)\/([a-z-]+)$/);
+  return m && APP_PAGES.includes(m[1]) ? `/${m[1]}` : null;
 }

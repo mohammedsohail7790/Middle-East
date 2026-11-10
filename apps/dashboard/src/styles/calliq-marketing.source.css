@@ -1,7 +1,7 @@
 /* ================================================
    Halla AI — Stylesheet
    Design: SkipCalls/SideShift inspired
-   Font: Inter | Primary: #0A0A0A | Accent: #C9A24B
+   Font: Inter | Primary: #0A0A0A | Accent: #0066CC
    © 2025 Halla AI
 ================================================ */
 
@@ -25,10 +25,10 @@ html { scroll-behavior: smooth; font-size: 16px; }
   --gray-700: #374151;
   --gray-800: #1F2937;
   --gray-900: #111827;
-  --accent: #C9A24B;
-  --accent-dark: #A6812F;
-  --accent-light: #F7EDD8;
-  --accent-mid: #E4C878;
+  --accent: #0066CC;
+  --accent-dark: #0055AA;
+  --accent-light: #EBF4FD;
+  --accent-mid: #5AC8FA;
   --green: #10B981;
   --green-light: #D1FAE5;
   --orange: #F59E0B;

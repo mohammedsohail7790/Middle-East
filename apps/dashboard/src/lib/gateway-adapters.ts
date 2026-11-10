@@ -143,7 +143,7 @@ export function normalizeCalendarEvent(row: Record<string, unknown>) {
     attendeePhone: String(row.phone ?? row.attendee_phone ?? row.attendee ?? ""),
     service: String(row.service ?? row.title ?? "Appointment"),
     location: String(row.location ?? ""),
-    color: String(row.color ?? "#C9A24B"),
+    color: String(row.color ?? "#0066CC"),
     status: String(row.status ?? "booked"),
   };
 }
@@ -191,9 +191,9 @@ export function funnelFromMetrics(metrics: {
   const leads = metrics.totalLeads ?? 0;
   const converted = Math.round((calls * (metrics.conversionRate ?? 0)) / 100);
   return [
-    { name: "Calls", value: calls, fill: "#C9A24B" },
-    { name: "Leads", value: leads, fill: "#E4C878" },
-    { name: "Converted", value: converted, fill: "#10B981" },
+    { name: "Calls", value: calls, fill: "#0066CC" },
+    { name: "Leads", value: leads, fill: "#5AC8FA" },
+    { name: "Converted", value: converted, fill: "#34C759" },
   ];
 }
 
@@ -201,11 +201,11 @@ export function funnelFromApi(raw: unknown) {
   if (Array.isArray(raw)) return raw;
   const o = (raw && typeof raw === "object" ? raw : {}) as Record<string, number>;
   const steps = [
-    { key: "calls", name: "Calls", fill: "#C9A24B" },
-    { key: "leads", name: "Leads", fill: "#E4C878" },
-    { key: "qualified", name: "Qualified", fill: "#B8AD9A" },
-    { key: "appointments", name: "Appointments", fill: "#8C6F3E" },
-    { key: "confirmed", name: "Confirmed", fill: "#10B981" },
+    { key: "calls", name: "Calls", fill: "#0066CC" },
+    { key: "leads", name: "Leads", fill: "#5AC8FA" },
+    { key: "qualified", name: "Qualified", fill: "#5E5CE6" },
+    { key: "appointments", name: "Appointments", fill: "#30B0C7" },
+    { key: "confirmed", name: "Confirmed", fill: "#34C759" },
   ];
   const max = Math.max(...steps.map((s) => Number(o[s.key] ?? 0)), 1);
   return steps.map((s) => ({

@@ -113,7 +113,7 @@ export default function SignupPage() {
       return;
     }
     setNotice(
-      `We sent a new confirmation link to ${pendingEmail}. It should open https://app.hallaai.com — not localhost.`
+      `We sent a new confirmation link to ${pendingEmail}. It should open https://www.hallaai.com — not localhost.`
     );
   }
 
@@ -189,7 +189,7 @@ export default function SignupPage() {
                   <input
                     id="signup-name"
                     name="name"
-                    placeholder="Alex Rivera"
+                    placeholder="Sara Ahmed"
                     className="input !pl-10"
                     required
                     autoComplete="name"
@@ -209,7 +209,7 @@ export default function SignupPage() {
                   <input
                     id="signup-company"
                     name="company"
-                    placeholder="Rivera HVAC Services"
+                    placeholder="Glow Clinic"
                     className="input !pl-10"
                     required
                     autoComplete="organization"

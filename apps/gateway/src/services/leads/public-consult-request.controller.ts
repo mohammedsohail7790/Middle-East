@@ -2,8 +2,9 @@ import { Router } from 'express';
 import { asyncHandler, MiddlewareFactory } from '../../middleware/index.js';
 import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
-import { renderBrandedEmail, renderDetailList, stripToPlainText } from '../automation/email-template.js';
+import { renderBrandedEmail, renderCallout, renderDetailList, renderQuote, renderSummaryStrip, stripToPlainText } from '../automation/email-template.js';
 import { Resend } from 'resend';
+import { throwIfRejected } from '../email-delivery.js';
 
 // Public, unauthenticated endpoint — throttle per IP to prevent spam/cost-exhaustion abuse.
 const consultRequestRateLimit = MiddlewareFactory.createRateLimit({
@@ -13,7 +14,11 @@ const consultRequestRateLimit = MiddlewareFactory.createRateLimit({
 });
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const LEAD_NOTIFICATION_TO = process.env.CONSULT_LEAD_EMAIL || 'hello@hallaai.com';
+// CONSULT_LEAD_EMAIL takes one or more addresses separated by commas (so Hk and the owner both get the mail); Resend needs them as a list, not one text.
+const LEAD_NOTIFICATION_TO = (process.env.CONSULT_LEAD_EMAIL || 'hello@hallaai.com')
+  .split(',')
+  .map((address) => address.trim())
+  .filter((address) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address));
 
 const consultRequestBodySchema = {
   body: {
@@ -57,32 +62,46 @@ export function createPublicConsultRequestRouter(): Router {
         return;
       }
 
-      const rows = [
+      // The website's Contact page posts here too, marking itself with a "General enquiry" priority.
+      const isContactMessage = typeof priority === 'string' && priority.startsWith('General enquiry');
+
+      const contactRows = [
         { label: 'Name', value: name },
         { label: 'Email', value: email },
         { label: 'Phone', value: phone || '—' },
         { label: 'Business', value: business || '—' },
-        { label: 'Priority', value: priority || '—' },
-        { label: 'Notes', value: notes || '—' },
       ];
+      const headline = isContactMessage ? 'A visitor sent a message from the website' : 'A visitor asked for a free diagnostic call';
+      const bodyHtml =
+        renderCallout({ tone: 'info', label: isContactMessage ? 'Contact page' : 'Diagnostic call', headline, points: ['Reply within one working day.'] })
+        + (isContactMessage ? '' : renderSummaryStrip([
+          { label: 'Business', value: business || 'Not given' },
+          { label: 'Main priority', value: priority || 'Not given' },
+          { label: 'Phone', value: phone || 'Not given' },
+        ]))
+        + (notes ? renderQuote(isContactMessage ? 'Their message' : 'What they told us', notes) : '')
+        + renderDetailList(contactRows, 'Contact details');
 
       const html = renderBrandedEmail({
-        eyebrow: 'New Diagnostic Call Request',
-        title: business ? `${business} wants a diagnostic call` : `${name} wants a diagnostic call`,
-        bodyHtml: renderDetailList(rows),
-        ctaLabel: 'Reply to lead',
-        ctaUrl: `mailto:${email}`,
+        eyebrow: isContactMessage ? 'New contact message' : 'New diagnostic call request',
+        title: isContactMessage
+          ? `${name} sent a message`
+          : business ? `${business} wants a diagnostic call` : `${name} wants a diagnostic call`,
+        preheader: `${name}, ${email}${business ? `, ${business}` : ''}`,
+        bodyHtml,
+        ctaLabel: `Reply to ${name.split(/\s+/)[0]}`,
+        ctaUrl: `mailto:${encodeURIComponent(email)}`,
       });
 
       try {
-        await resend.emails.send({
+        throwIfRejected(await resend.emails.send({
           from: `Halla AI <${process.env.EMAIL_FROM || 'noreply@hallaai.com'}>`,
           to: LEAD_NOTIFICATION_TO,
           replyTo: email,
-          subject: `New Diagnostic Call Request — ${business || name}`,
+          subject: isContactMessage ? `New Contact Message — ${name}` : `New Diagnostic Call Request — ${business || name}`,
           html,
           text: stripToPlainText(html),
-        });
+        }));
       } catch (error) {
         logger.error(
           '[ConsultRequest] Failed to send lead notification email',

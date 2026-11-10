@@ -40,7 +40,7 @@ export async function pollGatewayHealth(maxMs = 30_000, intervalMs = 2_000): Pro
 let warmInflight: Promise<boolean> | null = null;
 
 /** Shared gateway wake — deduped across login, layout, and API retries. */
-export function warmGatewayWhenReady(maxMs = 30_000): Promise<boolean> {
+export function warmGatewayWhenReady(maxMs = 90_000): Promise<boolean> {
   if (typeof window === "undefined") return Promise.resolve(false);
   if (warmInflight) return warmInflight;
 

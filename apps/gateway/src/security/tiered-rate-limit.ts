@@ -44,6 +44,16 @@ function isPublicBillingRead(path: string, method: string): boolean {
   );
 }
 
+/**
+ * Klaros's backend calls Halla server-to-server (provision / phone / refresh) with the platform secret,
+ * so these requests carry no tenant and would otherwise land in the anonymous per-IP bucket. Every Klaros
+ * business shares one egress IP, so that bucket (20/min) throttles provisioning ("Halla is rate limiting
+ * Klaros"). The route authenticates itself and has its own in-process limiter; give it a dedicated bucket.
+ */
+export function isPlatformServerRoute(path: string): boolean {
+  return /^\/platform\/klaros\//.test(path);
+}
+
 /** Stable per-user bucket from Bearer token (no JWT decode — avoids auth bypass). */
 function getBearerUserKey(req: Request): string | null {
   const auth = req.headers.authorization;
@@ -62,17 +72,31 @@ function isRealtimeDashboardRoute(path: string, method: string): boolean {
   );
 }
 
+/**
+ * Count one request AND guarantee the counter has an expiry, in a single atomic Redis step.
+ *
+ * Doing INCR and then PEXPIRE as two separate commands is not safe: if the process dies, the connection drops, or Redis fails over between them, the key is left with
+ * no expiry. Its count then only ever grows, so every later request from that address is refused with 429 until someone deletes the key by hand. (That is how a caller can
+ * be "rate limited" for many hours.) The script also repairs a counter that is already stuck: a key with no expiry (PTTL < 0) gets one on its next request.
+ */
+const COUNT_AND_EXPIRE = `
+local count = redis.call('INCR', KEYS[1])
+local ttl = redis.call('PTTL', KEYS[1])
+if count == 1 or ttl < 0 then
+  redis.call('PEXPIRE', KEYS[1], ARGV[1])
+  ttl = tonumber(ARGV[1])
+end
+return {count, ttl}
+`;
+
 async function incrRedis(key: string, windowMs: number): Promise<{ count: number; ttlMs: number } | null> {
   try {
-    const redisKey = `rl:${key}`;
-    const count = await voiceRedis.incr(redisKey);
-    if (count === 1) {
-      await voiceRedis.pexpire(redisKey, windowMs);
-    }
-    const ttlMs = await voiceRedis.pttl(redisKey);
+    const result = (await voiceRedis.eval(COUNT_AND_EXPIRE, 1, `rl:${key}`, String(windowMs))) as [number, number];
+    const count = Number(result[0]);
+    const ttlMs = Number(result[1]);
     return { count, ttlMs: ttlMs > 0 ? ttlMs : windowMs };
   } catch {
-    return null;
+    return null; // Redis unavailable: the caller falls back to the in-memory bucket
   }
 }
 
@@ -150,6 +174,9 @@ export async function tieredRateLimitMiddleware(
     // Separate bucket so redeploy reconnect storms do not exhaust the general API quota.
     max = Number(process.env.RATE_LIMIT_REALTIME_PER_MIN || 600);
     key = tenantId ? `rt:${tenantId}` : `rt:${ip}`;
+  } else if (isPlatformServerRoute(path)) {
+    max = Number(process.env.RATE_LIMIT_PLATFORM_PER_MIN || 120);
+    key = `platform:${ip}`;
   } else if (isPublicWebhook(path, method)) {
     // Provider webhooks (Twilio, Stripe, Slack, SMS) — higher ceiling, still IP-bound.
     max = Number(process.env.RATE_LIMIT_WEBHOOK_PER_MIN || 120);
@@ -178,7 +205,7 @@ export async function tieredRateLimitMiddleware(
   }
 
   // Authenticated traffic is keyed by tenant; do not also cap shared proxy egress (e.g. Vercel → Render).
-  if (!tenantId && !isPublicWebhook(path, method)) {
+  if (!tenantId && !isPublicWebhook(path, method) && !isPlatformServerRoute(path)) {
     const ipCap = await checkLimit(`ip:${ip}`, Number(process.env.IP_RATE_LIMIT_MAX || 120), WINDOW_MS);
     if (!ipCap.allowed) {
       respond429(res, ipCap.retryAfterSec || 60);

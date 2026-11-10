@@ -16,8 +16,8 @@ export function NeonGradientCard({
   children,
   borderSize = 2,
   borderRadius = 20,
-  firstColor = "#C7A25A",
-  secondColor = "#8C6F3E",
+  firstColor = "#2997FF",
+  secondColor = "#0066CC",
   ...props
 }: NeonGradientCardProps) {
   const containerRef = useRef<HTMLDivElement>(null);

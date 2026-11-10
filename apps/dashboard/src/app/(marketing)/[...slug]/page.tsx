@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
 import { readFileSync } from "fs";
 import { join } from "path";
 import MarketingSPA from "@/components/marketing/MarketingSPA";
-import { resolveMarketingPage } from "@/lib/marketing-routes";
+import { isKnownMarketingPath, plainAppPath, resolveMarketingPage } from "@/lib/marketing-routes";
+import { marketingMetadata } from "@/lib/marketing-metadata";
+import { extractPageHtml } from "@/lib/marketing-ssr";
 
-export const metadata: Metadata = {
-  title: "Halla AI – Smart • Seamless • Always",
-  description:
-    "Halla AI answers every call 24/7, books appointments, captures leads, and routes emergencies — automatically.",
-};
+export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const path = slug?.length ? `/${slug.join("/")}` : "/";
+  return marketingMetadata(resolveMarketingPage(path), path);
+}
 
 function getMarketingBodyHtml(): string {
   try {
@@ -32,6 +35,11 @@ export default async function MarketingCatchAllPage({
 }) {
   const { slug } = await params;
   const path = slug?.length ? `/${slug.join("/")}` : "/";
+  const plain = plainAppPath(path);
+  if (plain) redirect(plain);
   const bodyHtml = getMarketingBodyHtml();
-  return <MarketingSPA bodyHtml={bodyHtml} initialPage={resolveMarketingPage(path)} />;
+  const pageIds = new Set(Array.from(bodyHtml.matchAll(/<div id="page-([\w-]+)"/g), (m) => m[1]));
+  if (!isKnownMarketingPath(path, pageIds)) notFound();
+  const pageId = resolveMarketingPage(path);
+  return <MarketingSPA bodyHtml={bodyHtml} initialPage={pageId} ssrHtml={extractPageHtml(bodyHtml, pageId)} />;
 }

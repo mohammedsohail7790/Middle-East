@@ -1,5 +1,6 @@
 import { pool } from '../db/pool.js';
 import { assertHipaaTenant } from '../compliance/hipaa.service.js';
+import { redactTranscriptPii } from '../compliance/pii-redaction.js';
 
 /**
  * Recording Service
@@ -12,27 +13,6 @@ const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-// ─── PII redaction helpers ────────────────────────────────────────────────────
-const PII_PATTERNS: Array<{ pattern: RegExp; label: string }> = [
-  { pattern: /\b\d{3}-\d{2}-\d{4}\b/g, label: '[SSN]' },
-  { pattern: /\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b/g, label: '[CARD]' },
-  { pattern: /\b\d{3}[-.·]?\d{3}[-.·]?\d{4}\b/g, label: '[PHONE]' },
-  { pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, label: '[EMAIL]' },
-];
-
-/**
- * Redact common PII patterns from a transcript string before persistence.
- * This is a best-effort scan — not a substitute for proper de-identification
- * on HIPAA-enabled tenants.
- */
-function redactTranscriptPii(text: string): string {
-  let result = text;
-  for (const { pattern, label } of PII_PATTERNS) {
-    result = result.replace(pattern, label);
-  }
-  return result;
-}
 
 /**
  * Return a short-lived signed URL for a recording file instead of a public URL.

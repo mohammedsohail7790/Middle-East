@@ -22,6 +22,7 @@ import {
 import { buildFullPrompt, buildSystemPrompt } from '../../../apps/gateway/src/services/realtime/realtime-prompt-builder.js';
 import { buildToolsList } from '../../../apps/gateway/src/services/realtime/realtime-tool-schemas.js';
 import { WORKFORCE_TEMPLATES } from '../../../apps/gateway/src/services/workforce-templates/index.js';
+import { businessHoursService } from '../../../apps/gateway/src/services/business-hours/business-hours.service.js';
 
 const LANGUAGES = ['en', 'ar', 'hi', 'ru', 'fr'];
 
@@ -189,5 +190,45 @@ describe('F5: agent-specific prompts and tenant instructions still work, and sta
     const full = await buildFullPrompt('t-1', tenantConfig(), aiConfig({ systemInstructions: 'x'.repeat(50_000) }));
     expect(full).toContain('[TENANT_SYSTEM_INSTRUCTIONS_END]');
     expect(full.length).toBeLessThan(40_000);
+  });
+});
+
+describe('call-back wording in the base prompt: only tenants that opted in to consent capture (Medical Tourism) change', () => {
+  const MT = { consentCapture: { wordingVersion: 'SANDBOX-SYNTHETIC-v0' } };
+
+  it.each([
+    ['no transfer number (message taking)', { transferPhoneNumber: '' }],
+    ['transfer number, call handling "transfer"', { callHandlingMode: 'transfer' }],
+    ['transfer number, call handling "both"', { callHandlingMode: 'both' }],
+    ['transfer number, call handling "message"', { callHandlingMode: 'message' }],
+  ])('Medical Tourism (%s): no promised call-back, no "take name and phone", a request-only rule instead', async (_n, over) => {
+    const text = await buildFullPrompt('t-1', tenantConfig({ ...MT, ...over }), aiConfig());
+    expect(text).toContain('Escalation rules:');
+    expect(text).toContain('A call-back is only a request that the system records');
+    expect(text).not.toMatch(/promise a callback/i);
+    expect(text).not.toMatch(/take name, phone, and issue/i);
+    expect(text).not.toMatch(/take name and callback/i);
+    expect(text).not.toContain('Message taking:');
+  });
+
+  it('other tenants keep the existing wording exactly', async () => {
+    const noNumber = await buildFullPrompt('t-1', tenantConfig({ transferPhoneNumber: '' }), aiConfig());
+    expect(noNumber).toContain('Message taking:');
+    expect(noNumber).toContain('take name, phone, and issue — promise a callback');
+    expect(noNumber).not.toContain('Escalation rules:');
+    const msg = await buildFullPrompt('t-1', tenantConfig({ callHandlingMode: 'message' }), aiConfig());
+    expect(msg).toContain('take name and callback; offer transfer only if they insist');
+    const both = await buildFullPrompt('t-1', tenantConfig(), aiConfig());
+    expect(both).toContain('Use transfer_call when they need a live person');
+  });
+
+  it('after hours: Medical Tourism does not promise a call-back during business hours; other tenants unchanged', async () => {
+    vi.mocked(businessHoursService.isCurrentlyOpen).mockResolvedValueOnce(false);
+    const mt = await buildFullPrompt('t-1', tenantConfig({ ...MT }), aiConfig());
+    expect(mt).toContain('Do not promise a call-back or a time');
+    expect(mt).not.toMatch(/someone will call back during business hours/i);
+    vi.mocked(businessHoursService.isCurrentlyOpen).mockResolvedValueOnce(false);
+    const other = await buildFullPrompt('t-1', tenantConfig(), aiConfig());
+    expect(other).toContain('let them know someone will call back during business hours');
   });
 });

@@ -8,6 +8,9 @@
  * The same flow against real Redis 7 + real PostgreSQL 16 is in klaros-e2e.integration.test.ts.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+// These tests cover event shape/ordering for a tenant that did not opt in to consent capture; the delivery-time personal-data gate
+// (consent-gate.ts, tested in klaros-consent-evidence-delivery.test.ts) lets everything through for such a tenant.
+vi.mock('../../apps/gateway/src/services/consent/consent-gate.js', () => ({ personalDataMayBeDelivered: vi.fn(async () => true) }));
 import { FakeRedisStreams } from '../helpers/fake-redis-streams.js';
 import { createPlatformEvent } from '../../infrastructure/events/event-envelope.js';
 import { encodeEventEnvelope, decodeEventEnvelope } from '../../infrastructure/events/event-codecs.js';

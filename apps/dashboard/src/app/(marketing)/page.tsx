@@ -2,11 +2,12 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import MarketingSPA from "@/components/marketing/MarketingSPA";
+import { extractPageHtml } from "@/lib/marketing-ssr";
 
 export const metadata: Metadata = {
-  title: "Halla AI – AI Consultancy & Pure AI Receptionist",
+  title: "Halla AI | End-to-End AI Systems for Businesses",
   description:
-    "Halla AI Consultancy installs connected automation for small businesses. Plus a 24/7 AI receptionist that answers every call — starting at $39/month.",
+    "We design, build and run connected AI systems for your operations, plus a 24/7 Arabic and English AI receptionist.",
   openGraph: {
     title: "Halla AI – Never Miss a Call",
     description:
@@ -39,5 +40,5 @@ function getMarketingBodyHtml(): string {
 
 export default function HomePage() {
   const bodyHtml = getMarketingBodyHtml();
-  return <MarketingSPA bodyHtml={bodyHtml} initialPage="consultancy" />;
+  return <MarketingSPA bodyHtml={bodyHtml} initialPage="consultancy" ssrHtml={extractPageHtml(bodyHtml, "consultancy")} />;
 }

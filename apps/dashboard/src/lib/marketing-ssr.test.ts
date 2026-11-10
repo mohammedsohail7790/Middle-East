@@ -1,0 +1,97 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+import { extractPageHtml } from "@/lib/marketing-ssr";
+import { marketingMetadata } from "@/lib/marketing-metadata";
+import { resolveMarketingPage } from "@/lib/marketing-routes";
+
+const body = readFileSync(path.resolve(__dirname, "../../public/marketing-body.html"), "utf8");
+
+describe("extractPageHtml", () => {
+  it("returns the consultancy page with its real headline, visible, and none of the other pages", () => {
+    const html = extractPageHtml(body, "consultancy");
+    expect(html).toContain("We design, build and run the AI systems your business depends on.");
+    expect(html).toMatch(/^<div id="page-consultancy" class="page active"/);
+    expect(html).not.toContain('id="page-pricing"');
+    expect(html).not.toContain('id="page-security"');
+    expect(html.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length).toBeGreaterThan(300);
+  });
+
+  it("makes a page that is not active by default visible, because .page is hidden until .active", () => {
+    const html = extractPageHtml(body, "consult-signup");
+    expect(html).toMatch(/^<div id="page-consult-signup" class="page active"/);
+    expect(html).toContain("Book a Call");
+  });
+
+  it("returns nothing for an unknown or unsafe page id rather than guessing", () => {
+    expect(extractPageHtml(body, "no-such-page")).toBe("");
+    expect(extractPageHtml(body, "")).toBe("");
+    expect(extractPageHtml(body, '"><script>')).toBe("");
+  });
+});
+
+describe("marketingMetadata", () => {
+  it("describes the home page as the general Halla AI landing page, with its own canonical address and no doubled brand name", () => {
+    const m = marketingMetadata("consultancy", "/en");
+    expect(m.title).toEqual({ absolute: "Halla AI | End-to-End AI Systems for Businesses" });
+    expect(String(m.description)).toContain("connected AI systems");
+    expect(String(m.description).length).toBeLessThanOrEqual(160); // Bing flags longer descriptions
+    expect(m.alternates?.canonical).toBe("/en");
+    expect(m.openGraph?.url).toBe("/en");
+  });
+
+  it("gives every solutions, blog, industry and legal page its own title and canonical address", () => {
+    const m = marketingMetadata("solutions-answering", "/solutions/answering");
+    expect(m.title).toEqual({ absolute: "24/7 AI Answering Service | Halla AI" });
+    expect(m.alternates?.canonical).toBe("/solutions/answering");
+    for (const id of ["blog-emergency", "industry-clinics", "vs-smith", "forwarding", "security", "privacy", "terms"]) {
+      const t = marketingMetadata(id, "/x").title as { absolute: string };
+      expect(t.absolute).not.toContain("Smart • Seamless");
+    }
+  });
+
+  it("falls back to the default title for a page that has none", () => {
+    const m = marketingMetadata("no-such-page", "/no-such-page");
+    expect(m.title).toBe("Halla AI – Smart • Seamless • Always");
+  });
+
+  it("gives the main receptionist pages their own title, description and canonical address", () => {
+    const m = marketingMetadata("pricing", "/pricing");
+    expect(m.title).toEqual({ absolute: "AI Receptionist Pricing | Halla AI" });
+    expect(String(m.description)).toContain("from $39 a month");
+    expect(m.alternates?.canonical).toBe("/pricing");
+  });
+
+  it("gives the fit-check page its own title, description and canonical address", () => {
+    const m = marketingMetadata("fit-check", "/fit-check");
+    expect(m.title).toEqual({ absolute: "Is Halla AI a fit for your business? | Halla AI Consultancy" });
+    expect(String(m.description)).toContain("quick questions about your company");
+    expect(m.alternates?.canonical).toBe("/fit-check");
+  });
+
+  it("sends the fit-check form's real questions in the first HTML", () => {
+    const html = extractPageHtml(body, "fit-check");
+    expect(html).toMatch(/^<div id="page-fit-check" class="page active"/);
+    expect(html).toContain("How many people work in the company?");
+    expect(html).not.toContain('id="page-consult-signup"');
+  });
+  it("has a public Opportunity Audit page with its own address, in English and Arabic", () => {
+    expect(resolveMarketingPage("/opportunity-audit")).toBe("audit-info");
+    const m = marketingMetadata("audit-info", "/opportunity-audit");
+    expect(m.alternates?.canonical).toBe("/opportunity-audit");
+    expect(m.robots).toBeUndefined();
+    const html = extractPageHtml(body, "audit-info");
+    expect(html).toContain("AED 5,000");
+    expect(html).toContain("تدقيق الفرص");
+    expect(html).toContain("go('fit-check')");
+  });
+  it("gives the AI Consultancy page its own address, title and first-HTML content", () => {
+    expect(resolveMarketingPage("/ai-consultancy")).toBe("ai-consultancy");
+    const m = marketingMetadata("ai-consultancy", "/ai-consultancy");
+    expect(m.title).toEqual({ absolute: "AI Consultancy for Small and Mid-Sized Businesses | Halla AI" });
+    expect(m.alternates?.canonical).toBe("/ai-consultancy");
+    const html = extractPageHtml(body, "ai-consultancy");
+    expect(html).toMatch(/^<div id="page-ai-consultancy" class="page active"/);
+    expect(html).toContain("Custom software");
+  });
+});

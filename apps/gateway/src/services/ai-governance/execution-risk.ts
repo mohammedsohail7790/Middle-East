@@ -15,6 +15,7 @@ const SIDE_EFFECT: Record<string, RiskAssessment['sideEffectClass']> = {
   lookup_order: 'read',
   check_availability: 'read',
   create_lead: 'write',
+  record_consent: 'write',
   create_appointment: 'write',
   schedule_appointment: 'write',
   reschedule_appointment: 'write',

@@ -10,6 +10,8 @@ import { createAnalyticsRouter } from '../services/analytics/analytics.controlle
 import { createSmsRouter } from '../services/sms/sms.controller.js';
 import { createLeadsRouter } from '../services/leads/leads.controller.js';
 import { createPublicConsultRequestRouter } from '../services/leads/public-consult-request.controller.js';
+import { createPublicFitCheckRouter } from '../services/leads/public-fit-check.controller.js';
+import { createPublicAuditRouter } from '../services/audit/public-audit.controller.js';
 import { createTeamRouter } from '../services/team/team.controller.js';
 import { createBusinessHoursRouter } from '../services/business-hours/business-hours.controller.js';
 import { createAIConfigRouter } from '../services/ai-config/ai-config.controller.js';
@@ -36,8 +38,10 @@ import { createOnboardingRouter } from '../services/onboarding/onboarding.contro
 import { createOrganizationsRouter } from '../services/organizations/organization.controller.js';
 import { createCrmRouter } from '../services/crm/crm.controller.js';
 import { createChannelsRouter } from '../services/channels/channels.controller.js';
+import { createWhatsAppRouter } from '../services/whatsapp/whatsapp.controller.js';
 import { createIntegrationRouter } from '../services/integrations/integration.controller.js';
 import { createKlarosRouter } from '../services/klaros/klaros.controller.js';
+import { createKlarosProvisioningRouter } from '../services/klaros/klaros-provisioning.controller.js';
 import { createIntegrationOAuthRouter } from '../services/integrations/oauth.controller.js';
 import { createCalendarRouter } from '../services/calendar/calendar.controller.js';
 import { createSlackRouter } from '../services/slack/slack.controller.js';
@@ -68,12 +72,16 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/tenants', createTenantsRouter());
     apiRouter.use('/organizations', createOrganizationsRouter());
     apiRouter.use('/crm', createCrmRouter());
+    apiRouter.use('/channels/whatsapp', createWhatsAppRouter());
     apiRouter.use('/channels', createChannelsRouter());
     apiRouter.use('/integrations', createIntegrationOAuthRouter());
     apiRouter.use('/integrations', createIntegrationRouter());
     apiRouter.use('/integrations/klaros', createKlarosRouter());
+    apiRouter.use('/platform/klaros', createKlarosProvisioningRouter());
     apiRouter.use('/leads', createLeadsRouter());
     apiRouter.use('/public/consult-request', createPublicConsultRequestRouter());
+    apiRouter.use('/public/fit-check', createPublicFitCheckRouter());
+    apiRouter.use('/public/audit', createPublicAuditRouter());
     apiRouter.use('/calls', createCallsRouter());
     apiRouter.use('/campaigns', createCampaignsRouter());
     apiRouter.use('/appointments', createAppointmentsRouter());

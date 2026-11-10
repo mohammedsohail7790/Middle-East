@@ -102,7 +102,7 @@ type Props = {
 
 export function DashboardTopbar({ workspace, onOpenMenu, planTick }: Props) {
   const t = useTranslations("shell");
-  const { title, subtitle, icon: PageIcon } = usePageMeta();
+  const { title, icon: PageIcon } = usePageMeta();
   void planTick;
 
   const initials = workspaceInitials(workspace);
@@ -127,21 +127,13 @@ export function DashboardTopbar({ workspace, onOpenMenu, planTick }: Props) {
           <p className="dashboard-topbar-title truncate">{title}</p>
         </div>
 
-        <div className="dashboard-header-context-desktop hidden lg:flex items-center gap-3 min-w-0">
-          <div className="dashboard-topbar-icon-well" aria-hidden>
-            <PageIcon className="size-[1.125rem]" strokeWidth={ICON_STROKE} />
-          </div>
-          <div className="min-w-0">
-            <nav className="dashboard-topbar-breadcrumb" aria-label="Breadcrumb">
-              <span className="dashboard-topbar-breadcrumb-root">{t("workspace")}</span>
-              <ChevronRight className="size-3 opacity-50 shrink-0" strokeWidth={ICON_STROKE} />
-              <span className="dashboard-topbar-breadcrumb-current truncate">{title}</span>
-            </nav>
-            <div className="flex items-baseline gap-2 min-w-0 mt-0.5">
-              <h1 className="dashboard-topbar-heading truncate">{title}</h1>
-            </div>
-            <p className="dashboard-topbar-subtitle truncate">{subtitle}</p>
-          </div>
+        <div className="dashboard-header-context-desktop hidden lg:flex items-center gap-2 min-w-0">
+          <PageIcon className="size-4 shrink-0 text-muted-foreground" strokeWidth={ICON_STROKE} aria-hidden />
+          <nav className="dashboard-topbar-breadcrumb" aria-label="Breadcrumb">
+            <span className="dashboard-topbar-breadcrumb-root">{t("workspace")}</span>
+            <ChevronRight className="size-3 opacity-50 shrink-0" strokeWidth={ICON_STROKE} />
+            <span className="dashboard-topbar-breadcrumb-current truncate">{title}</span>
+          </nav>
         </div>
       </div>
 

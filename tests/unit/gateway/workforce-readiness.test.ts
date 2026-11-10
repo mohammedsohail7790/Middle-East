@@ -69,13 +69,14 @@ describe('the other honest states', () => {
     }
   });
 
-  it('but no deployed database is known to have it: staging and production are NOT_TESTED, and that keeps production blocked', () => {
-    expect(RLS_APPLIED_TO_STAGING).toBe('NOT_TESTED');
-    expect(RLS_APPLIED_TO_PRODUCTION).toBe('NOT_TESTED');
+  it('is applied and measured on both databases (staging and production 2026-10-08), yet production stays blocked by the other open items', () => {
+    expect(RLS_APPLIED_TO_STAGING).toBe('READY');
+    expect(RLS_APPLIED_TO_PRODUCTION).toBe('READY');
     for (const v of Object.keys(WORKFORCE_TEMPLATES) as Array<keyof typeof WORKFORCE_TEMPLATES>) {
       const r = workforceReadiness(v);
-      expect(r.RLS_APPLIED_TO_STAGING).toBe('NOT_TESTED');
-      expect(r.RLS_APPLIED_TO_PRODUCTION).toBe('NOT_TESTED');
+      expect(r.RLS_APPLIED_TO_STAGING).toBe('READY');
+      expect(r.RLS_APPLIED_TO_PRODUCTION).toBe('READY');
+      // no code-level output guard, Klaros delivery unproven from the deployed sender, live model untested
       expect(r.PRODUCTION_READY).toBe('BLOCKED');
     }
   });
@@ -84,7 +85,7 @@ describe('the other honest states', () => {
 describe('workforceReadiness()', () => {
   it('Medical Tourism: defined and staging-ready, never production-ready; the order lookup does not apply', () => {
     const r = workforceReadiness('medical_tourism');
-    expect(r).toMatchObject({ WORKFORCE_DEFINED: 'READY', AGENTS_CONFIGURED: 'READY', PROMPTS_CONFIGURED: 'READY', ESCALATION_CONFIGURED: 'READY', STAGING_READY: 'READY', PRODUCTION_READY: 'BLOCKED', ORDER_LOOKUP: 'NOT_APPLICABLE', WEBHOOK_READY: 'BLOCKED', ROW_LEVEL_SECURITY: 'READY', RLS_APPLIED_TO_STAGING: 'NOT_TESTED', RLS_APPLIED_TO_PRODUCTION: 'NOT_TESTED', LIVE_MODEL_BEHAVIOUR: 'NOT_TESTED' });
+    expect(r).toMatchObject({ WORKFORCE_DEFINED: 'READY', AGENTS_CONFIGURED: 'READY', PROMPTS_CONFIGURED: 'READY', ESCALATION_CONFIGURED: 'READY', STAGING_READY: 'READY', PRODUCTION_READY: 'BLOCKED', ORDER_LOOKUP: 'NOT_APPLICABLE', WEBHOOK_READY: 'BLOCKED', ROW_LEVEL_SECURITY: 'READY', RLS_APPLIED_TO_STAGING: 'READY', RLS_APPLIED_TO_PRODUCTION: 'READY', LIVE_MODEL_BEHAVIOUR: 'NOT_TESTED' });
   });
 
   it('Dropshipping: ORDER_LOOKUP is BLOCKED_PENDING_KLAROS_READ_API until a provider exists, and production stays blocked either way', () => {

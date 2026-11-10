@@ -22,6 +22,8 @@
     "callsSubtitle": "Transcripts, outcomes, and call history",
     "outbound": "Outbound",
     "outboundSubtitle": "Click-to-call, campaigns, and reminders",
+    "whatsapp": "WhatsApp",
+    "whatsappSubtitle": "Customer chats, bookings, and reminders",
     "integrations": "Integrations",
     "integrationsSubtitle": "CRMs, calendars, and automations",
     "businessProfile": "Business Profile",
@@ -60,7 +62,7 @@
     "apiConnectionIssue": "API connection issue",
     "noSession": "No active session — sign in again.",
     "upgradeRequired": "upgrade required",
-    "bootTimeout": "This is taking longer than expected.",
+    "bootTimeout": "Waking up your workspace. After a quiet period this can take up to a minute.",
     "backToSignIn": "Back to sign in"
   },
   "common": {
@@ -232,7 +234,7 @@
       "noAppsDesc": "Your workspace has no direct apps configured yet. Ask an admin to enable one of the apps above."
     },
     "leads": {
-      "description": "Pipeline from calls, SMS, and manual entry",
+      "description": "Pipeline from calls, WhatsApp, and manual entry",
       "newLead": "New Lead",
       "createLead": "Create Lead",
       "creating": "Creating...",
@@ -319,7 +321,7 @@
       "today": "Today",
       "upcoming": "Upcoming",
       "noAppointments": "No appointments yet",
-      "noAppointmentsDesc": "Bookings appear here after a successful call booking or when you add one below. Turn on Book Appointments under AI Agent.",
+      "noAppointmentsDesc": "Bookings appear here after your AI receptionist books an appointment on a call. Turn on Book Appointments under Voice Agents.",
       "noUpcoming": "No upcoming appointments",
       "noUpcomingDesc": "Synced calendar events will appear here once connected.",
       "noDayAppointments": "No appointments this day",
@@ -393,10 +395,10 @@
       "agentName": "Agent Name",
       "phoneGreeting": "Phone Greeting",
       "emergencyTransfer": "Emergency / transfer number",
-      "transferHint": "Required for call transfers. Use E.164 format (e.g. +19175551234).",
+      "transferHint": "Required for call transfers. Use E.164 format (e.g. +971501234567).",
       "voice": "Voice",
       "language": "Language",
-      "languageDesc": "Live calls use this language end-to-end. Arabic and English on Starter; Hindi and Russian on Professional.",
+      "languageDesc": "Live calls use this language end-to-end. Hindi is available on Professional.",
       "tone": "Tone",
       "customInstructions": "Custom instructions",
       "customInstructionsPlaceholder": "Add specific instructions for your AI agent...",
@@ -541,7 +543,7 @@
       "companyName": "Company name",
       "companyNamePlaceholder": "Your Company Name",
       "services": "Services (comma-separated)",
-      "servicesPlaceholder": "AC repair, furnace install, maintenance plans",
+      "servicesPlaceholder": "Skin consultation, laser hair removal, facial treatment",
       "servicesHint": "The AI uses this list when callers ask what you offer.",
       "description": "Business description",
       "descriptionPlaceholder": "Brief overview of your business for the AI receptionist...",
@@ -599,6 +601,86 @@
         "electrical": "Electrical",
         "general": "General"
       }
+    },
+    "whatsapp": {
+      "loadFailed": "Could not load WhatsApp",
+      "connectTitle": "Connect your WhatsApp Business number",
+      "connectIntro": "Customers message this number and the AI receptionist books, reschedules and answers questions, in Arabic and English, including voice notes.",
+      "phoneNumberId": "Phone number ID",
+      "phoneNumberIdHelp": "From Meta > WhatsApp > API Setup. This is not the phone number itself.",
+      "accessToken": "Access token",
+      "accessTokenHelp": "A permanent system-user token. Stored encrypted and never shown again.",
+      "wabaId": "WhatsApp Business Account ID (optional)",
+      "connect": "Connect",
+      "connecting": "Checking with WhatsApp...",
+      "connectFailed": "Could not connect",
+      "webhookTitle": "Webhook",
+      "webhookHelp": "In your Meta app, set the callback URL below and subscribe to the \"messages\" field.",
+      "verifyTokenHelp": "The verify token is the WHATSAPP_WEBHOOK_VERIFY_TOKEN value set on the gateway.",
+      "platformNotReady": "The platform webhook secret is not configured yet, so incoming messages will be rejected.",
+      "connectedAs": "Connected number",
+      "numberError": "WhatsApp reported a problem with this number.",
+      "aiReplies": "AI replies",
+      "aiRepliesHelp": "The AI answers customers automatically. Turn off to let your team reply manually.",
+      "notifyCallers": "Message people who called",
+      "notifyCallersHelp": "Send booking confirmations and reminders to callers who have not messaged you first. Only turn on if your customers have agreed to receive WhatsApp updates.",
+      "disconnect": "Disconnect",
+      "disconnectConfirm": "Disconnect WhatsApp? Conversation history is kept.",
+      "conversations": "Conversations",
+      "noConversations": "No conversations yet. They appear here when a customer messages your number.",
+      "needsAttention": "Needs you",
+      "aiHandling": "AI",
+      "staffHandling": "Team",
+      "optedOut": "Opted out",
+      "pickConversation": "Select a conversation",
+      "takeOver": "Take over",
+      "handBack": "Hand back to AI",
+      "typeReply": "Type a reply",
+      "send": "Send",
+      "sendFailed": "Could not send",
+      "failed": "failed",
+      "windowClosed": "The 24-hour reply window has closed. You can reply again once the customer writes.",
+      "sender": {
+        "ai": "AI",
+        "staff": "Team",
+        "system": "Auto",
+        "customer": ""
+      },
+      "report": {
+        "title": "Last 30 days",
+        "newConversations": "New conversations",
+        "inbound": "Messages received",
+        "aiReplies": "AI replies",
+        "staffReplies": "Team replies",
+        "auto": "Reminders and confirmations",
+        "bookings": "Bookings from WhatsApp contacts",
+        "needingAttention": "Need your attention",
+        "optedOut": "Opted out"
+      },
+      "connectWithFacebook": "Connect with Facebook",
+      "connectWithFacebookHelp": "Sign in with Facebook, pick your business and your WhatsApp number. No tokens to copy.",
+      "signupFailed": "We could not finish connecting. Please try again.",
+      "orPaste": "Or enter the details yourself",
+      "payments": {
+        "title": "Payment links",
+        "help": "Connect your own Stripe account so your team can send a payment link inside a chat. The money goes straight to your Stripe account.",
+        "keyLabel": "Stripe restricted key",
+        "keyHelp": "In Stripe, create a restricted key with write access to Payment Links and Products only. It starts with rk_.",
+        "save": "Save key",
+        "saving": "Saving...",
+        "connected": "Stripe connected",
+        "remove": "Remove key",
+        "removeConfirm": "Remove your Stripe key? Staff will no longer be able to send payment links.",
+        "keyFailed": "Could not save the key.",
+        "send": "Payment link",
+        "amount": "Amount",
+        "currency": "Currency",
+        "description": "What is it for?",
+        "descriptionPlaceholder": "Deposit for dental cleaning",
+        "sendLink": "Send link",
+        "sending": "Sending...",
+        "failed": "Could not send the payment link."
+      }
     }
   },
   "gates": {
@@ -611,8 +693,8 @@
       "message": "This feature requires the Professional plan or higher."
     },
     "outbound": {
-      "title": "Upgrade to Starter",
-      "message": "This feature requires the Starter plan or higher."
+      "title": "Upgrade to Essential",
+      "message": "This feature requires the Essential plan or higher."
     },
     "customVoice": {
       "title": "Upgrade to Professional",
@@ -623,8 +705,8 @@
       "message": "This feature requires the Professional plan or higher."
     },
     "campaigns": {
-      "title": "Upgrade to Starter",
-      "message": "This feature requires the Starter plan or higher."
+      "title": "Upgrade to Essential",
+      "message": "This feature requires the Essential plan or higher."
     }
   },
   "support": {

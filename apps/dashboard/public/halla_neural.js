@@ -24,10 +24,18 @@
     return min + Math.random() * (max - min);
   }
 
+  // Without WebGL (headless CI, blocklisted GPUs) three.js logs console errors; skip the decorative scene instead.
+  function webglAvailable() {
+    try {
+      const c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+    } catch (e) { return false; }
+  }
+
   class NeuralPathScene {
     constructor(mountId, options) {
       this.mount = document.getElementById(mountId);
-      if (!this.mount || typeof THREE === 'undefined') return;
+      if (!this.mount || typeof THREE === 'undefined' || !webglAvailable()) return;
 
       this.opts = Object.assign({
         mode: 'network',

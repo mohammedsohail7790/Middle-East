@@ -1,0 +1,198 @@
+import type { AddressInfo } from 'node:net';
+import type { Server } from 'node:http';
+import express from 'express';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const send = vi.fn();
+vi.mock('resend', () => ({
+  Resend: class {
+    emails = { send };
+  },
+}));
+
+let server: Server;
+let base: string;
+
+// The router keeps one rate-limit counter per visitor for the life of the module, so each test gets a fresh copy and every request here comes from the same address.
+beforeEach(async () => {
+  vi.resetModules();
+  send.mockReset();
+  send.mockResolvedValue({ id: 'x' });
+  process.env.RESEND_API_KEY = 'test-key';
+  process.env.CONSULT_LEAD_EMAIL = 'leads@example.com';
+  delete process.env.FIT_CHECK_LEAD_EMAILS;
+  const { createPublicFitCheckRouter } = await import('../../apps/gateway/src/services/leads/public-fit-check.controller.js');
+  const app = express();
+  app.use(express.json());
+  app.use('/fit-check', createPublicFitCheckRouter());
+  await new Promise<void>((resolve) => {
+    server = app.listen(0, '127.0.0.1', resolve);
+  });
+  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}/fit-check`;
+});
+
+afterEach(async () => {
+  await new Promise((resolve) => server.close(resolve));
+});
+
+const valid = {
+  name: 'Jordan Smith', email: 'jordan@example.com', role: 'owner', decider: 'yes', company: 'Smith & Co', size: '16-50', office: '6-15', departments: 'Sales, Finance and accounts', industry: 'Trading', country: 'United Arab Emirates', city: 'Dubai',
+  accounting: 'QuickBooks', erp: 'Odoo', pain: 'Quotes and invoices', problem: 'Invoices are typed by hand from emails and it takes two days every month.',
+  hours: '20-50', start: '1-3-months', budget: '5000-15000', consent: true,
+};
+const post = (body: unknown) => fetch(base, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+describe('POST /public/fit-check', () => {
+  it('emails the request to us with the verdict first, and sends the prospect a short confirmation without the verdict', async () => {
+    const res = await post(valid);
+    expect(res.status).toBe(200);
+    expect(send).toHaveBeenCalledTimes(2);
+    const mail = send.mock.calls[0][0];
+    expect(mail.to).toEqual(['leads@example.com']);
+    expect(mail.replyTo).toBe('jordan@example.com');
+    expect(mail.subject).toBe('New Fit Check — GREEN — Smith & Co');
+    expect(mail.text).toContain('GREEN: a good fit');
+    expect(mail.text.indexOf('GREEN')).toBeLessThan(mail.text.indexOf('Jordan Smith'));
+    const confirmation = send.mock.calls[1][0];
+    expect(confirmation.to).toEqual(['jordan@example.com']);
+    expect(confirmation.subject).toBe('We received your fit check');
+    expect(confirmation.text).not.toMatch(/GREEN|good fit|amber|red/i);
+    expect(confirmation.text).toContain('We will respond within 3 business days.');
+    expect(confirmation.text).toContain('private link to the Opportunity Audit');
+    expect(confirmation.text).not.toMatch(/We read every one|questionnaire/);
+  });
+
+  it('puts a one-click "send the audit questionnaire" button in our email when audit links are set up', async () => {
+    process.env.AUDIT_LINK_SECRET = 'a-test-secret';
+    vi.resetModules();
+    const { createPublicFitCheckRouter } = await import('../../apps/gateway/src/services/leads/public-fit-check.controller.js');
+    const app = express();
+    app.use(express.json());
+    app.use('/fit-check', createPublicFitCheckRouter());
+    const second = await new Promise<Server>((resolve) => { const srv = app.listen(0, '127.0.0.1', () => resolve(srv)); });
+    try {
+      const res = await fetch(`http://127.0.0.1:${(second.address() as AddressInfo).port}/fit-check`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(valid) });
+      expect(res.status).toBe(200);
+      const html = send.mock.calls[0][0].html as string;
+      expect(html).toContain('/api/v1/public/audit/approve?t=');
+      expect(html).toContain('Send the audit questionnaire');
+    } finally {
+      second.close();
+      delete process.env.AUDIT_LINK_SECRET;
+    }
+  });
+
+  it('accepts a company of any size, and tells us the currency to quote in for its country', async () => {
+    const res = await post({ ...valid, size: '150+', country: 'Saudi Arabia', city: 'Riyadh' });
+    expect(res.status).toBe(200);
+    const mail = send.mock.calls[0][0];
+    expect(mail.subject).not.toContain('over 50');
+    expect(mail.text).toContain('Saudi Arabia, Riyadh');
+    expect(mail.text).toContain('SAR');
+    expect(mail.text).toContain('Sales, Finance and accounts');
+  });
+
+  it('names the country when "Other" is chosen, quoted in US dollars', async () => {
+    const res = await post({ ...valid, country: 'Other', countryName: 'Türkiye', city: 'Istanbul' });
+    expect(res.status).toBe(200);
+    const mail = send.mock.calls[0][0];
+    expect(mail.text).toContain('Türkiye, Istanbul');
+    expect(mail.text).toContain('USD');
+  });
+
+  it('carries the hours per area, where the data lives and any hosting rules into the email', async () => {
+    const res = await post({
+      ...valid, pain: 'Quotes and invoices, Scheduling', painHours: 'Quotes and invoices: 5 to 20; Scheduling: Under 5',
+      dataLocation: 'spreadsheets', compliance: 'local-hosting',
+    });
+    expect(res.status).toBe(200);
+    const mail = send.mock.calls[0][0];
+    expect(mail.text).toContain('Quotes and invoices: 5 to 20; Scheduling: Under 5');
+    expect(mail.text).toContain('In spreadsheets');
+    expect(mail.text).toContain('Must be hosted in the UAE/GCC');
+    expect(mail.subject).toContain('AMBER');
+  });
+
+  it('refuses a data-location or hosting answer outside the list', async () => {
+    expect((await post({ ...valid, dataLocation: 'cloud' })).status).toBe(400);
+    expect((await post({ ...valid, dataLocation: 'spreadsheets, cloud' })).status).toBe(400);
+    expect((await post({ ...valid, compliance: 'maybe' })).status).toBe(400);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('accepts several places for where the data lives and lists them all in the email', async () => {
+    const res = await post({ ...valid, dataLocation: 'spreadsheets, documents' });
+    expect(res.status).toBe(200);
+    const mail = send.mock.calls[0][0];
+    expect(mail.text).toContain('In spreadsheets');
+    expect(mail.text).toContain('In emails and digital documents');
+  });
+
+  it('needs only the required answers: phone, website, CRM, hours and budget are optional', async () => {
+    const { hours: _h, budget: _b, office: _o, departments: _d, city: _c, ...minimal } = valid;
+    expect((await post(minimal)).status).toBe(200);
+    expect(send.mock.calls[0][0].subject).toContain('AMBER'); // budget and hours unknown
+  });
+
+  it('refuses a request without consent, with an unknown field, or with an answer outside the list', async () => {
+    expect((await post({ ...valid, consent: false })).status).toBe(400);
+    expect((await post({ ...valid, surprise: 'x' })).status).toBe(400);
+    expect((await post({ ...valid, size: '1000' })).status).toBe(400);
+    expect((await post({ ...valid, email: 'nope' })).status).toBe(400);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('refuses a country we do not list and a budget band that no longer exists', async () => {
+    expect((await post({ ...valid, country: 'Atlantis' })).status).toBe(400);
+    expect((await post({ ...valid, budget: 'under-2500' })).status).toBe(400);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('puts what a visitor typed into the email as text, not as HTML', async () => {
+    await post({ ...valid, company: '<img src=x onerror=alert(1)>', problem: '<script>alert(1)</script> invoices take two days every month' });
+    const mail = send.mock.calls[0][0];
+    expect(mail.html).not.toContain('<img src=x');
+    expect(mail.html).not.toContain('<script>alert');
+    expect(mail.html).toContain('&lt;img src=x');
+  });
+
+  it('tells the visitor plainly when delivery fails', async () => {
+    send.mockRejectedValue(new Error('provider down'));
+    const res = await post(valid);
+    expect(res.status).toBe(502);
+    expect((await res.json()).error).toContain('hello@hallaai.com');
+  });
+
+  it('tells the visitor when Resend refuses the email (it returns an error instead of throwing), rather than saying it was sent', async () => {
+    send.mockResolvedValue({ data: null, error: { name: 'validation_error', statusCode: 403, message: 'The hallaai.com domain is not verified.' } });
+    const res = await post(valid);
+    expect(res.status).toBe(502);
+    expect((await res.json()).error).toContain('hello@hallaai.com');
+  });
+
+  it('stops one visitor after 5 requests in 15 minutes', async () => {
+    for (let i = 0; i < 5; i++) expect((await post(valid)).status).toBe(200);
+    expect((await post(valid)).status).toBe(429);
+    expect(send).toHaveBeenCalledTimes(10); // the request to us and the confirmation to the visitor, five times
+  });
+
+  it('sends the request to every address in FIT_CHECK_LEAD_EMAILS, so Hk and the owner both receive it, and skips anything that is not an address', async () => {
+    process.env.FIT_CHECK_LEAD_EMAILS = 'hk@halla.test, owner@halla.test, not-an-address';
+    vi.resetModules();
+    const { createPublicFitCheckRouter } = await import('../../apps/gateway/src/services/leads/public-fit-check.controller.js');
+    const app = express();
+    app.use(express.json());
+    app.use('/fit-check', createPublicFitCheckRouter());
+    const second = await new Promise<Server>((resolve) => {
+      const srv = app.listen(0, '127.0.0.1', () => resolve(srv));
+    });
+    try {
+      const url = `http://127.0.0.1:${(second.address() as AddressInfo).port}/fit-check`;
+      const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(valid) });
+      expect(res.status).toBe(200);
+      expect(send.mock.calls[0][0].to).toEqual(['hk@halla.test', 'owner@halla.test']);
+    } finally {
+      await new Promise((resolve) => second.close(resolve));
+    }
+  });
+});

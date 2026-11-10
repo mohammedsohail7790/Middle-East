@@ -4,11 +4,16 @@ import {
   DATAFLOW_PAGES,
   assertNoDataLoadError,
   filterHardApiFailures,
+  hasAuthCredentials,
 } from '../fixtures';
 
 test.describe.configure({ mode: 'serial' });
 
 test.describe('dashboard data flow', () => {
+  test.beforeEach(() => {
+    test.skip(!hasAuthCredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD to run authenticated journeys");
+  });
+
 
   for (const { path, title, apis } of DATAFLOW_PAGES) {
     test(`${path} loads KPIs/APIs without data errors`, async ({ page, consoleErrors, failedRequests }) => {

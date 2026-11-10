@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import { MarketingProviders } from "@/components/marketing/MarketingProviders";
 import "../globals.css";
+import "@/styles/apple-dashboard.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Halla AI – AI Consultancy & Pure AI Receptionist",
+    default: "Halla AI | End-to-End AI Systems for Businesses",
     template: "%s | Halla AI",
   },
   description:
-    "Halla AI Consultancy installs connected automation for small businesses. Plus a 24/7 AI receptionist that answers every call — starting at $39/month.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://www.hallaai.com"
-  ),
+    "We design, build and run connected AI systems for your operations, plus a 24/7 Arabic and English AI receptionist.",
+  // The marketing site's own address. NEXT_PUBLIC_SITE_URL is the app's address on production (used for sign-in redirects), so it must not decide where search engines send visitors.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_MARKETING_URL || "https://www.hallaai.com"),
   openGraph: {
-    title: "Halla AI – AI Consultancy & Pure AI Receptionist",
+    title: "Halla AI | End-to-End AI Systems for Businesses",
     description:
       "We install AI systems for operations, growth, and brand — plus a receptionist that never misses a call.",
     type: "website",
@@ -22,11 +22,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Halla AI – AI Consultancy & Pure AI Receptionist",
+    title: "Halla AI | End-to-End AI Systems for Businesses",
     description:
       "Connected AI systems for small business — and a 24/7 receptionist from $39/month.",
     images: ["/logo-consultancy.jpg"],
   },
+  // Meta Business domain verification for hallaai.com.
+  other: { "facebook-domain-verification": "jagyh6pbbt1oj4qxuvi8ubtn365ok6" },
   icons: {
     icon: [{ url: "/favicon.ico", sizes: "any" }, { url: "/logo-consultancy-favicon.jpg", type: "image/jpeg" }],
     apple: "/apple-touch-icon.png",
@@ -37,14 +39,14 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#8C6F3E",
+  themeColor: "#0066CC",
 };
 
 // Prevent FOUC on theme toggle
 const themeInitScript = `(function(){try{var t=localStorage.getItem('halla_theme')||localStorage.getItem('calliq_theme');document.documentElement.classList.remove('light','dark');document.documentElement.classList.add(t==='dark'?'dark':'light');}catch(e){document.documentElement.classList.add('light');}})();`;
 
-// Marketing & auth pages share the dashboard's warm gold/bronze accent —
-// no override needed; halla_styles.css already sets --accent to Aureate Gold.
+// Marketing & auth pages share the Apple blue action color with the dashboard and meetklaros.com;
+// /marketing-apple.css (loaded last) is the Apple surface layer over halla_styles.css.
 
 export default function MarketingRootLayout({
   children,
@@ -67,6 +69,17 @@ export default function MarketingRootLayout({
         <link id="halla-styles" rel="stylesheet" href="/halla_styles.css" />
         {/* eslint-disable-next-line @next/next/no-css-tags */}
         <link id="marketing-premium" rel="stylesheet" href="/marketing-premium.css" />
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link id="marketing-apple" rel="stylesheet" href="/marketing-apple.css" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          id="halla-gcc-fonts"
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        />
+        {/* GCC theme: charcoal / off-white / champagne. Must load after marketing-apple.css. */}
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link id="halla-gcc-theme" rel="stylesheet" href="/halla-gcc-theme.css" />
         <link
           id="tabler-icons"
           rel="stylesheet"
@@ -76,7 +89,7 @@ export default function MarketingRootLayout({
         <link
           id="halla-fonts"
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=Cairo:wght@300;400;500;600;700;800;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800;900&display=swap"
         />
       </head>
       <body suppressHydrationWarning>

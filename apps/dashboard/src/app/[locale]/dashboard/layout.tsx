@@ -185,7 +185,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setInitError("Taking too long to load your workspace. Please sign in again.");
         return true;
       });
-    }, 15_000);
+    }, 100_000);
 
     init().catch((e) => {
       if (cancelled) return;
@@ -221,6 +221,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     return () => {
       cancelled = true;
+      // React StrictMode (dev) runs effect → cleanup → effect. Without this
+      // reset the second run is skipped by the guard above while the first run
+      // is already cancelled, so the boot screen would never resolve.
+      initStarted.current = false;
       window.clearTimeout(watchdog);
       authListener.subscription.unsubscribe();
       window.removeEventListener("focus", onFocus);

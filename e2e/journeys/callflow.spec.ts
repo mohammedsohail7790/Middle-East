@@ -5,6 +5,7 @@ import {
   gotoAndWaitForApi,
   GATEWAY_URL,
   filterHardApiFailures,
+  hasAuthCredentials,
 } from '../fixtures';
 
 test.describe('call flow (dashboard + gateway)', () => {
@@ -14,6 +15,10 @@ test.describe('call flow (dashboard + gateway)', () => {
   });
 
   test.describe('authenticated call UI', () => {
+    test.beforeEach(() => {
+      test.skip(!hasAuthCredentials(), "Set E2E_TEST_EMAIL and E2E_TEST_PASSWORD to run authenticated journeys");
+    });
+
 
     test('calls page loads list from API', async ({ page, failedRequests }) => {
       await gotoAndWaitForApi(page, '/dashboard/calls', '/api/v1/calls', { method: 'GET' });

@@ -43,10 +43,10 @@ export function StatCard({
 
   const trendColor =
     direction === "positive"
-      ? "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200/70 dark:border-emerald-900/60"
+      ? "text-[color:var(--green)] bg-[color-mix(in_srgb,var(--green)_13%,transparent)]"
       : direction === "negative"
-        ? "text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border-red-200/70 dark:border-red-900/60"
-        : "text-muted-foreground bg-muted/60 border-border";
+        ? "text-[color:var(--red)] bg-[color-mix(in_srgb,var(--red)_11%,transparent)]"
+        : "text-muted-foreground bg-[var(--surface-active)]";
 
   const TrendArrow = direction === "negative" ? ArrowDownRight : ArrowUpRight;
   const trendText =
@@ -61,13 +61,6 @@ export function StatCard({
       transition={{ delay: index * 0.05, duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
       className={cn("dashboard-stat-card min-w-0 group", className)}
     >
-      {/* subtle glow blob */}
-      <div
-        className="pointer-events-none absolute bottom-0 right-0 w-24 h-24 rounded-full opacity-[0.06] dark:opacity-[0.09]"
-        style={{ background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)", transform: "translate(30%, 30%)" }}
-        aria-hidden
-      />
-
       {/* whisper-quiet sparkline behind the number */}
       {sparkline && sparkline.length > 1 && (
         <Sparkline
@@ -84,7 +77,7 @@ export function StatCard({
             {trendText && (
               <span
                 className={cn(
-                  "inline-flex items-center gap-0.5 text-[11px] font-semibold px-1.5 py-0.5 rounded-md border tabular-nums shrink-0",
+                  "inline-flex items-center gap-0.5 text-[12px] font-medium px-2 py-0.5 rounded-full tabular-nums shrink-0",
                   trendColor
                 )}
                 aria-label={`Trend ${trendText}${trend?.label ? ` ${trend.label}` : ""}`}

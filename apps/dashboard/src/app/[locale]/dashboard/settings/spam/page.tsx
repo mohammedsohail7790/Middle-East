@@ -141,23 +141,6 @@ export default function SpamSettingsPage() {
                 <span className="toggle-track"><span className="toggle-thumb" /></span>
               </label>
             </label>
-            <label
-              className="toggle-row"
-              onClick={() => setSpamSettings((s) => (s ? { ...s, stirShakenRequired: !s.stirShakenRequired } : s))}
-            >
-              <div className="toggle-row-text">
-                <span className="toggle-row-label">{t("stirShaken")}</span>
-                <span className="toggle-row-hint">{t("stirShakenHint")}</span>
-              </div>
-              <label className="toggle" onClick={(e) => e.stopPropagation()}>
-                <input
-                  type="checkbox"
-                  checked={spamSettings.stirShakenRequired}
-                  onChange={(e) => setSpamSettings((s) => (s ? { ...s, stirShakenRequired: e.target.checked } : s))}
-                />
-                <span className="toggle-track"><span className="toggle-thumb" /></span>
-              </label>
-            </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="dashboard-field-label">{t("blocklist")}</label>
@@ -165,7 +148,7 @@ export default function SpamSettingsPage() {
                   rows={5}
                   value={blocklistText}
                   onChange={(e) => setBlocklistText(e.target.value)}
-                  placeholder="+15551234567"
+                  placeholder="+971501234567"
                   className="input resize-none font-mono text-xs"
                 />
               </div>
