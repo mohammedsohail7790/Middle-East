@@ -11,6 +11,7 @@ import express from 'express';
 import { getTenantId } from '../auth/tenant-context.js';
 import { verifySseDashboardToken } from '../../security/sse-token.js';
 import { scanKeys } from '../redis-scan.js';
+import { getLeadSelectList } from '../leads/leads-schema.js';
 
 /**
  * Shared Redis pub/sub subscriber for dashboard SSE.
@@ -149,6 +150,8 @@ export function createDashboardRouter(): express.Router {
     router.get('/bootstrap', async (req, res) => {
         try {
             const tenantId = getTenant(req);
+            // Same column list the Leads page uses: it adapts to the real table (the number column is `phone`, not `phone_number`).
+            const leadColumns = await getLeadSelectList();
             const [
                 callsAgg,
                 leadsAgg,
@@ -202,7 +205,7 @@ export function createDashboardRouter(): express.Router {
                     [tenantId]
                 ),
                 voiceDb.query(
-                    `select id, name, phone_number, email, status, score, source, created_at
+                    `select ${leadColumns}
                      from public.leads
                      where tenant_id = $1
                      order by created_at desc
@@ -248,7 +251,11 @@ export function createDashboardRouter(): express.Router {
                     },
                     callVolume,
                     recentCalls: recentCalls.rows,
-                    leadsPreview: leadsPreview.rows,
+                    // Keep the `phone_number` name the dashboard cache has always expected.
+                    leadsPreview: leadsPreview.rows.map((r: Record<string, unknown>) => ({
+                        ...r,
+                        phone_number: r.phone_number ?? r.phone ?? null,
+                    })),
                     tenant: tenant
                         ? {
                               id: tenant.id,
