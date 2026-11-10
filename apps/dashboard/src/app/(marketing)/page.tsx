@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description:
       "Every call answered in under 2 seconds. Books appointments, captures leads, blocks spam.",
     type: "website",
-    images: [{ url: "/logo-receptionist.jpg" }],
+    images: [{ url: "/og-halla-receptionist.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",

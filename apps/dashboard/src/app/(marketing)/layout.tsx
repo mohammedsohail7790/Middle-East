@@ -18,14 +18,14 @@ export const metadata: Metadata = {
       "We install AI systems for operations, growth, and brand — plus a receptionist that never misses a call.",
     type: "website",
     siteName: "Halla AI",
-    images: [{ url: "/logo-consultancy.jpg" }],
+    images: [{ url: "/og-halla-consultancy.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Halla AI | End-to-End AI Systems for Businesses",
     description:
       "Connected AI systems for small business — and a 24/7 receptionist from $39/month.",
-    images: ["/logo-consultancy.jpg"],
+    images: ["/og-halla-consultancy.png"],
   },
   // Meta Business domain verification for hallaai.com.
   other: { "facebook-domain-verification": "jagyh6pbbt1oj4qxuvi8ubtn365ok6" },

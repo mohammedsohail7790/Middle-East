@@ -57,7 +57,7 @@ const PAGE_META: Record<string, [string, string]> = {
 };
 
 /** Metadata for a marketing route. `path` is the public path (for example "/en"); `pageId` is what resolveMarketingPage chose for it. */
-export function marketingMetadata(pageId: string, path: string): Metadata {
+function baseMarketingMetadata(pageId: string, path: string): Metadata {
   if (pageId === "consultancy") {
     return {
       title: { absolute: CONSULTANCY_TITLE },
@@ -92,6 +92,28 @@ export function marketingMetadata(pageId: string, path: string): Metadata {
     return { title: { absolute: title }, description, alternates: { canonical: path.replace(/\/$/, "") || "/" }, openGraph: { title, description, type: "website", url: path } };
   }
   return { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION };
+}
+
+/** Link-preview images (1200x630) for WhatsApp, LinkedIn and X. Made by scripts/make-share-images.mjs. */
+const SHARE_IMAGE_RECEPTIONIST = { url: "/og-halla-receptionist.png", width: 1200, height: 630, alt: "Halla AI receptionist: every call and WhatsApp message answered, in Arabic and English" };
+const SHARE_IMAGE_CONSULTANCY = { url: "/og-halla-consultancy.png", width: 1200, height: 630, alt: "Halla AI consultancy: custom software and AI automation, fixed price and timeline" };
+/** Pages about the consultancy and automation offers use the consultancy card; the rest use the receptionist card. */
+const CONSULTANCY_PAGE_IDS = new Set(["consultancy", "ai-consultancy", "intelligence", "svc-operations", "consult-signup", "fit-check", "audit-info"]);
+
+function withShareImage(pageId: string, m: Metadata): Metadata {
+  // Private pages that open from an emailed link are not shared or indexed, so they get no preview.
+  if (m.robots && typeof m.robots === "object" && "index" in m.robots && m.robots.index === false) return m;
+  const image = CONSULTANCY_PAGE_IDS.has(pageId) ? SHARE_IMAGE_CONSULTANCY : SHARE_IMAGE_RECEPTIONIST;
+  return {
+    ...m,
+    openGraph: { type: "website", ...m.openGraph, images: [image] },
+    twitter: { card: "summary_large_image", ...m.twitter, images: [image.url] },
+  };
+}
+
+/** Metadata for a marketing route. `path` is the public path (for example "/en"); `pageId` is what resolveMarketingPage chose for it. */
+export function marketingMetadata(pageId: string, path: string): Metadata {
+  return withShareImage(pageId, baseMarketingMetadata(pageId, path));
 }
 
 /** The search/tab title for a page, when one is set for it. */
