@@ -3,7 +3,7 @@
  * Marketing guard: opens every page in the site's sitemap at phone width and reports layout problems that were
  * found in the Nov 2026 design review, so they cannot quietly come back.
  *
- *   node scripts/marketing-guard.mjs [baseUrl] [--lang=ar] [--json] [--css=path/to/file.css]
+ *   node scripts/marketing-guard.mjs [baseUrl] [--lang=ar] [--json] [--css=path/to/file.css] [--only=/home,/pricing]
  * --css applies a stylesheet on top of every page before checking, to prove a CSS fix before it is deployed.
  *
  * baseUrl defaults to MARKETING_GUARD_URL or https://www.hallaai.com (pass a Vercel preview address to check a PR).
@@ -26,6 +26,7 @@ const base = (args.find((a) => !a.startsWith('--')) || process.env.MARKETING_GUA
 const lang = (flag('lang') || '').split('=')[1] || 'en';
 const asJson = !!flag('json');
 const cssFile = (flag('css') || '').split('=')[1] || '';
+const only = ((flag('only') || '').split('=')[1] || '').split(',').filter(Boolean);
 
 async function loadChromium() {
   const require = createRequire(import.meta.url);
@@ -96,7 +97,8 @@ async function main() {
   const res = await fetch(`${base}/sitemap.xml`);
   if (!res.ok) throw new Error(`Could not read ${base}/sitemap.xml (${res.status})`);
   const xml = await res.text();
-  const paths = [...new Set([...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname))];
+  let paths = [...new Set([...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname))];
+  if (only.length) paths = paths.filter((p) => only.includes(p));
   const chromium = await loadChromium();
   // CHROMIUM_PATH lets a machine use a Chromium it already has instead of the one Playwright expects.
   const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
