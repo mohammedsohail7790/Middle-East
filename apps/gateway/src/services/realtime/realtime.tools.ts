@@ -471,6 +471,19 @@ export class RealtimeToolsManager {
       hasDepartment: Boolean(params.department),
     });
 
+    if (/^(emergency|urgent)$/i.test(String(params.reason || '').trim())) {
+      void Promise.all([import('../automation/automation.service.js'), import('../consent/consent-gate.js')])
+        .then(async ([{ automationService }, { getCallConsentGate }]) => {
+          const gate = await getCallConsentGate(session.tenantId, session.callSid);
+          await automationService.sendEmergencyAlert(session.tenantId, {
+            callSid: session.callSid,
+            reasonLabel: 'The caller asked for urgent help',
+            includePersonalDetails: gate.allows('store_personal_data'),
+          });
+        })
+        .catch(() => {});
+    }
+
     try {
       // Look up tenant's transfer number
       const tenant = await voiceDb.query(

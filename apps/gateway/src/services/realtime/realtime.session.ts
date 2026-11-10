@@ -40,6 +40,7 @@ export class RealtimeSessionManager {
 
   /** Tell Klaros (lead.escalated) that a person must look at this call. Ids and a reason code only: never what was said. */
   private publishSafetyEscalation(session: RealtimeSession, reason: string): void {
+    if (reason.startsWith('emergency_')) void this.alertBusinessOfEmergency(session, 'Possible emergency detected on a call');
     void import('../../events/event-publisher.js')
       .then(async ({ publishPlatformEvent }) => {
         const { PlatformEventTypes } = await import('../../events/event-types.js');
@@ -52,6 +53,24 @@ export class RealtimeSessionManager {
         );
       })
       .catch(() => {});
+  }
+
+  /** Email the business at once about an urgent call (details only if the caller agreed to their details being kept). */
+  private async alertBusinessOfEmergency(session: RealtimeSession, reasonLabel: string): Promise<void> {
+    try {
+      const [{ automationService }, { getCallConsentGate }] = await Promise.all([
+        import('../automation/automation.service.js'),
+        import('../consent/consent-gate.js'),
+      ]);
+      const gate = await getCallConsentGate(session.tenantId, session.callSid);
+      await automationService.sendEmergencyAlert(session.tenantId, {
+        callSid: session.callSid,
+        reasonLabel,
+        includePersonalDetails: gate.allows('store_personal_data'),
+      });
+    } catch {
+      /* an alert must never affect the call */
+    }
   }
 
   async createSession(config: RealtimeSessionConfig): Promise<RealtimeSession> {

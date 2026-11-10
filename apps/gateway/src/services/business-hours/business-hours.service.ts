@@ -74,15 +74,23 @@ export class BusinessHoursService {
     const openFlagValue = openFlagDbValue(isOpen, columns);
 
     try {
+      // Old and new time columns can exist side by side; fill both so the old NOT NULL ones are never left empty.
+      const extraCols: string[] = [];
+      if (columns.legacyStartCol) extraCols.push(columns.legacyStartCol);
+      if (columns.legacyEndCol) extraCols.push(columns.legacyEndCol);
+      const extraInsertCols = extraCols.map((c) => `, ${c}`).join('');
+      const extraValues = extraCols.map((c) => (c === 'open_time' ? ', $3' : ', $4')).join('');
+      const extraUpdates = extraCols.map((c) => `,\n           ${c} = ${c === 'open_time' ? '$3' : '$4'}`).join('');
+
       const result = await pool.query(
-        `INSERT INTO public.business_hours (tenant_id, day_of_week, ${columns.startCol}, ${columns.endCol}, ${columns.openCol}, timezone)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO public.business_hours (tenant_id, day_of_week, ${columns.startCol}, ${columns.endCol}, ${columns.openCol}, timezone${extraInsertCols})
+         VALUES ($1, $2, $3, $4, $5, $6${extraValues})
          ON CONFLICT (tenant_id, day_of_week)
          DO UPDATE SET
            ${columns.startCol} = $3,
            ${columns.endCol} = $4,
            ${columns.openCol} = $5,
-           timezone = $6
+           timezone = $6${extraUpdates}
          RETURNING id, tenant_id, day_of_week,
                    ${columns.startCol} AS start_time,
                    ${columns.endCol} AS end_time,

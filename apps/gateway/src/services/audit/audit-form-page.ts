@@ -17,8 +17,8 @@ export const bi = (en: string): string => `<span class="lang-en">${escapeHtml(en
 /** The strings of the generated pages that need Arabic: used by the test that checks none is missing. */
 export const PAGE_STRINGS = [
   'Halla AI Consultancy', 'Opportunity Audit questionnaire', 'Send my answers →', 'Choose…', 'Process', 'System', 'Add another process', 'Add another system',
-  'The details we need to study your business. It takes about 30 to 45 minutes. Your answers are saved on this device as you type, so you can close the page and come back.',
-  'Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. Everything you send is covered by the NDA we signed.',
+  'The details we need to study your business. It takes about 20 minutes. Your answers are saved on this device as you type, so you can close the page and come back.',
+  'Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. We treat everything you send as confidential. If you would like an NDA signed before you send it, write to hello@hallaai.com first.',
   'Your audit is ready', 'Pay the audit fee and we send you the full audit.', 'Checking your link…', 'Pay securely →',
   'Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.',
   'Required. Everything else is optional.', 'What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 30 days.', 'Questions? Write to hello@hallaai.com.',
@@ -28,7 +28,7 @@ export const PAGE_STRINGS = [
 const LABEL = 'font-size:0.83rem;font-weight:600;color:var(--gray-700);display:block;margin-bottom:8px';
 const HINT = 'font-weight:400;color:var(--gray-500)';
 
-const REQUIRED_IDS = new Set(['p1_name', 'p1_steps']);
+const REQUIRED_IDS = new Set(['a_company', 'b_process']);
 
 function field(question: Question): string {
   const required = REQUIRED_IDS.has(question.id);
@@ -59,12 +59,12 @@ const hero = (title: string, text: string) => `<div class="page-hero"><div class
 
 export function renderAuditPages(): string {
   const form2 = `<div id="page-audit" class="page">
-  ${hero('Opportunity Audit questionnaire', 'The details we need to study your business. It takes about 30 to 45 minutes. Your answers are saved on this device as you type, so you can close the page and come back.')}
+  ${hero('Opportunity Audit questionnaire', 'The details we need to study your business. It takes about 20 minutes. Your answers are saved on this device as you type, so you can close the page and come back.')}
   <section class="section"><div class="container" style="max-width:720px">
     <div class="card" style="padding:40px">
       <div id="auditLinkNote" role="status" style="font-size:0.9rem;margin-bottom:16px"></div>
-      <p style="font-size:0.875rem;margin-bottom:8px">${bi('Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. Everything you send is covered by the NDA we signed.')}</p>
-      <form id="auditForm" novalidate style="display:grid;gap:22px">
+      <p style="font-size:0.875rem;margin-bottom:8px">${bi('Answer what you can and leave the rest blank; "not sure" is a fine answer. Please do not type passwords, card numbers or ID numbers. We treat everything you send as confidential. If you would like an NDA signed before you send it, write to hello@hallaai.com first.')}</p>
+      <form id="auditForm" onsubmit="return false" novalidate style="display:grid;gap:22px">
         <p style="font-size:0.85rem;margin:0"><span style="color:var(--red)" aria-hidden="true">*</span> ${bi('Required. Everything else is optional.')}</p>
         ${AUDIT_SECTIONS.map(section).join('\n        ')}
         <button type="button" class="btn btn-primary btn-lg" style="width:100%;font-size:1rem" id="auditSubmitBtn">${bi('Send my answers →')}</button>

@@ -7,7 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CreditCard, Check, X, Download,
-  Phone, MessageSquare, HardDrive, Crown
+  Phone, HardDrive, Crown
 } from "lucide-react";
 import { api, asArray } from "@/lib/api";
 import { readApiGetCache } from "@/lib/api-get-cache";
@@ -91,7 +91,7 @@ const FALLBACK_PLANS: CheckoutPlan[] = [
     monthlyPrice: 149,
     annualPrice: 1490,
     annualEstimated: true,
-    features: ["750 min/mo", "3 phone numbers", "CRM + Calendar", "SMS follow-ups", "Analytics & automation", "Team accounts"],
+    features: ["750 min/mo", "3 phone numbers", "CRM + Calendar", "Email follow-ups", "Analytics & automation", "Team accounts"],
     popular: true,
   },
 ];
@@ -457,7 +457,6 @@ function BillingPageContent() {
             <div className="space-y-4">
               {[
                 { label: t("minutes"), icon: Phone, variant: "accent" as const, used: usage.minutes?.used ?? 0, limit: usage.minutes?.limit ?? 0, unit: t("minUnit") },
-                { label: t("sms"), icon: MessageSquare, variant: "violet" as const, used: usage.sms?.used ?? 0, limit: usage.sms?.limit ?? 0, unit: t("msgsUnit") },
                 { label: t("storage"), icon: HardDrive, variant: "neutral" as const, used: usage.storage?.used ?? 0, limit: usage.storage?.limit ?? 0, unit: t("gbUnit") },
               ].map((item) => {
                 const pct = getUsagePercentage(item.used, item.limit);

@@ -6,6 +6,12 @@ export type BusinessHoursColumnSet = {
   openCol: 'is_open' | 'is_closed';
   /** When DB uses is_closed, store the inverse of isOpen. */
   invertOpenFlag: boolean;
+  /**
+   * Databases that went through both migration 004 (open_time / close_time, NOT NULL) and 009 (start_time / end_time added beside them)
+   * have both sets of columns. Every write must fill the old required ones too, or the insert fails with a not-null error.
+   */
+  legacyStartCol?: 'open_time';
+  legacyEndCol?: 'close_time';
 };
 
 let cachedColumns: BusinessHoursColumnSet | null = null;
@@ -37,12 +43,17 @@ export async function getBusinessHoursColumnSet(pool: Pool): Promise<BusinessHou
       : 'open_time';
     const endCol: 'end_time' | 'close_time' = cols.has('end_time') ? 'end_time' : 'close_time';
 
+    const legacyStartCol = startCol === 'start_time' && cols.has('open_time') ? ('open_time' as const) : undefined;
+    const legacyEndCol = endCol === 'end_time' && cols.has('close_time') ? ('close_time' as const) : undefined;
+
     if (cols.has('is_open')) {
       cachedColumns = {
         startCol,
         endCol,
         openCol: 'is_open',
         invertOpenFlag: false,
+        legacyStartCol,
+        legacyEndCol,
       };
     } else {
       cachedColumns = {
@@ -50,6 +61,8 @@ export async function getBusinessHoursColumnSet(pool: Pool): Promise<BusinessHou
         endCol,
         openCol: 'is_closed',
         invertOpenFlag: true,
+        legacyStartCol,
+        legacyEndCol,
       };
     }
     return cachedColumns;
@@ -86,6 +99,11 @@ export function normalizeTimeForDb(value: string): string {
   if (/^\d{2}:\d{2}:\d{2}$/.test(trimmed)) return trimmed;
   if (/^\d{2}:\d{2}$/.test(trimmed)) return `${trimmed}:00`;
   return trimmed;
+}
+
+/** Test helper: forget the detected column layout. */
+export function resetBusinessHoursColumnCache(): void {
+  cachedColumns = null;
 }
 
 export { isMissingColumnError, isMissingRelationError };

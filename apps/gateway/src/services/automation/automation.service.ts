@@ -6,6 +6,8 @@
 import { Resend } from 'resend';
 import { voiceDb } from '../voice/tenant-scope.js';
 import { renderBrandedEmail, renderDetailList, stripToPlainText } from './email-template.js';
+import { renderCallSummaryEmail, renderEmergencyAlertEmail, type CallSummaryInput } from './call-summary-email.js';
+import { throwIfRejected } from '../email-delivery.js';
 
 const pool = voiceDb;
 
@@ -79,6 +81,81 @@ export class AutomationService {
       console.warn('[Automation] Owner email lookup failed:', error);
     }
     return [...emails];
+  }
+
+  /**
+   * Email the business a summary after every call. The tenant can switch it off with metadata.call_summary_email = false.
+   * Never throws: a failed email must not affect the call.
+   */
+  async sendOwnerCallSummary(tenantId: string, input: Omit<CallSummaryInput, 'companyName'>): Promise<void> {
+    try {
+      const tenant = await pool.query(
+        "SELECT company_name, metadata->>'call_summary_email' AS call_summary_email FROM public.voice_tenants WHERE id = $1",
+        [tenantId]
+      );
+      if (tenant.rows.length === 0) return;
+      if (String(tenant.rows[0].call_summary_email).toLowerCase() === 'false' && !input.urgent) return;
+
+      const owners = await this.getOwnerNotificationEmails(tenantId);
+      if (owners.length === 0) return;
+
+      const { subject, html } = renderCallSummaryEmail({ ...input, companyName: tenant.rows[0].company_name || 'your business' });
+      for (const owner of owners) {
+        await this.sendEmail(owner, subject, html);
+      }
+    } catch (error) {
+      console.error('[Automation] Error sending call summary:', error);
+    }
+  }
+
+  /** Calls already alerted, so one call sends one alert. Bounded so it cannot grow for ever. */
+  private readonly emergencyAlerted = new Set<string>();
+
+  /**
+   * Tell the business about an urgent call while it is still going: the owner, the team and the addresses in
+   * metadata.on_call_emails (comma separated). Never throws, and sends at most one alert per call.
+   */
+  async sendEmergencyAlert(tenantId: string, input: { callSid: string; reasonLabel: string; includePersonalDetails: boolean }): Promise<void> {
+    try {
+      const key = `${tenantId}:${input.callSid}`;
+      if (this.emergencyAlerted.has(key)) return;
+      this.emergencyAlerted.add(key);
+      if (this.emergencyAlerted.size > 500) this.emergencyAlerted.delete(this.emergencyAlerted.values().next().value as string);
+
+      const tenant = await pool.query(
+        "SELECT company_name, metadata->>'on_call_emails' AS on_call_emails FROM public.voice_tenants WHERE id = $1",
+        [tenantId]
+      );
+      if (tenant.rows.length === 0) return;
+
+      const recipients = new Set(await this.getOwnerNotificationEmails(tenantId));
+      for (const address of String(tenant.rows[0].on_call_emails || '').split(',')) {
+        const clean = address.trim().toLowerCase();
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) recipients.add(clean);
+      }
+      if (recipients.size === 0) return;
+
+      let callerPhone: string | undefined;
+      if (input.includePersonalDetails) {
+        try {
+          const { voiceRedis } = await import('../voice/redis.client.js');
+          callerPhone = (await voiceRedis.hget(`live_call:${tenantId}:${input.callSid}`, 'callerPhone')) || undefined;
+        } catch {
+          callerPhone = undefined;
+        }
+      }
+
+      const { subject, html } = renderEmergencyAlertEmail({
+        companyName: tenant.rows[0].company_name || 'your business',
+        callerPhone,
+        reasonLabel: input.reasonLabel,
+      });
+      for (const address of recipients) {
+        await this.sendEmail(address, subject, html);
+      }
+    } catch (error) {
+      console.error('[Automation] Error sending emergency alert:', error);
+    }
   }
 
   /**
@@ -455,13 +532,14 @@ export class AutomationService {
       }
 
       const from = process.env.EMAIL_FROM || 'noreply@hallaai.com';
-      await resend.emails.send({
+      // Resend answers a refusal (bad key, unverified domain) with an error value instead of throwing: treat it as a failure so it is logged.
+      throwIfRejected(await resend.emails.send({
         from: `Halla AI <${from}>`,
         to,
         subject,
         html,
         text: stripToPlainText(html),
-      });
+      }));
 
       console.log('[Automation] Email sent');
     } catch (error) {

@@ -32,9 +32,13 @@ export function isGatewayReadyForTwilio(): boolean {
 export interface AvailableNumber {
   phoneNumber: string;
   friendlyName: string;
+  region?: string;
   voice: boolean;
   sms: boolean;
   mms: boolean;
+  /** The names the dashboard reads. */
+  capabilities: string[];
+  cost: number;
   monthlyCost: number;
 }
 
@@ -64,28 +68,61 @@ export interface TenantNumberStats {
 export class PhoneProvisioningService {
   /**
    * Search for available Twilio numbers by area code.
+   * Tries voice + SMS first, then voice only, then no capability filter, because a number only has to take calls for the receptionist.
+   * Every attempt is logged with its result count so an empty answer can be told apart from a Twilio error.
    */
-  async searchAvailable(areaCode: string, limit = 10): Promise<AvailableNumber[]> {
+  async searchAvailable(
+    areaCode: string,
+    limit = 10,
+    client: Pick<ReturnType<typeof twilio>, 'availablePhoneNumbers'> = getTwilioClient()
+  ): Promise<AvailableNumber[]> {
     const cleanAreaCode = areaCode.replace(/\D/g, '');
     if (cleanAreaCode.length !== 3) {
       throw new Error('Area code must be exactly 3 digits');
     }
 
-    const available = await getTwilioClient().availablePhoneNumbers('US').local.list({
-      areaCode: cleanAreaCode as unknown as number,
-      limit: limit as unknown as number,
-      smsEnabled: true,
-      voiceEnabled: true,
-    } as any);
+    const attempts: Array<{ label: string; filter: Record<string, boolean> }> = [
+      { label: 'voice+sms', filter: { voiceEnabled: true, smsEnabled: true } },
+      { label: 'voice', filter: { voiceEnabled: true } },
+      { label: 'any', filter: {} },
+    ];
 
-    return available.map((num) => ({
-      phoneNumber: num.phoneNumber,
-      friendlyName: num.friendlyName,
-      voice: (num as any).voice ?? true,
-      sms: (num as any).sms ?? true,
-      mms: (num as any).mms ?? false,
-      monthlyCost: 1.15,
-    }));
+    for (const attempt of attempts) {
+      try {
+        const available = await client.availablePhoneNumbers('US').local.list({
+          areaCode: cleanAreaCode as unknown as number,
+          limit: limit as unknown as number,
+          ...attempt.filter,
+        } as any);
+        logger.info('Twilio number search', { areaCode: cleanAreaCode, filter: attempt.label, count: available.length });
+        if (available.length > 0) {
+          return available.map((num) => {
+            const caps = (num as any).capabilities ?? {};
+            const voice = Boolean(caps.voice ?? (num as any).voice ?? true);
+            const sms = Boolean(caps.sms ?? (num as any).sms ?? false);
+            const mms = Boolean(caps.mms ?? (num as any).mms ?? false);
+            const capabilities = [voice && 'voice', sms && 'sms', mms && 'mms'].filter(Boolean) as string[];
+            return {
+              phoneNumber: num.phoneNumber,
+              friendlyName: num.friendlyName,
+              region: [(num as any).locality, (num as any).region].filter(Boolean).join(', ') || undefined,
+              voice,
+              sms,
+              mms,
+              capabilities,
+              monthlyCost: 1.15,
+              cost: 1.15,
+            };
+          });
+        }
+      } catch (error) {
+        // A Twilio error is not the same as "no numbers": log it in full and tell the caller what happened.
+        const detail = error instanceof Error ? error.message : String(error);
+        logger.error('Twilio number search failed', { areaCode: cleanAreaCode, filter: attempt.label, error: detail, code: (error as any)?.code, status: (error as any)?.status });
+        throw new Error(`Twilio could not search for numbers right now (${(error as any)?.code ?? 'error'}). Please try again or contact support.`);
+      }
+    }
+    return [];
   }
 
   /**

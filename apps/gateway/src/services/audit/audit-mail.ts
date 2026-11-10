@@ -13,10 +13,10 @@ export function auditRecipients(env: NodeJS.ProcessEnv = process.env): string[] 
     .filter((a) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a));
 }
 
-export async function sendAuditMail(opts: { eyebrow: string; title: string; subject: string; bodyHtml: string; replyTo?: string }): Promise<'sent' | 'not-configured'> {
+export async function sendAuditMail(opts: { eyebrow: string; title: string; subject: string; bodyHtml: string; replyTo?: string; ctaLabel?: string; ctaUrl?: string }): Promise<'sent' | 'not-configured'> {
   if (!process.env.RESEND_API_KEY) return 'not-configured';
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const html = renderBrandedEmail({ eyebrow: opts.eyebrow, title: opts.title, bodyHtml: opts.bodyHtml });
+  const html = renderBrandedEmail({ eyebrow: opts.eyebrow, title: opts.title, bodyHtml: opts.bodyHtml, ctaLabel: opts.ctaLabel, ctaUrl: opts.ctaUrl });
   throwIfRejected(await resend.emails.send({
     from: `Halla AI <${process.env.EMAIL_FROM || 'noreply@hallaai.com'}>`,
     to: auditRecipients(),

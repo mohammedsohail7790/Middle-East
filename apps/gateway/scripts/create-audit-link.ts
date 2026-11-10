@@ -1,10 +1,10 @@
 /**
  * Makes the private links for a client of the paid audit.
  *
- *   AUDIT_LINK_SECRET=... npx tsx apps/gateway/scripts/create-audit-link.ts form2 --company "Smith & Co" --email jordan@smith.com [--days 30]
+ *   AUDIT_LINK_SECRET=... npx tsx apps/gateway/scripts/create-audit-link.ts form2 --company "Smith & Co" --email jordan@smith.com [--currency AED] [--name Jordan] [--days 30]
  *   AUDIT_LINK_SECRET=... npx tsx apps/gateway/scripts/create-audit-link.ts pay   --company "Smith & Co" --email jordan@smith.com --currency AED [--days 5]
  *
- * `form2` opens the audit questionnaire (send it after the NDA). `pay` opens the payment page (send it with the "audit ready" email; default 5 days, which is the payment window).
+ * The live flow makes these links itself (the button in the fit-check email); this script is the manual fallback. `form2` opens the audit questionnaire; with --currency, submitting it also sends the client the payment link. `pay` opens the payment page (send it with the "audit ready" email; default 5 days, which is the payment window).
  * Use the same AUDIT_LINK_SECRET as the live gateway. Changing that secret cancels every link already sent.
  */
 import { randomBytes } from 'node:crypto';
@@ -23,10 +23,11 @@ const email = opt('email') ?? fail('Missing --email.');
 const days = Number(opt('days') ?? (kind === 'pay' ? 5 : 30));
 if (!Number.isFinite(days) || days <= 0 || days > 90) fail('--days must be between 1 and 90.');
 const cur = opt('currency')?.toUpperCase();
+if (cur && !isAuditCurrency(cur)) fail(`--currency must be one of ${AUDIT_CURRENCIES.join(', ')}.`);
 if (kind === 'pay' && !isAuditCurrency(cur)) fail(`Payment links need --currency, one of ${AUDIT_CURRENCIES.join(', ')}.`);
 
 const x = Math.floor(Date.now() / 1000 + days * 86400);
-const token = signLink({ k: kind, id: randomBytes(4).toString('hex'), company, email, x, ...(kind === 'pay' ? { cur } : {}) }, secret);
+const token = signLink({ k: kind, id: randomBytes(4).toString('hex'), company, email, x, ...(cur ? { cur } : {}), ...(opt('name') ? { name: opt('name') } : {}) }, secret);
 const site = process.env.PUBLIC_SITE_URL || 'https://hallaai.com';
 console.log(`${site}${kind === 'pay' ? '/audit/pay' : '/audit'}?t=${token}`);
 console.log(`Valid until ${new Date(x * 1000).toISOString().slice(0, 10)}.`);

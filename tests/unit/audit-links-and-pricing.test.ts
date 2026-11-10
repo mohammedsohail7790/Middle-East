@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { signLink, verifyLink } from '../../apps/gateway/src/services/audit/signed-link.js';
-import { auditPrices, minorUnits } from '../../apps/gateway/src/services/audit/audit-pricing.js';
+import { auditPrices, minorUnits, priceText } from '../../apps/gateway/src/services/audit/audit-pricing.js';
 import { auditStripeKey } from '../../apps/gateway/src/services/audit/public-audit.controller.js';
 
 const secret = 'test-secret-at-least-long-enough';
@@ -52,5 +52,13 @@ describe('auditStripeKey', () => {
     expect(auditStripeKey({ STRIPE_SECRET_KEY: 'sk_live_billing' } as NodeJS.ProcessEnv)).toBe('sk_live_billing');
     expect(auditStripeKey({ AUDIT_STRIPE_SECRET_KEY: '  ', STRIPE_SECRET_KEY: 'sk_live_billing' } as NodeJS.ProcessEnv)).toBe('sk_live_billing');
     expect(auditStripeKey({} as NodeJS.ProcessEnv)).toBeUndefined();
+  });
+});
+
+describe('how a client reads the price', () => {
+  it('is plain in dirhams and carries the dirham equivalent in every other currency', () => {
+    expect(priceText('AED')).toBe('AED 5,000');
+    expect(priceText('SAR')).toBe('SAR 5,100 (equivalent to AED 5,000)');
+    expect(priceText('OMR')).toBe('OMR 525 (equivalent to AED 5,000)');
   });
 });
