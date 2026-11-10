@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Halla AI | End-to-End AI Systems for Businesses",
     description:
-      "Connected AI systems for small business — and a 24/7 receptionist from $39/month.",
+      "Connected AI systems for small business — and a 24/7 receptionist from AED 150/month.",
     images: ["/og-halla-consultancy.png"],
   },
   // Meta Business domain verification for hallaai.com.
