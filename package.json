@@ -19,6 +19,7 @@
     "packages/*"
   ],
   "scripts": {
+    "test:marketing-guard": "node scripts/marketing-guard.mjs",
     "sync:marketing": "node scripts/sync-marketing.mjs",
     "sync:marketing:watch": "node scripts/sync-marketing.mjs --watch",
     "sync:halla": "node scripts/sync-halla-marketing.mjs",

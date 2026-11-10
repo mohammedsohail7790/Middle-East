@@ -1,4 +1,10 @@
 /**
+ * WARNING (Nov 2026): apps/dashboard/public/marketing-body.html is now also edited directly in pull requests.
+ * Running this script WITH the root files present overwrites that file from them and erases any change made
+ * directly in marketing-body.html (including the page migrations and fixes made after the root files were last synced).
+ * Do not run it with older root files. Agree one source of truth before using it.
+ */
+/**
  * Publish root Halla marketing files into Marketing site + Next.js dashboard.
  *
  * Edit at repo root (source of truth):

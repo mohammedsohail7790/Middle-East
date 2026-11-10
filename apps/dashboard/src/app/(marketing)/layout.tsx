@@ -39,7 +39,7 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#0066CC",
+  themeColor: "#121417",
 };
 
 // Prevent FOUC on theme toggle
