@@ -11,9 +11,9 @@ const DEFAULT_DESCRIPTION = "Halla AI answers every call 24/7, books appointment
 
 /** Search title and description for the main receptionist and automation pages. The wording follows what each page says. */
 const PAGE_META: Record<string, [string, string]> = {
-  home: ["AI Receptionist for Businesses | Halla AI", "Answers every call and WhatsApp message in Arabic and English, books appointments and routes urgent cases. Live in 15 minutes, from $39 a month."],
+  home: ["AI Receptionist for Businesses | Halla AI", "Answers every call and WhatsApp message in Arabic and English, books appointments and routes urgent cases. Live in 15 minutes, from AED 150 a month."],
   features: ["AI Receptionist Features | Halla AI", "24/7 call answering, appointment booking, message taking, lead capture, call routing and spam blocking in seven languages, on every plan."],
-  pricing: ["AI Receptionist Pricing | Halla AI", "Essential, Professional and Enterprise plans from $39 a month. 14-day free trial, no credit card, and annual billing saves 20%."],
+  pricing: ["AI Receptionist Pricing | Halla AI", "Essential, Professional and Enterprise plans from AED 150 a month. 14-day free trial, no credit card, and annual billing saves 20%."],
   "how-it-works": ["How the AI Receptionist Works | Halla AI", "Set up in under 15 minutes: choose a plan, configure your agent, connect your calendar and CRM, forward your number and go live."],
   integrations: ["AI Receptionist Integrations | Halla AI", "Connect to Google Calendar, Calendly, HubSpot, Salesforce and more than 5,000 other apps through Zapier."],
   intelligence: ["AI Business Automation | Halla AI", "Automation built around one job in your business, connected to the tools you already use. About 10 days and AED 5,000 per automation, fixed."],

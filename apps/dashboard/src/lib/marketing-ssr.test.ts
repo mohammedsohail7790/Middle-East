@@ -58,7 +58,7 @@ describe("marketingMetadata", () => {
   it("gives the main receptionist pages their own title, description and canonical address", () => {
     const m = marketingMetadata("pricing", "/pricing");
     expect(m.title).toEqual({ absolute: "AI Receptionist Pricing | Halla AI" });
-    expect(String(m.description)).toContain("from $39 a month");
+    expect(String(m.description)).toContain("from AED 150 a month");
     expect(m.alternates?.canonical).toBe("/pricing");
   });
 
