@@ -141,7 +141,7 @@ export function TeamAccountPanel() {
           icon={Users}
           iconVariant="violet"
           title="Team"
-          description='Invites use your Supabase "Invite user" email template. When they accept, they are linked to this workspace automatically.'
+          description="Invites are sent by email. When they accept, they are linked to this workspace automatically."
         />
 
         {loading ? (

@@ -767,6 +767,7 @@
     "cancelSubscription": "Cancel Subscription",
     "canceling": "Canceling...",
     "renews": "${price}/month · Renews {date}",
+    "periodEnded": "${price}/month · Period ended {date}",
     "minutes": "Minutes",
     "sms": "SMS",
     "storage": "Storage",

@@ -752,6 +752,7 @@
     "cancelSubscription": "إلغاء الاشتراك",
     "canceling": "جارٍ الإلغاء...",
     "renews": "${price}/شهر · يتجدد {date}",
+    "periodEnded": "${price}/شهر · انتهت الفترة في {date}",
     "minutes": "الدقائق",
     "sms": "الرسائل القصيرة",
     "storage": "التخزين",
