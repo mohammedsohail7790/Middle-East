@@ -110,6 +110,24 @@ export async function resolveUserRole(
   }
 }
 
+/**
+ * True only for the account creator recorded in voice_tenants.owner_user_id. Stricter than resolveUserRole() === 'owner', which
+ * also returns 'owner' for a team_members row with role 'owner' (an admin can invite one). Fails closed on a missing id or DB error.
+ */
+export async function isTenantOwner(tenantId: string, userId?: string): Promise<boolean> {
+  if (!tenantId || !userId) return false;
+  try {
+    const r = await voiceDb.query(
+      `SELECT 1 FROM public.voice_tenants WHERE id = $1 AND owner_user_id = $2 LIMIT 1`,
+      [tenantId, userId]
+    );
+    return r.rows.length > 0;
+  } catch (err) {
+    logger.warn('OWNER_LOOKUP_FAILED', { tenantId, userId, error: String(err) });
+    return false;
+  }
+}
+
 function mapTeamRoleToEnterpriseRole(role?: string): EnterpriseRole | null {
   switch (role) {
     case 'owner':
