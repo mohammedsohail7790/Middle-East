@@ -339,7 +339,6 @@ html body #page-fit-check .section{padding:20px 0 72px!important}
 #page-security .page-hero p{margin-left:0!important;margin-right:0!important;max-width:680px!important}
 @media (max-width:900px){#page-security .page-hero .container,#page-security .section .container{padding:0 20px}}
 
-<<<<<<< HEAD
 /* --- phone fixes (marketing site review, Nov 2026) ---
    marketing-apple.css sets overflow:hidden on comparison tables, which hid the last column on phones.
    Inputs under 16px make iPhones zoom in on every tap. Footer links and the language buttons were 27-31px tall. */
@@ -351,7 +350,6 @@ html body #page-fit-check .section{padding:20px 0 72px!important}
   .lang-toggle button{min-height:40px!important;height:auto!important;padding-block:8px!important;min-width:44px}
   #page-svc-operations .page-hero a[onclick*="scrollToConsultSection"]{min-height:40px}
 }
-=======
+
 /* --- blog cards: charcoal tile with a gold icon instead of a grey box (matches the editorial pages) --- */
 #page-blog .grid-3>.card>div:first-child{background:#121417!important;color:#C5A059!important;border-radius:var(--radius)!important;padding:44px 24px!important;font-size:2.4rem!important;border:1px solid rgba(197,160,89,.35)}
->>>>>>> origin/main
