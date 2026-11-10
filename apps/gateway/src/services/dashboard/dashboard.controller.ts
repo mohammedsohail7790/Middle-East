@@ -1,4 +1,5 @@
 import { voiceDb } from '../voice/tenant-scope.js';
+import { logger } from '../logger.js';
 import { requireVoiceApiAccess } from '../voice/security.js';
 import { voiceRedis } from '../voice/redis.client.js';
 import { createRedisClient } from '../redis-connection.js';
@@ -84,6 +85,14 @@ function parseDateParam(value: unknown): Date | null {
 
 function safeClientError(_error: unknown, fallback = 'Request failed'): string {
     return fallback;
+}
+
+/** The client only ever sees a generic message, so record the real reason server-side (no request data, just the error). */
+function logDashboardError(route: string, error: unknown): void {
+    logger.warn('DASHBOARD_REQUEST_FAILED', {
+        route,
+        error: error instanceof Error ? `${error.name}: ${error.message}`.slice(0, 300) : String(error).slice(0, 300),
+    });
 }
 
 function normalizeMissedReason(reason: string): string {
@@ -251,6 +260,7 @@ export function createDashboardRouter(): express.Router {
                 },
             });
         } catch (error) {
+            logDashboardError('/bootstrap', error);
             res.status(400).json({ success: false, error: safeClientError(error) });
         }
     });
@@ -283,6 +293,7 @@ export function createDashboardRouter(): express.Router {
 
             res.json({ success: true, data: { count: callIds.length, callIds, liveCalls } });
         } catch (error) {
+            logDashboardError('/active-calls', error);
             res.status(400).json({ success: false, error: safeClientError(error) });
         }
     });
@@ -317,6 +328,7 @@ export function createDashboardRouter(): express.Router {
             }));
             res.json({ success: true, data });
         } catch (error) {
+            logDashboardError('/call-volume', error);
             res.status(400).json({ success: false, error: safeClientError(error) });
         }
     });
@@ -336,6 +348,7 @@ export function createDashboardRouter(): express.Router {
             );
             res.json({ success: true, data: result.rows, limit, offset });
         } catch (error) {
+            logDashboardError('/call-history', error);
             res.status(400).json({ success: false, error: safeClientError(error) });
         }
     });
@@ -357,6 +370,7 @@ export function createDashboardRouter(): express.Router {
             const totalMs = (durationResults || []).reduce((sum, [, val]) => sum + Number(val || 0), 0);
             res.json({ success: true, data: { minutesUsed: Math.round(totalMs / 60000), cycleStart: cycleStart.toISOString() } });
         } catch (error) {
+            logDashboardError('/usage', error);
             res.status(400).json({ success: false, error: safeClientError(error) });
         }
     });
@@ -395,6 +409,7 @@ export function createDashboardRouter(): express.Router {
                 },
             });
         } catch (error) {
+            logDashboardError('/metrics', error);
             res.status(400).json({ success: false, error: safeClientError(error) });
         }
     });
@@ -433,6 +448,7 @@ export function createDashboardRouter(): express.Router {
                 },
             });
         } catch (error) {
+            logDashboardError('/conversion', error);
             res.status(400).json({ success: false, error: safeClientError(error) });
         }
     });
