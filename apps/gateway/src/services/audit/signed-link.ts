@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 
 /**
  * Private links for the paid audit. There is no account and no database: a link is a small signed message that says who it is for, what it opens and when it stops working.
- * Four kinds: `approve` and `sendpay` are for us (the "send the questionnaire" button in the fit-check email, and the "audit is ready, send the payment link" button in the questionnaire email), `form2` opens the audit questionnaire, and `pay` opens the payment page (valid for 5 days).
+ * Four kinds: `approve` and `sendpay` are for us (the "send the questionnaire" button in the fit-check email, and the "audit is ready, send the payment link" button in the "questionnaire received" email), `form2` opens the audit questionnaire, and `pay` opens the payment page (valid for 5 days).
  * The signature uses AUDIT_LINK_SECRET, so a link cannot be forged or changed; changing the secret switches every link off at once.
  */
 export type LinkKind = 'form2' | 'pay' | 'approve' | 'sendpay';
