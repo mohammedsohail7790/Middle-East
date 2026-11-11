@@ -263,6 +263,7 @@ const SOLS = {
   screening: { title: 'Call Screening & Spam Blocking', sub: 'You never pay for spam. Zero tolerance for robocalls.', icon: '<i class="ti ti-shield"></i>', desc: 'AI detects spam within seconds and hangs up automatically. You are never charged. For legitimate calls, the AI screens and qualifies before connecting to you.', feats: ['Spam & robocall detection in seconds','Never pay for spam calls','Screen caller purpose before transfer','Block known spam numbers','Spam log for your records','Caller authentication option'] },
 };
 function loadSol(key) {
+  if (!document.getElementById('sol-content')) return;
   const s = SOLS[key] || SOLS.answering;
   document.getElementById('sol-title').textContent = s.title;
   document.getElementById('sol-sub').textContent = s.sub;
