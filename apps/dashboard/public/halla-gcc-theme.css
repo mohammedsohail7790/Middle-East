@@ -416,3 +416,10 @@ html body #page-fit-check .section{padding:20px 0 72px!important}
   #marketing-spa-root .cx-head{padding:88px 0 24px}
   #marketing-spa-root .cx-pull{font-size:1.4rem}
 }
+
+/* note box inside articles */
+#marketing-spa-root .cx-note{border-inline-start:3px solid #C5A059;background:rgba(197,160,89,.1);padding:16px 22px;margin:0 0 28px;border-radius:0 10px 10px 0}
+#marketing-spa-root .cx-doc .cx-note p{margin:0 0 10px;font-size:1rem;line-height:1.65}
+#marketing-spa-root .cx-doc .cx-note p:last-child{margin-bottom:0}
+#marketing-spa-root .cx-doc li{margin-bottom:.5rem}
+html[dir="rtl"] #marketing-spa-root .cx-note{border-radius:10px 0 0 10px}
