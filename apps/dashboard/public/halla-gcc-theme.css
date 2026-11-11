@@ -423,3 +423,7 @@ html body #page-fit-check .section{padding:20px 0 72px!important}
 #marketing-spa-root .cx-doc .cx-note p:last-child{margin-bottom:0}
 #marketing-spa-root .cx-doc li{margin-bottom:.5rem}
 html[dir="rtl"] #marketing-spa-root .cx-note{border-radius:10px 0 0 10px}
+
+/* two-column text tables (security, legal) fit a phone without sideways scrolling */
+#marketing-spa-root .cx-cmp.cx-cmp-2{min-width:0;table-layout:fixed}
+#marketing-spa-root .cx-cmp.cx-cmp-2 th:first-child,#marketing-spa-root .cx-cmp.cx-cmp-2 td:first-child{width:34%}
