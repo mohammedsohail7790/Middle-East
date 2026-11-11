@@ -353,3 +353,66 @@ html body #page-fit-check .section{padding:20px 0 72px!important}
 
 /* --- blog cards: charcoal tile with a gold icon instead of a grey box (matches the editorial pages) --- */
 #page-blog .grid-3>.card>div:first-child{background:#121417!important;color:#C5A059!important;border-radius:var(--radius)!important;padding:44px 24px!important;font-size:2.4rem!important;border:1px solid rgba(197,160,89,.35)}
+
+/* ---- NEW editorial components needed by the recipes (scoped like the existing ones) ---- */
+/* light page head: documents, forms */
+#marketing-spa-root .cx-head{padding:112px 0 40px}
+#marketing-spa-root .cx-head h1.cx-h1{color:#121417}
+#marketing-spa-root .cx-head .cx-lead{color:#4B4B50;max-width:760px}
+#marketing-spa-root .cx-metaline{font:500 .95rem var(--font);color:#636368;margin:18px 0 0}
+#marketing-spa-root .cx-body{padding-top:40px}
+#marketing-spa-root .cx-head+.cx-body{border-top:0}
+
+/* example call (dark panel) */
+#marketing-spa-root .cx-call{background:#1A1D21;border:1px solid rgba(233,227,211,.2);border-radius:16px;padding:26px 30px}
+#marketing-spa-root .cx-call-bar{display:flex;justify-content:space-between;gap:16px;padding-bottom:16px;margin-bottom:6px;border-bottom:1px solid rgba(233,227,211,.16);font:600 .72rem/1.3 var(--font);letter-spacing:.14em;text-transform:uppercase;color:#C5A059}
+#marketing-spa-root .cx-turn{display:grid;grid-template-columns:92px minmax(0,1fr);gap:18px;padding:16px 0;border-bottom:1px solid rgba(233,227,211,.1)}
+#marketing-spa-root .cx-who{font:600 .72rem/1.6 var(--font);letter-spacing:.12em;text-transform:uppercase;color:#B9B4A8}
+#marketing-spa-root .cx-turn.ai .cx-who{color:#C5A059}
+#marketing-spa-root .cx-turn p{margin:0;color:#E9E3D3;font-size:1.05rem;line-height:1.65}
+#marketing-spa-root .cx-result{margin-top:16px;padding-top:16px;border-top:1px solid rgba(197,160,89,.45);color:#E4CF9B;font:600 .9rem/1.4 var(--font)}
+
+/* comparison table */
+#marketing-spa-root .cx-cmp-wrap{margin-top:40px;border-top:2px solid #121417;overflow-x:auto;-webkit-overflow-scrolling:touch}
+#marketing-spa-root .cx-cmp{width:100%;min-width:680px;border-collapse:collapse;background:transparent}
+#marketing-spa-root .cx-cmp th{font:600 .72rem/1.3 var(--font);letter-spacing:.12em;text-transform:uppercase;text-align:start;color:#636368;padding:16px 18px;border-bottom:1px solid rgba(18,20,23,.22);background:transparent}
+#marketing-spa-root .cx-cmp td{padding:18px;border-bottom:1px solid rgba(18,20,23,.12);font-size:1.02rem;line-height:1.5;color:#2b2b30;vertical-align:top;background:transparent}
+#marketing-spa-root .cx-cmp td:first-child{font-weight:600;color:#121417}
+#marketing-spa-root .cx-cmp .us{background:rgba(197,160,89,.11)}
+#marketing-spa-root .cx-cmp th.us{color:#6B4F18}
+
+/* reading column: articles and documents */
+#marketing-spa-root .cx-doc{max-width:740px}
+#marketing-spa-root .cx-doc h2{font-family:var(--font-display);font-weight:600;font-size:2rem;line-height:1.15;margin:56px 0 16px;color:#121417}
+#marketing-spa-root .cx-doc h2:first-child{margin-top:0}
+#marketing-spa-root .cx-doc h3{font-size:1.15rem;font-weight:700;margin:32px 0 8px;color:#121417}
+#marketing-spa-root .cx-doc p,#marketing-spa-root .cx-doc li{font-size:1.1rem;line-height:1.8;color:#34343a}
+#marketing-spa-root .cx-doc p{margin:0 0 20px}
+#marketing-spa-root .cx-doc ul,#marketing-spa-root .cx-doc ol{padding-inline-start:1.3em;margin:0 0 20px}
+#marketing-spa-root .cx-doc a{color:#85631F;text-underline-offset:3px}
+#marketing-spa-root .cx-doc .cx-metaline{margin-bottom:32px}
+#marketing-spa-root .cx-pull{border-inline-start:3px solid #C5A059;padding:6px 24px;margin:40px 0;font-family:var(--font-display);font-size:1.75rem;line-height:1.3;color:#121417}
+#marketing-spa-root .cx-related .cx-row h3 a{color:#121417;text-decoration:none;border-bottom:1px solid rgba(18,20,23,.3)}
+#marketing-spa-root .cx-related .cx-row h3 a:hover{border-bottom-color:#85631F;color:#85631F}
+
+/* form page */
+#marketing-spa-root .cx-formgrid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:72px;align-items:start}
+#marketing-spa-root .cx-form{background:#fff;border:1px solid rgba(18,20,23,.14);border-radius:16px;padding:40px}
+#marketing-spa-root .cx-field{margin:0 0 22px}
+#marketing-spa-root .cx-form label{display:block;margin:0 0 8px;font:600 .85rem/1.3 var(--font);color:#121417}
+#marketing-spa-root .cx-form input,#marketing-spa-root .cx-form select,#marketing-spa-root .cx-form textarea{width:100%;box-sizing:border-box;font:400 16px/1.4 var(--font);padding:14px 16px;color:#121417;background:#FAF9F6;border:1px solid rgba(18,20,23,.28);border-radius:10px}
+#marketing-spa-root .cx-form input:focus,#marketing-spa-root .cx-form textarea:focus{outline:2px solid #C5A059;outline-offset:1px;border-color:#85631F}
+/* light version of the facts panel */
+#marketing-spa-root .cx-ledger-light dl{margin:0;border-top:2px solid #121417}
+#marketing-spa-root .cx-ledger-light dl>div{padding:22px 0;border-bottom:1px solid rgba(18,20,23,.16)}
+#marketing-spa-root .cx-ledger-light dt{font:600 .72rem/1.3 var(--font);letter-spacing:.14em;text-transform:uppercase;color:#85631F}
+#marketing-spa-root .cx-ledger-light dd{margin:8px 0 0;font-size:1.1rem;line-height:1.5;color:#121417}
+
+@media (max-width:900px){
+  #marketing-spa-root .cx-formgrid{grid-template-columns:1fr;gap:40px}
+  #marketing-spa-root .cx-form{padding:26px 20px}
+  #marketing-spa-root .cx-turn{grid-template-columns:72px minmax(0,1fr);gap:12px}
+  #marketing-spa-root .cx-call{padding:20px}
+  #marketing-spa-root .cx-head{padding:88px 0 24px}
+  #marketing-spa-root .cx-pull{font-size:1.4rem}
+}
