@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, Building, Clock, Bot, Check, Loader2, Hash, Phone } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -19,15 +19,31 @@ import { navigateAfterSignIn, localizedDashboardPath } from "@/lib/auth-navigate
 import { cn } from "@/lib/utils";
 import { OnboardingPersonalityVoice } from "@/components/onboarding/OnboardingPersonalityVoice";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
+import { OnboardingVoiceGreeting } from "@/components/onboarding/OnboardingVoiceGreeting";
+import { AGENT_LANGUAGES, type AgentLanguageId } from "@/lib/agent-languages";
+import {
+  buildSetupPayload,
+  defaultGreeting,
+  DEFAULT_VOICE,
+  faqToKnowledgeText,
+  guessLanguage,
+  normalizeTransferNumber,
+  orderIndustries,
+  type AfterHours,
+  type SetupAnswers,
+} from "@/lib/onboarding-setup";
 
 const FALLBACK_INDUSTRIES = [
-  { id: "hvac", label: "HVAC", icon: "\u{1F321}\u{FE0F}" },
-  { id: "plumbing", label: "Plumbing", icon: "\u{1F527}" },
-  { id: "electrical", label: "Electrical", icon: "\u26A1" },
-  { id: "real_estate", label: "Real Estate", icon: "\u{1F3E0}" },
-  { id: "salon", label: "Salon / Spa", icon: "\u{1F487}" },
-  { id: "law_firm", label: "Law Firm", icon: "\u2696\u{FE0F}" },
   { id: "clinic", label: "Medical Clinic", icon: "\u{1F3E5}" },
+  { id: "dental", label: "Dental Practice", icon: "\u{1F9B7}" },
+  { id: "real_estate", label: "Real Estate", icon: "\u{1F3E0}" },
+  { id: "law_firm", label: "Law Firm", icon: "\u2696\u{FE0F}" },
+  { id: "property_management", label: "Property Management", icon: "\u{1F3E2}" },
+  { id: "hvac", label: "AC & Facilities Maintenance", icon: "\u{1F321}\u{FE0F}" },
+  { id: "restaurant", label: "Restaurant & Hospitality", icon: "\u{1F374}" },
+  { id: "auto_repair", label: "Automotive", icon: "\u{1F697}" },
+  { id: "education", label: "Education & Training", icon: "\u{1F393}" },
+  { id: "insurance", label: "Insurance", icon: "\u{1F6E1}\u{FE0F}" },
   { id: "general", label: "Other", icon: "\u{1F4CB}" },
 ];
 
@@ -90,9 +106,46 @@ export default function OnboardingPage() {
   const [agentName, setAgentName] = useState("Sarah");
   const [tone, setTone] = useState("professional");
   const [industryOptions, setIndustryOptions] = useState<IndustryOption[]>(FALLBACK_INDUSTRIES);
+  const [showMoreIndustries, setShowMoreIndustries] = useState(false);
+  const [language, setLanguage] = useState<AgentLanguageId>("en");
+  const languageTouched = useRef(false);
+  const [description, setDescription] = useState("");
+  const [afterHours, setAfterHours] = useState<AfterHours>("message");
+  const [transferNumber, setTransferNumber] = useState("");
+  const [urgent, setUrgent] = useState("");
+  const [voice, setVoice] = useState<string>(DEFAULT_VOICE);
+  const [greeting, setGreeting] = useState("");
+  const [faq, setFaq] = useState("");
+  const [setupNotes, setSetupNotes] = useState<string[]>([]);
+
+  // Arabic if the browser is set to Arabic, unless the client has already chosen. Done after the page loads so the server and browser agree on the first paint.
+  useEffect(() => {
+    if (languageTouched.current) return;
+    setLanguage(guessLanguage(typeof navigator !== "undefined" ? navigator.language : undefined));
+  }, []);
+
+  const setupAnswers = (): SetupAnswers => ({
+    company,
+    description,
+    services: services.split(",").map((s) => s.trim()).filter(Boolean),
+    language,
+    timezone,
+    days,
+    start: startTime,
+    end: endTime,
+    afterHours,
+    transferNumber,
+    urgent,
+    agentName: agentName.trim() || "Sarah",
+    tone,
+    voice,
+    greeting,
+  });
+  const suggestedGreeting = defaultGreeting(language, company, agentName.trim() || "Sarah");
+  const transferNumberProblem = transferNumber.trim() !== "" && !normalizeTransferNumber(transferNumber);
 
   const canNext =
-    step === 0 ? !!company.trim() : step === 1 ? industries.length > 0 : true;
+    step === 0 ? !!company.trim() : step === 1 ? industries.length > 0 : step === 2 ? !transferNumberProblem : true;
 
   useEffect(() => {
     let cancelled = false;
@@ -168,6 +221,32 @@ export default function OnboardingPage() {
     };
   }, [step, createdTenantId]);
 
+  /** Saves what the wizard collected in the places the AI Agent page reads. A failure here never blocks setup: the client is told what to fill in later. */
+  async function applySetup(setup: ReturnType<typeof buildSetupPayload>, tenantId: string) {
+    const notes: string[] = [];
+    try {
+      await api.put("/ai-config", setup.aiConfig);
+    } catch {
+      notes.push("your greeting, voice and instructions");
+    }
+    try {
+      await api.put(`/tenants/${tenantId}`, setup.tenantPatch);
+    } catch {
+      notes.push("your language and transfer number");
+    }
+    setSetupNotes((prev) => [...prev, ...notes]);
+  }
+
+  async function saveFaq() {
+    const text = faqToKnowledgeText(faq);
+    if (!text) return;
+    try {
+      await api.post("/knowledge", { text, category: "general" });
+    } catch {
+      setSetupNotes((prev) => [...prev, "your questions and answers"]);
+    }
+  }
+
   async function handleFinish() {
     setLoading(true);
     setError(null);
@@ -183,6 +262,7 @@ export default function OnboardingPage() {
       };
 
       const displayName = agentName.trim() || "Sarah";
+      const setup = buildSetupPayload(setupAnswers());
 
       let tenantId: string | null = null;
       try {
@@ -200,12 +280,12 @@ export default function OnboardingPage() {
           services_offered: services.split(",").map((s) => s.trim()).filter(Boolean),
           industries,
           tone,
-          language_mode: "en",
+          language_mode: setup.tenantCreate.language_mode,
           owner_user_id: user.id,
           timezone,
           business_hours: businessHours,
           agent_name: displayName,
-          voice_id: displayName.toLowerCase() === "sarah" ? "coral" : "marin",
+          voice_id: setup.tenantCreate.voice_id,
           system_prompt: `You are ${displayName}, the AI receptionist for ${company.trim()}. Be ${tone}, helpful, and concise.`,
           capabilities: {
             bookAppointments: true,
@@ -225,6 +305,7 @@ export default function OnboardingPage() {
       setCreatedTenantId(tenantId);
       await supabase.auth.updateUser({ data: { tenant_id: tenantId } });
       await supabase.auth.refreshSession();
+      await applySetup(setup, tenantId);
 
       try {
         await api.post("/onboarding/progress", { step: "twilio", completed: false });
@@ -350,6 +431,7 @@ export default function OnboardingPage() {
     setLoading(true);
     setError(null);
     try {
+      await saveFaq();
       await api.post("/onboarding/skip-step", { step: "crm" });
       setStep(6);
     } catch {
@@ -436,6 +518,35 @@ export default function OnboardingPage() {
                   <input value={services} onChange={(e) => setServices(e.target.value)} className="input" placeholder="Skin consultation, Laser hair removal, Facial treatment" />
                 </div>
                 <div>
+                  <label className="text-sm text-foreground-secondary mb-1.5 block">About your business (optional)</label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={2}
+                    maxLength={500}
+                    className="input"
+                    placeholder="One or two sentences: what you do, where you are, who your customers are"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-foreground-secondary mb-1.5 block">Main language of your callers</label>
+                  <select
+                    value={language}
+                    onChange={(e) => {
+                      languageTouched.current = true;
+                      setLanguage(e.target.value as AgentLanguageId);
+                    }}
+                    className="input"
+                  >
+                    {AGENT_LANGUAGES.map((l) => (
+                      <option key={l.id} value={l.id}>{l.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-foreground-secondary mt-1">
+                    Your receptionist greets in this language and switches if the caller does.
+                  </p>
+                </div>
+                <div>
                   <label className="text-sm text-foreground-secondary mb-1.5 block">Timezone</label>
                   <select value={timezone} onChange={(e) => setTimezone(e.target.value)} className="input">
                     <optgroup label="Middle East &amp; Gulf">
@@ -482,7 +593,7 @@ export default function OnboardingPage() {
                   <p className="text-sm text-foreground-secondary mt-1">Select all that apply — gives your AI the right vocabulary.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  {industryOptions.map((ind) => {
+                  {(showMoreIndustries ? [...orderIndustries(industryOptions).popular, ...orderIndustries(industryOptions).more] : orderIndustries(industryOptions).popular.length ? orderIndustries(industryOptions).popular : industryOptions).map((ind) => {
                     const selected = industries.includes(ind.id);
                     return (
                       <button
@@ -505,6 +616,15 @@ export default function OnboardingPage() {
                     );
                   })}
                 </div>
+                {!showMoreIndustries && orderIndustries(industryOptions).popular.length > 0 && orderIndustries(industryOptions).more.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowMoreIndustries(true)}
+                    className="text-sm text-accent font-semibold underline mx-auto block"
+                  >
+                    Show all {industryOptions.length} industries
+                  </button>
+                )}
                 {industries.length > 0 && (
                   <p className="text-xs text-foreground-secondary text-center">
                     {industries.length} selected
@@ -554,6 +674,58 @@ export default function OnboardingPage() {
                     <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="input" />
                   </div>
                 </div>
+                <div>
+                  <label className="text-sm text-foreground-secondary mb-2 block">When you are closed, the receptionist should</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {([
+                      ["message", "Take a message", "Name, number and reason. Your team calls back."],
+                      ["transfer", "Offer to put urgent calls through", "Takes a message, and transfers urgent ones to your on-call number."],
+                    ] as const).map(([id, title, desc]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        aria-pressed={afterHours === id}
+                        onClick={() => setAfterHours(id)}
+                        className={cn(
+                          "rounded-xl border-2 p-3 text-left transition-all",
+                          afterHours === id ? "border-accent bg-accent/10 ring-1 ring-accent/30" : "border-border hover:border-border-light",
+                        )}
+                      >
+                        <div className="text-sm font-medium">{title}</div>
+                        <div className="text-xs text-foreground-secondary mt-0.5">{desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm text-foreground-secondary mb-1.5 block">
+                    Number to transfer calls to {afterHours === "transfer" ? "" : "(optional)"}
+                  </label>
+                  <input
+                    value={transferNumber}
+                    onChange={(e) => setTransferNumber(e.target.value)}
+                    className="input"
+                    placeholder="+971 50 123 4567"
+                    inputMode="tel"
+                    dir="ltr"
+                    aria-invalid={transferNumberProblem}
+                  />
+                  <p className={cn("text-xs mt-1", transferNumberProblem ? "text-red-600" : "text-foreground-secondary")}>
+                    {transferNumberProblem
+                      ? "Write the number with its country code, for example +971 50 123 4567."
+                      : "Where urgent or requested transfers go. Include the country code."}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm text-foreground-secondary mb-1.5 block">What counts as urgent? (optional)</label>
+                  <input
+                    value={urgent}
+                    onChange={(e) => setUrgent(e.target.value)}
+                    className="input"
+                    maxLength={300}
+                    placeholder="Burst pipe, no cooling, severe pain, a locked-out tenant"
+                  />
+                </div>
               </motion.div>
             )}
 
@@ -580,6 +752,16 @@ export default function OnboardingPage() {
                     onToneChange={setTone}
                   />
                 </div>
+                <OnboardingVoiceGreeting
+                  voice={voice}
+                  onVoiceChange={setVoice}
+                  greeting={greeting}
+                  onGreetingChange={setGreeting}
+                  suggestedGreeting={suggestedGreeting}
+                  tone={tone}
+                  agentName={agentName}
+                  rtl={language === "ar-SA" || language === "ur" || language === "fa"}
+                />
               </motion.div>
             )}
 
@@ -590,6 +772,12 @@ export default function OnboardingPage() {
                   <h2 className="text-xl font-bold">Get your AI phone line</h2>
                   <p className="text-sm text-foreground-secondary mt-1">
                     Pick a US area code and claim a line. Calls to that number reach your AI receptionist automatically — included on your free trial (up to 3 lines).
+                  </p>
+                  <p className="text-sm text-foreground-secondary mt-2">
+                    <strong>Already have a business number?</strong> Claim a line here, then forward your number to it and keep using the number your customers know.{" "}
+                    <a href="https://www.hallaai.com/forwarding" target="_blank" rel="noopener noreferrer" className="text-accent font-semibold underline">
+                      Step-by-step forwarding guide
+                    </a>
                   </p>
                 </div>
 
@@ -708,8 +896,30 @@ export default function OnboardingPage() {
               <motion.div key="s5" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center py-6 space-y-3">
                 <h2 className="text-xl font-bold">Almost there</h2>
                 <p className="text-foreground-secondary max-w-sm mx-auto">
-                  Your workspace is ready. Continue to finish setup.
+                  Your workspace is ready. One last thing makes your receptionist much better: the questions customers always ask.
                 </p>
+                <div className="text-left">
+                  <label htmlFor="onboarding-faq" className="text-sm text-foreground-secondary mb-1.5 block">
+                    Common questions and answers (optional)
+                  </label>
+                  <textarea
+                    id="onboarding-faq"
+                    value={faq}
+                    onChange={(e) => setFaq(e.target.value)}
+                    rows={7}
+                    maxLength={20000}
+                    className="input"
+                    placeholder={"Do you take walk-ins? Yes, until 5pm Sunday to Thursday.\nHow much is a consultation? AED 250, credited to your treatment.\nWhere are you? Dubai Marina, next to the metro."}
+                  />
+                  <p className="text-xs text-foreground-secondary mt-1">
+                    Paste prices, opening details, parking, policies, anything callers ask. You can add more later on the Knowledge page.
+                  </p>
+                </div>
+                {setupNotes.length > 0 && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-950 text-left">
+                    We could not save {setupNotes.join(" and ")}. Your workspace is fine: you can add them on the AI Agent page after setup.
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -836,7 +1046,7 @@ export default function OnboardingPage() {
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Skip for now"}
                 </button>
-                <button type="button" onClick={() => setStep(6)} className="btn-primary !px-6">
+                <button type="button" onClick={() => void saveFaq().then(() => setStep(6))} className="btn-primary !px-6">
                   Continue <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

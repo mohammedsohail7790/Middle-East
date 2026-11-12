@@ -12,6 +12,25 @@ import {
 import { checkLimit, respond429 } from '../../security/tiered-rate-limit.js';
 
 const VOICE_PREVIEW_WINDOW_MS = 60_000;
+
+/** The voices the live receptionist can use. A preview may ask for one of these, never anything else. */
+export const PREVIEW_VOICES: ReadonlySet<string> = new Set(['marin', 'coral', 'shimmer', 'cedar', 'ash', 'sage']);
+const PREVIEW_TEXT_MAX = 300;
+
+/**
+ * What a voice preview request asks for. The setup wizard can ask to hear its own greeting in a chosen voice; without those fields the old behaviour (a sample for the chosen
+ * personality) is unchanged. The text is cut to 300 characters and the voice must be on the list, because every preview costs a text-to-speech call.
+ */
+export function resolvePreviewRequest(body: any): { tone: string; agentName: string; voice: string; text: string | null } {
+    const tone = String(body?.tone || 'professional').toLowerCase();
+    const agentName = String(body?.agentName || 'Sarah').trim() || 'Sarah';
+    const allowed = new Set(['professional', 'friendly', 'warm', 'casual', 'formal']);
+    const resolvedTone = allowed.has(tone) ? tone : 'professional';
+    const asked = String(body?.voice || '').toLowerCase();
+    const voice = PREVIEW_VOICES.has(asked) ? asked : TONE_PREVIEW_VOICE[resolvedTone] || 'coral';
+    const raw = typeof body?.text === 'string' ? body.text.replace(/\s+/g, ' ').trim().slice(0, PREVIEW_TEXT_MAX) : '';
+    return { tone: resolvedTone, agentName, voice, text: raw || null };
+}
 const VOICE_PREVIEW_MAX = Number(process.env.RATE_LIMIT_VOICE_PREVIEW_PER_MIN || 5);
 
 export function createOnboardingRouter(): express.Router {
@@ -38,12 +57,9 @@ export function createOnboardingRouter(): express.Router {
                 return;
             }
 
-            const tone = String(req.body?.tone || 'professional').toLowerCase();
-            const agentName = String(req.body?.agentName || 'Sarah').trim() || 'Sarah';
-            const allowed = new Set(['professional', 'friendly', 'warm', 'casual', 'formal']);
-            const resolvedTone = allowed.has(tone) ? tone : 'professional';
-            const voice = TONE_PREVIEW_VOICE[resolvedTone] || 'coral';
-            const sampleText = buildTonePreviewSampleText(resolvedTone, agentName);
+            const asked = resolvePreviewRequest(req.body);
+            const voice = asked.voice;
+            const sampleText = asked.text ?? buildTonePreviewSampleText(asked.tone, asked.agentName);
             const buffer = await synthesizeOpenAiTtsMp3(sampleText, voice);
 
             res.set('Content-Type', 'audio/mpeg');
