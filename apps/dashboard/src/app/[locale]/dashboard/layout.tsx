@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { AppShell } from "@/components/dashboard-shell/app-shell";
 import { setTenantId, getTenantId, syncPlanFromAccount } from "@/lib/store";
 import { api, clearAuthCache, prefetchCsrfToken } from "@/lib/api";
-import { ensureTenantSession } from "@/lib/ensure-tenant";
+import { dropStaleTenant, ensureTenantSession } from "@/lib/ensure-tenant";
 import { fetchDashboardBootstrap, warmGatewayWhenReady } from "@/lib/dashboard-bootstrap";
 import { TrialUsageBanner, type TrialUsageState } from "@/components/billing/TrialUsageBanner";
 import { TrialLockedOverlay } from "@/components/billing/TrialLockedOverlay";
@@ -171,6 +171,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       void prefetchCsrfToken();
       void warmGatewayWhenReady().then(() => fetchDashboardBootstrap(tenantId));
+      // A login can remember a workspace that was deleted. Check in the background and send the client to setup instead of an empty dashboard.
+      void dropStaleTenant().then((gone) => {
+        if (gone && !cancelled) routerRef.current.replace("/onboarding");
+      });
 
       void loadAccount(user);
     }

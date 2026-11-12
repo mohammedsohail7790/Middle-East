@@ -12,6 +12,34 @@ import {
   resolveLanguageCode,
 } from './receptionist-voice.js';
 
+const MAX_QUALIFYING_QUESTIONS = 10;
+const MAX_QUESTION_LENGTH = 200;
+
+/**
+ * The questions an owner saved for the receptionist to ask callers, as a prompt section. Saved questions can be plain text or an object with the text in `question`, `text` or `label`;
+ * anything else is ignored. The questions are the owner's own words, so they go in an untrusted block like the other owner inputs, and the instruction around them is ours.
+ * Returns '' when there is nothing to ask.
+ */
+export function qualifyingQuestionsBlock(raw: unknown, wrap: (label: string, content: string) => string): string {
+  if (!Array.isArray(raw)) return '';
+  const questions = raw
+    .map((q) => {
+      if (typeof q === 'string') return q;
+      if (q && typeof q === 'object') {
+        const o = q as Record<string, unknown>;
+        for (const key of ['question', 'text', 'label']) if (typeof o[key] === 'string') return o[key] as string;
+      }
+      return '';
+    })
+    .map((q) => q.replace(/\s+/g, ' ').trim().slice(0, MAX_QUESTION_LENGTH))
+    .filter(Boolean)
+    .slice(0, MAX_QUALIFYING_QUESTIONS);
+  if (!questions.length) return '';
+  const block = wrap('TENANT_QUALIFYING_QUESTIONS', questions.map((q, i) => `${i + 1}. ${q}`).join('\n'));
+  if (!block) return '';
+  return `Qualifying questions: when the caller wants a booking, a quote or a visit, work these questions into the conversation, one at a time and in your own words. Skip any the caller has already answered, never read them out as a list, and do not hold up an urgent or emergency call to ask them.\n${block}`;
+}
+
 /**
  * Build the full system prompt for a tenant's AI agent.
  * Handles AI config overrides, knowledge base injection, and business profile assembly.
@@ -51,6 +79,9 @@ export async function buildFullPrompt(
     if (resolvedAiConfig.dontInstructions?.length) {
       prompt += `\n\n${wrapUntrustedBlock('TENANT_DONT', resolvedAiConfig.dontInstructions.join('. '))}`;
     }
+
+    const qualifying = qualifyingQuestionsBlock(resolvedAiConfig.qualificationQuestions, wrapUntrustedBlock);
+    if (qualifying) prompt += `\n\n${qualifying}`;
 
     if (resolvedAiConfig.agentName && resolvedAiConfig.agentName !== 'AI Assistant') {
       const name = resolvedAiConfig.agentName.trim();

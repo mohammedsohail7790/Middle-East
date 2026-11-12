@@ -133,6 +133,29 @@ export async function ensureTenantSession(
   return getTenantId();
 }
 
+/**
+ * A login can remember a workspace that no longer exists (it was deleted, or the account was reset). Left alone, the dashboard opens empty and the client is stuck.
+ * Asks the gateway once; only a clear "Tenant not found" counts as gone. A slow, cold or failing gateway never does, so a client is never sent back to setup by mistake.
+ * When the workspace is gone, forgets it everywhere (local cache and the login's metadata) and returns true so the caller can send the client to setup.
+ */
+export async function dropStaleTenant(): Promise<boolean> {
+  try {
+    await api.get("/tenants/me");
+    return false;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (!/tenant not found/i.test(message)) return false;
+  }
+  clearTenantId();
+  try {
+    await supabase.auth.updateUser({ data: { tenant_id: null } });
+    void supabase.auth.refreshSession();
+  } catch {
+    /* the local cache is already cleared; the metadata clean-up is best-effort */
+  }
+  return true;
+}
+
 /** Decide whether onboarding should resume, redirect, or start fresh. */
 export async function resolveOnboardingEntry(
   options?: EnsureTenantOptions
@@ -147,9 +170,10 @@ export async function resolveOnboardingEntry(
   const user = userData.user;
   if (!user) return empty;
 
-  const tenantId = await ensureTenantSession({
+  let tenantId = await ensureTenantSession({
     maxWaitMs: options?.maxWaitMs ?? 15_000,
   });
+  if (tenantId && (await dropStaleTenant())) tenantId = null;
   if (!tenantId) return empty;
 
   try {
