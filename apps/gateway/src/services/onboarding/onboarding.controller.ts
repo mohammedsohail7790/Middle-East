@@ -8,6 +8,7 @@ import {
   buildTonePreviewSampleText,
   synthesizeOpenAiTtsMp3,
   TONE_PREVIEW_VOICE,
+  ttsInstructionsFor,
 } from '../realtime/receptionist-voice.js';
 import { checkLimit, respond429 } from '../../security/tiered-rate-limit.js';
 
@@ -21,7 +22,7 @@ const PREVIEW_TEXT_MAX = 300;
  * What a voice preview request asks for. The setup wizard can ask to hear its own greeting in a chosen voice; without those fields the old behaviour (a sample for the chosen
  * personality) is unchanged. The text is cut to 300 characters and the voice must be on the list, because every preview costs a text-to-speech call.
  */
-export function resolvePreviewRequest(body: any): { tone: string; agentName: string; voice: string; text: string | null } {
+export function resolvePreviewRequest(body: any): { tone: string; agentName: string; voice: string; text: string | null; language: string | null } {
     const tone = String(body?.tone || 'professional').toLowerCase();
     const agentName = String(body?.agentName || 'Sarah').trim() || 'Sarah';
     const allowed = new Set(['professional', 'friendly', 'warm', 'casual', 'formal']);
@@ -29,7 +30,8 @@ export function resolvePreviewRequest(body: any): { tone: string; agentName: str
     const asked = String(body?.voice || '').toLowerCase();
     const voice = PREVIEW_VOICES.has(asked) ? asked : TONE_PREVIEW_VOICE[resolvedTone] || 'coral';
     const raw = typeof body?.text === 'string' ? body.text.replace(/\s+/g, ' ').trim().slice(0, PREVIEW_TEXT_MAX) : '';
-    return { tone: resolvedTone, agentName, voice, text: raw || null };
+    const lang = typeof body?.language === 'string' && /^[a-z]{2}(-[A-Za-z]{2})?$/.test(body.language.trim()) ? body.language.trim() : null;
+    return { tone: resolvedTone, agentName, voice, text: raw || null, language: lang };
 }
 const VOICE_PREVIEW_MAX = Number(process.env.RATE_LIMIT_VOICE_PREVIEW_PER_MIN || 5);
 
@@ -60,7 +62,7 @@ export function createOnboardingRouter(): express.Router {
             const asked = resolvePreviewRequest(req.body);
             const voice = asked.voice;
             const sampleText = asked.text ?? buildTonePreviewSampleText(asked.tone, asked.agentName);
-            const buffer = await synthesizeOpenAiTtsMp3(sampleText, voice);
+            const buffer = await synthesizeOpenAiTtsMp3(sampleText, voice, { instructions: ttsInstructionsFor(asked.language ?? undefined) });
 
             res.set('Content-Type', 'audio/mpeg');
             res.set('Content-Length', String(buffer.length));

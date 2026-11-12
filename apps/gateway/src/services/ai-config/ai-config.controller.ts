@@ -21,9 +21,9 @@ import { voiceRedis } from '../voice/redis.client.js';
 import { toDashboardConfig, fromDashboardBody, normalizeDashboardConfig } from './ai-config.dto.js';
 import {
   buildPreviewSampleText,
-  DEFAULT_SPEECH_SPEED,
-  mapVoiceForOpenAiTts,
   resolveLanguageCode,
+  synthesizeOpenAiTtsMp3,
+  ttsInstructionsFor,
 } from '../realtime/receptionist-voice.js';
 
 export function createAIConfigRouter(): Router {
@@ -45,40 +45,24 @@ export function createAIConfigRouter(): Router {
       }
 
       const { voice, text, language, agentName } = req.body;
-      const voiceId = mapVoiceForOpenAiTts(voice || 'marin');
       const langCode = resolveLanguageCode(language);
       const customText = typeof text === 'string' ? text.trim() : '';
 
       const sampleText = buildPreviewSampleText({
-        language: langCode,
+        language: typeof language === 'string' && language ? language : langCode,
         agentName: agentName || 'Sarah',
         greetingMessage: langCode === 'en' ? customText : customText || undefined,
       });
 
-      const response = await fetch('https://api.openai.com/v1/audio/speech', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: process.env.OPENAI_TTS_MODEL || 'tts-1-hd',
-          input: sampleText,
-          voice: voiceId,
-          response_format: 'mp3',
-          speed: DEFAULT_SPEECH_SPEED,
-        }),
-      });
-
-      if (!response.ok) {
-        const detail = await response.text().catch(() => '');
+      let buffer: Buffer;
+      try {
+        buffer = await synthesizeOpenAiTtsMp3(sampleText, voice || 'marin', { instructions: ttsInstructionsFor(typeof language === 'string' ? language : undefined) });
+      } catch (error) {
         return res.status(500).json({
           success: false,
-          error: detail ? `Voice preview failed: ${detail.slice(0, 200)}` : 'Voice preview failed',
+          error: error instanceof Error ? error.message : 'Voice preview failed',
         });
       }
-
-      const buffer = Buffer.from(await response.arrayBuffer());
       res.set('Content-Type', 'audio/mpeg');
       res.set('Content-Length', String(buffer.length));
       res.send(buffer);

@@ -15,6 +15,8 @@ type Props = {
   suggestedGreeting: string;
   tone: string;
   agentName: string;
+  /** The language or Arabic dialect code (for example ar-AE), so the preview sounds like it. */
+  language: string;
   rtl: boolean;
 };
 
@@ -25,7 +27,7 @@ function stopAudio(audio: HTMLAudioElement | null) {
 }
 
 /** Pick a voice, edit the greeting, and hear that greeting in that voice before going live. Everything here can be changed later on the AI Agent page. */
-export function OnboardingVoiceGreeting({ voice, onVoiceChange, greeting, onGreetingChange, suggestedGreeting, tone, agentName, rtl }: Props) {
+export function OnboardingVoiceGreeting({ voice, onVoiceChange, greeting, onGreetingChange, suggestedGreeting, tone, agentName, language, rtl }: Props) {
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -51,6 +53,7 @@ export function OnboardingVoiceGreeting({ voice, onVoiceChange, greeting, onGree
       const blob = await api.postBlob("/onboarding/voice-preview", {
         voice,
         tone,
+        language,
         agentName: agentName.trim() || "Sarah",
         text: (greeting.trim() || suggestedGreeting).slice(0, 300),
       });

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { AGENT_LANGUAGES, isArabicLanguage } from "./agent-languages";
 import {
   buildInstructions,
   buildSetupPayload,
@@ -33,9 +34,13 @@ const base: SetupAnswers = {
 const a = (over: Partial<SetupAnswers>): SetupAnswers => ({ ...base, ...over });
 
 describe("guessLanguage", () => {
-  it("picks Arabic for any Arabic browser, English for English and unknown", () => {
-    expect(guessLanguage("ar-AE")).toBe("ar-SA");
+  it("picks the Arabic dialect of the browser's country, Saudi for plain Arabic, English for English and unknown", () => {
     expect(guessLanguage("ar")).toBe("ar-SA");
+    expect(guessLanguage("ar-SA")).toBe("ar-SA");
+    for (const c of ["ar-AE", "ar-KW", "ar-QA", "ar-BH", "ar-OM"]) expect(guessLanguage(c)).toBe("ar-AE");
+    expect(guessLanguage("ar-EG")).toBe("ar-EG");
+    for (const c of ["ar-LB", "ar-JO", "ar-SY", "ar-PS"]) expect(guessLanguage(c)).toBe("ar-LB");
+    expect(guessLanguage("ar-MA")).toBe("ar-SA");
     expect(guessLanguage("en-GB")).toBe("en");
     expect(guessLanguage("ur-PK")).toBe("ur");
     expect(guessLanguage(undefined)).toBe("en");
@@ -84,6 +89,13 @@ describe("defaultGreeting", () => {
     expect(g).toContain("موظفة الاستقبال الذكية");
     expect(g).not.toMatch(/hello/i);
   });
+  it("greets in the chosen dialect, and always says it is an AI receptionist", () => {
+    expect(defaultGreeting("ar-SA", "عيادة", "سارة")).toContain("كيف أقدر أخدمك");
+    expect(defaultGreeting("ar-AE", "عيادة", "سارة")).toContain("معاك سارة");
+    expect(defaultGreeting("ar-EG", "عيادة", "سارة")).toContain("إزاي");
+    expect(defaultGreeting("ar-LB", "عيادة", "سارة")).toContain("كيف فيني");
+    for (const l of ["ar-SA", "ar-AE", "ar-EG", "ar-LB"] as const) expect(defaultGreeting(l, "عيادة", "سارة")).toContain("موظفة الاستقبال الذكية");
+  });
   it("falls back for empty names", () => {
     expect(defaultGreeting("en", "", "")).toContain("our office");
     expect(defaultGreeting("en", "", "")).toContain("Sarah");
@@ -119,8 +131,11 @@ describe("buildInstructions", () => {
     expect(withoutNumber).toContain("the team will be told straight away");
     expect(withoutNumber).not.toContain("transfer the call");
   });
-  it("sets the default speaking language", () => {
-    expect(buildInstructions(a({ language: "ar-SA" }))).toContain("Saudi and Gulf Arabic by default");
+  it("sets the default speaking language, and the dialect for Arabic", () => {
+    expect(buildInstructions(a({ language: "ar-SA" }))).toContain("Saudi Arabic by default");
+    expect(buildInstructions(a({ language: "ar-AE" }))).toContain("Gulf (Khaleeji) Arabic by default");
+    expect(buildInstructions(a({ language: "ar-EG" }))).toContain("Egyptian Arabic by default");
+    expect(buildInstructions(a({ language: "ar-LB" }))).toContain("Levantine Arabic by default");
     expect(buildInstructions(a({ language: "en" }))).toContain("clear English by default");
   });
   it("never contains a pattern the gateway rejects, even when the client typed one", () => {
@@ -187,5 +202,16 @@ describe("faqToKnowledgeText", () => {
     expect(faqToKnowledgeText("  Q: Do you take walk-ins?\nA: Yes until 5pm.  ")).toBe("Q: Do you take walk-ins?\nA: Yes until 5pm.");
     expect(faqToKnowledgeText("   ")).toBeNull();
     expect(faqToKnowledgeText("hi")).toBeNull();
+  });
+});
+
+describe("arabic dialects in the language list", () => {
+  it("offers Saudi, Gulf, Egyptian and Levantine Arabic", () => {
+    const ids = AGENT_LANGUAGES.map((l) => l.id) as string[];
+    for (const id of ["ar-SA", "ar-AE", "ar-EG", "ar-LB"]) expect(ids).toContain(id);
+  });
+  it("knows which codes are Arabic, for layout and wording", () => {
+    for (const id of ["ar", "ar-SA", "ar-AE", "ar-EG", "ar-LB", "AR-ae"]) expect(isArabicLanguage(id)).toBe(true);
+    for (const id of ["en", "ur", "fa", "fr", "", undefined, null]) expect(isArabicLanguage(id as any)).toBe(false);
   });
 });

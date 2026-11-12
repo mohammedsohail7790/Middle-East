@@ -22,6 +22,9 @@
 
 export const SUPPORTED_LANGUAGES = [
   { code: 'ar-SA', name: 'Arabic (Saudi)' },
+  { code: 'ar-AE', name: 'Arabic (Gulf: UAE, Kuwait, Qatar, Bahrain, Oman)' },
+  { code: 'ar-EG', name: 'Arabic (Egyptian)' },
+  { code: 'ar-LB', name: 'Arabic (Levantine)' },
   { code: 'en',    name: 'English' },
   { code: 'ur',    name: 'Urdu' },
   { code: 'fr',    name: 'French' },
@@ -119,7 +122,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     includedMinutes: 250,
     overageRate: 0.74,          // AED per minute (~$0.20 USD)
     maxPhoneNumbers: 1,
-    languages: ['ar-SA', 'en', 'ur', 'fr', 'zh', 'ru', 'fa'],  // all seven advertised languages on every plan
+    languages: ['ar-SA', 'ar-AE', 'ar-EG', 'ar-LB', 'en', 'ur', 'fr', 'zh', 'ru', 'fa'],  // all seven advertised languages on every plan
     customVoice: false,
     crmIntegrations: false,
     advancedAnalytics: false,
@@ -139,7 +142,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     includedMinutes: 750,
     overageRate: 0.55,          // AED per minute (~$0.15 USD)
     maxPhoneNumbers: 3,
-    languages: ['ar-SA', 'en', 'ur', 'fr', 'zh', 'ru', 'fa', 'hi'],  // every supported language
+    languages: ['ar-SA', 'ar-AE', 'ar-EG', 'ar-LB', 'en', 'ur', 'fr', 'zh', 'ru', 'fa', 'hi'],  // every supported language
     customVoice: true,
     crmIntegrations: true,
     advancedAnalytics: true,
@@ -160,7 +163,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     includedMinutes: 60,
     overageRate: 0,
     maxPhoneNumbers: 3,
-    languages: ['ar-SA', 'en', 'ur', 'fr', 'zh', 'ru', 'fa', 'hi'],  // every supported language
+    languages: ['ar-SA', 'ar-AE', 'ar-EG', 'ar-LB', 'en', 'ur', 'fr', 'zh', 'ru', 'fa', 'hi'],  // every supported language
     customVoice: true,
     crmIntegrations: true,
     advancedAnalytics: true,

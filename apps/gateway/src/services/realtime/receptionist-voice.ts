@@ -142,6 +142,58 @@ export function resolveLanguageCode(language?: string): string {
   return LANGUAGE_NAMES[code] ? code : 'en';
 }
 
+/**
+ * Arabic dialects. The language code carries the region: ar-SA is Saudi, ar-AE is Gulf (UAE, Kuwait, Qatar, Bahrain, Oman), ar-EG is Egyptian, ar-LB is Levantine
+ * (Lebanon, Jordan, Syria, Palestine). A bare "ar", or a region we have no guide for, means "match whatever the caller speaks", which is how Arabic worked before.
+ */
+export type ArabicDialect = 'sa' | 'gulf' | 'eg' | 'lb';
+
+const GULF_REGIONS = new Set(['ae', 'kw', 'qa', 'bh', 'om']);
+const LEVANT_REGIONS = new Set(['lb', 'jo', 'sy', 'ps']);
+
+export function arabicDialect(language?: string): ArabicDialect | null {
+  const l = (language || '').trim().toLowerCase();
+  if (!l.startsWith('ar')) return null;
+  const region = l.split(/[-_]/)[1] || '';
+  if (region === 'sa') return 'sa';
+  if (GULF_REGIONS.has(region)) return 'gulf';
+  if (region === 'eg') return 'eg';
+  if (LEVANT_REGIONS.has(region)) return 'lb';
+  return null;
+}
+
+export const ARABIC_DIALECT_NAMES: Record<ArabicDialect, string> = {
+  sa: 'Saudi Arabic',
+  gulf: 'Gulf (Khaleeji) Arabic',
+  eg: 'Egyptian Arabic',
+  lb: 'Levantine Arabic',
+};
+
+/**
+ * Short guides that anchor the model to a dialect. They name the register and give everyday phrases, so the receptionist does not drift into formal Modern Standard Arabic.
+ * Every guide ends by letting the caller win: if they clearly speak another dialect, follow them. These phrases need review by a native speaker of each dialect.
+ */
+export const ARABIC_DIALECT_GUIDES: Record<ArabicDialect, string> = {
+  sa: `Dialect: speak everyday Saudi Arabic (Najdi and Hejazi), not formal Modern Standard Arabic.
+Typical phrases: greeting "هلا والله" or "حياك الله"; offering help "كيف أقدر أخدمك؟"; yes "إيوه" or "أكيد"; agreeing "تمام" or "أبشر"; one moment "ثواني بس"; thanks "يعطيك العافية" or "مشكور"; goodbye "في أمان الله".
+Say times the spoken way ("الساعة ثلاثة ونص"). If the caller clearly speaks another dialect, move toward theirs.`,
+  gulf: `Dialect: speak everyday Gulf (Khaleeji) Arabic as used in the UAE, Kuwait, Qatar, Bahrain and Oman, not formal Modern Standard Arabic.
+Typical phrases: greeting "هلا والله" or "مرحبا فيك"; offering help "كيف أقدر أساعدك؟"; yes "إي نعم" or "أكيد"; agreeing "تمام" or "أبشر"; one moment "ثواني"; thanks "مشكور" or "الله يعطيك العافية"; goodbye "في أمان الله" or "مع السلامة".
+Say times the spoken way. If the caller clearly speaks another dialect, move toward theirs.`,
+  eg: `Dialect: speak everyday Egyptian Arabic, not formal Modern Standard Arabic.
+Typical phrases: greeting "أهلاً بحضرتك"; offering help "أقدر أساعدك إزاي؟"; yes "أيوه" or "تمام"; no "لأ"; agreeing "حاضر" or "من عيوني"; one moment "ثانية واحدة"; thanks "شكراً" or "ميرسي"; goodbye "مع السلامة".
+Say times the spoken way. If the caller clearly speaks another dialect, move toward theirs.`,
+  lb: `Dialect: speak everyday Levantine Arabic (Lebanon, Jordan, Syria, Palestine), not formal Modern Standard Arabic.
+Typical phrases: greeting "أهلاً وسهلاً"; offering help "كيف فيني ساعدك؟" or "شو بقدر أساعدك؟"; yes "إيه" or "أكيد"; agreeing "تمام" or "تكرم"; one moment "ثانية"; thanks "يسلمو" or "شكراً"; goodbye "الله معك" or "مع السلامة".
+Say times the spoken way. If the caller clearly speaks another dialect, move toward theirs.`,
+};
+
+/** The dialect guide for a language code, or an empty string when there is none (English, other languages, plain "ar"). */
+export function arabicDialectGuide(language?: string): string {
+  const d = arabicDialect(language);
+  return d ? `\n\n${ARABIC_DIALECT_GUIDES[d]}` : '';
+}
+
 export function getLanguageDisplayName(language?: string): string {
   return LANGUAGE_NAMES[resolveLanguageCode(language)] || 'English';
 }
@@ -158,7 +210,7 @@ export function buildHumanRealtimePreamble(language?: string): string {
 
 ${PLATFORM_BASE_RULES}
 
-Language (required): speak Arabic in a natural, everyday spoken style that matches the caller's own dialect. If the caller's dialect is unclear, use a plain conversational register rather than formal Modern Standard Arabic. Use English only if the caller uses English first. Do not assume where the caller is.
+Language (required): speak Arabic in a natural, everyday spoken style that matches the caller's own dialect. If the caller's dialect is unclear, use a plain conversational register rather than formal Modern Standard Arabic. Use English only if the caller uses English first. Do not assume where the caller is.${arabicDialectGuide(language)}
 
 ${VOICE_DELIVERY_RULES}
 
@@ -211,6 +263,21 @@ const PREVIEW_GREETING_BY_LANG: Record<string, (agentName: string) => string> = 
   fa: (agent) => `از تماس شما متشکرم. من ${agent} هستم. چطور می‌توانم کمکتان کنم؟`,
 };
 
+/** What the receptionist says first, in each dialect, for the preview and as the suggested greeting. Needs the same native review as the guides. */
+export const ARABIC_DIALECT_PREVIEW_GREETING: Record<ArabicDialect, (agentName: string) => string> = {
+  sa: (agent) => `هلا والله، ${agent} معك. كيف أقدر أخدمك؟`,
+  gulf: (agent) => `هلا والله، معاك ${agent}. كيف أقدر أساعدك؟`,
+  eg: (agent) => `أهلاً بحضرتك، أنا ${agent}. أقدر أساعدك إزاي؟`,
+  lb: (agent) => `أهلاً وسهلاً، أنا ${agent}. كيف فيني ساعدك؟`,
+};
+
+/** An instruction for the preview voice so it sounds like the chosen dialect. Only used with the speech model that accepts instructions. */
+export function ttsInstructionsFor(language?: string): string | undefined {
+  const d = arabicDialect(language);
+  if (!d) return undefined;
+  return `Speak ${ARABIC_DIALECT_NAMES[d]} the way a native speaker on the phone would: natural everyday dialect and accent, not formal news-reader Arabic. Warm, relaxed, normal speaking pace, like a friendly receptionist answering a call.`;
+}
+
 /** Main role block for Realtime system prompt (language-aware) */
 export function buildReceptionistRoleBlock(options: {
   agentName: string;
@@ -227,7 +294,7 @@ export function buildReceptionistRoleBlock(options: {
   }
 
   if (code === 'ar') {
-    return `${lead} Speak natural, everyday spoken Arabic that matches the caller's dialect, not a formal register. Keep replies brief and conversational, and ask one question at a time. Avoid menu-style lists and jargon. Do not switch to English unless the caller does first.`;
+    return `${lead} Speak natural, everyday spoken Arabic that matches the caller's dialect, not a formal register. Keep replies brief and conversational, and ask one question at a time. Avoid menu-style lists and jargon. Do not switch to English unless the caller does first.${arabicDialectGuide(options.language)}`;
   }
 
   const langName = getLanguageDisplayName(code);
@@ -245,6 +312,16 @@ export function buildPreviewSampleText(options: {
 
   if (custom && code === 'en') {
     return normalizeGreetingText(custom.replace(/\[Agent\]/gi, agent));
+  }
+
+  // An Arabic greeting the business wrote itself is previewed as written. Text in another script is not, so an English greeting never gets read out in Arabic.
+  if (custom && code === 'ar' && /[\u0600-\u06FF]/.test(custom)) {
+    return normalizeGreetingText(custom.replace(/\[Agent\]/gi, agent));
+  }
+
+  if (code === 'ar') {
+    const d = arabicDialect(options.language);
+    if (d) return ARABIC_DIALECT_PREVIEW_GREETING[d](agent);
   }
 
   if (custom && code !== 'en') {
@@ -310,31 +387,58 @@ export function buildTonePreviewSampleText(tone: string, agentName: string): str
   return (scripts[key] ?? scripts.professional)(name);
 }
 
-/** Generate MP3 buffer via OpenAI TTS (dashboard + onboarding previews) */
+/** Voices the speech model that accepts instructions can play. This includes the two live-call voices the older preview model lacks (marin and cedar). */
+const INSTRUCTABLE_TTS_VOICES = new Set(['alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'nova', 'onyx', 'sage', 'shimmer', 'verse', 'marin', 'cedar']);
+
+async function requestSpeech(body: Record<string, unknown>, apiKey: string): Promise<Response> {
+  return fetch('https://api.openai.com/v1/audio/speech', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
+/**
+ * Generate MP3 via OpenAI TTS (dashboard + onboarding previews).
+ * With `instructions` (a dialect or accent), the preview uses the speech model that follows them and the same voice a live call uses; if that request fails
+ * it falls back to the plain model so a preview still plays, just without the accent. Without instructions nothing changes.
+ */
 export async function synthesizeOpenAiTtsMp3(
   text: string,
-  voice: string
+  voice: string,
+  options?: { instructions?: string }
 ): Promise<Buffer> {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) {
     throw new Error('Voice preview unavailable — OPENAI_API_KEY is not set on the gateway.');
   }
 
-  const voiceId = mapVoiceForOpenAiTts(voice);
-  const response = await fetch('https://api.openai.com/v1/audio/speech', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: process.env.OPENAI_TTS_MODEL || 'tts-1-hd',
-      input: text.slice(0, 500),
-      voice: voiceId,
-      response_format: 'mp3',
-      speed: DEFAULT_SPEECH_SPEED,
-    }),
-  });
+  const plain = () =>
+    requestSpeech(
+      { model: process.env.OPENAI_TTS_MODEL || 'tts-1-hd', input: text.slice(0, 500), voice: mapVoiceForOpenAiTts(voice), response_format: 'mp3', speed: DEFAULT_SPEECH_SPEED },
+      apiKey
+    );
+
+  let response: Response | null = null;
+  if (options?.instructions) {
+    const wanted = (voice || DEFAULT_REALTIME_VOICE).trim().toLowerCase();
+    try {
+      response = await requestSpeech(
+        {
+          model: process.env.OPENAI_TTS_INSTRUCT_MODEL || 'gpt-4o-mini-tts',
+          input: text.slice(0, 500),
+          voice: INSTRUCTABLE_TTS_VOICES.has(wanted) ? wanted : mapVoiceForOpenAiTts(voice),
+          instructions: options.instructions,
+          response_format: 'mp3',
+        },
+        apiKey
+      );
+    } catch {
+      response = null;
+    }
+    if (response && !response.ok) response = null;
+  }
+  if (!response) response = await plain();
 
   if (!response.ok) {
     const detail = await response.text().catch(() => '');

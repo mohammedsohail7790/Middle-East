@@ -3,7 +3,7 @@
  * It is plain functions with no screen code, so each rule is tested. The wizard saves the results with the same calls the AI Agent page uses (PUT /ai-config, PUT /tenants/:id,
  * POST /knowledge), so everything a client sets here can be changed later on that page.
  */
-import { AGENT_LANGUAGES, type AgentLanguageId } from "./agent-languages";
+import { AGENT_LANGUAGES, isArabicLanguage, type AgentLanguageId } from "./agent-languages";
 
 export type AfterHours = "message" | "transfer";
 
@@ -37,10 +37,23 @@ export const VOICE_CHOICES = [
 
 export const DEFAULT_VOICE = "marin";
 
-/** Arabic if the browser is set to Arabic, English otherwise. The client can change it on the first screen. */
+const GULF_REGIONS = new Set(["ae", "kw", "qa", "bh", "om"]);
+const LEVANT_REGIONS = new Set(["lb", "jo", "sy", "ps"]);
+
+/**
+ * The client's likely language from the browser: an Arabic browser gets the dialect of its country (Gulf for the UAE, Kuwait, Qatar, Bahrain and Oman, Egyptian, Levantine),
+ * Saudi for plain Arabic or any other Arabic country, and English for anything we do not recognise. The client can change it on the first screen.
+ */
 export function guessLanguage(browserLanguage: string | undefined): AgentLanguageId {
-  const l = (browserLanguage || "").toLowerCase();
-  const hit = AGENT_LANGUAGES.find((x) => l === x.id.toLowerCase() || l.startsWith(`${x.id.toLowerCase().split("-")[0]}`));
+  const l = (browserLanguage || "").trim().toLowerCase();
+  const [lang, region = ""] = l.split(/[-_]/);
+  if (lang === "ar") {
+    if (GULF_REGIONS.has(region)) return "ar-AE";
+    if (region === "eg") return "ar-EG";
+    if (LEVANT_REGIONS.has(region)) return "ar-LB";
+    return "ar-SA";
+  }
+  const hit = AGENT_LANGUAGES.find((x) => x.id.toLowerCase() === l || x.id.toLowerCase().split("-")[0] === lang);
   return (hit?.id ?? "en") as AgentLanguageId;
 }
 
@@ -73,12 +86,29 @@ export function normalizeTransferNumber(input: string): string | null {
   return `+${body}`;
 }
 
-/** The first thing a caller hears. It says plainly that this is an AI receptionist, which the platform recommends everywhere. */
+const DIALECT_NAME: Record<string, string> = {
+  "ar-SA": "Saudi",
+  "ar-AE": "Gulf (Khaleeji)",
+  "ar-EG": "Egyptian",
+  "ar-LB": "Levantine",
+};
+
+/** The first thing a caller hears. It says plainly that this is an AI receptionist, which the platform recommends everywhere. Arabic greetings use the chosen dialect. */
 export function defaultGreeting(lang: AgentLanguageId, company: string, agentName: string): string {
   const c = safeText(company, 120) || "our office";
   const a = safeText(agentName, 60) || "Sarah";
-  if (lang === "ar-SA") return `مرحباً، شكراً لاتصالك بـ ${c}. أنا ${a}، موظفة الاستقبال الذكية. كيف يمكنني مساعدتك اليوم؟`;
-  return `Hello, thank you for calling ${c}. This is ${a}, the AI receptionist. How can I help you today?`;
+  switch (lang) {
+    case "ar-SA":
+      return `هلا والله، شكراً لاتصالك بـ ${c}. معك ${a}، موظفة الاستقبال الذكية. كيف أقدر أخدمك؟`;
+    case "ar-AE":
+      return `هلا والله، شكراً لاتصالك بـ ${c}. معاك ${a}، موظفة الاستقبال الذكية. كيف أقدر أساعدك؟`;
+    case "ar-EG":
+      return `أهلاً بحضرتك، شكراً لاتصالك بـ ${c}. أنا ${a}، موظفة الاستقبال الذكية. أقدر أساعدك إزاي؟`;
+    case "ar-LB":
+      return `أهلاً وسهلاً، شكراً لاتصالك بـ ${c}. أنا ${a}، موظفة الاستقبال الذكية. كيف فيني ساعدك؟`;
+    default:
+      return `Hello, thank you for calling ${c}. This is ${a}, the AI receptionist. How can I help you today?`;
+  }
 }
 
 const DAY_ORDER = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -108,8 +138,8 @@ export function buildInstructions(a: SetupAnswers): string {
     );
   }
   out.push(
-    a.language === "ar-SA"
-      ? "Speak natural Saudi and Gulf Arabic by default. If the caller switches to English or another language, answer in that language."
+    isArabicLanguage(a.language)
+      ? `Speak natural ${DIALECT_NAME[a.language] ?? "Gulf"} Arabic by default. If the caller switches to English, another dialect or another language, answer in that.`
       : "Speak in clear English by default. If the caller switches to Arabic or another language, answer in that language.",
   );
   out.push("Always say you are an AI receptionist if asked. Always collect the caller's name and a phone number. Never invent prices, availability or policies: if you do not know, say you will pass the question to the team.");
