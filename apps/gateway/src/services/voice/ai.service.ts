@@ -8,6 +8,7 @@ import {
     formatDefaultGreeting,
     normalizeGreetingText,
 } from '../realtime/receptionist-voice.js';
+import { parseQualificationSignals, type QualificationSignals } from '../leads/lead-scoring.js';
 import { aiCircuitBreaker } from './circuit-breaker.js';
 import { pool } from '../db/pool.js';
 import { parseConsentCaptureConfig } from '../consent/consent-evidence.js';
@@ -112,6 +113,8 @@ export interface CallEvaluationResult {
     summary: string;
     /** True when the AI evaluation did not run (no key, API error); the other fields are placeholders, not a judgement. */
     degraded?: boolean;
+    /** Caller's answers to the owner's qualifying questions plus budget, timing and urgency signals. Only set when the tenant has qualifying questions. */
+    qualification?: QualificationSignals;
 }
 
 export interface AppointmentActionResult {
@@ -1194,7 +1197,7 @@ CALLER PAST: {callerMemory}`;
         }
     }
 
-    async evaluateCall(config: TenantVoiceConfig, transcript: TranscriptTurn[], lead: VoiceLeadPayload, hasAppointment: boolean): Promise<CallEvaluationResult> {
+    async evaluateCall(config: TenantVoiceConfig, transcript: TranscriptTurn[], lead: VoiceLeadPayload, hasAppointment: boolean, qualifyingQuestions: string[] = []): Promise<CallEvaluationResult> {
         if (!this.openAiKey) {
             return { sentiment: 'neutral', sentimentScore: 50, frustrationLevel: 0, callSuccess: hasAppointment || Boolean(lead.phone), leadQuality: 'low', summary: 'Evaluation unavailable (AI key missing).', degraded: true };
         }
@@ -1213,7 +1216,17 @@ CALLER PAST: {callerMemory}`;
             '  "frustration_level": 0-100,',
             '  "call_success": true/false,',
             '  "lead_quality": "high | medium | low",',
-            '  "summary": "<short summary>"',
+            '  "summary": "<short summary>"' + (qualifyingQuestions.length ? ',' : ''),
+            ...(qualifyingQuestions.length
+                ? [
+                      '  "qualification": {',
+                      '    "answers": [{"question_index": 1, "answer": "<what the caller said, or null if not answered>"}],',
+                      '    "budget": "stated | vague | none",',
+                      '    "timing": "immediate | soon | later | none",',
+                      '    "urgency": "urgent | normal | none"',
+                      '  }',
+                  ]
+                : []),
             '}',
             '',
             'Evaluation rules:',
@@ -1229,6 +1242,14 @@ CALLER PAST: {callerMemory}`;
             '  medium → partial info',
             '  low → vague / no intent',
             '',
+            ...(qualifyingQuestions.length
+                ? [
+                      '- qualification.answers: one entry per numbered qualifying question; use the caller\'s own answer (short), or null when the caller did not answer. Never infer or invent an answer.',
+                      '- budget: stated = caller gave a figure or range, vague = hinted at price sensitivity or a rough level, none = not discussed',
+                      '- timing: immediate = today/this week, soon = within about a month, later = further out or just browsing, none = not discussed',
+                      '- urgency: urgent = caller said it is pressing or an emergency, normal = routine, none = not discussed',
+                  ]
+                : []),
             '- summary: max 2 sentences',
             '- be objective, no assumptions',
         ].join('\n');
@@ -1240,6 +1261,7 @@ CALLER PAST: {callerMemory}`;
             '',
             `Lead extracted: ${JSON.stringify(lead)}`,
             `Appointment booked: ${hasAppointment}`,
+            ...(qualifyingQuestions.length ? ['', 'Qualifying questions the business wants answered:', ...qualifyingQuestions.map((q, i) => `${i + 1}. ${q}`)] : []),
             '',
             `Transcript:\n${transcriptText}`,
         ].join('\n');
@@ -1279,6 +1301,7 @@ CALLER PAST: {callerMemory}`;
                 callSuccess: Boolean(parsed.call_success) || (hasAppointment && Boolean(lead.phone)),
                 leadQuality: ['high', 'medium', 'low'].includes(parsed.lead_quality) ? parsed.lead_quality : 'low',
                 summary: String(parsed.summary || '').slice(0, 300),
+                ...(qualifyingQuestions.length ? { qualification: parseQualificationSignals(qualifyingQuestions, parsed.qualification) } : {}),
             };
         } catch (error) {
             logger.warn('Call evaluation failed', { error: String(error) });

@@ -215,12 +215,35 @@ export async function finalizeRuntimeSession(
           qualificationFields = leadForEval;
           const hasAppointment = Boolean(bookedAppointment);
           evaluate = async () => {
+            // The owner's saved qualifying questions (empty for tenants with none, which keeps the original scoring).
+            let qualifyingQuestions: string[] = [];
+            try {
+              const { aiConfigService: questionConfigService } = await import('../ai-config/ai-config.service.js');
+              const { normalizeQuestions } = await import('../leads/lead-scoring.js');
+              qualifyingQuestions = normalizeQuestions((await questionConfigService.getConfig(state.tenantId!)).qualificationQuestions);
+            } catch {
+              qualifyingQuestions = [];
+            }
             const evaluation = await deps.aiService.evaluateCall(
               state.tenantConfig!,
               transcriptTurns,
               leadForEval,
-              hasAppointment
+              hasAppointment,
+              qualifyingQuestions
             );
+            if (qualifyingQuestions.length > 0 && evaluation.qualification && !evaluation.degraded && !consentGate.enforced && !noPersonalDataConsent && leadForEval.phone) {
+              try {
+                const { scoreQualification } = await import('../leads/lead-scoring.js');
+                const { leadsService } = await import('../leads/leads.service.js');
+                const scored = scoreQualification(qualifyingQuestions, evaluation.qualification);
+                if (scored) {
+                  await leadsService.applyQualificationScore(state.tenantId!, leadForEval.phone, { ...scored, signals: evaluation.qualification, callId: persistedCallId ?? undefined });
+                  evaluation.leadQuality = scored.level;
+                }
+              } catch (scoreErr) {
+                logger.warn('REALTIME_LEAD_QUALIFICATION_SCORE_FAILED', { tenantId: state.tenantId, callSid: state.callSid, error: String(scoreErr) });
+              }
+            }
             try {
               const { qaService } = await import('../qa/qa.service.js');
               await qaService.recordAiEvaluation({

@@ -9,6 +9,8 @@ import {
   appendSessionTranscript,
   extractMessageText,
 } from './realtime.transcript.js';
+import { planFirstUtteranceSwitch } from './language-detection.js';
+import { isLanguageAllowed, type LanguageCode } from '../../config/plan-config.js';
 import { createSafetySupervisor } from './safety-supervisor.js';
 import {
   buildGreetingSpeakInstruction,
@@ -452,6 +454,7 @@ export class RealtimeSessionManager {
           if (event.transcript) {
             appendSessionTranscript(session, 'caller', String(event.transcript));
             this.safety.onCallerTranscript(session, String(event.transcript));
+            this.detectCallerLanguage(session, String(event.transcript));
           }
           break;
 
@@ -579,6 +582,39 @@ export class RealtimeSessionManager {
   private finishGreeting(session: RealtimeSession): void {
     session.greetingInProgress = false;
     this.enableCallerTurnDetection(session);
+  }
+
+  /**
+   * Checks the caller's first utterance once per call and, when it is clearly in another of the seven supported languages,
+   * switches the call to it. All seven are available on every plan. The model sees the change as a system note on its next turn.
+   */
+  private detectCallerLanguage(session: RealtimeSession, text: string): void {
+    if (session.languageChecked) return;
+    if (!text.trim()) return;
+    session.languageChecked = true;
+    const target = planFirstUtteranceSwitch(text, session.config.language);
+    if (!target || !isLanguageAllowed('essential', target as LanguageCode)) return;
+    const previous = session.config.language;
+    session.config.language = target;
+    logger.info('REALTIME_LANGUAGE_DETECTED', { sessionId: session.id, tenantId: session.tenantId, from: previous, to: target });
+    this.sendToOpenAI(session, {
+      type: 'conversation.item.create',
+      item: {
+        type: 'message',
+        role: 'system',
+        content: [
+          {
+            type: 'input_text',
+            text: `The caller is speaking ${target.split('-')[0]} (detected from their first words). Reply in that language from now on, and keep following all other instructions.`,
+          },
+        ],
+      },
+    });
+    void import('../voice/tenant-scope.js')
+      .then(({ voiceDb }) =>
+        voiceDb.query(`UPDATE public.calls SET language = $3 WHERE tenant_id = $1 AND call_sid = $2`, [session.tenantId, session.callSid, target])
+      )
+      .catch(() => {});
   }
 
   private enableCallerTurnDetection(session: RealtimeSession): void {

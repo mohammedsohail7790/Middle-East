@@ -5,6 +5,7 @@
 
 import { voiceDb } from '../voice/tenant-scope.js';
 import type { LeadIntake } from '../consent/intake.js';
+import { blendLeadScore, type QualificationScore, type QualificationSignals } from './lead-scoring.js';
 import { getLeadSelectList } from './leads-schema.js';
 import { resolveConsentForLeadEvent } from '../consent/consent-evidence.js';
 
@@ -115,7 +116,44 @@ export class LeadsService {
     else if (lead.status === 'appointment_set') score += 30;
 
     // Cap at 100
-    return Math.min(score, 100);
+    const heuristic = Math.min(score, 100);
+
+    // When the call's qualifying-question answers were scored, they carry half the weight (tenants with no questions are unaffected).
+    return blendLeadScore(heuristic, lead.metadata?.qualification?.score);
+  }
+
+  /**
+   * Stores the post-call qualification (answers to the owner's qualifying questions, signals and the reasons for the score) on the lead
+   * for this phone number and re-scores it. Returns the new score, or null when there is no such lead.
+   */
+  async applyQualificationScore(
+    tenantId: string,
+    phoneNumber: string,
+    qualification: QualificationScore & { signals: QualificationSignals; callId?: string }
+  ): Promise<number | null> {
+    const found = await voiceDb.query('SELECT id FROM public.leads WHERE tenant_id = $1 AND phone = $2', [tenantId, phoneNumber]);
+    if (found.rows.length === 0) return null;
+    const leadId = found.rows[0].id as string;
+    const record = {
+      score: qualification.score,
+      level: qualification.level,
+      answered: qualification.answered,
+      total: qualification.total,
+      reasons: qualification.reasons,
+      answers: qualification.signals.answers,
+      budget: qualification.signals.budget,
+      timing: qualification.signals.timing,
+      urgency: qualification.signals.urgency,
+      callId: qualification.callId,
+      scoredAt: new Date().toISOString(),
+    };
+    const lead = await this.getLead(tenantId, leadId);
+    const score = this.calculateLeadScore({ ...lead, metadata: { ...(lead.metadata ?? {}), qualification: record } });
+    await voiceDb.query(
+      `UPDATE public.leads SET score = $1, custom_fields = COALESCE(custom_fields, '{}'::jsonb) || $2::jsonb WHERE id = $3 AND tenant_id = $4`,
+      [score, JSON.stringify({ qualification: { ...record, finalScore: score } }), leadId, tenantId]
+    );
+    return score;
   }
 
   /**

@@ -60,6 +60,8 @@ export interface RealtimeSession {
   greetingRetried?: boolean;
   /** Tools registered after first greeting (faster connect) */
   toolsDeferred?: boolean;
+  /** The first caller utterance has been checked for language (done once per call) */
+  languageChecked?: boolean;
   /** First outbound audio frame sent to Twilio (for latency metrics) */
   firstAudioSentAt?: number;
   /** Live transcript lines for dashboard */

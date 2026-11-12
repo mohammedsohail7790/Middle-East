@@ -227,18 +227,15 @@ export class RealtimeToolsManager {
     session: RealtimeSession,
     params: { language?: string }
   ): Promise<ToolResult> {
-    const lang = String(params.language || 'en').trim().toLowerCase().slice(0, 2);
-    const { billingService } = await import('../billing/billing.service.js');
-    const { PLAN_FEATURES, isLanguageAllowed } = await import('../../config/plan-config.js');
+    const requested = String(params.language || 'en').trim().toLowerCase();
+    const base = requested.slice(0, 2);
+    // Keep the tenant's Arabic dialect when the call is already Arabic; a bare "ar" otherwise means Saudi, the standard dialect.
+    const lang = base === 'ar' ? (/^ar-/.test(requested) ? requested : /^ar-/i.test(session.config.language || '') ? session.config.language : 'ar-SA') : base;
+    const { isLanguageAllowed } = await import('../../config/plan-config.js');
     type LanguageCode = import('../../config/plan-config.js').LanguageCode;
-    const sub = await billingService.getSubscription(session.tenantId);
-    const plan = sub?.status === 'trialing' ? 'trial' : (sub?.plan || 'essential');
-
-    if (!PLAN_FEATURES[plan]?.multiLanguageSwitching) {
-      return { success: false, error: 'Mid-call language switching is not currently available on any plan' };
-    }
-    if (!isLanguageAllowed(plan, lang as LanguageCode)) {
-      return { success: false, error: `Language "${lang}" is not included on your plan` };
+    // The seven marketed languages are available on every plan (Hindi stays for tenants already using it), so this checks the language list rather than the plan.
+    if (!isLanguageAllowed('professional', lang as LanguageCode)) {
+      return { success: false, error: `Language "${lang}" is not supported` };
     }
 
     session.config.language = lang;

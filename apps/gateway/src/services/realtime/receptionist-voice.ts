@@ -3,7 +3,7 @@
  */
 
 export const DEFAULT_GREETING_TEMPLATE =
-  'Thanks for calling {business}, this is {agent}. How can I help you?';
+  'Thanks for calling {business}, this is {agent}, the AI receptionist. How can I help you?';
 
 export function formatDefaultGreeting(businessName: string, agentName: string): string {
   return DEFAULT_GREETING_TEMPLATE.replace('{business}', businessName).replace(
@@ -253,22 +253,22 @@ Then stop talking and listen for the caller. Do not add "how can I help you" if 
 
 /** Natural spoken preview lines per language (for TTS test — must be in target language) */
 const PREVIEW_GREETING_BY_LANG: Record<string, (agentName: string) => string> = {
-  en: (agent) => `Thanks for calling. This is ${agent}. How can I help you?`,
-  ar: (agent) => `هلا والله، ${agent} تتكلم. كيف أقدر أخدمك؟`,
-  ru: (agent) => `Спасибо за звонок. Вас приветствует ${agent}. Чем могу помочь?`,
-  hi: (agent) => `धन्यवाद, कॉल करने के लिए। मैं ${agent} बोल रहा हूँ। मैं आपकी कैसे मदद कर सकता हूँ?`,
-  ur: (agent) => `کال کرنے کا شکریہ۔ میں ${agent} بول رہی ہوں۔ میں آپ کی کیسے مدد کر سکتی ہوں؟`,
-  fr: (agent) => `Merci de votre appel. Ici ${agent}. Comment puis-je vous aider ?`,
-  zh: (agent) => `感谢您的来电，我是${agent}。请问有什么可以帮您？`,
-  fa: (agent) => `از تماس شما متشکرم. من ${agent} هستم. چطور می‌توانم کمکتان کنم؟`,
+  en: (agent) => `Thanks for calling. This is ${agent}, the AI receptionist. How can I help you?`,
+  ar: (agent) => `هلا والله، ${agent} موظفة الاستقبال الذكية. كيف أقدر أخدمك؟`,
+  ru: (agent) => `Спасибо за звонок. Вас приветствует ${agent}, ИИ-ассистент. Чем могу помочь?`,
+  hi: (agent) => `धन्यवाद, कॉल करने के लिए। मैं ${agent} बोल रहा हूँ, एक एआई रिसेप्शनिस्ट। मैं आपकी कैसे मदद कर सकता हूँ?`,
+  ur: (agent) => `کال کرنے کا شکریہ۔ میں ${agent} بول رہی ہوں، اے آئی ریسیپشنسٹ۔ میں آپ کی کیسے مدد کر سکتی ہوں؟`,
+  fr: (agent) => `Merci de votre appel. Ici ${agent}, l'assistante virtuelle. Comment puis-je vous aider ?`,
+  zh: (agent) => `感谢您的来电，我是${agent}，AI智能接待员。请问有什么可以帮您？`,
+  fa: (agent) => `از تماس شما متشکرم. من ${agent} هستم، پذیرش هوشمند. چطور می‌توانم کمکتان کنم؟`,
 };
 
 /** What the receptionist says first, in each dialect, for the preview and as the suggested greeting. Needs the same native review as the guides. */
 export const ARABIC_DIALECT_PREVIEW_GREETING: Record<ArabicDialect, (agentName: string) => string> = {
-  sa: (agent) => `هلا والله، ${agent} معك. كيف أقدر أخدمك؟`,
-  gulf: (agent) => `هلا والله، معاك ${agent}. كيف أقدر أساعدك؟`,
-  eg: (agent) => `أهلاً بحضرتك، أنا ${agent}. أقدر أساعدك إزاي؟`,
-  lb: (agent) => `أهلاً وسهلاً، أنا ${agent}. كيف فيني ساعدك؟`,
+  sa: (agent) => `هلا والله، ${agent} معك، موظفة الاستقبال الذكية. كيف أقدر أخدمك؟`,
+  gulf: (agent) => `هلا والله، معاك ${agent}، موظفة الاستقبال الذكية. كيف أقدر أساعدك؟`,
+  eg: (agent) => `أهلاً بحضرتك، أنا ${agent}، موظفة الاستقبال الذكية. أقدر أساعدك إزاي؟`,
+  lb: (agent) => `أهلاً وسهلاً، أنا ${agent}، موظفة الاستقبال الذكية. كيف فيني ساعدك؟`,
 };
 
 /** An instruction for the preview voice so it sounds like the chosen dialect. Only used with the speech model that accepts instructions. */
