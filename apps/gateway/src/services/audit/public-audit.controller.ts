@@ -124,7 +124,7 @@ export function createPublicAuditRouter(): Router {
         const href = `${req.originalUrl.split('?')[0]}?t=${encodeURIComponent(String(req.query.t))}&confirm=1`;
         res.type('html').send(page('Send the audit questionnaire?',
           `<p>This emails <b>${who}</b> a private link to the audit questionnaire.</p>` +
-          `<p style="color:#5b6472">After they submit it, you prepare the audit (about one week). When the audit is ready, a button in the "questionnaire received" email we send you then emails them the payment link${isAuditCurrency(p.cur) && price !== undefined ? ` for ${escapeHtml(priceText(p.cur) ?? '')}` : ' (no payment currency is set for this country, so you will send that one yourself)'}. The full audit goes out once they pay.</p>` +
+          `<p style="color:#5b6472">After they submit it, the AI drafts the audit and you get an email with a link to review it. When you approve the draft, the client is emailed the payment link${isAuditCurrency(p.cur) && price !== undefined ? ` for ${escapeHtml(priceText(p.cur) ?? '')}` : ' (no payment currency is set for this country, so you will send that one yourself)'}. The full audit goes out once they pay.</p>` +
           `<p><a href="${escapeHtml(href)}" style="display:inline-block;background:#1b1f27;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600">Send the questionnaire</a></p>`));
         return;
       }

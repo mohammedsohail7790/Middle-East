@@ -44,6 +44,8 @@ const PUBLIC_POST_ROUTES = new Set([
   // The paid audit: Form 2 and the payment page open from a private signed link we email, not a login. (The Stripe webhook for it is mounted before this layer, in index.ts.)
   '/public/audit/form2',
   '/public/audit/pay',
+  // The team's review page for the AI draft of an audit report: saving edits and approving. Protected by a signed, expiring link (kind "review").
+  '/public/audit/review',
   // Klaros asks Halla to create a business's receptionist. Server-to-server: it carries no tenant JWT and authenticates itself
   // with the platform secret in the route (404 unless KLAROS_PROVISIONING_SECRET is set).
   '/platform/klaros/provision',
@@ -60,6 +62,9 @@ const PUBLIC_GET_ROUTES = new Set([
   '/public/audit/approve',
   // The "audit is ready, send the payment link" page from the questionnaire email for us. Same protection as the approve page.
   '/public/audit/send-payment',
+  // The team's review page and its PDF preview, opened from the "Draft audit ready" email. Same signed-link protection.
+  '/public/audit/review',
+  '/public/audit/review/pdf',
   '/calendar/google/callback',
   '/calendar/outlook/callback',
   '/calendar/calendly/callback',
