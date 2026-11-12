@@ -1,4 +1,4 @@
--- 082: Persistent scheduler
+-- 083: Persistent scheduler
 -- Appointment reminders, campaign dialling and retries used to live in process memory (setInterval / setTimeout) and were lost on every restart.
 -- This table is the source of truth for "something that must happen at a given time". The gateway polls it with FOR UPDATE SKIP LOCKED, so two
 -- instances never take the same job. Redis is not used for this: it runs with an eviction policy and may drop keys.
