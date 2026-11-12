@@ -55,7 +55,7 @@ function section(s: Section): string {
   return `<div>${head}${blocks}<button type="button" class="btn btn-secondary" style="margin-top:16px" data-add="${s.id}" data-noun="${escapeHtml(noun)}">+ ${bi('Add another ' + noun.toLowerCase())}</button></div>`;
 }
 
-const hero = (title: string, text: string) => `<div class="page-hero"><div class="container text-center"><div class="label">${bi('Halla AI Consultancy')}</div><h1>${bi(title)}</h1><p style="margin-top:12px;font-size:1.05rem;max-width:560px;margin-left:auto;margin-right:auto">${bi(text)}</p></div></div>`;
+const hero = (title: string, text: string) => `<section class="cx cx-light cx-head"><div class="cx-wrap"><div class="cx-eyebrow cx-ey-light">${bi('Halla AI Consultancy')}</div><h1 class="cx-h1 cx-h1-sm">${bi(title)}</h1><p class="cx-lead">${bi(text)}</p></div></section>`;
 
 export function renderAuditPages(): string {
   const form2 = `<div id="page-audit" class="page">
