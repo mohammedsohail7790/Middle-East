@@ -70,7 +70,7 @@ describe('dialect previews', () => {
   });
 
   it('keeps the old generic Arabic line for a bare "ar"', () => {
-    expect(buildPreviewSampleText({ language: 'ar', agentName: 'Sara' })).toContain('هلا والله، Sara تتكلم');
+    expect(buildPreviewSampleText({ language: 'ar', agentName: 'Sara' })).toContain('هلا والله، Sara موظفة الاستقبال الذكية');
   });
 
   it('previews the business\'s own Arabic greeting as written, but never reads English out in Arabic', () => {
