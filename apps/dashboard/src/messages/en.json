@@ -444,6 +444,12 @@
       "addDontRule": "Add a Don't rule",
       "removeDoRule": "Remove do-rule: {rule}",
       "removeDontRule": "Remove don't-rule: {rule}",
+      "qualifyingQuestions": "Questions to ask callers",
+      "qualifyingQuestionsHint": "When a caller wants a booking, a quote or a visit, your receptionist works these in, one at a time and in its own words. It skips any the caller already answered and never holds up an urgent call. Up to {max} questions.",
+      "addQuestion": "Add a question",
+      "questionPlaceholder": "For example: What service do you need?",
+      "removeQuestion": "Remove question: {question}",
+      "questionsFull": "You have reached the limit of {max} questions.",
       "voices": {
         "marin": "Female · live calls (most natural)",
         "coral": "Female · warm",
