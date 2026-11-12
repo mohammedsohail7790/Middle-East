@@ -3,6 +3,8 @@ import type { Server } from 'node:http';
 import express from 'express';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+const pipeline = vi.hoisted(() => ({ startDraft: vi.fn(), handlePaid: vi.fn() }));
+vi.mock('../../apps/gateway/src/services/audit/audit-pipeline.js', () => pipeline);
 const send = vi.fn();
 vi.mock('resend', () => ({ Resend: class { emails = { send }; } }));
 const create = vi.fn();
@@ -18,6 +20,10 @@ beforeEach(async () => {
   vi.resetModules();
   send.mockReset();
   send.mockResolvedValue({ id: 'x' });
+  pipeline.startDraft.mockReset();
+  pipeline.startDraft.mockResolvedValue(undefined);
+  pipeline.handlePaid.mockReset();
+  pipeline.handlePaid.mockResolvedValue('no-record');
   create.mockReset();
   create.mockResolvedValue({ url: 'https://checkout.stripe.com/c/abc' });
   process.env.RESEND_API_KEY = 'k';
@@ -74,6 +80,7 @@ describe('Form 2', () => {
     expect((await post('/form2', { token: pay(), answers: { a_company: 'a', b_process: 'b' } })).status).toBe(400);
     expect((await post('/form2', { token: form2(), answers: { a_company: 'a' } })).status).toBe(400);
     expect(send).not.toHaveBeenCalled();
+    expect(pipeline.startDraft).not.toHaveBeenCalled();
   });
 });
 
@@ -103,6 +110,22 @@ describe('payment', () => {
     expect(send).toHaveBeenCalledTimes(2);
     expect(send.mock.calls[1][0].to).toEqual(['j@example.com']);
     expect(send.mock.calls[1][0].subject).toContain('payment');
+    expect(pipeline.handlePaid).toHaveBeenCalledWith('r1');
+  });
+
+  it('does not send the "we will email your audit" note when the audit PDF was just delivered automatically', async () => {
+    pipeline.handlePaid.mockResolvedValue('delivered');
+    const body = JSON.stringify({ type: 'checkout.session.completed', data: { object: { payment_status: 'paid', currency: 'aed', amount_total: 500000, metadata: { kind: 'audit', company: 'Smith & Co', link_id: 'r2' }, customer_details: { email: 'j@example.com' } } } });
+    const res = await fetch(`${base}/stripe-webhook`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'stripe-signature': 's' }, body });
+    expect(res.status).toBe(200);
+    expect(send).toHaveBeenCalledTimes(1); // only our own "Audit PAID" email
+  });
+
+  it('still answers Stripe with success if the automatic delivery step crashes', async () => {
+    pipeline.handlePaid.mockRejectedValue(new Error('boom'));
+    const body = JSON.stringify({ type: 'checkout.session.completed', data: { object: { payment_status: 'paid', currency: 'aed', amount_total: 500000, metadata: { kind: 'audit', company: 'Smith & Co', link_id: 'r3' }, customer_details: { email: 'j@example.com' } } } });
+    expect((await fetch(`${base}/stripe-webhook`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'stripe-signature': 's' }, body })).status).toBe(200);
+    expect(send).toHaveBeenCalledTimes(2); // our email and the generic confirmation
   });
 });
 
@@ -137,19 +160,28 @@ describe('the live flow', () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it('thanks the client without a payment link, and gives us a button to send it once the audit is ready', async () => {
+  it('thanks the client without a payment link, tells us a draft is on its way, and starts the draft', async () => {
     const res = await post('/form2', { token: form2cur('AED'), answers: { a_company: 'Smith Trading, wholesale', b_process: 'Type it up' } });
     expect(res.status).toBe(200);
     expect((await res.json()).payUrl).toBeUndefined();
     expect(send).toHaveBeenCalledTimes(2);
     const team = send.mock.calls[0][0];
     expect(team.to).toEqual(['a@example.com', 'b@example.com']);
-    expect(team.html).toContain('/api/v1/public/audit/send-payment?t=');
-    expect(team.text).toContain('Audit is ready: send the payment link');
+    expect(team.html).not.toContain('/send-payment?t=');
+    expect(team.text).toContain('A draft audit is being written');
+    expect(pipeline.startDraft).toHaveBeenCalledTimes(1);
+    expect(pipeline.startDraft.mock.calls[0][0]).toMatchObject({ company: 'Smith & Co' });
+    expect(pipeline.startDraft.mock.calls[0][1]).toMatchObject({ a_company: 'Smith Trading, wholesale' });
     const client = send.mock.calls[1][0];
     expect(client.to).toEqual(['j@example.com']);
     expect(client.subject).toContain('We received your questionnaire');
     expect(client.html).not.toContain('/audit/pay?t=');
+  });
+
+  it('still reports success to the client if the background draft step fails', async () => {
+    pipeline.startDraft.mockRejectedValue(new Error('draft crashed'));
+    const res = await post('/form2', { token: form2cur('AED'), answers: { a_company: 'Smith Trading, wholesale', b_process: 'Type it up' } });
+    expect(res.status).toBe(200);
   });
 
   it('still reports success if the thank-you email to the client fails after our own email went out', async () => {

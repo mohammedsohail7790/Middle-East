@@ -17,6 +17,10 @@ export async function sendClientAuditMail(opts: {
   ctaLabel?: string;
   ctaUrl?: string;
   preheader?: string;
+  /** Files to attach, for example the audit PDF. */
+  attachments?: Array<{ filename: string; content: Buffer }>;
+  /** Right-to-left layout for Arabic text. */
+  rtl?: boolean;
 }): Promise<'sent' | 'not-configured'> {
   if (!process.env.RESEND_API_KEY) return 'not-configured';
   const resend = new Resend(process.env.RESEND_API_KEY);
@@ -33,8 +37,9 @@ export async function sendClientAuditMail(opts: {
     to: [opts.to],
     replyTo: REPLY_TO,
     subject: opts.subject,
-    html,
+    html: opts.rtl ? html.replace('<body', '<body dir="rtl"') : html,
     text: stripToPlainText(html),
+    ...(opts.attachments?.length ? { attachments: opts.attachments } : {}),
   }));
   return 'sent';
 }

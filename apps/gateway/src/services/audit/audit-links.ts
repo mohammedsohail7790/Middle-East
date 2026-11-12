@@ -41,6 +41,12 @@ export function sendPaymentUrl(who: LinkWho): string | null {
   return t ? `${GATEWAY}/api/v1/public/audit/send-payment?t=${encodeURIComponent(t)}` : null;
 }
 
+/** The team's review page for one audit: read and edit the AI draft, then approve it, which emails the client the payment link. Works as long as the analysis normally takes, with room to spare. */
+export function reviewUrl(who: LinkWho): string | null {
+  const t = make('review', who, SEND_PAYMENT_DAYS);
+  return t ? `${GATEWAY}/api/v1/public/audit/review?t=${encodeURIComponent(t)}` : null;
+}
+
 export function questionnaireUrl(who: LinkWho): string | null {
   const t = make('form2', who, QUESTIONNAIRE_DAYS);
   return t ? `${SITE}/audit?t=${encodeURIComponent(t)}` : null;
