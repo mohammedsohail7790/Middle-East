@@ -77,9 +77,9 @@ describe('audit estimate: rates from the environment', () => {
 });
 
 describe('audit estimate: time frame', () => {
-  it('turns the hours range into weeks at 30 build hours a week', () => {
-    expect(estimateTimeline({ min: 35, max: 60 })).toMatchObject({ weeksMin: 2, weeksMax: 2 });
-    expect(estimateTimeline({ min: 90, max: 165 })).toMatchObject({ weeksMin: 3, weeksMax: 6 });
+  it('turns the hours range into weeks at 25 build hours a week', () => {
+    expect(estimateTimeline({ min: 35, max: 60 })).toMatchObject({ weeksMin: 2, weeksMax: 3 });
+    expect(estimateTimeline({ min: 90, max: 165 })).toMatchObject({ weeksMin: 4, weeksMax: 7 });
     expect(estimateTimeline({ min: 15, max: 25 })).toMatchObject({ weeksMin: 1, weeksMax: 1 });
   });
 
@@ -87,7 +87,7 @@ describe('audit estimate: time frame', () => {
     const t = estimateTimeline({ min: 100, max: 100 }, 20);
     expect(t.weeksMin).toBe(5);
     expect(t.weeksMax).toBe(5);
-    expect(estimateTimeline({ min: 80, max: 150 }, 25)).toMatchObject({ weeksMin: 4, weeksMax: 6 });
+    expect(estimateTimeline({ min: 80, max: 150 }, 30)).toMatchObject({ weeksMin: 3, weeksMax: 5 });
   });
 
   it('shares the weeks over three phases, at least a week each, adding up to the total', () => {
@@ -103,13 +103,13 @@ describe('audit estimate: time frame', () => {
 
   it('puts the timeline in the phase split of the estimate for a big job', () => {
     const t = estimateTimeline({ min: 137, max: 245 });
-    expect(t.weeksMax).toBe(9);
-    expect(t.phaseWeeks[0] + t.phaseWeeks[1] + t.phaseWeeks[2]).toBe(9);
+    expect(t.weeksMax).toBe(10);
+    expect(t.phaseWeeks[0] + t.phaseWeeks[1] + t.phaseWeeks[2]).toBe(10);
   });
 
   it('reads the pace from the environment and ignores bad values', () => {
-    expect(ratesFromEnv({ AUDIT_BUILD_HOURS_PER_WEEK: '25' } as any).hoursPerWeek).toBe(25);
-    expect(ratesFromEnv({ AUDIT_BUILD_HOURS_PER_WEEK: 'lots' } as any).hoursPerWeek).toBe(30);
+    expect(ratesFromEnv({ AUDIT_BUILD_HOURS_PER_WEEK: '40' } as any).hoursPerWeek).toBe(40);
+    expect(ratesFromEnv({ AUDIT_BUILD_HOURS_PER_WEEK: 'lots' } as any).hoursPerWeek).toBe(25);
     expect(ratesFromEnv({ AUDIT_BUILD_HOURS_PER_WEEK: '0' } as any).hoursPerWeek).toBe(1);
   });
 });
