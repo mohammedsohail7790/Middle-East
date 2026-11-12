@@ -5,13 +5,14 @@ import Stripe from 'stripe';
 import { logger } from '../logger.js';
 import { BillingNotConfiguredError } from './billing-errors.js';
 
-export type PlanKey = 'essential' | 'professional';
+export type PlanKey = 'essential' | 'professional' | 'enterprise';
 export type BillingInterval = 'monthly' | 'annual';
 
-const PLAN_KEYS: PlanKey[] = ['essential', 'professional'];
+const PLAN_KEYS: PlanKey[] = ['essential', 'professional', 'enterprise'];
 
 /** Halla AI Stripe products (reused from the same account as the earlier Call IQ product; safe to commit — not secret). Override via env on Render. */
-const DEFAULT_STRIPE_PRODUCTS: Record<PlanKey, Record<BillingInterval, string>> = {
+/** Enterprise has no default product: it is created in Stripe and set on Render (STRIPE_ENTERPRISE_*), so it is never sold by accident before it exists. */
+const DEFAULT_STRIPE_PRODUCTS: Record<Exclude<PlanKey, 'enterprise'>, Record<BillingInterval, string>> = {
   essential: {
     monthly: 'prod_UevJDYfmBcR9Id',
     annual: 'prod_UevhigbubpTIss',
@@ -31,6 +32,10 @@ const PRICE_ENV: Record<PlanKey, Record<BillingInterval, string>> = {
     monthly: 'STRIPE_PROFESSIONAL_PRICE_ID',
     annual: 'STRIPE_PROFESSIONAL_ANNUAL_PRICE_ID',
   },
+  enterprise: {
+    monthly: 'STRIPE_ENTERPRISE_PRICE_ID',
+    annual: 'STRIPE_ENTERPRISE_ANNUAL_PRICE_ID',
+  },
 };
 
 const PRODUCT_ENV: Record<PlanKey, Record<BillingInterval, string>> = {
@@ -42,14 +47,19 @@ const PRODUCT_ENV: Record<PlanKey, Record<BillingInterval, string>> = {
     monthly: 'STRIPE_PROFESSIONAL_PRODUCT_ID_MONTHLY',
     annual: 'STRIPE_PROFESSIONAL_PRODUCT_ID_ANNUAL',
   },
+  enterprise: {
+    monthly: 'STRIPE_ENTERPRISE_PRODUCT_ID_MONTHLY',
+    annual: 'STRIPE_ENTERPRISE_PRODUCT_ID_ANNUAL',
+  },
 };
 
 const OVERAGE_ENV: Record<PlanKey, string> = {
   essential: 'STRIPE_ESSENTIAL_OVERAGE_ID',
   professional: 'STRIPE_PROFESSIONAL_OVERAGE_ID',
+  enterprise: 'STRIPE_ENTERPRISE_OVERAGE_ID',
 };
 
-const PLACEHOLDER_PRICE = /^price_(essential|professional)(_annual)?(_overage)?$/;
+const PLACEHOLDER_PRICE = /^price_(essential|professional|enterprise)(_annual)?(_overage)?$/;
 
 type CachedPrice = { priceId: string; unitAmount: number | null; expiresAt: number };
 
@@ -77,7 +87,14 @@ function envTrim(name: string): string {
 function getProductId(plan: PlanKey, interval: BillingInterval): string {
   const fromEnv = envTrim(PRODUCT_ENV[plan][interval]);
   if (fromEnv) return fromEnv;
+  if (plan === 'enterprise') return '';
   return DEFAULT_STRIPE_PRODUCTS[plan][interval];
+}
+
+/** True when this plan can be sold: a price id or a product id is set (always true for Essential and Professional, which have built-in products). */
+export function isPlanPurchasable(plan: PlanKey): boolean {
+  if (plan !== 'enterprise') return true;
+  return (['monthly', 'annual'] as BillingInterval[]).some((i) => !!getDirectPriceId(plan, i) || !!envTrim(PRODUCT_ENV[plan][i]));
 }
 
 function getDirectPriceId(plan: PlanKey, interval: BillingInterval): string | null {
@@ -102,6 +119,9 @@ export async function resolveSubscriptionPriceId(
 ): Promise<{ priceId: string; unitAmountCents: number | null }> {
   const direct = getDirectPriceId(plan, interval);
   if (direct) return { priceId: direct, unitAmountCents: null };
+  if (!getProductId(plan, interval)) {
+    throw new BillingNotConfiguredError(`The ${plan} plan is not on sale yet. Contact sales.`);
+  }
 
   const cacheKey = `${plan}:${interval}`;
   const cached = priceCache.get(cacheKey);
@@ -162,6 +182,7 @@ export function parsePlanKey(raw: unknown): PlanKey | null {
 export async function warmStripePriceCache(): Promise<void> {
   if (!isStripeConfigured()) return;
   for (const plan of PLAN_KEYS) {
+    if (!isPlanPurchasable(plan)) continue;
     for (const interval of ['monthly', 'annual'] as BillingInterval[]) {
       try {
         await resolveSubscriptionPriceId(plan, interval);
@@ -190,6 +211,7 @@ export async function validateStripeBillingConfig(): Promise<void> {
 
   const failures: string[] = [];
   for (const plan of PLAN_KEYS) {
+    if (!isPlanPurchasable(plan)) continue;
     for (const interval of ['monthly', 'annual'] as BillingInterval[]) {
       try {
         await resolveSubscriptionPriceId(plan, interval);

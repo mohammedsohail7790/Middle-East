@@ -7,6 +7,7 @@ import { logger } from '../logger.js';
 import { voiceDb } from '../voice/tenant-scope.js';
 import { publishDashboardPushType } from '../dashboard/dashboard-events.js';
 import { appointmentService } from '../appointments/appointment.service.js';
+import { billingService } from '../billing/billing.service.js';
 import { whatsappStore, type Conversation, type WhatsAppNumber } from './whatsapp.store.js';
 import {
   downloadMedia, markRead, optKeyword, transcribeAudio, type InboundMessage, type ParsedWebhook,
@@ -143,8 +144,13 @@ async function processMessage(num: WhatsAppNumber, m: InboundMessage): Promise<v
     return;
   }
 
-  // Human is driving, AI is off for this number, or the tenant is on the consent-capture track: store only, staff replies.
-  if (conv.mode === 'human' || !num.aiEnabled || (await isConsentCaptureTenant(tenantId))) {
+  // Human is driving, AI is off for this number, the tenant is on the consent-capture track, or the paid WhatsApp add-on is missing: store only, staff replies.
+  if (
+    conv.mode === 'human' ||
+    !num.aiEnabled ||
+    (await isConsentCaptureTenant(tenantId)) ||
+    !(await billingService.isWhatsAppAllowed(tenantId).catch(() => true))
+  ) {
     await whatsappStore.flagAttention(conv.id);
     push(tenantId, conv.id);
     return;

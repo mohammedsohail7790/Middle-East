@@ -5,6 +5,7 @@ const PLAN_LEVEL: Record<string, number> = {
   starter: 1,
   essential: 1,
   professional: 2,
+  enterprise: 3,
 };
 
 /** Map API/marketing plan ids to sidebar gate ids */

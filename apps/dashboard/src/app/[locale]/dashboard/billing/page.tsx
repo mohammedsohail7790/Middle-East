@@ -206,8 +206,10 @@ function BillingPageContent() {
       setPlansChecked(true);
       if (!state) return;
       setCheckoutEnabled(state.checkoutEnabled);
+      // A plan whose Stripe price is not set up yet (Enterprise, before it goes on sale) is not offered, so no one clicks a button that fails.
+      const sellable = Object.values(state.plans).filter((p) => !state.checkoutEnabled || p.checkoutReady !== false);
       setCheckoutPlans(
-        Object.values(state.plans).map((p) => ({
+        sellable.map((p) => ({
           id: p.key,
           name: p.name,
           monthlyPrice: p.pricing?.monthly?.amount ?? p.price,

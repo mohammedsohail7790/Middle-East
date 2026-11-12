@@ -60,6 +60,17 @@ function requireStripe(): Stripe {
   return stripe;
 }
 
+/** The $39/month WhatsApp add-on's Stripe price. Set STRIPE_WHATSAPP_ADDON_PRICE_ID on Render once the price exists in Stripe. */
+export function whatsappAddonPriceId(): string | null {
+  const id = process.env.STRIPE_WHATSAPP_ADDON_PRICE_ID?.trim();
+  return id || null;
+}
+
+/** WhatsApp is only held back for businesses without the add-on once this is switched on (when billing goes live); until then it behaves as it does today. */
+export function isWhatsAppAddonEnforced(): boolean {
+  return process.env.WHATSAPP_ADDON_ENFORCED === 'true';
+}
+
 // ─── Plan Definitions (matching spec) ───────────────────────────────────────
 
 export interface PlanFeature {
@@ -104,7 +115,7 @@ export interface PlanDefinition {
   badge?: string;
 }
 
-const PLAN_RANK: Record<string, number> = { essential: 1, professional: 2 };
+const PLAN_RANK: Record<string, number> = { essential: 1, professional: 2, enterprise: 3 };
 
 export const PLANS: Record<string, PlanDefinition> = {
   essential: {
@@ -167,12 +178,50 @@ export const PLANS: Record<string, PlanDefinition> = {
       crm: 'zapier_full',
       calendar: 'native',
       customVoice: true,
-      advancedAnalytics: true,
+      advancedAnalytics: false,
       apiAccess: true,
       dedicatedAccountManager: false,
       customOnboarding: false,
       hipaa: false,
       sla: false,
+      additionalLanguages: 0,
+    },
+    support: {
+      liveChat: '7am–3pm ET',
+      email: '24/7',
+    },
+    trial: {
+      days: 14,
+      requiresCard: false,
+    },
+  },
+  enterprise: {
+    name: 'Enterprise',
+    key: 'enterprise',
+    price: 499,
+    overageRate: 0.10,
+    includedMinutes: 4000,
+    estimatedCalls: 1600,
+    features: {
+      callMinutes: 4000,
+      estimatedCalls: 1600,
+      callForwarding: true,
+      coreAI: true,
+      voicemailToText: false,
+      appointmentBooking: 'native',
+      browserDashboard: true,
+      bilingual: 'en-ar',
+      languages: ['en', 'ar'],
+      emailSmsSummaries: true,
+      crm: 'zapier_full',
+      calendar: 'native',
+      customVoice: true,
+      advancedAnalytics: true,
+      apiAccess: true,
+      dedicatedAccountManager: false,
+      customOnboarding: false,
+      hipaa: false,
+      sla: true,
       additionalLanguages: 0,
     },
     support: {
@@ -419,6 +468,78 @@ export class BillingService {
     return sub !== null;
   }
 
+  // ── WhatsApp add-on ($39/month) ─────────────────────────────────────────
+
+  /** Whether the business has the WhatsApp add-on switched on (stored on the tenant, set when the Stripe item is added or removed). */
+  async hasWhatsAppAddon(tenantId: string): Promise<boolean> {
+    const r = await pool.query(
+      `SELECT COALESCE((metadata -> 'addons' -> 'whatsapp' ->> 'active')::boolean, false) AS active FROM public.voice_tenants WHERE id = $1`,
+      [tenantId]
+    );
+    return r.rows[0]?.active === true;
+  }
+
+  /**
+   * Whether this business may use the WhatsApp AI agent now. A free trial has every feature. A paid business needs the add-on, but only once enforcement is
+   * switched on, so turning billing on is a setting, not a deploy. A cancelled or unpaid subscription never counts as the add-on being active.
+   */
+  async isWhatsAppAllowed(tenantId: string): Promise<boolean> {
+    if (!isWhatsAppAddonEnforced()) return true;
+    const sub = await this.getActiveSubscription(tenantId);
+    if (!sub) return false;
+    if (sub.status === 'trialing') return true;
+    if (sub.status !== 'active') return false;
+    return this.hasWhatsAppAddon(tenantId);
+  }
+
+  private async setWhatsAppAddonFlag(tenantId: string, value: { active: boolean; stripeItemId?: string | null }): Promise<void> {
+    await pool.query(
+      `UPDATE public.voice_tenants
+       SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), '{addons,whatsapp}', $2::jsonb, true)
+       WHERE id = $1`,
+      [
+        tenantId,
+        JSON.stringify({ active: value.active, stripeItemId: value.stripeItemId ?? null, changedAt: new Date().toISOString() }),
+      ]
+    );
+  }
+
+  /** Adds the WhatsApp add-on to the business's paid subscription. Safe to call twice: an item already on the subscription is reused. */
+  async addWhatsAppAddon(tenantId: string): Promise<{ active: true; stripeItemId: string }> {
+    const priceId = whatsappAddonPriceId();
+    if (!priceId) throw new BillingNotConfiguredError('The WhatsApp add-on is not on sale yet. Contact sales.');
+    const sub = await this.getSubscription(tenantId);
+    if (!sub?.stripeSubscriptionId) throw new Error('Choose a paid plan before adding WhatsApp');
+    const stripeSub = await requireStripe().subscriptions.retrieve(sub.stripeSubscriptionId);
+    if (stripeSub.status === 'canceled') throw new Error('Subscription ended — start a new checkout to subscribe again');
+    let item = stripeSub.items.data.find((i) => i.price?.id === priceId);
+    if (!item) {
+      item = await requireStripe().subscriptionItems.create({
+        subscription: sub.stripeSubscriptionId,
+        price: priceId,
+        quantity: 1,
+        proration_behavior: 'create_prorations',
+      });
+    }
+    await this.setWhatsAppAddonFlag(tenantId, { active: true, stripeItemId: item.id });
+    logger.info('WHATSAPP_ADDON_ADDED', { tenantId });
+    return { active: true, stripeItemId: item.id };
+  }
+
+  /** Removes the add-on at once (prorated). WhatsApp then stops answering for this business once enforcement is on. */
+  async removeWhatsAppAddon(tenantId: string): Promise<{ active: false }> {
+    const priceId = whatsappAddonPriceId();
+    const sub = await this.getSubscription(tenantId);
+    if (priceId && sub?.stripeSubscriptionId) {
+      const stripeSub = await requireStripe().subscriptions.retrieve(sub.stripeSubscriptionId);
+      const item = stripeSub.items.data.find((i) => i.price?.id === priceId);
+      if (item) await requireStripe().subscriptionItems.del(item.id, { proration_behavior: 'create_prorations' });
+    }
+    await this.setWhatsAppAddonFlag(tenantId, { active: false, stripeItemId: null });
+    logger.info('WHATSAPP_ADDON_REMOVED', { tenantId });
+    return { active: false };
+  }
+
   // ── Plan Upgrade / Downgrade ─────────────────────────────────────────────
 
   async updateSubscriptionPlan(tenantId: string, newPlan: string): Promise<Subscription> {
@@ -450,14 +571,17 @@ export class BillingService {
       }
     }
 
-    const billingInterval = intervalFromStripePrice(stripeSub.items.data[0]?.price);
+    // The WhatsApp add-on is an item on the same subscription; the plan and overage items are the others, in order.
+    const addonPrice = whatsappAddonPriceId();
+    const planItems = stripeSub.items.data.filter((item) => !(addonPrice && item.price?.id === addonPrice));
+    const billingInterval = intervalFromStripePrice(planItems[0]?.price);
     const { priceId } = await resolveSubscriptionPriceId(planKey, billingInterval);
     const overagePriceId = getOveragePriceId(planKey);
     const updateItems: Stripe.SubscriptionUpdateParams.Item[] = [
-      { id: stripeSub.items.data[0].id, price: priceId },
+      { id: planItems[0].id, price: priceId },
     ];
-    if (overagePriceId && stripeSub.items.data[1]) {
-      updateItems.push({ id: stripeSub.items.data[1].id, price: overagePriceId });
+    if (overagePriceId && planItems[1]) {
+      updateItems.push({ id: planItems[1].id, price: overagePriceId });
     }
 
     const updated = await requireStripe().subscriptions.update(sub.stripeSubscriptionId, {
@@ -1017,7 +1141,8 @@ export class BillingService {
   async canUseFeature(tenantId: string, feature: keyof PlanFeature): Promise<boolean> {
     const sub = await this.getActiveSubscription(tenantId);
     if (!sub) return false;
-    const planConfig = PLANS[sub.plan];
+    // The free trial unlocks every feature (the sites say so), so a trial is checked as the top plan.
+    const planConfig = PLANS[sub.status === 'trialing' ? 'enterprise' : sub.plan];
     if (!planConfig) return false;
     const value = planConfig.features[feature];
     if (typeof value === 'number') return value > 0;
@@ -1034,8 +1159,9 @@ export class BillingService {
     return PLAN_RANK[plan] ?? 0;
   }
 
-  async isEnterprise(_tenantId: string): Promise<boolean> {
-    return false;
+  async isEnterprise(tenantId: string): Promise<boolean> {
+    const sub = await this.getActiveSubscription(tenantId);
+    return sub?.plan === 'enterprise' && sub.status !== 'trialing';
   }
 
   async getFeatureSummary(tenantId: string): Promise<{

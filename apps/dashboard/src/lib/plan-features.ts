@@ -8,7 +8,7 @@
 import { getPlan, hasAccess, isNavItemLocked, normalizePlanId } from "@/lib/store";
 import type { NavPlan } from "@/lib/dashboard-nav";
 
-export type PlanTier = "trial" | "essential" | "professional";
+export type PlanTier = "trial" | "essential" | "professional" | "enterprise";
 
 export type FeatureKey =
   | "analytics"
@@ -30,6 +30,7 @@ const FEATURE_MIN_PLAN: Record<FeatureKey, NavPlan | "trial"> = {
 const PLAN_LABEL: Record<string, string> = {
   essential: "Starter",
   professional: "Professional",
+  enterprise: "Enterprise",
 };
 
 export function currentPlanTier(): PlanTier {
