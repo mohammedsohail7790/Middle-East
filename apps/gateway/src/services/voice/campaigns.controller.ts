@@ -4,6 +4,14 @@ import { requireVoiceApiAccess, voiceRateLimit } from './security.js';
 import { clientErrorMessage } from '../../security/safe-error.js';
 import { requireCallMinutes, requireEssentialOrHigher } from '../../middleware/plan-gating.js';
 import { logger } from '../logger.js';
+import { parseCallingHoursInput } from '../scheduler/calling-hours.js';
+import { CampaignControlError } from '../scheduler/campaign-control.js';
+
+function sendControlError(res: any, error: unknown): boolean {
+    if (!(error instanceof CampaignControlError)) return false;
+    res.status(error.httpStatus).json({ success: false, error: error.message });
+    return true;
+}
 
 function getTenantScope(req: any): string {
     const resolved = req.resolvedTenantId as string | undefined;
@@ -23,8 +31,8 @@ interface CampaignTarget {
 }
 
 /** Outbound campaigns: sales/cold-call lists, appointment reminders, lead follow-ups.
- *  Dialing is triggered on-demand via /start — a proper time-scheduled dialer (for
- *  reminders that must fire at a specific time) is a follow-up piece, not yet wired here. */
+ *  /start queues persistent dial jobs (services/scheduler) that run at the scheduled start time inside the campaign's calling hours;
+ *  /pause, /resume, /stop and /status control and report on them. */
 export function createCampaignsRouter(): express.Router {
     const router = express.Router();
     router.use(express.json());
@@ -215,7 +223,11 @@ export function createCampaignsRouter(): express.Router {
         }
     });
 
-    /** Dials every pending target in the campaign now, staggered to avoid hammering Twilio. */
+    /**
+     * Starts a campaign: one persistent dial job per pending target (table scheduled_jobs), so nothing is lost on a restart and no
+     * number is dialled twice. Optional body: scheduleAt (ISO time to begin) and callingHours { start, end, days, timezone }, which
+     * default to 09:00-20:00 every day in the business's timezone. Calls never go out outside those hours; they wait for the next opening.
+     */
     router.post('/:id/start', requireCallMinutes(), async (req: any, res: any) => {
         try {
             const tenantId = getTenantScope(req);
@@ -223,77 +235,83 @@ export function createCampaignsRouter(): express.Router {
             const fromNumberInput = typeof req.body?.fromNumber === 'string' ? req.body.fromNumber.trim() : undefined;
             const phoneNumberId = typeof req.body?.phoneNumberId === 'string' ? req.body.phoneNumberId.trim() : undefined;
 
+            const hours = parseCallingHoursInput(req.body?.callingHours);
+            if (hours.ok === false) return res.status(400).json({ success: false, error: hours.error });
+            let scheduleAt: Date | null = null;
+            if (req.body?.scheduleAt !== undefined && req.body.scheduleAt !== null) {
+                scheduleAt = new Date(req.body.scheduleAt);
+                if (Number.isNaN(scheduleAt.getTime())) return res.status(400).json({ success: false, error: 'scheduleAt must be an ISO date-time' });
+            }
+
             const { resolveOutboundCallerId } = await import('./resolve-outbound-caller-id.js');
-            const caller = await resolveOutboundCallerId(tenantId, {
-                fromNumber: fromNumberInput,
-                phoneNumberId,
-            });
+            const caller = await resolveOutboundCallerId(tenantId, { fromNumber: fromNumberInput, phoneNumberId });
             if (!caller) {
                 return res.status(400).json({
                     success: false,
                     error: 'No authorized outbound phone number configured for this workspace',
                 });
             }
-            const fromNumber = caller.fromNumber;
-            const agentId = caller.agentId;
 
-            const campaign = await voiceDb.query(
-                `select id from public.campaigns where id = $1 and tenant_id = $2`,
-                [campaignId, tenantId]
-            );
-            if (campaign.rows.length === 0) {
-                return res.status(404).json({ success: false, error: 'Campaign not found' });
-            }
-
-            const pending = await voiceDb.query(
-                `select id, phone_number, purpose, context, lead_id, customer_id
-                 from public.campaign_calls where campaign_id = $1 and status = 'pending'
-                 order by created_at asc limit 500`,
-                [campaignId]
-            );
-
-            await voiceDb.query(`update public.campaigns set status = 'running', updated_at = now() where id = $1`, [campaignId]);
-
-            const { initiateOutboundCall, parseCampaignCallContext } = await import('./outbound.service.js');
-            const DIAL_STAGGER_MS = 2000;
-            let queued = 0;
-            for (const row of pending.rows) {
-                const delay = queued * DIAL_STAGGER_MS;
-                queued += 1;
-                const context = parseCampaignCallContext(row.context);
-                setTimeout(() => {
-                    initiateOutboundCall({
-                        tenantId,
-                        toNumber: row.phone_number,
-                        fromNumber,
-                        agentId,
-                        reason: row.purpose || 'campaign',
-                        openingContext: context,
-                        campaignCallId: row.id,
-                        leadId: row.lead_id,
-                        customerId: row.customer_id,
-                    }).catch((err) => {
-                        logger.error('CAMPAIGN_DIAL_FAILED', { campaignId, campaignCallId: row.id, error: String(err) });
-                        voiceDb
-                            .query(
-                                `update public.campaign_calls cc
-                                 set status = 'failed'
-                                 from public.campaigns c
-                                 where cc.id = $1 and cc.campaign_id = c.id and c.tenant_id = $2`,
-                                [row.id, tenantId]
-                            )
-                            .catch(() => {});
-                    });
-                }, delay);
-            }
-
-            res.json({ success: true, queued });
+            const { startCampaign } = await import('../scheduler/campaign-control.js');
+            const { jobStore } = await import('../scheduler/runtime.js');
+            const result = await startCampaign(jobStore, {
+                tenantId, campaignId, fromNumber: caller.fromNumber, agentId: caller.agentId, now: new Date(), scheduleAt, hours: hours.value,
+            });
+            res.json({ success: true, queued: result.queued, status: result.status, scheduleAt: result.scheduleAt });
         } catch (error) {
+            if (sendControlError(res, error)) return;
             logger.error('CAMPAIGN_START_FAILED', {
                 campaignId: req.params.id,
                 error: error instanceof Error ? error.stack || error.message : String(error),
             });
             res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to start campaign') });
+        }
+    });
+
+    /** Pause: no further calls are placed; calls already ringing finish. Resume continues where it stopped. */
+    router.post('/:id/pause', async (req: any, res: any) => {
+        try {
+            const { pauseCampaign } = await import('../scheduler/campaign-control.js');
+            const status = await pauseCampaign(getTenantScope(req), req.params.id, new Date());
+            res.json({ success: true, status });
+        } catch (error) {
+            if (sendControlError(res, error)) return;
+            res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to pause campaign') });
+        }
+    });
+
+    router.post('/:id/resume', async (req: any, res: any) => {
+        try {
+            const { resumeCampaign } = await import('../scheduler/campaign-control.js');
+            const { jobStore } = await import('../scheduler/runtime.js');
+            const result = await resumeCampaign(jobStore, getTenantScope(req), req.params.id, new Date());
+            res.json({ success: true, ...result });
+        } catch (error) {
+            if (sendControlError(res, error)) return;
+            res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to resume campaign') });
+        }
+    });
+
+    /** Stop for good: queued calls are cancelled and the campaign cannot be restarted (create a new one). */
+    router.post('/:id/stop', async (req: any, res: any) => {
+        try {
+            const { stopCampaign } = await import('../scheduler/campaign-control.js');
+            const { jobStore } = await import('../scheduler/runtime.js');
+            const result = await stopCampaign(jobStore, getTenantScope(req), req.params.id, new Date());
+            res.json({ success: true, ...result });
+        } catch (error) {
+            if (sendControlError(res, error)) return;
+            res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to stop campaign') });
+        }
+    });
+
+    router.get('/:id/status', async (req: any, res: any) => {
+        try {
+            const { getCampaignStatus } = await import('../scheduler/campaign-control.js');
+            res.json({ success: true, data: await getCampaignStatus(getTenantScope(req), req.params.id, new Date()) });
+        } catch (error) {
+            if (sendControlError(res, error)) return;
+            res.status(500).json({ success: false, error: clientErrorMessage(error, 'Failed to load campaign status') });
         }
     });
 
