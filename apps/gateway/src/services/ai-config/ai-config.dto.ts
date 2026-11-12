@@ -29,6 +29,8 @@ export interface DashboardAIConfig {
   customInstructions: string;
   doRules: string[];
   dontRules: string[];
+  /** What the receptionist asks callers who want a booking or a quote, at most {@link MAX_QUALIFYING_QUESTIONS}. */
+  qualificationQuestions: string[];
   businessDescription?: string;
   servicesOffered?: string[];
   businessHoursDescription?: string;
@@ -39,6 +41,32 @@ export interface DashboardAIConfig {
     sendSMS: boolean;
     accessKnowledge: boolean;
   };
+}
+
+export const MAX_QUALIFYING_QUESTIONS = 10;
+export const MAX_QUALIFYING_QUESTION_LENGTH = 200;
+
+/** Saved questions can be plain text or an object with the text in `question`, `text` or `label`. Anything else is dropped; the rest is trimmed, de-duplicated and capped. */
+export function cleanQualificationQuestions(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const item of raw) {
+    let text = '';
+    if (typeof item === 'string') text = item;
+    else if (item && typeof item === 'object') {
+      const o = item as Record<string, unknown>;
+      for (const key of ['question', 'text', 'label']) {
+        if (typeof o[key] === 'string') {
+          text = o[key] as string;
+          break;
+        }
+      }
+    }
+    text = text.replace(/\s+/g, ' ').trim().slice(0, MAX_QUALIFYING_QUESTION_LENGTH);
+    if (text && !out.includes(text)) out.push(text);
+    if (out.length >= MAX_QUALIFYING_QUESTIONS) break;
+  }
+  return out;
 }
 
 const DEFAULT_CAPABILITIES: DashboardAIConfig['capabilities'] = {
@@ -82,6 +110,7 @@ export function normalizeDashboardConfig(
       : Array.isArray(p.dontInstructions)
         ? p.dontInstructions.map(String)
         : [],
+    qualificationQuestions: cleanQualificationQuestions(p.qualificationQuestions ?? p.qualification_questions),
     businessDescription: String(p.businessDescription ?? p.business_description ?? ''),
     servicesOffered: Array.isArray(p.servicesOffered)
       ? p.servicesOffered.map(String)
@@ -111,6 +140,7 @@ export function toDashboardConfig(config: AIAgentConfig): DashboardAIConfig {
     customInstructions: config.systemInstructions || '',
     doRules: config.doInstructions || [],
     dontRules: config.dontInstructions || [],
+    qualificationQuestions: config.qualificationQuestions as unknown as string[],
     businessDescription: config.businessDescription || '',
     servicesOffered: config.servicesOffered || [],
     businessHoursDescription: config.businessHoursDescription || '',
@@ -166,6 +196,10 @@ export function fromDashboardBody(body: Record<string, unknown>): Partial<AIAgen
     dontInstructions: ensureJsonArray(
       body.dontRules ?? body.dontInstructions ?? body.dont_instructions
     ).map(String),
+    // Only when the request carries the field: the save merges over the saved settings, so a save that leaves it out (the sign-up wizard, an older page) must not erase the questions.
+    ...('qualificationQuestions' in body || 'qualification_questions' in body
+      ? { qualificationQuestions: cleanQualificationQuestions(body.qualificationQuestions ?? body.qualification_questions) }
+      : {}),
     businessDescription:
       (body.businessDescription as string) ||
       (body.business_description as string) ||

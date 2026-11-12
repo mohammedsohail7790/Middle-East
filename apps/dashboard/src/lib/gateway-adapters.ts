@@ -284,6 +284,8 @@ export interface DashboardAIConfigShape {
   customInstructions: string;
   doRules: string[];
   dontRules: string[];
+  /** Questions the receptionist asks callers who want a booking or a quote. Saved with the rest of the agent settings. */
+  qualificationQuestions: string[];
   capabilities: {
     bookAppointments: boolean;
     transferCalls: boolean;
@@ -355,6 +357,11 @@ export function normalizeAIConfig(raw: unknown): DashboardAIConfigShape {
       ? r.dontRules.map(String)
       : Array.isArray(r.dontInstructions)
         ? (r.dontInstructions as unknown[]).map(String)
+        : [],
+    qualificationQuestions: Array.isArray(r.qualificationQuestions)
+      ? (r.qualificationQuestions as unknown[]).map(String).filter((q) => q.trim() !== "")
+      : Array.isArray(r.qualification_questions)
+        ? (r.qualification_questions as unknown[]).map(String).filter((q) => q.trim() !== "")
         : [],
     capabilities: { ...DEFAULT_AI_CAPABILITIES, ...caps },
   };

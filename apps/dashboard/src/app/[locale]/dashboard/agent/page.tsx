@@ -26,6 +26,7 @@ import { subscribeAIConfigUpdates } from "@/lib/realtime";
 import { AdditionalAgentsPanel } from "@/components/agent/AdditionalAgentsPanel";
 import { AgentHeroBanner } from "@/components/agent/AgentHeroBanner";
 import { VoicePreviewPanel } from "@/components/agent/VoicePreviewPanel";
+import { QualifyingQuestionsPanel } from "@/components/agent/QualifyingQuestionsPanel";
 import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { cn } from "@/lib/utils";
 import { useDashboardSync } from "@/lib/dashboard-sync";
@@ -521,6 +522,11 @@ export default function AgentPage() {
               </div>
             </div>
           </div>
+
+          <QualifyingQuestionsPanel
+            questions={config.qualificationQuestions || []}
+            onChange={(next) => patchConfig((c) => ({ ...c, qualificationQuestions: next }))}
+          />
 
           {/* Capabilities */}
           <div className="dashboard-panel-padded">

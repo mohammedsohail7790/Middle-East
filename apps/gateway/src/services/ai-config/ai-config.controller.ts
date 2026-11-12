@@ -136,6 +136,7 @@ export function createAIConfigRouter(): Router {
         parsed.systemInstructions,
         ...(parsed.doInstructions || []),
         ...(parsed.dontInstructions || []),
+        ...((parsed.qualificationQuestions as string[] | undefined) || []),
         parsed.greetingMessage,
       ].filter(Boolean) as string[];
       for (const field of injectionFields) {
