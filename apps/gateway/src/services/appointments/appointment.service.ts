@@ -4,7 +4,8 @@ import { calendarService } from '../calendar/calendar.service.js';
 import { logger } from '../logger.js';
 import { logAppointmentWrite } from '../observability/validation-telemetry.js';
 import { patchCorrelation } from '../observability/correlation-context.js';
-import { invalidateTenantAvailabilityCache } from './tenant-availability.service.js';
+import { invalidateTenantAvailabilityCache, calendlyOwnsScheduling } from './tenant-availability.service.js';
+import { getTenantTimezone } from './tenant-timezone.js';
 import { resolveAppointmentCorrelation } from '../klaros/correlation.js';
 
 const GOOGLE_AVAIL_TIMEOUT_MS = Number(process.env.VOICE_GOOGLE_AVAIL_TIMEOUT_MS || 2500);
@@ -139,36 +140,20 @@ export class AppointmentService {
     }
 
     /**
-     * Calendly has no API to create a confirmed booking at a chosen time -- it only
-     * issues booking links for the customer to complete themselves. If Calendly is
-     * the tenant's only connected scheduler (no Google/Outlook/Acuity for instant
-     * booking), text the caller a link instead of pretending to confirm a time.
-     * Returns null (caller should fall through to normal booking) when Calendly
-     * isn't the right path or anything about it fails.
+     * Text the caller a Calendly link to pick their own time. This is the
+     * fallback whenever the Scheduling API can't be used (no email on the call,
+     * plan without API access, API failure). It never claims a booking: if the
+     * SMS itself can't be sent the caller is told so.
      */
-    private async tryCalendlyOnlyBooking(
+    private async sendCalendlyLinkFallback(
         input: AppointmentInput,
-        requestedTime: Date
+        requestedTime: Date,
+        eventTypeUri: string,
+        reason: string
     ): Promise<AppointmentResult | null> {
         try {
-            const { outlookCalendarService } = await import('../calendar/outlook.calendar.service.js');
-            const { acuityService } = await import('../calendar/acuity.service.js');
-            const [hasGoogle, outlookConn, acuityConn] = await Promise.all([
-                googleCalendarService.hasConnection(input.tenantId),
-                outlookCalendarService.getConnection(input.tenantId),
-                acuityService.getConnection(input.tenantId),
-            ]);
-            if (hasGoogle || outlookConn || acuityConn) return null;
-
             const { calendlyService } = await import('../calendar/calendly.service.js');
-            const calendlyConn = await calendlyService.getConnection(input.tenantId);
-            if (!calendlyConn) return null;
-
-            const types = await calendlyService.getEventTypes(input.tenantId);
-            const rawId = String(types?.[0]?.uri || types?.[0]?.id || '');
-            if (!rawId) return null;
-            const eventTypeId = rawId.includes('/') ? rawId.split('/').pop()! : rawId;
-
+            const eventTypeId = eventTypeUri.includes('/') ? eventTypeUri.split('/').pop()! : eventTypeUri;
             const link = await calendlyService.createInviteLink(
                 input.tenantId,
                 eventTypeId,
@@ -176,6 +161,7 @@ export class AppointmentService {
             );
 
             const { smsService } = await import('../sms/sms.service.js');
+            let smsSent = true;
             await smsService
                 .sendSms(
                     input.tenantId,
@@ -183,6 +169,7 @@ export class AppointmentService {
                     `Hi ${input.name}, thanks for calling! Pick your preferred time here: ${link}`
                 )
                 .catch((err) => {
+                    smsSent = false;
                     logger.warn('APPOINTMENT_CALENDLY_SMS_FAILED', {
                         tenantId: input.tenantId,
                         error: String(err),
@@ -195,9 +182,9 @@ export class AppointmentService {
                     name: input.name,
                     email: input.email,
                     service: input.service,
-                    notes: `Sent Calendly booking link for ${input.service} (requested ${requestedTime.toISOString()}): ${link}`,
+                    notes: `Calendly booking link ${smsSent ? 'sent' : 'NOT delivered, follow up'} for ${input.service} (requested ${requestedTime.toISOString()}): ${link}`,
                     preferred_time: requestedTime.toISOString(),
-                    metadata: { calendlyLinkSent: true, calendlyLink: link },
+                    metadata: { calendlyLinkSent: smsSent, calendlyLink: link, calendlyFallbackReason: reason },
                 })
                 .catch((err) => {
                     logger.warn('APPOINTMENT_CALENDLY_LEAD_SYNC_FAILED', {
@@ -210,14 +197,144 @@ export class AppointmentService {
                 appointmentId: 'calendly-link',
                 scheduledTime: requestedTime.toISOString(),
                 phone: input.phone,
-                calendarSyncResult: 'calendly_link_sent',
+                calendarSyncResult: smsSent ? 'calendly_link_sent' : 'calendly_link_sms_failed',
             });
 
+            if (!smsSent) {
+                return {
+                    success: false,
+                    message:
+                        "I couldn't send the booking link just now, and your time is not booked yet. Our team will follow up to confirm it.",
+                };
+            }
             return {
                 success: true,
                 message:
-                    "I've texted you a link to pick your exact time on our calendar — you'll get a confirmation once you book it.",
+                    "I couldn't confirm that time directly, so I've texted you a link to pick your exact time. It isn't booked until you choose a time there.",
             };
+        } catch (err) {
+            logger.warn('APPOINTMENT_CALENDLY_LINK_FALLBACK_FAILED', {
+                tenantId: input.tenantId,
+                error: String(err),
+            });
+            return null;
+        }
+    }
+
+    /**
+     * Is `time` one of the start times Calendly reports as open? Returns the
+     * matching event type, or the nearest later open time as an alternative.
+     * Throws when Calendly can't answer (callers fall back, never assume free).
+     */
+    private async verifyCalendlySlot(
+        tenantId: string,
+        time: Date
+    ): Promise<
+        | { status: 'free'; eventType: import('../calendar/calendly.service.js').CalendlySchedulingEventType }
+        | { status: 'busy'; alternative?: Date }
+        | { status: 'unknown' }
+    > {
+        const { calendlyService } = await import('../calendar/calendly.service.js');
+        const eventType = await calendlyService.getSchedulingEventType(tenantId);
+        if (!eventType) return { status: 'unknown' };
+        const slots = await calendlyService.getAvailableTimes(
+            tenantId,
+            eventType,
+            time,
+            new Date(time.getTime() + 24 * 60 * 60 * 1000)
+        );
+        if (slots.some((s) => Math.abs(s.start.getTime() - time.getTime()) < 60_000)) {
+            return { status: 'free', eventType };
+        }
+        const later = slots.find((s) => s.start.getTime() > time.getTime());
+        return { status: 'busy', alternative: later?.start };
+    }
+
+    /**
+     * Calendly as the tenant's only scheduler: check Calendly's real availability
+     * and create the booking through its Scheduling API so it appears in
+     * Calendly. When that can't be done (no caller email, no API access, API
+     * error) text the caller the booking link instead. Returns null only when
+     * Calendly isn't the right path, so normal booking continues.
+     */
+    private async tryCalendlyBooking(
+        input: AppointmentInput,
+        requestedTime: Date
+    ): Promise<
+        | { kind: 'result'; result: AppointmentResult }
+        | { kind: 'booked'; eventUri: string }
+        | null
+    > {
+        try {
+            if (!(await calendlyOwnsScheduling(input.tenantId))) return null;
+            const { calendlyService, CalendlyApiError } = await import('../calendar/calendly.service.js');
+
+            let eventType;
+            try {
+                const check = await this.verifyCalendlySlot(input.tenantId, requestedTime);
+                if (check.status === 'unknown') return null;
+                if (check.status === 'busy') {
+                    return {
+                        kind: 'result',
+                        result: check.alternative
+                            ? {
+                                  success: false,
+                                  message: `That time isn't open. The next open time is ${check.alternative.toISOString()}.`,
+                                  alternativeTime: check.alternative.toISOString(),
+                              }
+                            : {
+                                  success: false,
+                                  message: "That time isn't open and I don't see another opening that day. Please suggest a different day.",
+                              },
+                    };
+                }
+                eventType = check.eventType;
+            } catch (err) {
+                logger.warn('APPOINTMENT_CALENDLY_AVAILABILITY_FAILED', {
+                    tenantId: input.tenantId,
+                    status: err instanceof CalendlyApiError ? err.status : undefined,
+                    error: String(err),
+                });
+                const types = await calendlyService.getEventTypes(input.tenantId).catch(() => []);
+                const uri = String(types?.[0]?.uri || '');
+                if (!uri) return null;
+                const fb = await this.sendCalendlyLinkFallback(input, requestedTime, uri, 'availability_failed');
+                return fb ? { kind: 'result', result: fb } : null;
+            }
+
+            const email = input.email?.trim();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                const fb = await this.sendCalendlyLinkFallback(input, requestedTime, eventType.uri, 'no_email');
+                return fb ? { kind: 'result', result: fb } : null;
+            }
+
+            try {
+                const booking = await calendlyService.createBooking(input.tenantId, {
+                    eventType,
+                    start: requestedTime,
+                    name: input.name,
+                    email,
+                    phone: input.phone,
+                    timezone: await getTenantTimezone(input.tenantId),
+                });
+                return { kind: 'booked', eventUri: booking.eventUri };
+            } catch (err) {
+                if (err instanceof CalendlyApiError && err.isSlotUnavailable) {
+                    invalidateTenantAvailabilityCache(input.tenantId);
+                    return {
+                        kind: 'result',
+                        result: { success: false, message: 'That time was just taken. Please choose another time.' },
+                    };
+                }
+                logger.warn('APPOINTMENT_CALENDLY_BOOKING_FAILED', {
+                    tenantId: input.tenantId,
+                    status: err instanceof CalendlyApiError ? err.status : undefined,
+                    accessDenied: err instanceof CalendlyApiError ? err.isAccessDenied : false,
+                    error: String(err),
+                });
+                const fb = await this.sendCalendlyLinkFallback(input, requestedTime, eventType.uri, 'booking_failed');
+                return fb ? { kind: 'result', result: fb } : null;
+            }
         } catch (err) {
             logger.warn('APPOINTMENT_CALENDLY_FLOW_FAILED', {
                 tenantId: input.tenantId,
@@ -236,10 +353,12 @@ export class AppointmentService {
             };
         }
 
-        const calendlyResult = await this.tryCalendlyOnlyBooking(input, parsed);
-        if (calendlyResult) return calendlyResult;
+        const calendly = await this.tryCalendlyBooking(input, parsed);
+        if (calendly?.kind === 'result') return calendly.result;
+        const calendlyEventUri = calendly?.kind === 'booked' ? calendly.eventUri : null;
 
-        const available = await this.checkAvailability(input.tenantId, parsed);
+        // Calendly already verified the slot against its own availability.
+        const available = calendlyEventUri ? true : await this.checkAvailability(input.tenantId, parsed);
         if (!available) {
             const alternative = plusMinutes(parsed, 60);
             return {
@@ -252,8 +371,8 @@ export class AppointmentService {
         let result;
         try {
             result = await voiceDb.query(
-                `insert into public.appointments (tenant_id, name, phone, service, scheduled_time, status, calendar_event_id)
-                 values ($1, $2, $3, $4, $5, 'booked', null)
+                `insert into public.appointments (tenant_id, name, phone, service, scheduled_time, status, calendar_event_id, calendar_provider, external_calendar_event_id)
+                 values ($1, $2, $3, $4, $5, 'booked', null, $6, $7)
                  returning id, scheduled_time`,
                 [
                     input.tenantId,
@@ -261,13 +380,25 @@ export class AppointmentService {
                     input.phone,
                     input.service,
                     parsed.toISOString(),
+                    calendlyEventUri ? 'calendly' : null,
+                    calendlyEventUri,
                 ]
             );
         } catch (dbErr) {
             logger.error('APPOINTMENT_INSERT_FAILED', {
                 tenantId: input.tenantId,
                 error: String(dbErr),
+                calendlyBooked: !!calendlyEventUri,
             });
+            if (calendlyEventUri) {
+                // The booking exists in Calendly; only our local record failed.
+                invalidateTenantAvailabilityCache(input.tenantId);
+                return {
+                    success: true,
+                    message: `You are booked for ${parsed.toLocaleString()}.`,
+                    scheduledTime: parsed.toISOString(),
+                };
+            }
             return {
                 success: false,
                 message: 'Could not save the appointment. Please try again or contact support.',
@@ -277,7 +408,7 @@ export class AppointmentService {
         const scheduledTime = new Date(result.rows[0].scheduled_time).toISOString();
         const appointmentId = result.rows[0].id as string;
 
-        void import('./appointment-external-sync.service.js').then(({ syncAppointmentToExternalCalendars }) => {
+        if (!calendlyEventUri) void import('./appointment-external-sync.service.js').then(({ syncAppointmentToExternalCalendars }) => {
             syncAppointmentToExternalCalendars({
                 tenantId: input.tenantId,
                 appointmentId,
@@ -442,7 +573,23 @@ export class AppointmentService {
         }
 
         const appointment = existing.rows[0];
-        const available = await this.checkAvailability(tenantId, parsed, appointment.id as string);
+        const isCalendly =
+            appointment.calendar_provider === 'calendly' && !!appointment.external_calendar_event_id;
+        let newCalendlyEventUri: string | null = null;
+        if (isCalendly) {
+            const moved = await this.rescheduleCalendlyBooking(
+                tenantId,
+                String(appointment.external_calendar_event_id),
+                parsed,
+                String(appointment.name || ''),
+                String(appointment.phone || phone || '')
+            );
+            if ('result' in moved) return moved.result;
+            newCalendlyEventUri = moved.eventUri;
+        }
+        const available = isCalendly
+            ? true
+            : await this.checkAvailability(tenantId, parsed, appointment.id as string);
         if (!available) {
             const alternative = plusMinutes(parsed, 60);
             return {
@@ -458,6 +605,12 @@ export class AppointmentService {
              where id = $2 and tenant_id = $3`,
             [parsed.toISOString(), appointment.id, tenantId]
         );
+        if (newCalendlyEventUri) {
+            await voiceDb.query(
+                `update public.appointments set external_calendar_event_id = $1 where id = $2 and tenant_id = $3`,
+                [newCalendlyEventUri, appointment.id, tenantId]
+            );
+        }
 
         try {
             if (appointment.calendar_provider === 'google' && appointment.calendar_event_id) {
@@ -566,6 +719,75 @@ export class AppointmentService {
         };
     }
 
+    /**
+     * Calendly has no reschedule endpoint: book the new time first, then cancel
+     * the old event, and roll the new one back if that cancel fails. Any failure
+     * leaves the original booking untouched and is reported honestly.
+     */
+    private async rescheduleCalendlyBooking(
+        tenantId: string,
+        oldEventUri: string,
+        newTime: Date,
+        fallbackName: string,
+        phone: string
+    ): Promise<{ eventUri: string } | { result: AppointmentResult }> {
+        const unchanged = (message: string): { result: AppointmentResult } => ({
+            result: { success: false, message },
+        });
+        try {
+            const { calendlyService } = await import('../calendar/calendly.service.js');
+            const check = await this.verifyCalendlySlot(tenantId, newTime);
+            if (check.status === 'unknown') {
+                return unchanged("I couldn't reach the calendar to move your appointment, so it hasn't changed. Our team will follow up.");
+            }
+            if (check.status === 'busy') {
+                return {
+                    result: {
+                        success: false,
+                        message: check.alternative
+                            ? `That new slot is unavailable. I can offer ${check.alternative.toISOString()} instead.`
+                            : "That new time isn't open. Please suggest another day.",
+                        alternativeTime: check.alternative?.toISOString(),
+                    },
+                };
+            }
+            const invitee = await calendlyService.getEventInvitee(tenantId, oldEventUri);
+            const booking = await calendlyService.createBooking(tenantId, {
+                eventType: check.eventType,
+                start: newTime,
+                name: invitee.name || fallbackName || 'Caller',
+                email: invitee.email,
+                phone,
+                timezone: await getTenantTimezone(tenantId),
+            });
+            try {
+                await calendlyService.cancelScheduledEvent(tenantId, oldEventUri, 'Rescheduled via Halla AI');
+            } catch (cancelErr) {
+                logger.error('APPOINTMENT_CALENDLY_RESCHEDULE_OLD_CANCEL_FAILED', {
+                    tenantId,
+                    error: String(cancelErr),
+                });
+                await calendlyService
+                    .cancelScheduledEvent(tenantId, booking.eventUri, 'Rolled back failed reschedule')
+                    .catch((rollbackErr) =>
+                        logger.error('APPOINTMENT_CALENDLY_RESCHEDULE_ROLLBACK_FAILED', {
+                            tenantId,
+                            error: String(rollbackErr),
+                        })
+                    );
+                return unchanged("I couldn't move your appointment on the calendar, so it hasn't changed. Our team will follow up.");
+            }
+            return { eventUri: booking.eventUri };
+        } catch (err) {
+            const { CalendlyApiError } = await import('../calendar/calendly.service.js');
+            if (err instanceof CalendlyApiError && err.isSlotUnavailable) {
+                return unchanged('That new time was just taken. Please choose another time.');
+            }
+            logger.warn('APPOINTMENT_CALENDLY_RESCHEDULE_FAILED', { tenantId, error: String(err) });
+            return unchanged("I couldn't move your appointment on the calendar, so it hasn't changed. Our team will follow up.");
+        }
+    }
+
     async cancelAppointment(
         tenantId: string,
         appointmentId: string,
@@ -581,6 +803,31 @@ export class AppointmentService {
             return { success: false, message: 'Appointment not found or already cancelled.' };
         }
         const row = existing.rows[0];
+
+        if (row.calendar_provider === 'calendly' && row.external_calendar_event_id) {
+            // Cancel in Calendly first: if it fails the booking still exists there,
+            // so never tell the caller it is cancelled.
+            try {
+                const { calendlyService } = await import('../calendar/calendly.service.js');
+                await calendlyService.cancelScheduledEvent(
+                    tenantId,
+                    row.external_calendar_event_id as string,
+                    reason
+                );
+            } catch (err) {
+                logger.warn('APPOINTMENT_CALENDLY_CANCEL_FAILED', {
+                    tenantId,
+                    appointmentId,
+                    error: String(err),
+                });
+                return {
+                    success: false,
+                    message:
+                        "I couldn't cancel that on the calendar just now, so it's still booked. Our team will follow up to cancel it.",
+                    appointmentId,
+                };
+            }
+        }
 
         await voiceDb.query(
             `update public.appointments set status = 'cancelled' where id = $1 and tenant_id = $2`,

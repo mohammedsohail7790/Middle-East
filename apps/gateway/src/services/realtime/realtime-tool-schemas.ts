@@ -99,7 +99,7 @@ export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'es
           email: {
             type: 'string',
             description:
-              'Customer email address for the confirmation email. Include it only if the caller offered it or the business requires it; email addresses are easy to mishear over the phone, so read it back once to confirm spelling before booking. Omit it otherwise.',
+              'Customer email address for the confirmation email. Include it only if the caller offered it or the business requires it; email addresses are easy to mishear over the phone, so read it back once to confirm spelling before booking. Omit it otherwise. If the business books on Calendly, a booking needs an email; without one the caller is texted a link to pick their own time (not booked yet).',
           },
           address: {
             type: 'string',

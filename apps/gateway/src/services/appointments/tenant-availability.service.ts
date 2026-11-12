@@ -85,6 +85,69 @@ async function getExternalBusyIntervals(
   }
 }
 
+/**
+ * True when Calendly is the tenant's only connected scheduler (same precedence
+ * as booking: Google/Outlook/Acuity win), meaning Calendly owns availability.
+ */
+export async function calendlyOwnsScheduling(tenantId: string): Promise<boolean> {
+  const { googleCalendarService } = await import('../calendar/google.calendar.service.js');
+  const { outlookCalendarService } = await import('../calendar/outlook.calendar.service.js');
+  const { acuityService } = await import('../calendar/acuity.service.js');
+  const { calendlyService } = await import('../calendar/calendly.service.js');
+  const [hasGoogle, outlook, acuity, calendly] = await Promise.all([
+    googleCalendarService.hasConnection(tenantId),
+    outlookCalendarService.getConnection(tenantId),
+    acuityService.getConnection(tenantId),
+    calendlyService.getConnection(tenantId),
+  ]);
+  return !hasGoogle && !outlook && !acuity && !!calendly;
+}
+
+/**
+ * Slots Calendly says are free for the tenant's scheduling event type, or null
+ * when Calendly isn't the scheduler or can't answer (no API access, timeout,
+ * error) so the caller falls back to the normal business-hours slots.
+ */
+async function getCalendlySlots(
+  tenantId: string,
+  rangeStart: Date,
+  rangeEnd: Date,
+  timezone: string
+): Promise<AvailabilitySlotResult[] | null> {
+  try {
+    if (!(await calendlyOwnsScheduling(tenantId))) return null;
+    const { calendlyService } = await import('../calendar/calendly.service.js');
+    const work = (async () => {
+      const eventType = await calendlyService.getSchedulingEventType(tenantId);
+      if (!eventType) return null;
+      return calendlyService.getAvailableTimes(tenantId, eventType, rangeStart, rangeEnd);
+    })();
+    const found = await Promise.race([
+      work,
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), EXTERNAL_AVAIL_TIMEOUT_MS + 3000)),
+    ]);
+    if (!found) {
+      logger.warn('CALENDLY_AVAILABILITY_UNAVAILABLE', { tenantId });
+      return null;
+    }
+    return found.slice(0, 12).map((s) => ({
+      start: s.start,
+      end: s.end,
+      label: s.start.toLocaleString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        timeZone: timezone,
+      }),
+    }));
+  } catch (err) {
+    logger.warn('CALENDLY_AVAILABILITY_FAILED', { tenantId, error: String(err) });
+    return null;
+  }
+}
+
 function availabilityCacheKey(
   tenantId: string,
   rangeStartIso: string,
@@ -157,6 +220,14 @@ export async function getTenantAvailabilitySlots(
       })),
       timezone: cached.timezone,
     };
+  }
+
+  const calendlyTimezone = await getTenantTimezone(tenantId);
+  const calendlySlots = await getCalendlySlots(tenantId, rangeStart, rangeEnd, calendlyTimezone);
+  if (calendlySlots) {
+    const timezone = calendlyTimezone;
+    availCache.set(cacheKey, { slots: calendlySlots, timezone, expiresAt: Date.now() + AVAIL_CACHE_TTL_MS });
+    return { slots: calendlySlots, timezone };
   }
 
   type HourRow = { day_of_week: number; start_time: string; end_time: string; is_open: boolean };
