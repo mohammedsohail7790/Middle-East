@@ -39,7 +39,7 @@ export interface Rates {
   hoursPerWeek: number;
 }
 
-export const DEFAULT_RATES: Rates = { tier1: 300, tier2: 475, tier3: 675, blended: 400, bufferPct: 0, roundTo: 500, hoursPerWeek: 30 };
+export const DEFAULT_RATES: Rates = { tier1: 300, tier2: 475, tier3: 675, blended: 400, bufferPct: 0, roundTo: 500, hoursPerWeek: 25 };
 
 const num = (v: string | undefined, fallback: number): number => {
   const n = Number(v);
