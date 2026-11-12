@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { OnboardingPersonalityVoice } from "@/components/onboarding/OnboardingPersonalityVoice";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { OnboardingVoiceGreeting } from "@/components/onboarding/OnboardingVoiceGreeting";
-import { AGENT_LANGUAGES, type AgentLanguageId } from "@/lib/agent-languages";
+import { AGENT_LANGUAGES, isArabicLanguage, type AgentLanguageId } from "@/lib/agent-languages";
 import {
   buildSetupPayload,
   defaultGreeting,
@@ -760,7 +760,8 @@ export default function OnboardingPage() {
                   suggestedGreeting={suggestedGreeting}
                   tone={tone}
                   agentName={agentName}
-                  rtl={language === "ar-SA" || language === "ur" || language === "fa"}
+                  language={language}
+                  rtl={isArabicLanguage(language) || language === "ur" || language === "fa"}
                 />
               </motion.div>
             )}

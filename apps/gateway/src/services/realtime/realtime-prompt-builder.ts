@@ -1,5 +1,7 @@
 import type { TenantVoiceConfig } from '../voice/ai.service.js';
 import {
+  ARABIC_DIALECT_NAMES,
+  arabicDialect,
   buildHumanSpeechAppendix,
   buildReceptionistRoleBlock,
   CALL_CLOSING_RULES,
@@ -216,8 +218,14 @@ export async function buildSystemPrompt(
     prompt += `\n\nIMPORTANT — It's currently after business hours. Let the caller know that the office is closed right now but you can still help them. Take their info and let them know someone will call back during business hours. Be extra helpful since they're calling outside normal hours.`;
   }
 
-  const langName = language && language !== 'en' ? ` (the business default is ${language})` : '';
-  prompt += `\n\nLanguage: reply in the language the caller uses${langName}. Do not assume the caller's country, city or accent.`;
+  const dialect = arabicDialect(language);
+  if (dialect) {
+    // The business picked a dialect: it is the default, and the caller still wins if they speak another one.
+    prompt += `\n\nLanguage: reply in the language the caller uses. The business default is ${ARABIC_DIALECT_NAMES[dialect]}; use it unless the caller clearly speaks another dialect or language.`;
+  } else {
+    const langName = language && language !== 'en' ? ` (the business default is ${language})` : '';
+    prompt += `\n\nLanguage: reply in the language the caller uses${langName}. Do not assume the caller's country, city or accent.`;
+  }
 
   const emailRule = needsEmail
     ? "Email — the business needs an email address for confirmations, so ask for it, read it back once in your own words, and let them correct it before you submit anything."

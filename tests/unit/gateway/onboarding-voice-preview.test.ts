@@ -37,3 +37,13 @@ describe('voice preview request', () => {
     expect(resolvePreviewRequest({ tone: 'angry', agentName: '   ' })).toMatchObject({ tone: 'professional', agentName: 'Sarah' });
   });
 });
+
+describe('voice preview language', () => {
+  it('passes a plain language or dialect code through, and drops anything else', () => {
+    expect(resolvePreviewRequest({ language: 'ar-AE' }).language).toBe('ar-AE');
+    expect(resolvePreviewRequest({ language: 'en' }).language).toBe('en');
+    expect(resolvePreviewRequest({ language: ' ar-SA ' }).language).toBe('ar-SA');
+    for (const bad of ['Arabic please', 'ar-SAUDI', '../../x', 42, '', null]) expect(resolvePreviewRequest({ language: bad as any }).language).toBeNull();
+    expect(resolvePreviewRequest({}).language).toBeNull();
+  });
+});
