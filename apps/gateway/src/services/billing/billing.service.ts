@@ -211,7 +211,7 @@ export const PLANS: Record<string, PlanDefinition> = {
       appointmentBooking: 'native',
       browserDashboard: true,
       bilingual: 'en-ar',
-      languages: ['en', 'ar'],
+      languages: ['en', 'ar', 'ur', 'fr', 'zh', 'ru', 'fa'],  // all seven languages on every plan
       emailSmsSummaries: true,
       crm: 'zapier_full',
       calendar: 'native',

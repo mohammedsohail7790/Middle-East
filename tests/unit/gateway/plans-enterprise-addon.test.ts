@@ -235,3 +235,11 @@ describe('buying and removing the add-on', () => {
     delete process.env.STRIPE_PROFESSIONAL_OVERAGE_ID;
   });
 });
+
+describe('every plan lists the seven advertised languages', () => {
+  it('including Enterprise', () => {
+    for (const plan of Object.values(PLANS)) {
+      expect(plan.features.languages).toEqual(expect.arrayContaining(['en', 'ar', 'ur', 'fr', 'zh', 'ru', 'fa']));
+    }
+  });
+});
