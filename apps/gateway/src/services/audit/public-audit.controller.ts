@@ -9,7 +9,9 @@ import { auditPrices, formatPrice, isAuditCurrency, minorUnits, priceText } from
 import { AUDIT_FIELD_IDS, AUDIT_QUESTIONS, AUDIT_SECTIONS } from './audit-form-definition.js';
 import { sendAuditMail } from './audit-mail.js';
 import { sendClientAuditMail, para } from './audit-client-mail.js';
-import { paymentUrl, questionnaireUrl, sendPaymentUrl, PAYMENT_WINDOW_DAYS, QUESTIONNAIRE_DAYS, SEND_PAYMENT_DAYS } from './audit-links.js';
+import { paymentUrl, questionnaireUrl, PAYMENT_WINDOW_DAYS, QUESTIONNAIRE_DAYS } from './audit-links.js';
+import { createAuditReviewRouter } from './audit-review.controller.js';
+import { handlePaid, startDraft } from './audit-pipeline.js';
 
 /**
  * The paid Opportunity Audit. The flow runs on its own: the fit-check email has a button that emails the client a private link to Form 2 (the audit questionnaire); submitting it
@@ -68,6 +70,7 @@ export function createPublicAuditRouter(): Router {
     res.set('Cache-Control', 'no-store');
     next();
   });
+  router.use(createAuditReviewRouter());
 
   // Is this link good, and what is it for? Used by the pages to show the company name and the price before anything is submitted.
   router.get(
@@ -284,11 +287,8 @@ export function createPublicAuditRouter(): Router {
         return rows.length ? renderDetailList(rows, section.title) : '';
       }).join('');
       const answered = Object.keys(answers).length;
-      const sendPay = sendPaymentUrl({ id: p.id, company: p.company, email: p.email, name: p.name, cur: p.cur });
       const intro =
-        (sendPay
-          ? renderCallout({ tone: 'warn', label: 'Next step', headline: 'Do the analysis (about one week). When the audit is ready, press the button to send the client the payment link.', points: [`The button works for ${SEND_PAYMENT_DAYS} days and sends once. The payment link then works for ${PAYMENT_WINDOW_DAYS} days.`, 'Send the full audit to the client once they have paid.'] })
-          : renderCallout({ tone: 'warn', label: 'Next step', headline: 'Do the analysis (about one week), then email the client the payment link.', points: ['There is no button because AUDIT_LINK_SECRET is not set: use apps/gateway/scripts/create-audit-link.ts with the pay option and the client\'s currency.'] }))
+        renderCallout({ tone: 'warn', label: 'Next step', headline: 'A draft audit is being written from these answers. You will get a second email in a few minutes with a link to review it.', points: ['Both of you can read and edit the draft there, then approve it. Approving emails the client the payment link.', 'If the draft fails or the link does not arrive, you will get an email with a button to carry on by hand.'] })
         + renderSummaryStrip([
           { label: 'Company', value: p.company },
           { label: 'Answered', value: `${answered} of ${AUDIT_QUESTIONS.length}` },
@@ -297,7 +297,7 @@ export function createPublicAuditRouter(): Router {
         ]);
 
       try {
-        const sent = await sendAuditMail({ eyebrow: 'Audit questionnaire', title: `${p.company} submitted Form 2`, subject: `Form 2 received — ${p.company}`, bodyHtml: intro + sections, replyTo: p.email, ...(sendPay ? { ctaLabel: 'Audit is ready: send the payment link', ctaUrl: sendPay } : {}) });
+        const sent = await sendAuditMail({ eyebrow: 'Audit questionnaire', title: `${p.company} submitted Form 2`, subject: `Form 2 received — ${p.company}`, bodyHtml: intro + sections, replyTo: p.email });
         if (sent === 'not-configured') {
           logger.error('[Audit] RESEND_API_KEY not configured, cannot deliver Form 2');
           res.status(503).json({ error: 'Email delivery is not configured. Please email hello@hallaai.com directly.' });
@@ -324,6 +324,8 @@ export function createPublicAuditRouter(): Router {
       } catch (error) {
         logger.error('[Audit] Failed to send the questionnaire confirmation', undefined, error instanceof Error ? error : new Error(String(error)));
       }
+      // Write the draft audit in the background. The client gets their answer now; the team gets the review email when the draft is ready.
+      void startDraft(p, answers).catch((error) => logger.error('[Audit] Draft step crashed', undefined, error instanceof Error ? error : new Error(String(error))));
       res.status(200).json({ ok: true });
     })
   );
@@ -425,8 +427,17 @@ export async function handleAuditStripeWebhook(req: any, res: any): Promise<void
         res.status(500).json({ error: 'Could not send the notification' }); // Stripe retries, so the notification is not lost
         return;
       }
+      // If the team approved the report, this sends the PDF to the client right now; if not, the team is told to approve it.
+      let delivered = false;
+      if (session.metadata.link_id) {
+        try {
+          delivered = (await handlePaid(session.metadata.link_id)) === 'delivered';
+        } catch (error) {
+          logger.error('[Audit] Automatic delivery step crashed', undefined, error instanceof Error ? error : new Error(String(error)));
+        }
+      }
       const clientEmail = session.customer_details?.email ?? session.customer_email;
-      if (clientEmail) {
+      if (clientEmail && !delivered) {
         try {
           await sendClientAuditMail({
             to: clientEmail,
