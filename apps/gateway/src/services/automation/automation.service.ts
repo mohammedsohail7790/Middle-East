@@ -56,7 +56,7 @@ export class AutomationService {
    * (always present — set at signup) is included unconditionally as a guaranteed
    * fallback rather than only when the others are empty.
    */
-  private async getOwnerNotificationEmails(tenantId: string): Promise<string[]> {
+  async getOwnerNotificationEmails(tenantId: string): Promise<string[]> {
     const emails = new Set<string>();
     try {
       const tenantResult = await pool.query(

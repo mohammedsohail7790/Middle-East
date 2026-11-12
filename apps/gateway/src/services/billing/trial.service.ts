@@ -427,7 +427,7 @@ export class TrialManager {
       [tenantId, warningType, message, JSON.stringify(details)]
     );
     const row = result.rows[0];
-    return {
+    const warning = {
       id: row.id,
       warningType: row.warning_type,
       message: row.message,
@@ -435,6 +435,11 @@ export class TrialManager {
       acknowledged: row.acknowledged,
       createdAt: row.created_at,
     };
+    // Show the warning in the owner's alerts inbox and email it. Never allowed to slow down or fail the billing path.
+    void import('../alerts/alert-service.js')
+      .then((m) => m.raiseBillingWarningAlert(tenantId, warning))
+      .catch(() => undefined);
+    return warning;
   }
 }
 
