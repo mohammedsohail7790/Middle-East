@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { PDFParse } from 'pdf-parse';
-import { ArabicFontMissingError, arabicFonts, renderReportPdf } from '../../../apps/gateway/src/services/audit/audit-report-pdf.js';
+import { ArabicFontMissingError, arabicFonts, renderReportPdf, weeksRange, weeksText } from '../../../apps/gateway/src/services/audit/audit-report-pdf.js';
 import { assembleReport } from '../../../apps/gateway/src/services/audit/audit-report.js';
 
 const raw = {
@@ -72,5 +72,42 @@ describe('audit report PDF', () => {
     const t = await text(await renderReportPdf(make(raw)));
     expect(t).toMatch(/Page 1 of [12]\b/);
     expect(t).not.toMatch(/Page [3-9] of/);
+  });
+
+  it('shows the estimated time frame with a line per phase, and never the hours', async () => {
+    const report = make(raw);
+    const tl = report.timeline!;
+    const txt = await text(await renderReportPdf(report));
+    expect(txt).toContain('Estimated time frame');
+    expect(txt).toContain(`About ${weeksRange(tl.weeksMin, tl.weeksMax, 'en')} from the start of the build.`);
+    expect(txt).toContain(`Phase 1: Architecture & API Discovery, about ${weeksText(tl.phaseWeeks[0], 'en')}`);
+    expect(txt).toContain('The clock starts once we have access to your systems');
+    expect(txt).not.toMatch(/\d\s?-?\s?\d*\s?(hours?|hrs?)\b/i);
+  });
+
+  it('leaves the time frame out of an older report that has none', async () => {
+    const old = make(raw);
+    delete (old as any).timeline;
+    expect(await text(await renderReportPdf(old))).not.toContain('Estimated time frame');
+  });
+
+  it('renders the Arabic time frame', async () => {
+    const buf = await renderReportPdf(make(raw, 'ar'));
+    expect(buf.subarray(0, 5).toString()).toBe('%PDF-');
+  });
+});
+
+describe('weeks wording', () => {
+  it('writes English and Arabic week counts correctly', () => {
+    expect(weeksText(1, 'en')).toBe('1 week');
+    expect(weeksText(6, 'en')).toBe('6 weeks');
+    expect(weeksText(1, 'ar')).toBe('أسبوع واحد');
+    expect(weeksText(2, 'ar')).toBe('أسبوعان');
+    expect(weeksText(5, 'ar')).toBe('5 أسابيع');
+    expect(weeksText(12, 'ar')).toBe('12 أسبوعاً');
+    expect(weeksRange(6, 9, 'en')).toBe('6 to 9 weeks');
+    expect(weeksRange(3, 3, 'en')).toBe('3 weeks');
+    expect(weeksRange(6, 9, 'ar')).toBe('من 6 إلى 9 أسابيع');
+    expect(weeksRange(8, 12, 'ar')).toBe('من 8 إلى 12 أسبوعاً');
   });
 });

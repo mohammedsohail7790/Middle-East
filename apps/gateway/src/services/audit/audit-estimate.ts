@@ -35,9 +35,11 @@ export interface Rates {
   bufferPct: number;
   /** The fee is rounded up to a multiple of this many AED. */
   roundTo: number;
+  /** Productive build hours one engineer gets through in a week. Turns the hours estimate into a time frame. */
+  hoursPerWeek: number;
 }
 
-export const DEFAULT_RATES: Rates = { tier1: 300, tier2: 475, tier3: 675, blended: 400, bufferPct: 0, roundTo: 500 };
+export const DEFAULT_RATES: Rates = { tier1: 300, tier2: 475, tier3: 675, blended: 400, bufferPct: 0, roundTo: 500, hoursPerWeek: 30 };
 
 const num = (v: string | undefined, fallback: number): number => {
   const n = Number(v);
@@ -52,6 +54,7 @@ export function ratesFromEnv(env: NodeJS.ProcessEnv = process.env): Rates {
     blended: num(env.AUDIT_RATE_BLENDED_AED, DEFAULT_RATES.blended),
     bufferPct: num(env.AUDIT_PRICE_BUFFER_PCT, DEFAULT_RATES.bufferPct),
     roundTo: Math.max(1, num(env.AUDIT_PRICE_ROUND_TO_AED, DEFAULT_RATES.roundTo)),
+    hoursPerWeek: Math.max(1, num(env.AUDIT_BUILD_HOURS_PER_WEEK, DEFAULT_RATES.hoursPerWeek)),
   };
 }
 
@@ -102,4 +105,30 @@ export function quote(a: Assessment, rates: Rates = DEFAULT_RATES): Quote {
   // Phase 1 is the largest round figure that fits inside the stated budget.
   const phase1Aed = overBudget && budget !== null ? Math.floor(budget / rates.roundTo) * rates.roundTo : null;
   return { hours, feeAed, overBudget, phase1Aed: phase1Aed && phase1Aed > 0 ? phase1Aed : null };
+}
+
+export interface Timeline {
+  /** Calendar weeks from the start of the build, low and high. */
+  weeksMin: number;
+  weeksMax: number;
+  /** About how long each of the three phases takes. They add up to weeksMax. */
+  phaseWeeks: [number, number, number];
+}
+
+/** How the weeks are shared between Architecture and Discovery, Core Build, and Testing and Deployment. */
+const PHASE_SHARE: [number, number, number] = [0.2, 0.5, 0.3];
+
+/** Split a total number of weeks over the three phases, at least a week each, adding up to the total (or to three if the total is smaller). */
+export function splitWeeks(totalWeeks: number): [number, number, number] {
+  const total = Math.max(3, Math.round(totalWeeks));
+  const first = Math.max(1, Math.round(total * PHASE_SHARE[0]));
+  const last = Math.max(1, Math.round(total * PHASE_SHARE[2]));
+  return [first, Math.max(1, total - first - last), last];
+}
+
+/** The time frame the client is shown, from the same hours the price comes from. */
+export function estimateTimeline(hours: { min: number; max: number }, hoursPerWeek: number = DEFAULT_RATES.hoursPerWeek): Timeline {
+  const weeksMin = Math.max(1, Math.ceil(hours.min / hoursPerWeek));
+  const weeksMax = Math.max(weeksMin, Math.ceil(hours.max / hoursPerWeek));
+  return { weeksMin, weeksMax, phaseWeeks: splitWeeks(weeksMax) };
 }

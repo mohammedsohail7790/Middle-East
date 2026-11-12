@@ -108,3 +108,34 @@ describe('audit report: team edits', () => {
     expect(mergeEdits(b, {})).toEqual(b);
   });
 });
+
+
+describe('audit report: time frame', () => {
+  it('comes from the same hours as the price', () => {
+    const { report } = make(goodRaw); // medium (35-60h) + 5h high-volume structured data = 40-65h -> 2-3 weeks at 30h a week
+    expect(report.timeline).toMatchObject({ weeksMin: 2, weeksMax: 3 });
+    expect(report.timeline!.phaseWeeks.reduce((a, b) => a + b, 0)).toBe(3);
+  });
+
+  it('follows a different weekly pace passed in', () => {
+    const { report } = assembleReport({ raw: goodRaw, lang: 'en', company: 'Acme', contactName: 'Sam', now: new Date('2026-11-12'), rates: { tier1: 300, tier2: 475, tier3: 675, blended: 400, bufferPct: 0, roundTo: 500, hoursPerWeek: 10 } });
+    expect(report.timeline).toMatchObject({ weeksMin: 4, weeksMax: 7 });
+  });
+
+  it('is editable: whole weeks only, the high end never below the low end, phases follow', () => {
+    const b = make(goodRaw).report;
+    const r = mergeEdits(b, { weeksMin: '4', weeksMax: '8' });
+    expect(r.timeline).toMatchObject({ weeksMin: 4, weeksMax: 8 });
+    expect(r.timeline!.phaseWeeks.reduce((a, c) => a + c, 0)).toBe(8);
+    expect(mergeEdits(b, { weeksMin: '6', weeksMax: '3' }).timeline).toMatchObject({ weeksMin: 6, weeksMax: 6 });
+    expect(mergeEdits(b, { weeksMin: 'soon', weeksMax: '2.5' }).timeline).toEqual(b.timeline);
+    expect(mergeEdits(b, { weeksMax: '200' }).timeline).toEqual(b.timeline);
+  });
+
+  it('keeps an old report without a timeline working, and lets the team add one', () => {
+    const old = { ...make(goodRaw).report };
+    delete (old as any).timeline;
+    expect(mergeEdits(old, {}).timeline).toBeUndefined();
+    expect(mergeEdits(old, { weeksMin: '3', weeksMax: '5' }).timeline).toMatchObject({ weeksMin: 3, weeksMax: 5 });
+  });
+});

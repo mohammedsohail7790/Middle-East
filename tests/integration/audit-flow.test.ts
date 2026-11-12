@@ -65,11 +65,12 @@ d('automatic audit, end to end', () => {
     expect(page).toContain('Ready for your review');
     expect(page).toContain('name="summary"');
 
-    const saved = await (await post(token, { action: 'save', summary: 'Edited by the team.', fee: '26,000', phase1: '', findings: 'One\nTwo', phase_0: 'A', phase_1: 'B', phase_2: 'C', opp_title_0: 'Capture each job once', opp_problem_0: 'Typed three times.', opp_solution_0: 'One entry.', opp_payoff_0: 'Less admin.' })).text();
+    const saved = await (await post(token, { action: 'save', summary: 'Edited by the team.', fee: '26,000', phase1: '', weeks_min: '4', weeks_max: '7', findings: 'One\nTwo', phase_0: 'A', phase_1: 'B', phase_2: 'C', opp_title_0: 'Capture each job once', opp_problem_0: 'Typed three times.', opp_solution_0: 'One entry.', opp_payoff_0: 'Less admin.' })).text();
     expect(saved).toContain('Saved.');
     const row = await getAudit(h.pool, p.id);
     expect(row?.report?.summary).toBe('Edited by the team.');
     expect(row?.report?.investment.feeAed).toBe(26000);
+    expect(row?.report?.timeline).toMatchObject({ weeksMin: 4, weeksMax: 7 });
     expect(row?.report?.findings).toEqual(['One', 'Two']);
 
     const approved = await (await post(token, { action: 'approve', summary: 'Edited by the team.', fee: '26000' })).text();

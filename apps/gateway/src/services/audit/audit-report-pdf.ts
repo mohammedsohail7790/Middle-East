@@ -37,6 +37,21 @@ export class ArabicFontMissingError extends Error {
 
 const fmtAed = (n: number): string => `AED ${n.toLocaleString('en-US')}`;
 
+/** "1 week", "6 weeks"; in Arabic the noun changes with the number (واحد, أسبوعان, 3-10 أسابيع, 11+ أسبوعاً). */
+export function weeksText(n: number, lang: 'en' | 'ar'): string {
+  if (lang === 'en') return n === 1 ? '1 week' : `${n} weeks`;
+  if (n === 1) return 'أسبوع واحد';
+  if (n === 2) return 'أسبوعان';
+  return n <= 10 ? `${n} أسابيع` : `${n} أسبوعاً`;
+}
+
+/** "6 to 9 weeks", or "3 weeks" when low and high are the same. */
+export function weeksRange(min: number, max: number, lang: 'en' | 'ar'): string {
+  if (min === max) return weeksText(max, lang);
+  if (lang === 'en') return `${min} to ${max} weeks`;
+  return `من ${min} إلى ${max} ${max <= 10 ? 'أسابيع' : 'أسبوعاً'}`;
+}
+
 const COPY = {
   en: {
     title: 'Opportunity Audit',
@@ -50,6 +65,10 @@ const COPY = {
     payoff: 'Payoff',
     roadmap: 'Roadmap',
     phase: 'Phase',
+    timeline: 'Estimated time frame',
+    timelineTotal: (r: string) => `About ${r} from the start of the build.`,
+    timelineNote: 'The clock starts once we have access to your systems. It moves with how quickly your team can answer questions and approve each step.',
+    phaseTime: (n: string) => `about ${n}`,
     investment: 'Project investment',
     fixedFee: 'Fixed fee',
     validity: (d: number) => `This fixed price is valid for ${d} days from the date of this report. It is not credited against the audit fee.`,
@@ -71,6 +90,10 @@ const COPY = {
     payoff: 'العائد',
     roadmap: 'خارطة الطريق',
     phase: 'المرحلة',
+    timeline: 'الإطار الزمني المقدّر',
+    timelineTotal: (r: string) => `نحو ${r} من بدء التنفيذ.`,
+    timelineNote: 'يبدأ العدّ بعد حصولنا على صلاحية الوصول إلى أنظمتكم، ويتأثر بسرعة ردّ فريقكم على الأسئلة وموافقته على كل خطوة.',
+    phaseTime: (n: string) => `نحو ${n}`,
     investment: 'استثمار المشروع',
     fixedFee: 'سعر ثابت',
     validity: (d: number) => `هذا السعر الثابت صالح لمدة ${d} يوماً من تاريخ هذا التقرير، ولا يُخصم من رسوم التدقيق.`,
@@ -149,6 +172,16 @@ export async function renderReportPdf(report: AuditReport, env: NodeJS.ProcessEn
     bullets(p.deliverables);
     doc.moveDown(0.4);
   });
+
+  if (report.timeline) {
+    const tl = report.timeline;
+    heading(t.timeline);
+    body(t.timelineTotal(weeksRange(tl.weeksMin, tl.weeksMax, report.lang)));
+    doc.moveDown(0.4);
+    bullets(report.phases.map((p, i) => `${t.phase} ${i + 1}: ${p.title}, ${t.phaseTime(weeksText(tl.phaseWeeks[i], report.lang))}`));
+    doc.moveDown(0.2);
+    body(t.timelineNote);
+  }
 
   heading(t.investment);
   doc.font(bold).fontSize(20).fillColor(INK).text(vis(`${t.fixedFee}: ${fmtAed(report.investment.feeAed)}`), LEFT, doc.y, opts());

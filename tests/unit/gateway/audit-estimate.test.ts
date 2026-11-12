@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_RATES, estimateHours, quote, ratesFromEnv, type Assessment } from '../../../apps/gateway/src/services/audit/audit-estimate.js';
+import { DEFAULT_RATES, estimateHours, estimateTimeline, quote, ratesFromEnv, splitWeeks, type Assessment } from '../../../apps/gateway/src/services/audit/audit-estimate.js';
 
 const base: Assessment = { complexity: 'medium', volume: 'low', dataFormat: 'structured', systems: 'cloud', humanApproval: false, budgetMaxAed: null };
 const a = (over: Partial<Assessment>): Assessment => ({ ...base, ...over });
@@ -73,5 +73,43 @@ describe('audit estimate: rates from the environment', () => {
 
   it('reads overrides', () => {
     expect(ratesFromEnv({ AUDIT_RATE_BLENDED_AED: '450', AUDIT_PRICE_BUFFER_PCT: '10' } as any)).toMatchObject({ blended: 450, bufferPct: 10 });
+  });
+});
+
+describe('audit estimate: time frame', () => {
+  it('turns the hours range into weeks at 30 build hours a week', () => {
+    expect(estimateTimeline({ min: 35, max: 60 })).toMatchObject({ weeksMin: 2, weeksMax: 2 });
+    expect(estimateTimeline({ min: 90, max: 165 })).toMatchObject({ weeksMin: 3, weeksMax: 6 });
+    expect(estimateTimeline({ min: 15, max: 25 })).toMatchObject({ weeksMin: 1, weeksMax: 1 });
+  });
+
+  it('never gives a high end below the low end, and uses a different pace when told to', () => {
+    const t = estimateTimeline({ min: 100, max: 100 }, 20);
+    expect(t.weeksMin).toBe(5);
+    expect(t.weeksMax).toBe(5);
+    expect(estimateTimeline({ min: 80, max: 150 }, 25)).toMatchObject({ weeksMin: 4, weeksMax: 6 });
+  });
+
+  it('shares the weeks over three phases, at least a week each, adding up to the total', () => {
+    expect(splitWeeks(10)).toEqual([2, 5, 3]);
+    expect(splitWeeks(6)).toEqual([1, 3, 2]);
+    expect(splitWeeks(1)).toEqual([1, 1, 1]);
+    for (const total of [3, 4, 5, 7, 9, 12, 20]) {
+      const parts = splitWeeks(total);
+      expect(parts.every((n) => n >= 1)).toBe(true);
+      expect(parts[0] + parts[1] + parts[2]).toBe(total);
+    }
+  });
+
+  it('puts the timeline in the phase split of the estimate for a big job', () => {
+    const t = estimateTimeline({ min: 137, max: 245 });
+    expect(t.weeksMax).toBe(9);
+    expect(t.phaseWeeks[0] + t.phaseWeeks[1] + t.phaseWeeks[2]).toBe(9);
+  });
+
+  it('reads the pace from the environment and ignores bad values', () => {
+    expect(ratesFromEnv({ AUDIT_BUILD_HOURS_PER_WEEK: '25' } as any).hoursPerWeek).toBe(25);
+    expect(ratesFromEnv({ AUDIT_BUILD_HOURS_PER_WEEK: 'lots' } as any).hoursPerWeek).toBe(30);
+    expect(ratesFromEnv({ AUDIT_BUILD_HOURS_PER_WEEK: '0' } as any).hoursPerWeek).toBe(1);
   });
 });
