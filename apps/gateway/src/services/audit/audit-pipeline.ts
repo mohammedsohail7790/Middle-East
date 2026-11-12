@@ -100,6 +100,7 @@ export async function startDraft(p: LinkPayload, answers: Record<string, string>
       renderSummaryStrip([
         { label: 'Company', value: p.company },
         { label: 'Suggested fee', value: money(result.report.investment.feeAed) },
+        ...(result.report.timeline ? [{ label: 'Time frame', value: result.report.timeline.weeksMin === result.report.timeline.weeksMax ? `${result.report.timeline.weeksMax} weeks` : `${result.report.timeline.weeksMin}–${result.report.timeline.weeksMax} weeks` }] : []),
         { label: 'Complexity', value: `${h.complexity} (${h.hoursMin}–${h.hoursMax} hours, internal)` },
         { label: 'Reference', value: p.id },
       ]),

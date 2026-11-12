@@ -1,6 +1,6 @@
 import { AUDIT_SECTIONS } from './audit-form-definition.js';
 import { assembleReport, detectLang, isUsable, type AuditReport, type Lang, type RawDraft } from './audit-report.js';
-import type { Assessment, Quote } from './audit-estimate.js';
+import { ratesFromEnv, type Assessment, type Quote, type Rates } from './audit-estimate.js';
 
 /**
  * The AI draft of an audit report. The model reads the client's answers and returns JSON: the words of the report and a few labelled facts (the Assessment).
@@ -76,6 +76,8 @@ export async function draftAuditReport(args: {
   contactName: string;
   llm?: LlmFn;
   now?: Date;
+  /** Hourly rate, buffer and weekly pace. Read from the AUDIT_* settings unless a test passes its own. */
+  rates?: Rates;
 }): Promise<DraftResult | null> {
   const lang = detectLang(args.answers);
   const llm = args.llm ?? ((s, u) => openAiJson(s, u));
@@ -86,6 +88,6 @@ export async function draftAuditReport(args: {
   } catch {
     return null;
   }
-  const out = assembleReport({ raw, lang, company: args.company, contactName: args.contactName, now: args.now ?? new Date() });
+  const out = assembleReport({ raw, lang, company: args.company, contactName: args.contactName, now: args.now ?? new Date(), rates: args.rates ?? ratesFromEnv() });
   return isUsable(out.report) ? out : null;
 }

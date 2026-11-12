@@ -100,6 +100,9 @@ export function renderReviewPage(row: AuditRow, token: string, notice?: { tone: 
     card(label('Fixed fee (AED), shown to the client') + input('fee', String(r.investment.feeAed), dis, 'inputmode="numeric"') +
       label('Smaller Phase 1 (AED), only when the budget is below the fee. Leave empty to omit') + input('phase1', r.investment.phase1Aed ? String(r.investment.phase1Aed) : '', dis, 'inputmode="numeric"') +
       `<p style="margin:8px 0 0;font-size:12px;color:#5b6472">${r.investment.overBudget ? 'The client\'s stated budget is below this fee.' : 'The stated budget covers the fee, or none was given.'}</p>`) +
+    card(label('Estimated time frame, in weeks (shown to the client)') +
+      `<div style="display:flex;gap:12px;align-items:center"><div style="flex:1">${input('weeks_min', r.timeline ? String(r.timeline.weeksMin) : '', dis, 'inputmode="numeric" placeholder="From"')}</div><span>to</span><div style="flex:1">${input('weeks_max', r.timeline ? String(r.timeline.weeksMax) : '', dis, 'inputmode="numeric" placeholder="To"')}</div></div>` +
+      `<p style="margin:8px 0 0;font-size:12px;color:#5b6472">Worked out from the hours estimate and how many build hours an engineer gets through in a week. The client is told the clock starts once we have access to their systems. Change it if you know better.</p>`) +
     card(label('Things to confirm, one per line') + area('considerations', r.considerations.join('\n'), 3, dis) + label('Next steps, one per line') + area('nextSteps', r.nextSteps.join('\n'), 3, dis)) +
     `<div style="margin:0 0 16px">${buttons}</div></form>` +
     `<p style="font-size:14px"><a href="review/pdf?t=${encodeURIComponent(token)}" style="color:#1b1f27;font-weight:600">Preview or download the PDF</a> (shows the saved version)</p>`;
@@ -121,6 +124,8 @@ export function editsFromForm(b: Record<string, unknown>, existingOpps: number):
     nextSteps: lines(b.nextSteps),
     feeAed: String(b.fee ?? ''),
     phase1Aed: String(b.phase1 ?? ''),
+    weeksMin: String(b.weeks_min ?? ''),
+    weeksMax: String(b.weeks_max ?? ''),
   };
 }
 

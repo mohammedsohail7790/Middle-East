@@ -1,4 +1,4 @@
-import { quote, type Assessment, type Quote, type Rates } from './audit-estimate.js';
+import { estimateTimeline, quote, splitWeeks, type Assessment, type Quote, type Rates, type Timeline } from './audit-estimate.js';
 
 /**
  * The shape of an audit report, and the rules that keep the AI inside it.
@@ -21,6 +21,8 @@ export interface AuditReport {
   considerations: string[];
   nextSteps: string[];
   investment: { feeAed: number; phase1Aed: number | null; overBudget: boolean; validDays: number };
+  /** The estimated time frame, in weeks. Older reports saved before this existed do not have one, so it is optional. */
+  timeline?: Timeline;
   /** For the team's review page only. Never printed in the client's PDF. */
   internal: { hoursMin: number; hoursMax: number; adjustments: Array<{ reason: string; min: number; max: number }>; complexity: Assessment['complexity'] };
 }
@@ -110,6 +112,7 @@ export function assembleReport(args: {
     considerations: list(args.raw.considerations, 6, 300),
     nextSteps: list(args.raw.nextSteps, 6, 200),
     investment: { feeAed: q.feeAed, phase1Aed: q.phase1Aed, overBudget: q.overBudget, validDays: VALID_DAYS },
+    timeline: estimateTimeline(q.hours, args.rates?.hoursPerWeek),
     internal: { hoursMin: q.hours.min, hoursMax: q.hours.max, adjustments: q.hours.adjustments, complexity: assessment.complexity },
   };
   return { report, assessment, quote: q };
@@ -130,6 +133,8 @@ export interface ReportEdits {
   nextSteps?: unknown;
   feeAed?: unknown;
   phase1Aed?: unknown;
+  weeksMin?: unknown;
+  weeksMax?: unknown;
 }
 
 const plain = (v: unknown, max: number): string => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, max) : '');
@@ -137,6 +142,11 @@ const plainList = (v: unknown, maxItems: number, maxLen: number): string[] => (A
 const money = (v: unknown): number | null => {
   const n = typeof v === 'number' ? v : typeof v === 'string' && v.trim() !== '' ? Number(v.replace(/[,\s]/g, '')) : NaN;
   return Number.isFinite(n) && n > 0 && n < 10_000_000 ? Math.round(n) : null;
+};
+
+const wholeWeeks = (v: unknown): number | null => {
+  const n = typeof v === 'number' ? v : typeof v === 'string' && v.trim() !== '' ? Number(v.trim()) : NaN;
+  return Number.isInteger(n) && n >= 1 && n <= 104 ? n : null;
 };
 
 /** Apply the team's edits to a report. Their text is kept as written (they may mention figures); only length and shape are limited. */
@@ -159,5 +169,16 @@ export function mergeEdits(report: AuditReport, edits: ReportEdits): AuditReport
     considerations: edits.considerations === undefined ? report.considerations : plainList(edits.considerations, 8, 400),
     nextSteps: edits.nextSteps === undefined ? report.nextSteps : plainList(edits.nextSteps, 8, 250),
     investment: { ...report.investment, feeAed: fee, phase1Aed: phase1 },
+    timeline: editedTimeline(report.timeline, edits),
   };
+}
+
+/** The team may change the low and high number of weeks. A bad value is ignored, a high below the low is lifted to it, and the phase split follows the high end. */
+function editedTimeline(current: Timeline | undefined, edits: ReportEdits): Timeline | undefined {
+  const lo = wholeWeeks(edits.weeksMin);
+  const hi = wholeWeeks(edits.weeksMax);
+  if (lo === null && hi === null) return current;
+  const weeksMin = lo ?? current?.weeksMin ?? hi ?? 1;
+  const weeksMax = Math.max(weeksMin, hi ?? current?.weeksMax ?? weeksMin);
+  return { weeksMin, weeksMax, phaseWeeks: splitWeeks(weeksMax) };
 }

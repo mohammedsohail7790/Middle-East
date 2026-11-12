@@ -44,6 +44,31 @@ describe('audit draft', () => {
   });
 });
 
+describe('audit draft: settings', () => {
+  const run = async () => (await draftAuditReport({ answers, company: 'Acme', contactName: 'Sam', llm: vi.fn().mockResolvedValue(JSON.stringify(good)) }))!.report;
+
+  it('reads the buffer, rate and weekly pace from the AUDIT_* settings', async () => {
+    const saved = { ...process.env };
+    try {
+      delete process.env.AUDIT_PRICE_BUFFER_PCT;
+      delete process.env.AUDIT_RATE_BLENDED_AED;
+      delete process.env.AUDIT_BUILD_HOURS_PER_WEEK;
+      const plain = await run();
+      expect(plain.investment.feeAed).toBe(24000);
+      process.env.AUDIT_PRICE_BUFFER_PCT = '10';
+      expect((await run()).investment.feeAed).toBe(26500);
+      delete process.env.AUDIT_PRICE_BUFFER_PCT;
+      process.env.AUDIT_RATE_BLENDED_AED = '500';
+      expect((await run()).investment.feeAed).toBe(30000);
+      delete process.env.AUDIT_RATE_BLENDED_AED;
+      process.env.AUDIT_BUILD_HOURS_PER_WEEK = '10';
+      expect((await run()).timeline).toMatchObject({ weeksMin: 4, weeksMax: 6 });
+    } finally {
+      process.env = saved;
+    }
+  });
+});
+
 describe('openAiJson', () => {
   it('fails clearly without a key and on an HTTP error, and returns the message content otherwise', async () => {
     await expect(openAiJson('s', 'u', {} as any)).rejects.toThrow(/OPENAI_API_KEY/);
