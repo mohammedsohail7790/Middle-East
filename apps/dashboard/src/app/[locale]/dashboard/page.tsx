@@ -23,6 +23,7 @@ import { DASHBOARD_POLL_MS, useDashboardSync } from "@/lib/dashboard-sync";
 import { timeAgo, formatDuration, formatChartDay, clampPercent } from "@/lib/utils";
 import { useTranslations, useLocale } from "next-intl";
 import { StatCard } from "@/components/ui-kit/StatCard";
+import { MinutesStrip } from "@/components/dashboard/MinutesStrip";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
@@ -345,6 +346,8 @@ export default function DashboardHome() {
           />
         </Link>
       </div>
+
+      <MinutesStrip />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-w-0">
         <VibePanel beam className="lg:col-span-2 min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">

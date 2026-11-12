@@ -15,6 +15,7 @@ import { createPublicAuditRouter } from '../services/audit/public-audit.controll
 import { createTeamRouter } from '../services/team/team.controller.js';
 import { createBusinessHoursRouter } from '../services/business-hours/business-hours.controller.js';
 import { createAIConfigRouter } from '../services/ai-config/ai-config.controller.js';
+import { createAlertsRouter } from '../services/alerts/alerts.controller.js';
 import { createPhoneNumbersRouter } from '../services/phone-provisioning/phoneNumbers.controller.js';
 import { createAuditLogsRouter } from '../services/audit/audit.controller.js';
 import { createApiKeysRouter } from '../services/api-keys/apiKeys.controller.js';
@@ -98,6 +99,7 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/business-hours', createBusinessHoursRouter());
     apiRouter.use('/slack', createSlackRouter());
     apiRouter.use('/ai-config', createAIConfigRouter());
+    apiRouter.use('/alerts', createAlertsRouter());
     apiRouter.use('/phone-numbers', createPhoneNumbersRouter());
 
     apiRouter.use('/audit-logs', createAuditLogsRouter());

@@ -34,6 +34,10 @@ class VoiceMetrics {
     integrationFailure(tenantId: string, provider: string, error: string): void {
         this.integrationFailures += 1;
         void voiceAlertService.onIntegrationFailure(tenantId, provider, error);
+        // Tell the business too, once per tool per day (the alert never includes the raw error text).
+        void import('../alerts/alert-service.js')
+            .then((m) => m.raiseIntegrationFailureAlert(tenantId, provider))
+            .catch(() => undefined);
         logger.error('voice.metrics.integration_failure', {
             tenantId,
             provider,
