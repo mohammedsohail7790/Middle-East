@@ -11,6 +11,8 @@
     "dashboardSubtitle": "Performance, volume, and recent activity",
     "leads": "Leads",
     "leadsSubtitle": "Pipeline stages and conversion",
+    "automations": "Automations",
+    "automationsSubtitle": "Ready-made automations, what they did, and what waits for you",
     "consultancyLeads": "Prospects",
     "consultancyLeadsSubtitle": "Fit checks and audits in progress",
     "consultancyProposals": "Proposals",
