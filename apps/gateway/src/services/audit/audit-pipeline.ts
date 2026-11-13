@@ -9,6 +9,7 @@ import { detectLang } from './audit-report.js';
 import { renderReportPdf } from './audit-report-pdf.js';
 import { getAudit, markDelivered, markDraftFailed, markPaid, saveDraft, saveSubmission, type AuditRow } from './audit-store.js';
 import type { LinkPayload } from './signed-link.js';
+import { markLeadStatusSafe } from '../consultancy/lead-store.js';
 
 /**
  * The automatic part of the paid audit, in two steps that run on their own:
@@ -67,6 +68,8 @@ export async function startDraft(p: LinkPayload, answers: Record<string, string>
     return;
   }
 
+  await markLeadStatusSafe(deps.pool, p.email, 'form_received');
+
   let result: DraftResult | null = null;
   try {
     result = await deps.draft({ answers, company: p.company, contactName: p.name || p.company });
@@ -89,6 +92,7 @@ export async function startDraft(p: LinkPayload, answers: Record<string, string>
   }
 
   await saveDraft(deps.pool, p.id, result.report, result.assessment).catch((error) => logger.error('[Audit] Could not save the draft', undefined, error instanceof Error ? error : new Error(String(error))));
+  await markLeadStatusSafe(deps.pool, p.email, 'audit_in_review');
   const review = reviewUrl(link);
   const h = result.report.internal;
   await safeTeamMail(deps, {
@@ -149,6 +153,7 @@ export async function deliverAudit(row: AuditRow, inject?: Partial<Deps>): Promi
     });
     if (sent === 'not-configured') throw new Error('Email is not configured (RESEND_API_KEY)');
     await markDelivered(deps.pool, row.id, true);
+    await markLeadStatusSafe(deps.pool, row.email, 'audit_paid');
     await safeTeamMail(deps, {
       eyebrow: 'Audit delivered',
       title: `Audit sent to ${row.company}`,
@@ -188,6 +193,7 @@ export async function handlePaid(id: string, inject?: Partial<Deps>): Promise<'d
     return 'no-record';
   }
   if (!row) return 'no-record';
+  await markLeadStatusSafe(deps.pool, row.email, 'audit_paid');
   if (row.status !== 'paid') {
     const review = reviewUrl({ id: row.id, company: row.company, email: row.email, name: row.contact_name ?? undefined, cur: row.currency });
     await safeTeamMail(deps, {

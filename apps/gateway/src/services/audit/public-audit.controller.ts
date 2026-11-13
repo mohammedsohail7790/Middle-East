@@ -12,6 +12,7 @@ import { sendClientAuditMail, para } from './audit-client-mail.js';
 import { paymentUrl, questionnaireUrl, PAYMENT_WINDOW_DAYS, QUESTIONNAIRE_DAYS } from './audit-links.js';
 import { createAuditReviewRouter } from './audit-review.controller.js';
 import { handlePaid, startDraft } from './audit-pipeline.js';
+import { markLeadStatusSafe } from '../consultancy/lead-store.js';
 
 /**
  * The paid Opportunity Audit. The flow runs on its own: the fit-check email has a button that emails the client a private link to Form 2 (the audit questionnaire); submitting it
@@ -164,6 +165,7 @@ export function createPublicAuditRouter(): Router {
         return;
       }
       approvedIds.add(p.id);
+      void import('../db/pool.js').then((m) => markLeadStatusSafe(m.pool, p.email, 'form_sent')).catch(() => undefined);
       res.type('html').send(page('Sent', `<p>The questionnaire link was emailed to <b>${who}</b>. It works for ${QUESTIONNAIRE_DAYS} days.</p>`));
     })
   );
