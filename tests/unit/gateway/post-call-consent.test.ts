@@ -4,11 +4,17 @@
  * behaves exactly as before. The database is an in-memory emulation of the consent statements; every other collaborator is a stub,
  * so this proves the gateway's decisions, not the behaviour of a real call, a real model or real PostgreSQL.
  */
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const OPT_IN = '11111111-1111-4111-8111-111111111111';
 const PLAIN = '22222222-2222-4222-8222-222222222222';
 const rows: Array<{ tenant_id: string; call_sid: string; scope: string; granted: boolean; at: number; seq: number }> = [];
+// Each test run is tagged with a generation. The code under test starts detached work (dynamic imports, summary, follow-up) that can finish late on a busy machine;
+// anything that finishes after the next test has begun belongs to the earlier test and must not be recorded as the new test's.
+const als = new AsyncLocalStorage<{ gen: number }>();
+let gen = 0;
+const keep = (): boolean => als.getStore()?.gen === gen;
 const calls = {
   storeCall: [] as any[], storeLead: [] as any[], sendRealtime: [] as any[], followUp: [] as any[], published: [] as any[], slack: [] as any[], evaluate: 0, extract: 0,
 };
@@ -31,26 +37,26 @@ vi.mock('../../../apps/gateway/src/services/voice/tenant-scope.js', () => ({
 vi.mock('../../../apps/gateway/src/services/logger.js', () => ({ logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() } }));
 vi.mock('../../../apps/gateway/src/services/db/pool.js', () => ({ pool: { query: vi.fn(async () => ({ rows: [] })) } }));
 vi.mock('../../../apps/gateway/src/services/voice/voice.controller.js', () => ({
-  storeCall: vi.fn(async (a: any) => { calls.storeCall.push(a); }),
-  storeLead: vi.fn(async (a: any) => { calls.storeLead.push(a); return 'lead-1'; }),
+  storeCall: vi.fn(async (a: any) => { if (keep()) calls.storeCall.push(a); }),
+  storeLead: vi.fn(async (a: any) => { if (keep()) calls.storeLead.push(a); return 'lead-1'; }),
   resolveCallIdForLead: vi.fn(async () => 'call-uuid-1'),
 }));
 vi.mock('../../../apps/gateway/src/services/voice/redis.client.js', () => ({
   voiceRedis: { get: vi.fn(async () => null), set: vi.fn(async () => 'OK'), del: vi.fn(async () => 1), srem: vi.fn(async () => 1), sadd: vi.fn(async () => 1), expire: vi.fn(async () => 1) },
 }));
 vi.mock('../../../apps/gateway/src/services/billing/billing.service.js', () => ({ billingService: { trackCallMinutes: vi.fn(async () => undefined) } }));
-vi.mock('../../../apps/gateway/src/services/integrations/integration.service.js', () => ({ integrationService: { sendRealtime: vi.fn(async (...a: any[]) => { calls.sendRealtime.push(a); }) } }));
+vi.mock('../../../apps/gateway/src/services/integrations/integration.service.js', () => ({ integrationService: { sendRealtime: vi.fn(async (...a: any[]) => { if (keep()) calls.sendRealtime.push(a); }) } }));
 vi.mock('../../../apps/gateway/src/services/voice/concurrency.guard.js', () => ({ concurrencyGuard: { release: vi.fn(async () => undefined) } }));
 vi.mock('../../../apps/gateway/src/services/realtime/session-coordinator.js', () => ({ sessionCoordinator: { unregisterSession: vi.fn(async () => undefined) } }));
 vi.mock('../../../apps/gateway/src/services/realtime/heartbeat-manager.js', () => ({ heartbeatManager: { untrackSocket: vi.fn() } }));
 vi.mock('../../../apps/gateway/src/services/ws-rate-limiter.js', () => ({ wsRateLimiter: { unregisterConnection: vi.fn() } }));
-vi.mock('../../../apps/gateway/src/services/automation/automation.service.js', () => ({ automationService: { sendCallFollowUp: vi.fn(async (...a: any[]) => { calls.followUp.push(a); }) } }));
-vi.mock('../../../apps/gateway/src/services/slack/slack.service.js', () => ({ slackService: { sendNewCallNotification: vi.fn(async (...a: any[]) => { calls.slack.push(a); }) } }));
+vi.mock('../../../apps/gateway/src/services/automation/automation.service.js', () => ({ automationService: { sendCallFollowUp: vi.fn(async (...a: any[]) => { if (keep()) calls.followUp.push(a); }) } }));
+vi.mock('../../../apps/gateway/src/services/slack/slack.service.js', () => ({ slackService: { sendNewCallNotification: vi.fn(async (...a: any[]) => { if (keep()) calls.slack.push(a); }) } }));
 vi.mock('../../../apps/gateway/src/services/qa/qa.service.js', () => ({ qaService: { recordAiEvaluation: vi.fn(async () => undefined) } }));
 vi.mock('../../../apps/gateway/src/services/ai-config/ai-config.service.js', () => ({ aiConfigService: { getConfig: vi.fn(async () => ({ requiredFields: ['name', 'phone', 'service'] })) } }));
 vi.mock('../../../apps/gateway/src/services/dashboard/dashboard-events.js', () => ({ publishDashboardPushType: vi.fn() }));
 vi.mock('../../../apps/gateway/src/services/klaros/correlation.js', () => ({ resolveCallCorrelation: vi.fn(async () => ({})) }));
-vi.mock('../../../apps/gateway/src/events/event-publisher.js', () => ({ publishPlatformEvent: vi.fn((type: string, payload: any) => { calls.published.push({ type, payload }); }) }));
+vi.mock('../../../apps/gateway/src/events/event-publisher.js', () => ({ publishPlatformEvent: vi.fn((type: string, payload: any) => { if (keep()) calls.published.push({ type, payload }); }) }));
 vi.mock('../../../apps/gateway/src/events/platform-event-bus.js', () => ({ isP2AsyncIntegrationsEnabled: () => false }));
 vi.mock('../../../apps/gateway/src/events/shadow-verification.js', () => ({ isP2ShadowVerificationEnabled: () => false, logShadowSyncBaseline: vi.fn() }));
 
@@ -60,6 +66,21 @@ const T0 = Date.parse('2026-10-09T10:00:00.000Z');
 const decide = (tenant: string, call: string, scope: string, granted = true) => rows.push({ tenant_id: tenant, call_sid: call, scope, granted, at: T0 + rows.length * 1000, seq: rows.length });
 let n = 0;
 const TRANSCRIPT = 'I had a knee operation last year and I take blood pressure tablets';
+
+const activity = () => calls.storeCall.length + calls.storeLead.length + calls.sendRealtime.length + calls.followUp.length + calls.published.length + calls.slack.length + calls.evaluate + calls.extract;
+
+/** Resolves once the recorded calls have not changed for 100 ms (and at least 60 ms have passed), with a 5 second ceiling. */
+async function settled(): Promise<void> {
+  const started = Date.now();
+  let last = -1;
+  let quietSince = Date.now();
+  while (Date.now() - started < 5000) {
+    await new Promise((r) => setTimeout(r, 20));
+    const now = activity();
+    if (now !== last) { last = now; quietSince = Date.now(); }
+    if (Date.now() - quietSince >= 100 && Date.now() - started >= 60) return;
+  }
+}
 
 async function run(tenantId: string, callSid: string, opts: { consentDeclined?: boolean } = {}) {
   const session: any = {
@@ -75,17 +96,19 @@ async function run(tenantId: string, callSid: string, opts: { consentDeclined?: 
     memoryManager: { getAllSessionMemory: async () => [{ type: 'customer_info', key: 'name', value: 'Test Person' }, { type: 'customer_info', key: 'phone', value: '+971500000001' }], saveConversationSummary: vi.fn(async () => undefined) },
     analyticsManager: { trackEvent: vi.fn(async () => undefined) },
     aiService: {
-      validateLeadExtraction: vi.fn(async () => { calls.extract++; return {}; }),
-      evaluateCall: vi.fn(async () => { calls.evaluate++; return { sentiment: 'neutral', sentimentScore: 0, frustrationLevel: 0, callSuccess: true, leadQuality: 'high', summary: 's' }; }),
+      validateLeadExtraction: vi.fn(async () => { if (keep()) calls.extract++; return {}; }),
+      evaluateCall: vi.fn(async () => { if (keep()) calls.evaluate++; return { sentiment: 'neutral', sentimentScore: 0, frustrationLevel: 0, callSuccess: true, leadQuality: 'high', summary: 's' }; }),
     },
   };
-  await finalizeRuntimeSession(state, { terminate: () => undefined } as any, deps);
-  // detached work (summary, follow-up, completion) settles on later ticks
-  await new Promise((r) => setTimeout(r, 60));
+  await als.run({ gen }, () => finalizeRuntimeSession(state, { terminate: () => undefined } as any, deps));
+  // Detached work (summary, follow-up, completion) settles on later ticks. A fixed wait was flaky: on a busy machine that work could land after
+  // the next test had reset `calls`, and show up there as a lead or follow-up that never happened. So wait until nothing new has been recorded for a while.
+  await settled();
   return { deps };
 }
 
 beforeEach(() => {
+  gen++;
   rows.length = 0;
   for (const k of ['storeCall', 'storeLead', 'sendRealtime', 'followUp', 'published', 'slack'] as const) calls[k].length = 0;
   calls.evaluate = 0; calls.extract = 0;
@@ -191,8 +214,8 @@ describe('Medical Tourism qualification is administrative completeness, not the 
       analyticsManager: { trackEvent: vi.fn(async () => undefined) },
       aiService: { validateLeadExtraction: vi.fn(async () => ({})), evaluateCall: vi.fn(async () => evaluation) },
     };
-    await finalizeRuntimeSession(state, { terminate: () => undefined } as any, deps);
-    await new Promise((r) => setTimeout(r, 60));
+    await als.run({ gen }, () => finalizeRuntimeSession(state, { terminate: () => undefined } as any, deps));
+    await settled();
   };
 
   it('everything present, consent recorded, no escalation => qualified, with a fixed administrative reason (no model summary, nothing medical)', async () => {
