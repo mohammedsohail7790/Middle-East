@@ -131,7 +131,9 @@ export function createAutomationEngineRouter(deps: RouterDeps = {}): Router {
     if (!tenantId) return;
     const status = req.query.status ? String(req.query.status) : undefined;
     if (status && !APPROVAL_STATUS.includes(status as ApprovalStatus)) return res.status(400).json({ success: false, error: 'Unknown status' });
-    res.json({ success: true, data: await store.listApprovals(await db(), tenantId, status as ApprovalStatus | undefined) });
+    const pool = await db();
+    await engine.expireApprovalsNow(pool); // answers nobody gave in time are closed before the list is read (never throws)
+    res.json({ success: true, data: await store.listApprovals(pool, tenantId, status as ApprovalStatus | undefined) });
   }));
 
   router.post('/approvals/:id/decide', asyncHandler(async (req: any, res: any) => {

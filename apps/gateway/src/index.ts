@@ -41,6 +41,7 @@ import { validateEnvironment, getAllowedOrigins, isAllowedCorsOrigin } from './s
 import { knowledgeService } from './services/knowledge/knowledge.service.js';
 import { productionTelemetry } from './services/voice/production-telemetry.js';
 import { startScheduler, stopScheduler } from './services/scheduler/runtime.js';
+import { startAutomationSweeper, stopAutomationSweeper } from './services/automation-engine/engine.js';
 import { startRetentionWorker } from './workers/retention-worker.js';
 import { startSelfHealingLoop } from './operations/self-healing/self-healing.service.js';
 import { bootstrapOtel } from './observability/otel/otel-bootstrap.js';
@@ -74,6 +75,8 @@ if (process.env.GATEWAY_RUN_WORKERS === 'true') {
 
 // The persistent scheduler (reminders, campaign dialling, retries) runs in every gateway instance: it claims jobs with SKIP LOCKED.
 startScheduler();
+// Closes automation approvals nobody answered in 7 days (every 10 minutes; AUTOMATION_SWEEPER_ENABLED=false switches it off).
+startAutomationSweeper();
 
 startSelfHealingLoop();
 
@@ -270,6 +273,11 @@ registerService({
 registerService({
     name: 'scheduler',
     shutdown: async () => { stopScheduler(); },
+});
+
+registerService({
+    name: 'automation-sweeper',
+    shutdown: async () => { stopAutomationSweeper(); },
 });
 
 registerService({

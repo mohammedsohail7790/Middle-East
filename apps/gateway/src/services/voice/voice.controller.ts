@@ -327,6 +327,7 @@ export async function storeLead(args: {
         const row = inserted.rows[0] as { id?: string; inserted?: boolean } | undefined;
         if (row?.id) {
             void publishLeadDashboardEvent(args.tenantId, String(row.id), Boolean(row.inserted));
+            if (row.inserted) void import('../automation-engine/triggers.js').then((m) => m.emitAutomationTrigger(args.tenantId, 'lead.created', String(row.id), { name: args.name, phone: args.phone, email: args.email, score: 35, source: 'inbound_call', createdAt: new Date().toISOString() })).catch(() => {});
             return String(row.id);
         }
         return null;
@@ -379,6 +380,7 @@ export async function storeLead(args: {
     const leadId = fallback.rows[0]?.id ? String(fallback.rows[0].id) : null;
     if (leadId) {
         void publishLeadDashboardEvent(args.tenantId, leadId, true);
+        void import('../automation-engine/triggers.js').then((m) => m.emitAutomationTrigger(args.tenantId, 'lead.created', leadId, { name: args.name, phone: args.phone, email: args.email, score: 35, source: 'inbound_call', createdAt: new Date().toISOString() })).catch(() => {});
     }
     return leadId;
 }
@@ -965,6 +967,8 @@ export function createVoiceRouter(): express.Router {
                 callStatus: String(body.CallStatus || ''),
                 callDuration: body.CallDuration != null ? String(body.CallDuration) : undefined,
             });
+            // A call to the business that nobody took, or that hung up straight away, starts the "missed call" automations (guarded: can never break the callback).
+            void import('../automation-engine/triggers.js').then((m) => m.emitMissedCallFromStatus(body, getTenantByPhone)).catch(() => {});
         } catch (error) {
             logger.error('TWILIO_CALL_STATUS_ERROR', { error: String(error), callSid: body.CallSid });
         }

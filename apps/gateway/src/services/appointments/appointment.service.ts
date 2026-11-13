@@ -465,6 +465,9 @@ export class AppointmentService {
             })
             .catch(() => {});
 
+        // Start the business's switched-on automations for a new appointment (guarded: can never break booking).
+        void import('../automation-engine/triggers.js').then((m) => m.emitAutomationTrigger(input.tenantId, 'appointment.created', appointmentId, { name: input.name, phone: input.phone, email: input.email, service: input.service, scheduledTime, createdAt: new Date().toISOString() })).catch(() => {});
+
         void import('../dashboard/dashboard-events.js')
             .then(({ publishDashboardPushType }) => {
                 publishDashboardPushType(input.tenantId, 'calendar.updated', [], { appointmentId });
