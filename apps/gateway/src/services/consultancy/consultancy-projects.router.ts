@@ -1,7 +1,6 @@
 import { Router, type Response } from 'express';
 import { logger } from '../logger.js';
 import { signLink } from '../audit/signed-link.js';
-import { SITE } from '../audit/audit-links.js';
 import { para, sendClientAuditMail } from '../audit/audit-client-mail.js';
 import { escapeHtml } from '../automation/email-template.js';
 import {
