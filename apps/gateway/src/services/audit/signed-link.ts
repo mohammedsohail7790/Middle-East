@@ -2,10 +2,12 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 
 /**
  * Private links for the paid audit. There is no account and no database: a link is a small signed message that says who it is for, what it opens and when it stops working.
- * Five kinds: `review` (the team's page for checking and approving the AI draft of the audit report), `approve` and `sendpay` are for us (the "send the questionnaire" button in the fit-check email, and the "audit is ready, send the payment link" button in the "questionnaire received" email), `form2` opens the audit questionnaire, and `pay` opens the payment page (valid for 5 days).
+ * Seven kinds (the last two, `proposal` and `project`, are described below): `review` (the team's page for checking and approving the AI draft of the audit report), `approve` and `sendpay` are for us (the "send the questionnaire" button in the fit-check email, and the "audit is ready, send the payment link" button in the "questionnaire received" email), `form2` opens the audit questionnaire, and `pay` opens the payment page (valid for 5 days).
  * The signature uses AUDIT_LINK_SECRET, so a link cannot be forged or changed; changing the secret switches every link off at once.
  */
-export type LinkKind = 'form2' | 'pay' | 'approve' | 'sendpay' | 'review';
+export type LinkKind = 'form2' | 'pay' | 'approve' | 'sendpay' | 'review' | 'proposal' | 'project';
+/** Two more kinds for the consultancy side: `proposal` (a client reads and accepts a build proposal; `id` is the proposal id) and `project` (a client's read-only status page; `id` is the project id). */
+const LINK_KINDS: ReadonlySet<string> = new Set<LinkKind>(['form2', 'pay', 'approve', 'sendpay', 'review', 'proposal', 'project']);
 
 export interface LinkPayload {
   /** Kind of link. */
@@ -55,7 +57,7 @@ export function verifyLink(token: string, secret: string, nowMs: number = Date.n
     return { ok: false, reason: 'malformed' };
   }
   const valid =
-    p && (p.k === 'form2' || p.k === 'pay' || p.k === 'approve' || p.k === 'sendpay' || p.k === 'review') && typeof p.id === 'string' && typeof p.company === 'string' && typeof p.email === 'string' && typeof p.x === 'number' && Number.isFinite(p.x) &&
+    p && LINK_KINDS.has(p.k) && typeof p.id === 'string' && typeof p.company === 'string' && typeof p.email === 'string' && typeof p.x === 'number' && Number.isFinite(p.x) &&
     (p.cur === undefined || typeof p.cur === 'string') && (p.name === undefined || typeof p.name === 'string');
   if (!valid) return { ok: false, reason: 'malformed' };
   if (p.x * 1000 <= nowMs) return { ok: false, reason: 'expired' };
