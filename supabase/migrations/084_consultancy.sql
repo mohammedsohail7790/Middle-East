@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.consultancy_leads (
                   ('new', 'approved', 'form_sent', 'form_received', 'audit_in_review', 'audit_paid', 'proposal_sent', 'won', 'lost')),
   notes           TEXT,
   owner_email     TEXT,                                      -- the team member looking after this prospect
-  audit_report_id UUID REFERENCES public.audit_reports(id) ON DELETE SET NULL,
+  audit_report_id TEXT REFERENCES public.audit_reports(id) ON DELETE SET NULL,   -- audit_reports.id is the audit's text link id, not a UUID
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
