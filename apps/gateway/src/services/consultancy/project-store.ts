@@ -414,14 +414,15 @@ export interface PublicProjectView {
 }
 
 /** Exactly what the client may see. Deliberately a separate, narrow query: no lead, no email, no proposal, no milestone notes, no ids of anything else. */
-export async function getPublicProjectView(db: Queryable, projectId: string, now: Date = new Date()): Promise<PublicProjectView | null> {
+export async function getPublicProjectView(db: Queryable, projectId: string, now: Date = new Date(), linkVersion = 1): Promise<PublicProjectView | null> {
   const r = await db.query(
-    `SELECT p.name, p.status, to_char(p.starts_on, 'YYYY-MM-DD') AS starts_on, to_char(p.delivery_date, 'YYYY-MM-DD') AS delivery_date, p.delivered_at, p.handover, p.client_notes, pr.language
+    `SELECT p.name, p.status, to_char(p.starts_on, 'YYYY-MM-DD') AS starts_on, to_char(p.delivery_date, 'YYYY-MM-DD') AS delivery_date, p.delivered_at, p.handover, p.client_notes, p.link_version, pr.language
      FROM consultancy_projects p LEFT JOIN consultancy_proposals pr ON pr.id = p.proposal_id WHERE p.id = $1`,
     [projectId],
   );
   const x = r.rows[0];
   if (!x) return null;
+  if (Number(x.link_version ?? 1) !== linkVersion) return null; // a link made before the team revoked links
   const ms = await db.query(
     `SELECT m.title, to_char(m.due_on, 'YYYY-MM-DD') AS due_on, m.done_at FROM consultancy_milestones m WHERE m.project_id = $1 ORDER BY m.position ASC, m.created_at ASC`,
     [projectId],
@@ -440,4 +441,17 @@ export async function getPublicProjectView(db: Queryable, projectId: string, now
     language: x.language === 'ar' ? 'ar' : 'en',
     milestones: ms.rows.map((m) => ({ title: m.title, dueOn: m.due_on ?? null, done: m.done_at != null })),
   };
+}
+
+
+/** The current link version of a project (what new status links are made with). Null when the project does not exist. */
+export async function getProjectLinkVersion(db: Queryable, projectId: string): Promise<number | null> {
+  const r = await db.query(`SELECT link_version FROM consultancy_projects WHERE id = $1`, [projectId]);
+  return r.rows[0] ? Number(r.rows[0].link_version ?? 1) : null;
+}
+
+/** Switches off every status link made so far for this project. Returns the new version, or null when the project does not exist. */
+export async function revokeProjectLinks(db: Queryable, projectId: string): Promise<number | null> {
+  const r = await db.query(`UPDATE consultancy_projects SET link_version = link_version + 1 WHERE id = $1 RETURNING link_version`, [projectId]);
+  return r.rows[0] ? Number(r.rows[0].link_version) : null;
 }

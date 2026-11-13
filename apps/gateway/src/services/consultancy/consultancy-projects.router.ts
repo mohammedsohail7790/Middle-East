@@ -4,8 +4,8 @@ import { signLink } from '../audit/signed-link.js';
 import { para, sendClientAuditMail } from '../audit/audit-client-mail.js';
 import { escapeHtml } from '../automation/email-template.js';
 import {
-  ProjectError, addMilestone, createProject, createProjectFromProposal, deleteMilestone, getProject, getProjectContact, listAcceptedProposals, listProjects,
-  reorderMilestones, updateMilestone, updateProject, type Queryable,
+  ProjectError, addMilestone, createProject, createProjectFromProposal, deleteMilestone, getProject, getProjectContact, getProjectLinkVersion, listAcceptedProposals, listProjects,
+  reorderMilestones, revokeProjectLinks, updateMilestone, updateProject, type Queryable,
 } from './project-store.js';
 
 /**
@@ -105,6 +105,13 @@ export function createProjectsRouter(deps: { pool?: Queryable; mail?: Mailer; no
     res.json({ success: true });
   }));
 
+  router.post('/:id/revoke-links', run(async (db, req, res) => {
+    if (!idOk(req.params.id)) return notFound(res);
+    const version = await revokeProjectLinks(db, req.params.id);
+    if (version === null) return notFound(res);
+    res.json({ success: true, data: { linkVersion: version } }); // every status link made before now stops working; make a new one to share again
+  }));
+
   router.post('/:id/status-link', run(async (db, req, res) => {
     if (!idOk(req.params.id)) return notFound(res);
     const secret = process.env.AUDIT_LINK_SECRET;
@@ -112,7 +119,8 @@ export function createProjectsRouter(deps: { pool?: Queryable; mail?: Mailer; no
     const contact = await getProjectContact(db, req.params.id);
     if (!contact) return notFound(res);
     // The email is left out of the link itself: the page never shows it, and a link is only a signed, readable token.
-    const token = signLink({ k: 'project', id: req.params.id, company: contact.company.slice(0, 200), email: '', x: Math.floor(now().getTime() / 1000 + STATUS_LINK_DAYS * 86400) }, secret);
+    const v = (await getProjectLinkVersion(db, req.params.id)) ?? 1;
+    const token = signLink({ k: 'project', id: req.params.id, company: contact.company.slice(0, 200), email: '', x: Math.floor(now().getTime() / 1000 + STATUS_LINK_DAYS * 86400), v }, secret);
     const url = `${GATEWAY()}/api/v1/public/project?t=${encodeURIComponent(token)}`;
     const out: { url: string; expiresInDays: number; emailed?: 'sent' | 'not-configured' } = { url, expiresInDays: STATUS_LINK_DAYS };
     if (req.body?.send === true) {

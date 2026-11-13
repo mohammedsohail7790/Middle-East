@@ -95,6 +95,17 @@ run('consultancy pipeline on a real database', () => {
     expect(text).not.toContain(`Acme ${tag}`);
   });
 
+  it('revoking links switches off older status links and not the new ones', async () => {
+    expect(await projects.getProjectLinkVersion(db, ids.project!)).toBe(1);
+    expect(await projects.getPublicProjectView(db, ids.project!, new Date(), 1)).toBeTruthy();
+    expect(await projects.revokeProjectLinks(db, ids.project!)).toBe(2);
+    expect(await projects.getPublicProjectView(db, ids.project!, new Date(), 1)).toBeNull(); // the old link
+    expect(await projects.getPublicProjectView(db, ids.project!, new Date(), 2)).toBeTruthy(); // a link made after
+    expect(await projects.revokeProjectLinks(db, '00000000-0000-0000-0000-000000000000')).toBeNull();
+    // put it back so the later tests in this file see the project as before
+    await db.query('UPDATE consultancy_projects SET link_version = 1 WHERE id = $1', [ids.project]);
+  });
+
   it('tracks a monthly support plan and the hours worked against it', async () => {
     const plan = await support.createPlan(db, { leadId: ids.lead!, kind: 'standard', projectId: ids.project });
     ids.plan = plan.id;

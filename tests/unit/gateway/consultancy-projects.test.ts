@@ -54,6 +54,13 @@ function fakePool() {
     if (s.includes('pr.language')) {
       return rows(db.projects.filter((x) => x.id === p[0]).map((x) => ({ ...x, language: db.proposals.find((r) => r.id === x.proposal_id)?.language ?? null })));
     }
+    if (s.startsWith('SELECT link_version FROM consultancy_projects')) return rows(db.projects.filter((x) => x.id === p[0]).map((x) => ({ link_version: x.link_version ?? 1 })));
+    if (s.startsWith('UPDATE consultancy_projects SET link_version')) {
+      const x = db.projects.find((r) => r.id === p[0]);
+      if (!x) return rows([]);
+      x.link_version = (x.link_version ?? 1) + 1;
+      return rows([{ link_version: x.link_version }]);
+    }
     if (s.startsWith('SELECT COALESCE(MAX(position)')) return rows([{ next: Math.max(-1, ...db.milestones.filter((m) => m.project_id === p[0]).map((m) => m.position)) + 1 }]);
     if (s.startsWith('INSERT INTO consultancy_milestones')) {
       const row = { id: uuid(), project_id: p[0], title: p[1], due_on: p[2], note: p[3], position: p[4], done_at: p[5] };
@@ -314,6 +321,12 @@ describe('team router', () => {
     expect(payload).toMatchObject({ k: 'project', id, email: '' });
     expect(payload.x).toBe(Math.floor(NOW.getTime() / 1000 + 180 * 86400));
     expect(mail).toHaveBeenCalledWith(expect.objectContaining({ to: 'client@acme.test', ctaUrl: r.body.data.url }));
+    expect(payload.v).toBe(1);
+    const revoked = await j('POST', `/p/${id}/revoke-links`, {});
+    expect(revoked.body.data.linkVersion).toBe(2);
+    const fresh = await j('POST', `/p/${id}/status-link`, {});
+    expect(JSON.parse(Buffer.from(new URL(fresh.body.data.url).searchParams.get('t')!.split('.')[0], 'base64url').toString()).v).toBe(2);
+    expect((await j('POST', `/p/00000000-0000-4000-8000-000000000000/revoke-links`, {})).status).toBe(404);
     const noSend = await j('POST', `/p/${id}/status-link`, {});
     expect(noSend.body.data.emailed).toBeUndefined();
     expect(mail).toHaveBeenCalledTimes(1);

@@ -147,6 +147,32 @@ describe('engine runtime', () => {
     expect(ext).toHaveBeenCalledTimes(1);
   });
 
+  it('settings changed after the owner said yes: the approved step is not run, the run fails and says why', async () => {
+    const ext = vi.fn(async () => ({ summary: 'sent' }));
+    const s = setup(tpl([step('b', 'webhook.post', true, { params: { url: '{{config.dest}}' } })]), { 'webhook.post': ext });
+    const auto = s.addAutomation({ approvalMode: 'ask', config: { dest: 'https://good.example.com/x' } });
+    await s.engine.processTrigger('T', 'lead.created', 'l1', {});
+    const a = [...s.approvals.values()][0];
+    a.status = 'approved';
+    auto.config = { dest: 'https://evil.example.com/y' }; // someone edits the address after the yes
+    const res = await s.engine.resume('T', a.id);
+    expect(res.ok).toBe(true);
+    expect(ext).not.toHaveBeenCalled();
+    expect(runOf(s).status).toBe('failed');
+    expect(runOf(s).error).toContain('changed after you approved');
+  });
+
+  it('settings unchanged after the yes: the approved step runs as before', async () => {
+    const ext = vi.fn(async () => ({ summary: 'sent' }));
+    const s = setup(tpl([step('b', 'webhook.post', true, { params: { url: '{{config.dest}}' } })]), { 'webhook.post': ext });
+    s.addAutomation({ approvalMode: 'ask', config: { dest: 'https://good.example.com/x' } });
+    await s.engine.processTrigger('T', 'lead.created', 'l1', {});
+    [...s.approvals.values()][0].status = 'approved';
+    await s.engine.resume('T', [...s.approvals.values()][0].id);
+    expect(ext).toHaveBeenCalledTimes(1);
+    expect(runOf(s).status).toBe('succeeded');
+  });
+
   it('rejection ends the run as rejected and runs no later step', async () => {
     const later = vi.fn(ok());
     const s = setup(tpl([step('b', 'crm.push_lead', true), step('c', 'data.transform')]), { 'crm.push_lead': ok(), 'data.transform': later });
