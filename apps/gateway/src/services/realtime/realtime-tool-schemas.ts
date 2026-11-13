@@ -298,7 +298,7 @@ export function buildToolsList(tenantConfig: TenantVoiceConfig, tenantPlan = 'es
         properties: {
           language: {
             type: 'string',
-            description: 'ISO language code: en, es, fr, ru, zh, hi',
+            description: 'Language code: en, ar, ur, fr, zh, ru or fa',
           },
         },
         required: ['language'],

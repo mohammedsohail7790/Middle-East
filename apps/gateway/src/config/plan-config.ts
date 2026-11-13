@@ -130,7 +130,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     hipaa: false,
     calendarSync: 'basic',
     voiceCloning: false,
-    multiLanguageSwitching: false,
+    multiLanguageSwitching: true,  // switching among the seven languages is on every plan, as marketed
     dynamicVoiceRouting: false,
     departmentVoices: false,
     sla: false,
