@@ -66,18 +66,23 @@ export async function initiateOutboundCall(
         statusCallbackEvent: ['initiated', 'ringing', 'answered', 'completed'],
     });
 
+    // The call is already placed at this point: nothing below may throw, or a scheduler retry would dial the same person twice.
     await voiceRedis
         .setex(outboundContextKey(call.sid), CONTEXT_TTL_SECONDS, JSON.stringify(ctx))
         .catch((err) => {
             logger.warn('OUTBOUND_CONTEXT_CACHE_FAILED', { callSid: call.sid, error: String(err) });
         });
 
-    await voiceDb.query(
-        `INSERT INTO public.calls (tenant_id, call_sid, transcript, language, latency, duration_ms, direction, from_number, to_number, campaign_call_id, outbound_reason, klaros_lead_id)
-         VALUES ($1, $2, '', 'en', 0, 0, 'outbound', $3, $4, $5, $6, $7)
-         ON CONFLICT (call_sid) DO NOTHING`,
-        [ctx.tenantId, call.sid, ctx.fromNumber, ctx.toNumber, ctx.campaignCallId ?? null, ctx.reason, ctx.klarosLeadId ?? null]
-    );
+    try {
+        await voiceDb.query(
+            `INSERT INTO public.calls (tenant_id, call_sid, transcript, language, latency, duration_ms, direction, from_number, to_number, campaign_call_id, outbound_reason, klaros_lead_id)
+             VALUES ($1, $2, '', 'en', 0, 0, 'outbound', $3, $4, $5, $6, $7)
+             ON CONFLICT (call_sid) DO NOTHING`,
+            [ctx.tenantId, call.sid, ctx.fromNumber, ctx.toNumber, ctx.campaignCallId ?? null, ctx.reason, ctx.klarosLeadId ?? null]
+        );
+    } catch (err) {
+        logger.error('OUTBOUND_CALL_ROW_INSERT_FAILED', { callSid: call.sid, error: String(err) });
+    }
 
     if (ctx.campaignCallId) {
         await voiceDb
@@ -122,7 +127,7 @@ function mapTwilioStatusToCampaignCall(status: string): 'completed' | 'failed' |
     return 'failed';
 }
 
-async function refreshCampaignStats(campaignId: string): Promise<void> {
+export async function refreshCampaignStats(campaignId: string): Promise<void> {
     const agg = await voiceDb.query(
         `SELECT
            count(*) FILTER (WHERE status IN ('completed', 'failed', 'no_answer'))::int AS completed_count,
@@ -138,13 +143,14 @@ async function refreshCampaignStats(campaignId: string): Promise<void> {
 
     const nextStatus =
         Number(row.remaining) === 0 && Number(row.completed_count) > 0 ? 'completed' : null;
+    // A paused or stopped campaign keeps its status even when the counts say everything is settled.
 
     await voiceDb.query(
         `UPDATE public.campaigns
          SET completed_count = $2,
              success_count = $3,
              failed_count = $4,
-             status = COALESCE($5, status),
+             status = CASE WHEN status IN ('running', 'scheduled') THEN COALESCE($5, status) ELSE status END,
              updated_at = NOW()
          WHERE id = $1`,
         [campaignId, row.completed_count, row.success_count, row.failed_count, nextStatus]

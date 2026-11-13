@@ -25,6 +25,14 @@ export interface AutomationRule {
   createdAt: Date;
 }
 
+export interface ReminderAppointment {
+  phone?: string;
+  name?: string;
+  service?: string;
+  scheduled_time?: string | Date;
+  company_name?: string;
+}
+
 export class AutomationService {
   /**
    * Caller email from their lead record (email column, falling back to
@@ -239,19 +247,30 @@ export class AutomationService {
   /**
    * Send appointment reminder
    */
-   async sendAppointmentReminder(
+  async sendAppointmentReminder(
     tenantId: string,
     appointmentId: string,
     hoursBeforeAppointment: number,
-    preloaded?: {
-      phone?: string;
-      name?: string;
-      service?: string;
-      scheduled_time?: string | Date;
-      company_name?: string;
-    }
+    preloaded?: ReminderAppointment
   ): Promise<void> {
     try {
+      await this.deliverAppointmentReminder(tenantId, appointmentId, hoursBeforeAppointment, preloaded);
+    } catch (error) {
+      console.error('[Automation] Error sending appointment reminder:', error);
+    }
+  }
+
+  /**
+   * Same as sendAppointmentReminder but reports what happened, and throws when every delivery failed, so the scheduler can retry.
+   * When some recipients got it and others did not, it counts as delivered (a retry would send the first ones a second copy).
+   */
+  async deliverAppointmentReminder(
+    tenantId: string,
+    appointmentId: string,
+    hoursBeforeAppointment: number,
+    preloaded?: ReminderAppointment
+  ): Promise<{ delivered: number; skippedReason?: string }> {
+    {
       let appointment = preloaded;
       if (!appointment) {
         const appointmentResult = await pool.query(
@@ -261,10 +280,24 @@ export class AutomationService {
            WHERE a.id = $1 AND a.tenant_id = $2`,
           [appointmentId, tenantId]
         );
-        if (appointmentResult.rows.length === 0) return;
+        if (appointmentResult.rows.length === 0) return { delivered: 0, skippedReason: 'appointment_not_found' };
         appointment = appointmentResult.rows[0];
       }
-      const { phone, name, service, scheduled_time, company_name } = appointment;
+      const { phone, name, service, scheduled_time, company_name } = appointment as Required<ReminderAppointment>;
+      if (!resend) return { delivered: 0, skippedReason: 'email_not_configured' };
+      let delivered = 0;
+      let failures = 0;
+      let lastError: unknown;
+      const deliver = async (to: string, subject: string, html: string) => {
+        try {
+          await this.deliverEmail(to, subject, html);
+          delivered += 1;
+        } catch (err) {
+          failures += 1;
+          lastError = err;
+          console.error('[Automation] Error sending email:', err);
+        }
+      };
 
       // Format appointment time
       const appointmentTime = new Date(scheduled_time);
@@ -283,7 +316,7 @@ export class AutomationService {
       // Email the customer when their email was captured on the call
       const callerEmail = phone ? await this.resolveCallerEmail(tenantId, String(phone)) : null;
       if (callerEmail) {
-        await this.sendEmail(
+        await deliver(
           callerEmail,
           `Reminder: your appointment with ${company_name} — ${formattedDate} at ${formattedTime}`,
           renderBrandedEmail({
@@ -303,7 +336,7 @@ export class AutomationService {
       // Always notify the business so upcoming appointments are never silently missed
       const ownerEmails = await this.getOwnerNotificationEmails(tenantId);
       for (const ownerEmail of ownerEmails) {
-        await this.sendEmail(
+        await deliver(
           ownerEmail,
           `⏰ Upcoming appointment (${reminderType}): ${name || phone || 'Customer'} — ${formattedDate} at ${formattedTime}`,
           renderBrandedEmail({
@@ -319,11 +352,9 @@ export class AutomationService {
         );
       }
 
-      // Mark reminder as sent (handled by caller for proper flag tracking)
-
+      if (delivered === 0 && failures > 0) throw lastError instanceof Error ? lastError : new Error('reminder email failed');
       console.log(`[Automation] ${reminderType} reminder sent for appointment ${appointmentId}`);
-    } catch (error) {
-      console.error('[Automation] Error sending appointment reminder:', error);
+      return { delivered, skippedReason: delivered === 0 ? 'no_recipient' : undefined };
     }
   }
 
@@ -458,89 +489,27 @@ export class AutomationService {
     }
   }
 
-  /**
-   * Process scheduled reminders
-   */
-  async processScheduledReminders(): Promise<void> {
-    try {
-      const now = new Date();
-      const in24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      const in1Hour = new Date(now.getTime() + 60 * 60 * 1000);
-
-      const reminders24h = await pool.query(
-        `SELECT a.id, a.tenant_id, a.name, a.phone, a.service, a.scheduled_time, vt.company_name
-         FROM public.appointments a
-         JOIN public.voice_tenants vt ON vt.id = a.tenant_id
-         WHERE a.scheduled_time BETWEEN $1 AND $2
-         AND a.status = 'booked'
-         AND (a.reminder_24h_sent IS NULL OR a.reminder_24h_sent = false)`,
-        [in24Hours, new Date(in24Hours.getTime() + 5 * 60 * 1000)]
-      );
-
-      const ids24h: string[] = [];
-      for (const appointment of reminders24h.rows) {
-        await this.sendAppointmentReminder(appointment.tenant_id, appointment.id, 24, appointment);
-        ids24h.push(appointment.id);
-      }
-      if (ids24h.length) {
-        await pool.query(
-          `UPDATE public.appointments SET reminder_24h_sent = true WHERE id = ANY($1::uuid[])`,
-          [ids24h]
-        );
-      }
-
-      const reminders1h = await pool.query(
-        `SELECT a.id, a.tenant_id, a.name, a.phone, a.service, a.scheduled_time, vt.company_name
-         FROM public.appointments a
-         JOIN public.voice_tenants vt ON vt.id = a.tenant_id
-         WHERE a.scheduled_time BETWEEN $1 AND $2
-         AND a.status = 'booked'
-         AND (a.reminder_1h_sent IS NULL OR a.reminder_1h_sent = false)`,
-        [in1Hour, new Date(in1Hour.getTime() + 5 * 60 * 1000)]
-      );
-
-      const ids1h: string[] = [];
-      for (const appointment of reminders1h.rows) {
-        await this.sendAppointmentReminder(appointment.tenant_id, appointment.id, 1, appointment);
-        ids1h.push(appointment.id);
-      }
-      if (ids1h.length) {
-        await pool.query(
-          `UPDATE public.appointments SET reminder_1h_sent = true WHERE id = ANY($1::uuid[])`,
-          [ids1h]
-        );
-      }
-
-      console.log(`[Automation] Processed ${reminders24h.rows.length + reminders1h.rows.length} reminders`);
-    } catch (error) {
-      console.error('[Automation] Error processing scheduled reminders:', error);
-    }
+  /** Sends one email; throws when the provider refuses or errors. Callers that must not fail use sendEmail. */
+  private async deliverEmail(to: string, subject: string, html: string): Promise<void> {
+    if (!resend) throw new Error('RESEND_API_KEY missing');
+    const from = process.env.EMAIL_FROM || 'noreply@hallaai.com';
+    // Resend answers a refusal (bad key, unverified domain) with an error value instead of throwing: treat it as a failure so it is logged.
+    throwIfRejected(await resend.emails.send({
+      from: `Halla AI <${from}>`,
+      to,
+      subject,
+      html,
+      text: stripToPlainText(html),
+    }));
   }
 
-   /**
-    * Send email
-    */
-   private async sendEmail(
-    to: string,
-    subject: string,
-    html: string
-  ): Promise<void> {
+  private async sendEmail(to: string, subject: string, html: string): Promise<void> {
     try {
       if (!resend) {
         console.log('[Automation] Resend not configured (RESEND_API_KEY missing), skipping email');
         return;
       }
-
-      const from = process.env.EMAIL_FROM || 'noreply@hallaai.com';
-      // Resend answers a refusal (bad key, unverified domain) with an error value instead of throwing: treat it as a failure so it is logged.
-      throwIfRejected(await resend.emails.send({
-        from: `Halla AI <${from}>`,
-        to,
-        subject,
-        html,
-        text: stripToPlainText(html),
-      }));
-
+      await this.deliverEmail(to, subject, html);
       console.log('[Automation] Email sent');
     } catch (error) {
       console.error('[Automation] Error sending email:', error);
@@ -686,11 +655,4 @@ export class AutomationService {
 
 export const automationService = new AutomationService();
 
-// Start reminder scheduler (runs every 5 minutes)
-setInterval(() => {
-  automationService.processScheduledReminders().catch(console.error);
-  void import('../whatsapp/whatsapp.outbound.js')
-    .then((m) => m.sendDueWhatsAppReminders())
-    .catch((err) => console.warn('[Automation] WhatsApp reminders skipped:', String(err).slice(0, 120)));
-}, 5 * 60 * 1000);
-
+// Reminders are scheduled by services/scheduler (persistent, restart-safe); nothing runs on a timer here.

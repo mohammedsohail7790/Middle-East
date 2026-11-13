@@ -180,28 +180,12 @@ export async function notifyAppointmentConfirmed(tenantId: string, appointmentId
   return r;
 }
 
-/** Sends the day-before reminder for appointments in the next ~24h window that haven't had one on WhatsApp. Called by the scheduler. */
-export async function sendDueWhatsAppReminders(now = new Date()): Promise<number> {
-  const from = new Date(now.getTime() + 23 * 60 * 60 * 1000);
-  const to = new Date(now.getTime() + 25 * 60 * 60 * 1000);
-  const due = await voiceDb.query(
-    `SELECT a.id, a.tenant_id FROM public.appointments a
-     JOIN public.whatsapp_numbers w ON w.tenant_id = a.tenant_id AND w.status = 'connected'
-     WHERE a.status = 'booked' AND a.scheduled_time BETWEEN $1 AND $2 AND COALESCE(a.wa_reminder_24h_sent, FALSE) = FALSE
-     LIMIT 200`,
-    [from, to]
-  );
-  let sent = 0;
-  for (const row of due.rows) {
-    const claim = await voiceDb.query(
-      `UPDATE public.appointments SET wa_reminder_24h_sent = TRUE WHERE id = $1 AND COALESCE(wa_reminder_24h_sent, FALSE) = FALSE RETURNING id`,
-      [row.id]
-    );
-    if (!claim.rowCount) continue; // another instance took it
-    const a = await loadAppointment(row.tenant_id, row.id);
-    if (!a) continue;
-    const r = await sendAppointmentMessage({ tenantId: row.tenant_id, phone: a.phone, name: a.name, kind: 'reminder', appointmentId: a.id, businessName: a.company_name, when: new Date(a.scheduled_time), service: a.service });
-    if (r.ok) sent += 1;
-  }
-  return sent;
+/**
+ * Sends the day-before reminder for one appointment. The scheduler (services/scheduler) decides when and makes sure it is attempted
+ * once; this only sends. Returns the reason when nothing was sent so the scheduler can tell "never going to work" from "try again".
+ */
+export async function sendWhatsAppReminderNow(tenantId: string, appointmentId: string): Promise<OutboundResult> {
+  const a = await loadAppointment(tenantId, appointmentId);
+  if (!a || a.status !== 'booked' || !a.phone) return { ok: false, reason: 'not_found' };
+  return sendAppointmentMessage({ tenantId, phone: a.phone, name: a.name, kind: 'reminder', appointmentId: a.id, businessName: a.company_name, when: new Date(a.scheduled_time), service: a.service });
 }

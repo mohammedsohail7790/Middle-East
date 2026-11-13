@@ -40,6 +40,7 @@ import { RealtimeGateway } from './services/realtime/realtime.gateway.js';
 import { validateEnvironment, getAllowedOrigins, isAllowedCorsOrigin } from './services/env.js';
 import { knowledgeService } from './services/knowledge/knowledge.service.js';
 import { productionTelemetry } from './services/voice/production-telemetry.js';
+import { startScheduler, stopScheduler } from './services/scheduler/runtime.js';
 import { startRetentionWorker } from './workers/retention-worker.js';
 import { startSelfHealingLoop } from './operations/self-healing/self-healing.service.js';
 import { bootstrapOtel } from './observability/otel/otel-bootstrap.js';
@@ -70,6 +71,9 @@ if (process.env.GATEWAY_RUN_WORKERS === 'true') {
 } else {
   logger.info('WORKERS_NOT_STARTED', { note: 'Set GATEWAY_RUN_WORKERS=true to co-locate, or deploy apps/worker' });
 }
+
+// The persistent scheduler (reminders, campaign dialling, retries) runs in every gateway instance: it claims jobs with SKIP LOCKED.
+startScheduler();
 
 startSelfHealingLoop();
 
@@ -261,6 +265,11 @@ registerService({
             (wsRateLimiter as any).destroy();
         }
     },
+});
+
+registerService({
+    name: 'scheduler',
+    shutdown: async () => { stopScheduler(); },
 });
 
 registerService({
