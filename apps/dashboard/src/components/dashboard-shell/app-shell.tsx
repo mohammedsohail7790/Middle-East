@@ -14,10 +14,12 @@ import { cn } from "@/lib/utils";
 import { isNavItemLocked } from "@/lib/store";
 import {
   DASHBOARD_NAV_GROUPS,
+  CONSULTANCY_NAV_GROUP,
   navLockedTitle,
   type DashboardNavItem,
 } from "@/lib/dashboard-nav";
 import { HallaAiLogo } from "@/components/brand/HallaAiLogo";
+import { useConsultancyTeam } from "@/lib/use-consultancy-team";
 import { MobileBottomNav } from "@/components/dashboard-shell/MobileBottomNav";
 import { DashboardTopbar } from "@/components/dashboard/DashboardTopbar";
 import { useDashboardSync } from "@/lib/dashboard-sync";
@@ -89,6 +91,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const [planTick, setPlanTick] = useState(0);
+  const isConsultancyTeam = useConsultancyTeam();
   const [workspace, setWorkspace] = useState<WorkspaceProfile | null>(null);
 
   useEffect(() => {
@@ -199,7 +202,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <div className="dashboard-sidebar-scroll flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-thin">
           <nav className="dashboard-sidebar-nav p-3 space-y-5" aria-label="Main navigation">
-            {DASHBOARD_NAV_GROUPS.map((group) => (
+            {(isConsultancyTeam ? [...DASHBOARD_NAV_GROUPS, CONSULTANCY_NAV_GROUP] : DASHBOARD_NAV_GROUPS).map((group) => (
               <div key={group.label}>
                 {!collapsed && (
                   <p className="dashboard-nav-group-label">{t(group.labelKey)}</p>

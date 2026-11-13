@@ -69,7 +69,19 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
   },
 ];
 
-export const DASHBOARD_NAV_FLAT: DashboardNavItem[] = DASHBOARD_NAV_GROUPS.flatMap((g) => g.items);
+/** Team-only: shown in the sidebar only to people on the consultancy team list (see use-consultancy-team.ts). The gateway enforces it; hiding the link is only a convenience. */
+export const CONSULTANCY_NAV_GROUP: DashboardNavGroup = {
+  label: "Consultancy",
+  labelKey: "navGroups.consultancy",
+  items: [
+    { href: "/dashboard/consultancy/leads", label: "Prospects", labelKey: "nav.consultancyLeads", subtitle: "Fit checks and audits in progress", subtitleKey: "nav.consultancyLeadsSubtitle" },
+    { href: "/dashboard/consultancy/proposals", label: "Proposals", labelKey: "nav.consultancyProposals", subtitle: "Build prices clients accept in writing", subtitleKey: "nav.consultancyProposalsSubtitle" },
+    { href: "/dashboard/consultancy/projects", label: "Projects", labelKey: "nav.consultancyProjects", subtitle: "Delivery dates, milestones and handover", subtitleKey: "nav.consultancyProjectsSubtitle" },
+    { href: "/dashboard/consultancy/support", label: "Support plans", labelKey: "nav.consultancySupport", subtitle: "Monthly plans and hours worked", subtitleKey: "nav.consultancySupportSubtitle" },
+  ],
+};
+
+export const DASHBOARD_NAV_FLAT: DashboardNavItem[] = [...DASHBOARD_NAV_GROUPS, CONSULTANCY_NAV_GROUP].flatMap((g) => g.items);
 
 export function navItemByPath(pathname: string): DashboardNavItem | undefined {
   const exact = DASHBOARD_NAV_FLAT.find((item) => item.href === pathname);

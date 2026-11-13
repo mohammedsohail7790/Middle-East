@@ -46,6 +46,11 @@ const PUBLIC_POST_ROUTES = new Set([
   '/public/audit/pay',
   // The team's review page for the AI draft of an audit report: saving edits and approving. Protected by a signed, expiring link (kind "review").
   '/public/audit/review',
+  // The long audit form's server-side copy, saved and read with the same private link as the form itself (so it can be resumed on another device).
+  '/public/audit/draft',
+  // A client accepts or declines a build proposal from a private signed link we email (kind "proposal"). Accepting records the typed name, time, address and the exact terms.
+  '/public/proposal/accept',
+  '/public/proposal/decline',
   // Klaros asks Halla to create a business's receptionist. Server-to-server: it carries no tenant JWT and authenticates itself
   // with the platform secret in the route (404 unless KLAROS_PROVISIONING_SECRET is set).
   '/platform/klaros/provision',
@@ -65,6 +70,10 @@ const PUBLIC_GET_ROUTES = new Set([
   // The team's review page and its PDF preview, opened from the "Draft audit ready" email. Same signed-link protection.
   '/public/audit/review',
   '/public/audit/review/pdf',
+  '/public/audit/draft',
+  // The proposal a client reads before accepting, and the read-only project status page, each opened from a private signed link.
+  '/public/proposal',
+  '/public/project',
   '/calendar/google/callback',
   '/calendar/outlook/callback',
   '/calendar/calendly/callback',

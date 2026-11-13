@@ -3,13 +3,22 @@
     "overview": "نظرة عامة",
     "operations": "العمليات",
     "channels": "القنوات",
-    "platform": "المنصة"
+    "platform": "المنصة",
+    "consultancy": "الاستشارات (الفريق)"
   },
   "nav": {
     "dashboard": "لوحة التحكم",
     "dashboardSubtitle": "الأداء والحجم والنشاط الأخير",
     "leads": "العملاء المحتملون",
     "leadsSubtitle": "مراحل خط الأنابيب والتحويل",
+    "consultancyLeads": "العملاء المحتملون",
+    "consultancyLeadsSubtitle": "فحوصات الملاءمة والتدقيقات الجارية",
+    "consultancyProposals": "العروض",
+    "consultancyProposalsSubtitle": "أسعار التنفيذ التي يوافق عليها العميل كتابيًا",
+    "consultancyProjects": "المشاريع",
+    "consultancyProjectsSubtitle": "مواعيد التسليم والمراحل والتسليم النهائي",
+    "consultancySupport": "خطط الدعم",
+    "consultancySupportSubtitle": "الخطط الشهرية والساعات المنجزة",
     "voiceAgents": "الوكلاء الصوتيون",
     "voiceAgentsSubtitle": "الصوت والنبرة وقواعد التوجيه",
     "calendar": "التقويم",

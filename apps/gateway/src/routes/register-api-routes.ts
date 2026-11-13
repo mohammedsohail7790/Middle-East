@@ -16,6 +16,9 @@ import { createTeamRouter } from '../services/team/team.controller.js';
 import { createBusinessHoursRouter } from '../services/business-hours/business-hours.controller.js';
 import { createAIConfigRouter } from '../services/ai-config/ai-config.controller.js';
 import { createAlertsRouter } from '../services/alerts/alerts.controller.js';
+import { createConsultancyAdminRouter } from '../services/consultancy/consultancy-admin.router.js';
+import { createPublicProposalRouter } from '../services/consultancy/public-proposal.router.js';
+import { createPublicProjectRouter } from '../services/consultancy/public-project.router.js';
 import { createPhoneNumbersRouter } from '../services/phone-provisioning/phoneNumbers.controller.js';
 import { createAuditLogsRouter } from '../services/audit/audit.controller.js';
 import { createApiKeysRouter } from '../services/api-keys/apiKeys.controller.js';
@@ -100,6 +103,9 @@ export function createApiRouter(): express.Router {
     apiRouter.use('/slack', createSlackRouter());
     apiRouter.use('/ai-config', createAIConfigRouter());
     apiRouter.use('/alerts', createAlertsRouter());
+    apiRouter.use('/consultancy-admin', createConsultancyAdminRouter());
+    apiRouter.use('/public/proposal', createPublicProposalRouter());
+    apiRouter.use('/public/project', createPublicProjectRouter());
     apiRouter.use('/phone-numbers', createPhoneNumbersRouter());
 
     apiRouter.use('/audit-logs', createAuditLogsRouter());

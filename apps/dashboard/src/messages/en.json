@@ -3,13 +3,22 @@
     "overview": "Overview",
     "operations": "Operations",
     "channels": "Channels",
-    "platform": "Platform"
+    "platform": "Platform",
+    "consultancy": "Consultancy (team)"
   },
   "nav": {
     "dashboard": "Dashboard",
     "dashboardSubtitle": "Performance, volume, and recent activity",
     "leads": "Leads",
     "leadsSubtitle": "Pipeline stages and conversion",
+    "consultancyLeads": "Prospects",
+    "consultancyLeadsSubtitle": "Fit checks and audits in progress",
+    "consultancyProposals": "Proposals",
+    "consultancyProposalsSubtitle": "Build prices clients accept in writing",
+    "consultancyProjects": "Projects",
+    "consultancyProjectsSubtitle": "Delivery dates, milestones and handover",
+    "consultancySupport": "Support plans",
+    "consultancySupportSubtitle": "Monthly plans and hours worked",
     "voiceAgents": "Voice Agents",
     "voiceAgentsSubtitle": "Voice, tone, and routing rules",
     "calendar": "Calendar",
