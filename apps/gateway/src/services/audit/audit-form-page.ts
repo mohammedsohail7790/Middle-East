@@ -68,6 +68,7 @@ export function renderAuditPages(): string {
         <p style="font-size:0.85rem;margin:0"><span style="color:var(--red)" aria-hidden="true">*</span> ${bi('Required. Everything else is optional.')}</p>
         ${AUDIT_SECTIONS.map(section).join('\n        ')}
         <button type="button" class="btn btn-primary btn-lg" style="width:100%;font-size:1rem" id="auditSubmitBtn">${bi('Send my answers →')}</button>
+        <div class="audit-saved" role="status" aria-live="polite" style="font-size:0.8rem;color:var(--gray-500);min-height:1.2em"></div>
         <div class="audit-status" role="status" aria-live="polite" style="font-size:0.9rem"></div>
       </form>
     </div>

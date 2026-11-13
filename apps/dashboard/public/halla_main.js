@@ -880,12 +880,58 @@ function initAuditPages() {
     const shown = (id) => Array.from(form.querySelectorAll('[data-block="' + id + '"]')).filter((b) => b.style.display !== 'none').length;
 
     form.querySelectorAll('[data-add]').forEach((add) => add.addEventListener('click', () => { const id = add.getAttribute('data-add'); reveal(id, shown(id) + 1); }));
-    try {
-      const saved = JSON.parse(localStorage.getItem(key) || '{}');
-      fields().forEach((el) => { if (saved[el.name]) el.value = saved[el.name]; });
-      form.querySelectorAll('[data-add]').forEach((add) => { const id = add.getAttribute('data-add'); let n = 1; form.querySelectorAll('[data-block="' + id + '"]').forEach((b, i) => { if (i > 0 && Array.from(b.querySelectorAll('[name]')).some((el) => el.value)) n = i + 1; }); reveal(id, n); });
-    } catch (e) { /* no saved answers */ }
-    form.addEventListener('input', () => { try { const o = {}; fields().forEach((el) => { if (el.value) o[el.name] = el.value; }); localStorage.setItem(key, JSON.stringify(o)); } catch (e) { /* storage full or blocked */ } });
+    // The answers are kept in this browser as you type, and a copy goes to our server (debounced) so you can carry on from another device. The page works without either.
+    const savedEl = form.querySelector('.audit-saved');
+    const showSaved = (where) => { if (savedEl) savedEl.textContent = where === 'server' ? (isAr() ? 'تم حفظ إجاباتك' : 'Your answers are saved') : where === 'device' ? (isAr() ? 'تم الحفظ على هذا الجهاز' : 'Saved on this device') : ''; };
+    const collect = () => { const o = {}; fields().forEach((el) => { if (el.value) o[el.name] = el.value; }); return o; };
+    const readLocal = () => {
+      try {
+        const s = JSON.parse(localStorage.getItem(key) || 'null');
+        if (s && typeof s === 'object') return s.fields && typeof s.fields === 'object' ? { savedAt: Number(s.savedAt) || 0, fields: s.fields } : { savedAt: 0, fields: s };
+      } catch (e) { /* no saved answers */ }
+      return null;
+    };
+    const restoreBlocks = () => form.querySelectorAll('[data-add]').forEach((add) => { const id = add.getAttribute('data-add'); let n = 1; form.querySelectorAll('[data-block="' + id + '"]').forEach((b, i) => { if (i > 0 && Array.from(b.querySelectorAll('[name]')).some((el) => el.value)) n = i + 1; }); reveal(id, n); });
+    const applyFields = (f) => { fields().forEach((el) => { el.value = typeof f[el.name] === 'string' ? f[el.name] : ''; }); restoreBlocks(); };
+    let savedAt = 0; let submitted = false; let syncOn = !!token; let serverReady = false; let dirty = false; let timer = null;
+    const writeLocal = () => { try { localStorage.setItem(key, JSON.stringify({ savedAt, fields: collect() })); return true; } catch (e) { return false; } };
+    const body = () => JSON.stringify({ t: token, data: { savedAt, fields: collect() } });
+    const pushServer = (leaving) => {
+      if (!syncOn || submitted || !serverReady) return Promise.resolve();
+      clearTimeout(timer); timer = null; dirty = false;
+      const payload = body();
+      const init = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: !!leaving };
+      return fetch(API + '/draft', init).then((r) => {
+        if (r.ok) { showSaved('server'); return; }
+        if (r.status === 400 || r.status === 410 || r.status === 413) syncOn = false;
+        dirty = true; showSaved('device');
+      }).catch(() => {
+        dirty = true; showSaved('device');
+        if (leaving && navigator.sendBeacon) { try { navigator.sendBeacon(API + '/draft', new Blob([payload], { type: 'application/json' })); } catch (e) { /* ignore */ } }
+      });
+    };
+    const schedule = () => { dirty = true; if (!syncOn || submitted) return; clearTimeout(timer); timer = setTimeout(() => { pushServer(false); }, 2000); };
+    const leave = () => { if (dirty && !submitted) pushServer(true); };
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') leave(); });
+    window.addEventListener('pagehide', leave);
+
+    const local0 = readLocal();
+    if (local0) { savedAt = local0.savedAt; try { applyFields(local0.fields); } catch (e) { /* ignore */ } }
+    form.addEventListener('input', () => { if (submitted) return; savedAt = Date.now(); const ok = writeLocal(); if (ok) showSaved('device'); schedule(); });
+
+    // On open: if our copy is newer than this browser's, use it; otherwise keep this browser's and send it up.
+    if (token) {
+      fetch(API + '/draft?t=' + encodeURIComponent(token), { cache: 'no-store' })
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error('unavailable'))))
+        .then((j) => {
+          const d = j && j.data && j.data.data;
+          const remoteAt = d && Number(d.savedAt) || 0;
+          if (d && d.fields && typeof d.fields === 'object' && remoteAt > savedAt) { savedAt = remoteAt; applyFields(d.fields); writeLocal(); showSaved('server'); }
+          else if (Object.keys(collect()).length) dirty = true;
+        })
+        .catch(() => { /* offline or asleep: keep working here */ })
+        .finally(() => { serverReady = true; if (dirty) pushServer(false); });
+    }
 
     let valid = false;
     btn.disabled = true;
@@ -911,6 +957,7 @@ function initAuditPages() {
       btn.disabled = true; btn.textContent = isAr() ? 'جارٍ الإرسال...' : 'Sending...'; say('');
       fetch(API + '/form2', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, answers }) })
         .then(async (res) => { if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(formErrorText(res.status, data.error, 'Something went wrong. Please email hello@hallaai.com directly.')); }
+          submitted = true; clearTimeout(timer); showSaved('');
           try { localStorage.removeItem(key); } catch (e2) { /* ignore */ }
           form.querySelectorAll('input[name], textarea[name], select[name]').forEach((el) => { el.value = ''; });
           say(isAr() ? 'شكراً لك. وصلتنا إجاباتك. سنعدّ تدقيقك ونراسلك عندما يكون جاهزاً.' : 'Thank you. We have your answers. We will prepare your audit and email you when it is ready.', 'var(--green, #2ecc71)'); })
