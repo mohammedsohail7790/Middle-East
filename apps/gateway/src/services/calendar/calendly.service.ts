@@ -41,10 +41,57 @@ async function calendlyRequest(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Calendly API error ${res.status}: ${text}`);
+    throw new CalendlyApiError(res.status, text);
   }
 
   return res.json();
+}
+
+/** Calendly returned a non-2xx. `status` lets callers tell "no scheduling-API
+ *  access" (401/403) and "slot taken" (409/422) from a transient failure. */
+export class CalendlyApiError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly body: string
+  ) {
+    super(`Calendly API error ${status}: ${body.slice(0, 300)}`);
+    this.name = 'CalendlyApiError';
+  }
+
+  /** Token rejected or plan lacks the Scheduling API: use the link-by-SMS path. */
+  get isAccessDenied(): boolean {
+    return this.status === 401 || this.status === 403;
+  }
+
+  /** Requested time is no longer bookable. */
+  get isSlotUnavailable(): boolean {
+    return this.status === 409 || this.status === 422;
+  }
+}
+
+/** Calendly's available-times endpoint accepts at most a 7 day window. */
+const CALENDLY_MAX_RANGE_MS = 7 * 24 * 60 * 60 * 1000 - 60_000;
+
+export interface CalendlySchedulingEventType {
+  uri: string;
+  name: string;
+  durationMinutes: number;
+}
+
+export interface CalendlyAvailableSlot {
+  start: Date;
+  end: Date;
+}
+
+export interface CalendlyBookingResult {
+  /** Full scheduled event URI, used for cancellation. */
+  eventUri: string;
+  inviteeUri: string;
+}
+
+/** The trailing id of a Calendly URI (".../scheduled_events/UUID" -> "UUID"). */
+export function calendlyUriId(uri: string): string {
+  return uri.split('/').filter(Boolean).pop() || uri;
 }
 
 export interface CalendlyConnection {
@@ -54,6 +101,8 @@ export interface CalendlyConnection {
   userUri: string;
   accessToken: string;
   email: string;
+  refreshToken?: string | null;
+  expiresAt?: Date | null;
 }
 
 export interface CalendlyEvent {
@@ -105,6 +154,29 @@ async function exchangeCalendlyCode(code: string): Promise<{
     refresh_token?: string;
     expires_in?: number;
   }>;
+}
+
+async function refreshCalendlyToken(refreshToken: string): Promise<{
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+}> {
+  const clientId = process.env.CALENDLY_CLIENT_ID?.trim() || '';
+  const clientSecret = process.env.CALENDLY_CLIENT_SECRET?.trim() || '';
+  if (!clientId || !clientSecret) throw new Error('Calendly OAuth is not configured on the server');
+  const res = await fetch('https://auth.calendly.com/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: clientId,
+      client_secret: clientSecret,
+    }).toString(),
+    timeout: CALENDLY_REQUEST_TIMEOUT_MS,
+  } as any);
+  if (!res.ok) throw new Error(`Calendly token refresh failed (${res.status})`);
+  return res.json() as Promise<{ access_token: string; refresh_token?: string; expires_in?: number }>;
 }
 
 export class CalendlyService {
@@ -255,7 +327,7 @@ export class CalendlyService {
 
   async getConnection(tenantId: string): Promise<CalendlyConnection | null> {
     const result = await pool.query(
-      `SELECT id, tenant_id, email, access_token, expires_at, status, metadata
+      `SELECT id, tenant_id, email, access_token, refresh_token, expires_at, status, metadata
        FROM public.calendar_connections
        WHERE tenant_id = $1 AND provider = 'calendly' AND status = 'active'
        LIMIT 1`,
@@ -265,14 +337,38 @@ export class CalendlyService {
 
     const row = result.rows[0];
     const meta = typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata || {};
-    return {
+    const conn: CalendlyConnection = {
       id: row.id,
       tenantId: row.tenant_id,
       organizationUri: meta.organizationUri || '',
       userUri: meta.userUri || '',
       accessToken: row.access_token,
       email: row.email,
+      refreshToken: row.refresh_token || meta.refreshToken || null,
+      expiresAt: row.expires_at ? new Date(row.expires_at) : null,
     };
+    return this.refreshIfExpiring(conn);
+  }
+
+  /** Calendly access tokens last ~2h; refresh before use so a live call never hits a stale token. */
+  private async refreshIfExpiring(conn: CalendlyConnection): Promise<CalendlyConnection> {
+    if (!conn.refreshToken || !conn.expiresAt) return conn;
+    if (conn.expiresAt.getTime() - Date.now() > 60_000) return conn;
+    try {
+      const t = await refreshCalendlyToken(conn.refreshToken);
+      const expiresAt = new Date(Date.now() + (t.expires_in ?? 7200) * 1000);
+      const refreshToken = t.refresh_token || conn.refreshToken;
+      await pool.query(
+        `UPDATE public.calendar_connections
+         SET access_token = $1, refresh_token = $2, expires_at = $3, updated_at = NOW()
+         WHERE id = $4`,
+        [t.access_token, refreshToken, expiresAt, conn.id]
+      );
+      return { ...conn, accessToken: t.access_token, refreshToken, expiresAt };
+    } catch (err) {
+      logger.warn('[Calendly] Token refresh failed', { tenantId: conn.tenantId, error: String(err) });
+      return conn;
+    }
   }
 
   async getEventTypes(tenantId: string): Promise<any[]> {
@@ -317,6 +413,125 @@ export class CalendlyService {
 
     // Return the Calendly booking URL with pre-filled time
     return `https://calendly.com/${res.resource?.slug || eventTypeId}/${startTime}`;
+  }
+
+  /** The event type the receptionist books into: first active, non-secret one. */
+  async getSchedulingEventType(tenantId: string): Promise<CalendlySchedulingEventType | null> {
+    const types = await this.getEventTypes(tenantId);
+    const t =
+      types.find((x) => x?.active !== false && x?.secret !== true && x?.uri) ||
+      types.find((x) => x?.uri);
+    if (!t?.uri) return null;
+    return {
+      uri: String(t.uri),
+      name: String(t.name || 'Appointment'),
+      durationMinutes: Number(t.duration) > 0 ? Number(t.duration) : 30,
+    };
+  }
+
+  /**
+   * Open start times Calendly itself reports for the event type (honours the
+   * host's availability, buffers, notice and existing bookings). The API caps
+   * a request at 7 days, so longer ranges are fetched in chunks.
+   */
+  async getAvailableTimes(
+    tenantId: string,
+    eventType: CalendlySchedulingEventType,
+    rangeStart: Date,
+    rangeEnd: Date
+  ): Promise<CalendlyAvailableSlot[]> {
+    const conn = await this.getConnection(tenantId);
+    if (!conn) throw new Error('No Calendly connection found');
+
+    // Calendly rejects start_time in the past.
+    const from = new Date(Math.max(rangeStart.getTime(), Date.now() + 60_000));
+    const slots: CalendlyAvailableSlot[] = [];
+    for (let cursor = from.getTime(); cursor < rangeEnd.getTime(); cursor += CALENDLY_MAX_RANGE_MS) {
+      const chunkEnd = Math.min(cursor + CALENDLY_MAX_RANGE_MS, rangeEnd.getTime());
+      const qs = new URLSearchParams({
+        event_type: eventType.uri,
+        start_time: new Date(cursor).toISOString(),
+        end_time: new Date(chunkEnd).toISOString(),
+      });
+      const res = await calendlyRequest(`/event_type_available_times?${qs.toString()}`, conn.accessToken);
+      for (const item of res.collection || []) {
+        if (item?.status && item.status !== 'available') continue;
+        const start = new Date(item?.start_time);
+        if (Number.isNaN(start.getTime())) continue;
+        slots.push({ start, end: new Date(start.getTime() + eventType.durationMinutes * 60_000) });
+      }
+    }
+    slots.sort((a, b) => a.start.getTime() - b.start.getTime());
+    return slots;
+  }
+
+  /**
+   * Create the booking through the Scheduling API (POST /invitees) so it shows
+   * up in Calendly. Needs the caller's email and a Calendly plan with
+   * scheduling-API access; otherwise throws (CalendlyApiError for API refusals).
+   */
+  async createBooking(
+    tenantId: string,
+    input: {
+      eventType: CalendlySchedulingEventType;
+      start: Date;
+      name: string;
+      email: string;
+      phone?: string;
+      timezone: string;
+    }
+  ): Promise<CalendlyBookingResult> {
+    const conn = await this.getConnection(tenantId);
+    if (!conn) throw new Error('No Calendly connection found');
+
+    const res = await calendlyRequest('/invitees', conn.accessToken, {
+      method: 'POST',
+      body: JSON.stringify({
+        event_type: input.eventType.uri,
+        start_time: input.start.toISOString(),
+        invitee: { name: input.name, email: input.email, timezone: input.timezone },
+        ...(input.phone && /^\+[1-9]\d{6,14}$/.test(input.phone)
+          ? { text_reminder_number: input.phone }
+          : {}),
+      }),
+    });
+    const r = res?.resource;
+    const eventUri = String(r?.event || '');
+    if (!eventUri) throw new Error('Calendly did not confirm the booking (no event in response)');
+    return { eventUri, inviteeUri: String(r?.uri || '') };
+  }
+
+  /** First invitee of a scheduled event: the details needed to rebook it. */
+  async getEventInvitee(
+    tenantId: string,
+    eventUri: string
+  ): Promise<{ name: string; email: string }> {
+    const conn = await this.getConnection(tenantId);
+    if (!conn) throw new Error('No Calendly connection found');
+    const res = await calendlyRequest(
+      `/scheduled_events/${encodeURIComponent(calendlyUriId(eventUri))}/invitees?status=active&count=1`,
+      conn.accessToken
+    );
+    const inv = (res.collection || [])[0];
+    if (!inv?.email) throw new Error('Calendly invitee not found for event');
+    return { name: String(inv.name || ''), email: String(inv.email) };
+  }
+
+  /** Cancel a scheduled event (POST /scheduled_events/{uuid}/cancellation). */
+  async cancelScheduledEvent(tenantId: string, eventUri: string, reason?: string): Promise<void> {
+    const conn = await this.getConnection(tenantId);
+    if (!conn) throw new Error('No Calendly connection found');
+    try {
+      await calendlyRequest(
+        `/scheduled_events/${encodeURIComponent(calendlyUriId(eventUri))}/cancellation`,
+        conn.accessToken,
+        { method: 'POST', body: JSON.stringify({ reason: reason || 'Cancelled via Halla AI' }) }
+      );
+    } catch (err) {
+      // Already cancelled in Calendly (e.g. by the host): nothing left to do.
+      if (err instanceof CalendlyApiError && err.status === 400 && /already/i.test(err.body)) return;
+      throw err;
+    }
   }
 
   async cancelEvent(tenantId: string, eventUri: string): Promise<void> {
