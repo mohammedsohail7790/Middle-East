@@ -2,6 +2,8 @@
 export function getMaxPhoneNumbers(plan: string, status?: string): number {
   if (status === 'trialing') return 3;
   switch (plan) {
+    case 'enterprise':
+      return 20;
     case 'professional':
       return 3;
     case 'essential':
@@ -14,6 +16,8 @@ export function getMaxPhoneNumbers(plan: string, status?: string): number {
 export function getMaxAiAgents(plan: string, status?: string): number {
   if (status === 'trialing') return 3;
   switch (plan) {
+    case 'enterprise':
+      return 10;
     case 'professional':
       return 3;
     case 'essential':

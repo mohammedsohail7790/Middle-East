@@ -5,7 +5,7 @@
 import type { ValidationSchema } from '../middleware/validation.js';
 
 const LEAD_STATUSES = ['new', 'contacted', 'qualified', 'appointment_set', 'won', 'lost'] as const;
-const BILLING_PLANS = ['essential', 'professional'] as const;
+const BILLING_PLANS = ['essential', 'professional', 'enterprise'] as const;
 const BILLING_INTERVALS = ['monthly', 'annual', 'yearly'] as const;
 
 export const leadsListQuerySchema: ValidationSchema = {

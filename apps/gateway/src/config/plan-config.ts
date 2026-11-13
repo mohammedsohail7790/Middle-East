@@ -145,7 +145,7 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     languages: ['ar-SA', 'ar-AE', 'ar-EG', 'ar-LB', 'en', 'ur', 'fr', 'zh', 'ru', 'fa', 'hi'],  // every supported language
     customVoice: true,
     crmIntegrations: true,
-    advancedAnalytics: true,
+    advancedAnalytics: false,   // Enterprise only; the trial unlocks it (see the trial block)
     apiAccess: false,
     hipaa: false,
     calendarSync: 'native',
@@ -157,6 +157,26 @@ export const PLAN_FEATURES: Record<string, PlanConfig> = {
     dedicatedOnboarding: false,
     maxKnowledgeFiles: 20,
     maxKnowledgeSizeMb: 50,
+  },
+  enterprise: {
+    includedMinutes: 4000,
+    overageRate: 0.37,          // AED per minute (~$0.10 USD)
+    maxPhoneNumbers: 20,
+    languages: ['ar-SA', 'ar-AE', 'ar-EG', 'ar-LB', 'en', 'ur', 'fr', 'zh', 'ru', 'fa', 'hi'],  // every supported language
+    customVoice: true,
+    crmIntegrations: true,
+    advancedAnalytics: true,    // conversion funnel, exports and reporting: Enterprise only (the trial unlocks it too)
+    apiAccess: true,
+    hipaa: false,
+    calendarSync: 'native',
+    voiceCloning: false,
+    multiLanguageSwitching: true,
+    dynamicVoiceRouting: false,
+    departmentVoices: false,
+    sla: true,
+    dedicatedOnboarding: false,
+    maxKnowledgeFiles: 50,
+    maxKnowledgeSizeMb: 200,
   },
   trial: {
     // Trial unlocks PROFESSIONAL features
@@ -191,15 +211,25 @@ export const TRIAL_CONFIG = {
 
 // ─── Voice Rules by Plan ────────────────────────────────────────────────────
 
+/** Essential gets the standard voice only; a choice of voices starts at Professional (as the pricing table says). */
+export const ESSENTIAL_STANDARD_VOICE: OpenAIVoice = 'marin';
+
 export const VOICE_RULES = {
   essential: {
     allowedProviders: ['openai'] as VoiceProvider[],
-    allowedVoices: ['alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'onyx', 'nova', 'sage', 'shimmer', 'verse', 'marin', 'cedar'] as OpenAIVoice[],
+    allowedVoices: [ESSENTIAL_STANDARD_VOICE] as OpenAIVoice[],
     customCloning: false,
     brandedGreeting: false,
     departmentVoices: false,
   },
   professional: {
+    allowedProviders: ['openai', 'elevenlabs'] as VoiceProvider[],
+    allowedVoices: ['alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'onyx', 'nova', 'sage', 'shimmer', 'verse', 'marin', 'cedar'] as OpenAIVoice[],
+    customCloning: false,
+    brandedGreeting: true,
+    departmentVoices: false,
+  },
+  enterprise: {
     allowedProviders: ['openai', 'elevenlabs'] as VoiceProvider[],
     allowedVoices: ['alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'onyx', 'nova', 'sage', 'shimmer', 'verse', 'marin', 'cedar'] as OpenAIVoice[],
     customCloning: false,
@@ -275,7 +305,9 @@ export function getEffectivePlan(plan: string, status: string): string {
  */
 export function validateVoiceConfig(
   plan: string,
-  config: Partial<TenantVoiceSettings>
+  config: Partial<TenantVoiceSettings>,
+  /** The voice the business already uses. Keeping it is always allowed, so a plan change never breaks a saved setup. */
+  currentVoiceId?: string
 ): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
   const planConfig = getPlanConfig(plan);
@@ -288,6 +320,10 @@ export function validateVoiceConfig(
 
   if (config.voiceProvider && !voiceRules.allowedProviders.includes(config.voiceProvider)) {
     errors.push(`Voice provider '${config.voiceProvider}' is not available on the ${plan} plan. Available: ${voiceRules.allowedProviders.join(', ')}`);
+  }
+
+  if (config.voiceId && config.voiceId !== currentVoiceId && !(voiceRules.allowedVoices as readonly string[]).includes(config.voiceId)) {
+    errors.push(`A choice of voices starts at the Professional plan. The ${plan} plan uses the standard voice.`);
   }
 
   return { valid: errors.length === 0, errors };

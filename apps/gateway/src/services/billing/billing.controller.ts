@@ -4,7 +4,7 @@
  * trial management, warnings, billing portal, and minute accounting.
  */
 
-import { billingService, PLANS } from './billing.service.js';
+import { billingService, PLANS, whatsappAddonPriceId, isWhatsAppAddonEnforced } from './billing.service.js';
 import { parseBillingInterval, isStripeConfigured } from './stripe-catalog.js';
 import { BillingNotConfiguredError } from './billing-errors.js';
 import { trialManager } from './trial.service.js';
@@ -179,6 +179,66 @@ export function createBillingRouter(): Router {
       const subscription = await billingService.cancelSubscription(tenantId, immediately);
       logger.info('Subscription canceled via API', { tenantId, immediately });
       res.json({ success: true, data: subscription });
+    })
+  );
+
+  // ── Add-ons ─────────────────────────────────────────────────────────────
+
+  router.get(
+    '/addons',
+    noConditionalCache,
+    asyncHandler(async (req: any, res: any) => {
+      const tenantId = getTenantId(req);
+      if (!tenantId) return res.status(400).json({ success: false, error: 'Tenant required' });
+      const active = await billingService.hasWhatsAppAddon(tenantId);
+      res.json({
+        success: true,
+        data: {
+          whatsapp: {
+            active,
+            priceUsdPerMonth: 39,
+            /** False until the Stripe price is set, so the dashboard can show "contact us" instead of a button that fails. */
+            available: !!whatsappAddonPriceId(),
+            /** When false, every business can use WhatsApp for now; the add-on only matters once billing goes live. */
+            enforced: isWhatsAppAddonEnforced(),
+          },
+        },
+      });
+    })
+  );
+
+  router.post(
+    '/addons/whatsapp',
+    asyncHandler(async (req: any, res: any) => {
+      const r = req as CallIqAuthenticatedRequest;
+      const tenantId = getTenantId(req);
+      if (!tenantId) return res.status(400).json({ success: false, error: 'Tenant required' });
+      const userRole = await resolveUserRole(tenantId, r.tenant?.userId);
+      const perm = requirePermission(userRole, 'billing:write');
+      if (!perm.ok) return res.status(403).json({ success: false, error: perm.reason ?? 'Forbidden' });
+      try {
+        const data = await billingService.addWhatsAppAddon(tenantId);
+        res.json({ success: true, data });
+      } catch (err) {
+        if (err instanceof BillingNotConfiguredError) {
+          return res.status(503).json({ success: false, error: err.message, code: err.code });
+        }
+        throw err;
+      }
+    })
+  );
+
+  router.delete(
+    '/addons/whatsapp',
+    asyncHandler(async (req: any, res: any) => {
+      const r = req as CallIqAuthenticatedRequest;
+      const tenantId = getTenantId(req);
+      if (!tenantId) return res.status(400).json({ success: false, error: 'Tenant required' });
+      const userRole = await resolveUserRole(tenantId, r.tenant?.userId);
+      const perm = requirePermission(userRole, 'billing:write');
+      if (!perm.ok) return res.status(403).json({ success: false, error: perm.reason ?? 'Forbidden' });
+      const data = await billingService.removeWhatsAppAddon(tenantId);
+      res.json({ success: true, data });
     })
   );
 

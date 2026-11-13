@@ -23,13 +23,12 @@ async function requireAdvancedAnalytics(tenantId: string, res: Response): Promis
     return false;
   }
   if (sub.status === 'trialing') return true;
-  const rank = await billingService.getPlanRank(sub.plan);
-  if (rank >= 2) return true;
+  // The conversion funnel and exports are the advanced analytics: Enterprise only, as the pricing table says.
   const allowed = await billingService.canUseFeature(tenantId, 'advancedAnalytics');
   if (!allowed) {
     res.status(403).json({
       success: false,
-      error: 'Analytics requires a Professional plan or higher',
+      error: 'Advanced analytics and exports require the Enterprise plan',
       currentPlan: sub.plan,
     });
     return false;

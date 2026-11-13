@@ -165,10 +165,15 @@ export function createAIConfigRouter(): Router {
       }
       const { language, voiceId } = { ...existing, ...configFields };
       if (language || voiceId) {
-        const validation = validateVoiceConfig(plan, {
-          language: language as LanguageCode | undefined,
-          voiceProvider: 'openai' as VoiceProvider,
-        });
+        const validation = validateVoiceConfig(
+          plan,
+          {
+            language: language as LanguageCode | undefined,
+            voiceProvider: 'openai' as VoiceProvider,
+            voiceId: voiceId as string | undefined,
+          },
+          existing?.voiceId
+        );
         if (!validation.valid) {
           return res.status(403).json({
             success: false,
