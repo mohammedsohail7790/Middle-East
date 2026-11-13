@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { logger } from '../logger.js';
 import * as realStore from './store.js';
 import { getExecutor as realGetExecutor, getTemplate as realGetTemplate, listTemplates as realListTemplates } from './registry.js';
@@ -70,6 +71,14 @@ function wellFormed(r: unknown): r is ExecutorResult {
   if (x.skipped !== undefined && typeof x.skipped !== 'boolean') return false;
   if (x.output !== undefined && (x.output === null || typeof x.output !== 'object' || Array.isArray(x.output))) return false;
   return true;
+}
+
+const CHANGED_AFTER_APPROVAL_ERROR = 'The settings changed after you approved this, so it was not run. It will ask again.';
+
+/** A short stable fingerprint of a set of values (keys sorted), so two identical sets match and any change does not. */
+function fingerprint(v: unknown): string {
+  const norm = (x: unknown): unknown => (Array.isArray(x) ? x.map(norm) : x && typeof x === 'object' ? Object.fromEntries(Object.keys(x as object).sort().map((k) => [k, norm((x as Record<string, unknown>)[k])])) : x);
+  return createHash('sha256').update(JSON.stringify(norm(v)) ?? '').digest('hex');
 }
 
 type StepOutcome = { status: 'succeeded' | 'skipped'; summary: string; output?: Record<string, unknown> } | { status: 'failed'; error: string };
@@ -152,21 +161,29 @@ export class Engine {
       let approved = !step.external || automation.approvalMode === 'auto';
 
       if (step.external && !approved) {
-        if (approvedIndex === i) approved = true;
-        else {
+        {
           let params: Record<string, unknown> = {};
           try {
             params = resolveParams(step.params, data);
           } catch {
             /* the step itself will report this when it runs */
           }
+          // What the owner is shown and says yes to is pinned by a fingerprint of the exact values. If the settings are changed afterwards, the yes no longer applies.
+          const paramsHash = fingerprint(params);
           const approval = await store.createApproval(db, {
             tenantId, runId: run.id, stepIndex: i, stepKey: step.key,
             summary: `Halla AI wants to: ${step.title}`,
-            proposal: { step: step.title, kind: step.kind, params: redactForProposal(params) as Record<string, unknown> },
+            proposal: { step: step.title, kind: step.kind, params: redactForProposal(params) as Record<string, unknown>, paramsHash },
           });
-          if (approval.status === 'approved') approved = true; // an answer already given for this very step (a retry after it failed)
-          else if (approval.status === 'pending') {
+          const answered = approval.status === 'approved' || approvedIndex === i;
+          if (answered && approval.status === 'approved') {
+            const pinned = (approval.proposal as { paramsHash?: unknown }).paramsHash;
+            if (typeof pinned === 'string' && pinned !== paramsHash) {
+              log[i] = { index: i, key: step.key, status: 'failed', startedAt: nowIso(), finishedAt: nowIso(), summary: `Could not: ${step.title}`, error: CHANGED_AFTER_APPROVAL_ERROR };
+              return save({ status: 'failed', steps: log, error: CHANGED_AFTER_APPROVAL_ERROR, finished: true });
+            }
+            approved = true; // an answer already given for this very step (just approved, or a retry after it failed)
+          } else if (approval.status === 'pending') {
             log[i] = { index: i, key: step.key, status: 'waiting_approval', startedAt: nowIso(), summary: `Waiting for your yes: ${step.title}` };
             return save({ status: 'waiting_approval', steps: log });
           } else {

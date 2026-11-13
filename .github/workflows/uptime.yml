@@ -3,6 +3,7 @@ name: Uptime check
 # Checks the live gateway and website from outside every 5 minutes (GitHub's shortest schedule; runs can start a few minutes late).
 # A failing run emails the repository owner, and the first failure of an incident also opens one issue so there is a written record.
 # This replaces the old keep-warm ping: the gateway now runs on a paid instance that does not sleep.
+# (Touched on 14 Nov 2026 so GitHub registers the workflow: it was on main but not listed under Actions.)
 on:
   schedule:
     - cron: '*/5 * * * *'

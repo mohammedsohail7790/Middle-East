@@ -57,6 +57,21 @@ describe('POST /documents', () => {
     expect((emit.mock.calls[1] as any)[3]).toEqual({ fileName: 'note.txt', text: 'Name: Sara' });
   });
 
+  it('stops a workspace that uploads too many documents in an hour (429), and counts from the run log', async () => {
+    const countRecent = vi.fn(async () => 30);
+    await new Promise((r) => server.close(r));
+    const app = express();
+    app.use((req: any, _res, next) => { req.tenant = { id: T, userId: 'u1', source: 'user_jwt' }; next(); });
+    app.use('/documents', createDocumentRouter({ db: async () => ({ query: vi.fn() }) as never, canWrite: async () => true, getAutomation: getAutomation as never, emit: emit as never, countRecent: countRecent as never, hourlyLimit: 30 }));
+    await new Promise<void>((r) => { server = app.listen(0, '127.0.0.1', () => r()); });
+    base = `http://127.0.0.1:${(server.address() as AddressInfo).port}/documents`;
+    const res = await upload(Buffer.from('Name: Sara'), 'note.txt');
+    expect(res.status).toBe(429);
+    expect(res.headers.get('retry-after')).toBeTruthy();
+    expect(emit).not.toHaveBeenCalled();
+    expect(countRecent.mock.calls[0].slice(2)).toEqual(['document.received', 60]);
+  });
+
   it('gives the same ref for the same file twice', async () => {
     const a = await (await upload(PDF, 'a.pdf')).json();
     const b = await (await upload(PDF, 'renamed.pdf')).json();

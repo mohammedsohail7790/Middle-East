@@ -22,7 +22,7 @@ export function createPublicProjectRouter(deps: { pool?: Queryable; now?: () => 
       const token = typeof req.query.t === 'string' ? req.query.t : '';
       const r = secret ? verifyLink(token, secret, deps.now?.().getTime()) : null;
       if (!r || !r.ok || r.payload.k !== 'project') return neutral();
-      const view = await getPublicProjectView(await getPool(), r.payload.id, deps.now?.());
+      const view = await getPublicProjectView(await getPool(), r.payload.id, deps.now?.(), r.payload.v ?? 1);
       if (!view) return neutral();
       res.set('Cache-Control', 'no-store').set('Referrer-Policy', 'no-referrer').type('html').send(renderProjectPage(view));
     } catch (err) {

@@ -109,6 +109,15 @@ export async function claimFailedRun(db: Db, tenantId: string, runId: string): P
   return r.rows[0] ? toRun(r.rows[0]) : null;
 }
 
+/** How many runs of one trigger kind this workspace started in the last `minutes`. Used to cap uploads, since each one costs an AI call. */
+export async function countRecentRuns(db: Db, tenantId: string, triggerKind: string, minutes: number): Promise<number> {
+  const r = await db.query(
+    `SELECT count(*)::int AS n FROM public.tenant_automation_runs WHERE tenant_id = $1 AND trigger_kind = $2 AND started_at >= now() - ($3::int * interval '1 minute')`,
+    [tenantId, triggerKind, minutes],
+  );
+  return Number(r.rows[0]?.n ?? 0);
+}
+
 /** Starts a run. The same trigger never runs the same automation twice: a repeat returns the existing run with `created: false`. */
 export async function createRun(db: Db, n: NewRun): Promise<{ run: AutomationRun; created: boolean }> {
   const ins = await db.query(

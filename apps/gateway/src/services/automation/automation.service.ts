@@ -490,7 +490,8 @@ export class AutomationService {
   }
 
   /** Sends one email; throws when the provider refuses or errors. Callers that must not fail use sendEmail. */
-  private async deliverEmail(to: string, subject: string, html: string): Promise<void> {
+  /** Sends one email through the configured provider; throws when the provider refuses. Public because the automation engine's email step uses it too. */
+  async deliverEmail(to: string, subject: string, html: string): Promise<void> {
     if (!resend) throw new Error('RESEND_API_KEY missing');
     const from = process.env.EMAIL_FROM || 'noreply@hallaai.com';
     // Resend answers a refusal (bad key, unverified domain) with an error value instead of throwing: treat it as a failure so it is logged.

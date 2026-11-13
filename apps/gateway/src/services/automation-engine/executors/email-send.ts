@@ -20,8 +20,7 @@ export async function renderPlainEmail(title: string, body: string): Promise<str
 /** Sends one email with the existing mail helper; it throws when the provider refuses, so a refusal is a failed step and not a silent success. */
 export async function deliver(to: string, subject: string, html: string): Promise<void> {
   const { automationService } = await import('../../automation/automation.service.js');
-  const svc = automationService as unknown as { deliverEmail: (to: string, subject: string, html: string) => Promise<void> };
-  await svc.deliverEmail(to, subject, html);
+  await automationService.deliverEmail(to, subject, html);
 }
 
 /** email.send: params { to: 'team' | 'customer' | an address, subject, body }. 'customer' is the lead's own email address from the trigger. */

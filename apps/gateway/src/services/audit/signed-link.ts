@@ -23,6 +23,8 @@ export interface LinkPayload {
   cur?: string;
   /** The client's first name, used to address the emails. */
   name?: string;
+  /** Project links only: the project's link version when the link was made. Raising the version on the project switches older links off. */
+  v?: number;
 }
 
 export type VerifyResult =
@@ -58,7 +60,7 @@ export function verifyLink(token: string, secret: string, nowMs: number = Date.n
   }
   const valid =
     p && LINK_KINDS.has(p.k) && typeof p.id === 'string' && typeof p.company === 'string' && typeof p.email === 'string' && typeof p.x === 'number' && Number.isFinite(p.x) &&
-    (p.cur === undefined || typeof p.cur === 'string') && (p.name === undefined || typeof p.name === 'string');
+    (p.cur === undefined || typeof p.cur === 'string') && (p.name === undefined || typeof p.name === 'string') && (p.v === undefined || (typeof p.v === 'number' && Number.isInteger(p.v) && p.v >= 1));
   if (!valid) return { ok: false, reason: 'malformed' };
   if (p.x * 1000 <= nowMs) return { ok: false, reason: 'expired' };
   return { ok: true, payload: p };

@@ -26,6 +26,9 @@ export interface DocumentRouterDeps {
   canWrite: (tenantId: string, userId: string | undefined) => Promise<boolean>;
   getAutomation?: typeof store.getAutomation;
   emit?: typeof emitTrigger;
+  countRecent?: typeof store.countRecentRuns;
+  /** Uploads one workspace may make per hour (each one is read by AI). Default 30. */
+  hourlyLimit?: number;
 }
 
 /** The real signature of the bytes, whatever the name or declared type says. */
@@ -111,6 +114,14 @@ export function createDocumentRouter(deps: DocumentRouterDeps): Router {
     if (!template || (template.trigger as TriggerKind) !== 'document.received') return fail(res, 400, 'That automation does not read documents');
     const automation = await getAutomation(await deps.db(), tenantId, template.key);
     if (!automation || !automation.enabled) return fail(res, 409, 'Switch this automation on before uploading documents');
+
+    // One workspace cannot run up the AI bill or tie up the PDF reader: a cap on uploads per hour, counted from the run log so it holds across servers.
+    const limit = deps.hourlyLimit ?? (Number(process.env.AUTOMATION_UPLOADS_PER_HOUR) || 30);
+    const recent = await (deps.countRecent ?? store.countRecentRuns)(await deps.db(), tenantId, 'document.received', 60).catch(() => 0);
+    if (recent >= limit) {
+      res.setHeader('Retry-After', '600');
+      return fail(res, 429, 'Too many documents in the last hour. Try again in a few minutes');
+    }
 
     const file = parts.find((p) => p.name === 'file' && p.filename !== undefined);
     if (!file || file.data.length === 0) return fail(res, 400, 'Choose a file to upload');
