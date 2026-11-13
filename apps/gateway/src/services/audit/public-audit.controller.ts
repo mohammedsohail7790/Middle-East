@@ -14,6 +14,7 @@ import { createAuditReviewRouter } from './audit-review.controller.js';
 import { handlePaid, startDraft } from './audit-pipeline.js';
 import { markLeadStatusSafe } from '../consultancy/lead-store.js';
 import { handleSupportEvent } from '../consultancy/support-webhook.js';
+import { checkDraftData, deleteDraft, getDraft, saveDraft } from './audit-draft-store.js';
 
 /**
  * The paid Opportunity Audit. The flow runs on its own: the fit-check email has a button that emails the client a private link to Form 2 (the audit questionnaire); submitting it
@@ -33,6 +34,8 @@ const page = (title: string, bodyHtml: string): string =>
 
 const readLimit = MiddlewareFactory.createRateLimit({ windowMs: 15 * 60 * 1000, max: 60, message: 'Too many requests. Please try again later.' });
 const writeLimit = MiddlewareFactory.createRateLimit({ windowMs: 15 * 60 * 1000, max: 10, message: 'Too many requests. Please try again later or email hello@hallaai.com.' });
+
+const draftWriteLimit = MiddlewareFactory.createRateLimit({ windowMs: 15 * 60 * 1000, max: 240, message: 'Too many requests. Please try again later.' });
 
 const MAX_ANSWER_CHARS = 4000;
 const MAX_TOTAL_CHARS = 60000;
@@ -329,7 +332,61 @@ export function createPublicAuditRouter(): Router {
       }
       // Write the draft audit in the background. The client gets their answer now; the team gets the review email when the draft is ready.
       void startDraft(p, answers).catch((error) => logger.error('[Audit] Draft step crashed', undefined, error instanceof Error ? error : new Error(String(error))));
+      // The answers are in, so the saved draft is no longer needed. Best effort: a failure here must not fail the submission.
+      try {
+        const { pool } = await import('../db/pool.js');
+        await deleteDraft(pool, String(req.body.token));
+      } catch (error) {
+        logger.error('[Audit] Could not delete the form draft', undefined, error instanceof Error ? error : new Error(String(error)));
+      }
       res.status(200).json({ ok: true });
+    })
+  );
+
+  // The half-filled questionnaire, kept on our side too so the client can carry on from another device. Keyed by a hash of the private link; the link is checked like Form 2's.
+  router.get(
+    '/draft',
+    readLimit,
+    validate({ query: { t: { type: 'string', required: true, maxLength: 2000 } }, allowOnlyQuery: ['t'] }),
+    asyncHandler(async (req: any, res: any) => {
+      const checked = checkToken(req.query.t, 'form2');
+      if (!checked.ok) {
+        res.status(checked.status).json({ success: false, error: checked.error });
+        return;
+      }
+      try {
+        const { pool } = await import('../db/pool.js');
+        res.json({ success: true, data: await getDraft(pool, String(req.query.t)) });
+      } catch (error) {
+        logger.error('[Audit] Could not read the form draft', undefined, error instanceof Error ? error : new Error(String(error)));
+        res.status(503).json({ success: false, error: 'Your saved answers are not available right now.' });
+      }
+    })
+  );
+
+  router.post(
+    '/draft',
+    draftWriteLimit,
+    validate({ body: { t: { type: 'string', required: true, maxLength: 2000 }, data: { type: 'object', required: true } }, allowOnlyBody: ['t', 'data'] }),
+    asyncHandler(async (req: any, res: any) => {
+      const checked = checkToken(req.body.t, 'form2');
+      if (!checked.ok) {
+        res.status(checked.status).json({ success: false, error: checked.error });
+        return;
+      }
+      const problem = checkDraftData(req.body.data);
+      if (problem) {
+        res.status(problem.includes('too large') ? 413 : 400).json({ success: false, error: problem });
+        return;
+      }
+      try {
+        const { pool } = await import('../db/pool.js');
+        const updatedAt = await saveDraft(pool, String(req.body.t), req.body.data);
+        res.json({ success: true, data: { updatedAt } });
+      } catch (error) {
+        logger.error('[Audit] Could not save the form draft', undefined, error instanceof Error ? error : new Error(String(error)));
+        res.status(503).json({ success: false, error: 'Your answers could not be saved on our side right now.' });
+      }
     })
   );
 
