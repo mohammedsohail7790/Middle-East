@@ -1,0 +1,39 @@
+name: Uptime check
+
+# Checks the live gateway and website from outside every 5 minutes (GitHub's shortest schedule; runs can start a few minutes late).
+# A failing run emails the repository owner, and the first failure of an incident also opens one issue so there is a written record.
+# This replaces the old keep-warm ping: the gateway now runs on a paid instance that does not sleep.
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Probe gateway and website
+        id: probe
+        run: node scripts/uptime-check.mjs
+      - name: Open one issue per incident
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          FAILED: ${{ steps.probe.outputs.failed }}
+        run: |
+          open=$(gh issue list --label uptime --state open --json number --jq 'length')
+          if [ "$open" = "0" ]; then
+            gh label create uptime --color B60205 --description "Production is down or degraded" 2>/dev/null || true
+            gh issue create --label uptime --title "Production check failing: ${FAILED:-see run}" \
+              --body "$(printf 'The 5-minute uptime check failed for: %s.\n\nRun: %s\n\nClose this issue when everything is back.' "${FAILED:-see run}" "$RUN_URL")"
+          fi
