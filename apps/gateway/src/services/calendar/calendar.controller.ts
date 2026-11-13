@@ -8,6 +8,7 @@
  */
 
 import { calendarService } from './calendar.service.js';
+import { verifyOAuthState } from './oauth-state.js';
 import { outlookCalendarService } from './outlook.calendar.service.js';
 import { calendlyService } from './calendly.service.js';
 import { acuityService } from './acuity.service.js';
@@ -79,7 +80,7 @@ export function createCalendarRouter(): Router {
   router.get('/google/callback', (req: any, res: any) => {
     void (async () => {
       const { code, state } = req.query;
-      const tenantId = state as string;
+      const tenantId = verifyOAuthState(state);
 
       if (!code || !tenantId) {
         res.redirect(
@@ -145,7 +146,7 @@ export function createCalendarRouter(): Router {
           )
         );
       }
-      const tenantId = state;
+      const tenantId = verifyOAuthState(state);
       if (!code || !tenantId) {
         return res.redirect(
           integrationsPageUrl(
@@ -204,19 +205,7 @@ export function createCalendarRouter(): Router {
           )
         );
       }
-      let parsedState: { tenantId?: string } = {};
-      if (state) {
-        try {
-          parsedState = JSON.parse(Buffer.from(state as string, 'base64url').toString('utf8'));
-        } catch {
-          try {
-            parsedState = JSON.parse(Buffer.from(state as string, 'base64').toString('utf8'));
-          } catch {
-            parsedState = {};
-          }
-        }
-      }
-      const resolvedTenantId = parsedState.tenantId || (state as string);
+      const resolvedTenantId = verifyOAuthState(state);
 
       if (!code || !resolvedTenantId) {
         return res.redirect(
@@ -310,19 +299,7 @@ export function createCalendarRouter(): Router {
           )
         );
       }
-      let parsedState: { tenantId?: string } = {};
-      if (state) {
-        try {
-          parsedState = JSON.parse(Buffer.from(state as string, 'base64url').toString('utf8'));
-        } catch {
-          try {
-            parsedState = JSON.parse(Buffer.from(state as string, 'base64').toString('utf8'));
-          } catch {
-            parsedState = {};
-          }
-        }
-      }
-      const resolvedTenantId = parsedState.tenantId || (state as string);
+      const resolvedTenantId = verifyOAuthState(state);
 
       if (!code || !resolvedTenantId) {
         return res.redirect(
@@ -405,19 +382,7 @@ export function createCalendarRouter(): Router {
           )
         );
       }
-      let parsedState: { tenantId?: string } = {};
-      if (state) {
-        try {
-          parsedState = JSON.parse(Buffer.from(state as string, 'base64url').toString('utf8'));
-        } catch {
-          try {
-            parsedState = JSON.parse(Buffer.from(state as string, 'base64').toString('utf8'));
-          } catch {
-            parsedState = {};
-          }
-        }
-      }
-      const resolvedTenantId = parsedState.tenantId || (state as string);
+      const resolvedTenantId = verifyOAuthState(state);
 
       if (!code || !resolvedTenantId) {
         return res.redirect(

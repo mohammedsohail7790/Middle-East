@@ -33,7 +33,7 @@ const wantsHtml = (req: any): boolean => !String(req.headers['content-type'] ?? 
 export function createPublicProposalRouter(deps?: { pool?: Pool }): Router {
   const router = Router();
   router.use((_req, res, next) => {
-    res.set('Cache-Control', 'no-store');
+    res.set('Cache-Control', 'no-store').set('Referrer-Policy', 'no-referrer');
     next();
   });
   router.use(express.urlencoded({ extended: false, limit: '20kb' }));

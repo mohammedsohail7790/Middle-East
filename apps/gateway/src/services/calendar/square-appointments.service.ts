@@ -4,6 +4,7 @@
  */
 
 import fetch from 'node-fetch';
+import { signOAuthState } from './oauth-state.js';
 import { pool } from '../db/pool.js';
 import { getSquareRedirectUri } from '../env.js';
 import { logger } from '../logger.js';
@@ -106,7 +107,7 @@ export class SquareAppointmentsService {
       throw new Error('SQUARE_CLIENT_ID is not configured on the gateway');
     }
     const redirectUri = getSquareRedirectUri();
-    const state = Buffer.from(JSON.stringify({ tenantId })).toString('base64url');
+    const state = signOAuthState(tenantId);
     return (
       'https://connect.squareup.com/oauth2/authorize' +
       `?client_id=${encodeURIComponent(clientId)}` +

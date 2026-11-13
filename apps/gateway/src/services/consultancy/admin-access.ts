@@ -23,8 +23,10 @@ type EmailLookup = (userId: string) => Promise<string | null>;
 /** Looks the signed-in user's email up from the login table; null when the user cannot be found. */
 export const emailFromAuthUsers: EmailLookup = async (userId) => {
   const { pool } = await import('../db/pool.js');
-  const r = await pool.query(`SELECT email FROM auth.users WHERE id = $1 LIMIT 1`, [userId]);
-  return r.rows[0]?.email ?? null;
+  const r = await pool.query(`SELECT email, email_confirmed_at FROM auth.users WHERE id = $1 LIMIT 1`, [userId]);
+  // An address nobody has proved they own does not count, so signing up as a team address gives no access.
+  if (!r.rows[0]?.email_confirmed_at) return null;
+  return r.rows[0].email ?? null;
 };
 
 /**

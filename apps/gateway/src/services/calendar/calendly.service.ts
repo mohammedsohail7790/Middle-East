@@ -5,6 +5,7 @@
  */
 
 import fetch from 'node-fetch';
+import { signOAuthState } from './oauth-state.js';
 import { pool } from '../db/pool.js';
 import { getCalendlyRedirectUri, getCalendlyWebhookBaseUrl } from '../env.js';
 import { logger } from '../logger.js';
@@ -192,7 +193,7 @@ export class CalendlyService {
       throw new Error('CALENDLY_CLIENT_ID is not configured on the gateway');
     }
     const redirectUri = getCalendlyRedirectUri();
-    const state = Buffer.from(JSON.stringify({ tenantId })).toString('base64url');
+    const state = signOAuthState(tenantId);
     return `https://auth.calendly.com/oauth/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&state=${encodeURIComponent(state)}`;
   }
 

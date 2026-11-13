@@ -22,7 +22,7 @@ export interface EngineDeps {
   db: () => Promise<realStore.Db>;
   store: Pick<
     typeof realStore,
-    'enabledForTrigger' | 'createRun' | 'updateRun' | 'getRun' | 'getAutomationById' | 'createApproval' | 'getApproval' | 'expirePendingApprovals'
+    'enabledForTrigger' | 'claimFailedRun' | 'createRun' | 'updateRun' | 'getRun' | 'getAutomationById' | 'createApproval' | 'getApproval' | 'expirePendingApprovals'
   >;
   getTemplate: (key: string) => AutomationTemplate | undefined;
   listTemplates: () => AutomationTemplate[];
@@ -264,6 +264,8 @@ export class Engine {
     if (!automation) return { ok: false, reason: 'not_found' };
     const template = this.deps.getTemplate(automation.templateKey);
     if (!template) return { ok: true, run: await this.failRun(run, 'This automation is no longer available') };
+    // Only one retry can take the run; a second one at the same moment finds it already running.
+    if (!(await store.claimFailedRun(db, tenantId, runId))) return { ok: false, reason: 'not_allowed' };
 
     const log: LoggedStep[] = run.steps.map((s) => ({ ...s }));
     let from = log.findIndex((e) => e.status !== 'succeeded' && e.status !== 'skipped');

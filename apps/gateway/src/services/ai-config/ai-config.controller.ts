@@ -128,6 +128,15 @@ export function createAIConfigRouter(): Router {
     asyncHandler(async (req: any, res: any) => {
       const tenantId = getTenantId(req);
 
+      // Changing how the receptionist talks to customers needs write access; a viewer cannot.
+      {
+        const { resolveUserRole, requirePermission } = await import('../enterprise/rbac.service.js');
+        const role = await resolveUserRole(tenantId, req.tenant?.userId);
+        if (!requirePermission(role, 'ops:write').ok) {
+          return res.status(403).json({ success: false, error: 'You do not have permission to change the AI settings' });
+        }
+      }
+
       // Validate voice/language settings against plan
       const existing = await aiConfigService.getConfig(tenantId);
       const parsed = fromDashboardBody(req.body);
