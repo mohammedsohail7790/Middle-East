@@ -5,6 +5,7 @@ import { listTemplates, getTemplate } from './registry.js';
 import { validateConfig } from './config-validation.js';
 import * as store from './store.js';
 import * as engine from './engine.js';
+import { createDocumentRouter } from './document.router.js';
 import type { ApprovalMode, ApprovalStatus, RunStatus } from './types.js';
 
 /**
@@ -55,6 +56,8 @@ export function createAutomationEngineRouter(deps: RouterDeps = {}): Router {
     return ok;
   };
   const who = (req: any): string => String((req as CallIqAuthenticatedRequest).tenant?.userId ?? 'owner');
+
+  router.use('/documents', createDocumentRouter({ db, canWrite }));
 
   router.get('/', asyncHandler(async (req: any, res: any) => {
     const tenantId = tenant(req, res);

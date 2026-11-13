@@ -27,6 +27,8 @@ export interface StepSpec {
   params?: Record<string, unknown>;
   /** True when this step changes something outside Halla AI (sends a message, writes to a CRM). In "ask first" mode, the run pauses before each such step. */
   external: boolean;
+  /** Optional "{{path}}" resolved like params: when it resolves to a truthy value (not "", "0", "false", null, 0, false) the step is skipped, not failed. */
+  skipIf?: string;
 }
 
 export interface ConfigField {
