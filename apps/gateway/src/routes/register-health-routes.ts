@@ -33,9 +33,10 @@ export function registerHealthRoutes(app: Application, cacheManager: CacheManage
 
         try {
             const t0 = Date.now();
-            const cache = new CacheManager();
-            await cache.set('health:ping', 'pong', { ttl: 10 });
-            const result = await cache.get<string>('health:ping');
+            // Reuse the gateway's own cache connection. A new CacheManager per request opened a new Redis connection every time and never closed it,
+            // so an outside monitor calling this every few minutes would slowly use up every connection Redis allows.
+            await cacheManager.set('health:ping', 'pong', { ttl: 10 });
+            const result = await cacheManager.get<string>('health:ping');
             checks.redis = { ok: result === 'pong', latencyMs: Date.now() - t0 };
         } catch (error) {
             checks.redis = { ok: false, error: String(error).slice(0, 120) };

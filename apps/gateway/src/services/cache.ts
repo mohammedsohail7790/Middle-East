@@ -202,7 +202,7 @@ export class CacheManager {
             const cacheKey = `req:${tenantId}:${req.method}:${req.originalUrl}:${JSON.stringify(req.query)}`;
 
             // Try to get from cache first
-            const cacheManager = new CacheManager();
+            const cacheManager = getSharedCacheManager();
             const cached = await cacheManager.get<ApiResponse>(cacheKey, options);
 
             if (cached) {
@@ -234,7 +234,7 @@ export class CacheManager {
 
             descriptor.value = async function (...args: any[]) {
                 const cacheKey = `${target.constructor.name}:${propertyName}:${JSON.stringify(args)}`;
-                const cacheManager = new CacheManager();
+                const cacheManager = getSharedCacheManager();
 
                 // Try to get from cache
                 const cached = await cacheManager.get(cacheKey, options);
@@ -252,11 +252,21 @@ export class CacheManager {
     }
 }
 
+/**
+ * One shared cache for the helpers below. Each `new CacheManager()` opens its own Redis connection and never closes it, and these helpers run per request
+ * (cacheDatabaseQuery runs on every incoming call), so creating one each time slowly used up every connection Redis allows.
+ */
+let sharedCacheManager: CacheManager | null = null;
+export function getSharedCacheManager(): CacheManager {
+    if (!sharedCacheManager) sharedCacheManager = new CacheManager();
+    return sharedCacheManager;
+}
+
 // Cache helper functions
 export const CacheHelpers = {
     // Cache API responses
     cacheApiResponse: (req: Request, res: Response, next: NextFunction) => {
-        const cacheManager = new CacheManager();
+        const cacheManager = getSharedCacheManager();
         const tenantId = req.headers['x-tenant-id'] as string || 'public';
         const cacheKey = `api:${tenantId}:${req.method}:${req.originalUrl}:${JSON.stringify(req.query)}`;
 
@@ -290,7 +300,7 @@ export const CacheHelpers = {
         query: () => Promise<T>,
         options: CacheOptions = {}
     ): Promise<T> => {
-        const cacheManager = new CacheManager();
+        const cacheManager = getSharedCacheManager();
 
         // Try to get from cache
         const cached = await cacheManager.get<T>(key, options);
