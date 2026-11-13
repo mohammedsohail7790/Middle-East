@@ -13,6 +13,7 @@ import { paymentUrl, questionnaireUrl, PAYMENT_WINDOW_DAYS, QUESTIONNAIRE_DAYS }
 import { createAuditReviewRouter } from './audit-review.controller.js';
 import { handlePaid, startDraft } from './audit-pipeline.js';
 import { markLeadStatusSafe } from '../consultancy/lead-store.js';
+import { handleSupportEvent } from '../consultancy/support-webhook.js';
 
 /**
  * The paid Opportunity Audit. The flow runs on its own: the fit-check email has a button that emails the client a private link to Form 2 (the audit questionnaire); submitting it
@@ -456,6 +457,14 @@ export async function handleAuditStripeWebhook(req: any, res: any): Promise<void
         }
       }
     }
+  }
+  // Support plans (consultancy): activation, failed and recovered payments, cancellation. Does nothing for events that are not about a support plan.
+  try {
+    await handleSupportEvent(event);
+  } catch (error) {
+    logger.error('[Support] Webhook handling failed', undefined, error instanceof Error ? error : new Error(String(error)));
+    res.status(500).json({ error: 'Could not record the support event' }); // Stripe retries
+    return;
   }
   res.json({ received: true });
 }
