@@ -4,6 +4,7 @@
  */
 
 import { google } from 'googleapis';
+import { signOAuthState } from './oauth-state.js';
 import { getGoogleCalendarRedirectUri } from '../env.js';
 import { voiceDb } from '../voice/tenant-scope.js';
 import { getTenantTimezone } from '../appointments/tenant-timezone.js';
@@ -116,7 +117,7 @@ export class CalendarService {
       prompt: 'consent',
       include_granted_scopes: true,
       scope: scopes,
-      state: tenantId,
+      state: signOAuthState(tenantId),
     });
   }
 

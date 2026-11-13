@@ -5,6 +5,7 @@
  */
 
 import fetch from 'node-fetch';
+import { signOAuthState } from './oauth-state.js';
 import { pool } from '../db/pool.js';
 import { getAcuityRedirectUri } from '../env.js';
 import { logger } from '../logger.js';
@@ -153,7 +154,7 @@ export class AcuityService {
       throw new Error('ACUITY_CLIENT_ID is not configured on the gateway');
     }
     const redirectUri = getAcuityRedirectUri();
-    const state = Buffer.from(JSON.stringify({ tenantId })).toString('base64url');
+    const state = signOAuthState(tenantId);
     return (
       'https://acuityscheduling.com/oauth2/authorize' +
       `?response_type=code` +

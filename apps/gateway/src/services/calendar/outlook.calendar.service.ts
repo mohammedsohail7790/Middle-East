@@ -1,4 +1,5 @@
 import { pool } from '../db/pool.js';
+import { signOAuthState } from './oauth-state.js';
 
 /**
  * Outlook Calendar Service — Microsoft Graph API
@@ -94,7 +95,7 @@ export class OutlookCalendarService {
     return msal.getAuthCodeUrl({
       scopes: MS_SCOPES,
       redirectUri: MS_REDIRECT_URI,
-      state: tenantId,
+      state: signOAuthState(tenantId),
       responseMode: 'query',
     });
   }

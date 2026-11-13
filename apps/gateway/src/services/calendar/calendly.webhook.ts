@@ -8,8 +8,8 @@ export function verifyCalendlyWebhookSignature(
 ): boolean {
   const secret = process.env.CALENDLY_WEBHOOK_SIGNING_KEY?.trim();
   if (!secret) {
-    logger.warn('[Calendly] CALENDLY_WEBHOOK_SIGNING_KEY not set — skipping signature check');
-    return true;
+    logger.warn('[Calendly] CALENDLY_WEBHOOK_SIGNING_KEY not set — refusing the webhook');
+    return false;
   }
   if (!header) return false;
 
@@ -22,6 +22,9 @@ export function verifyCalendlyWebhookSignature(
   const timestamp = parts.t;
   const signature = parts.v1;
   if (!timestamp || !signature) return false;
+  // A signed message is only good for a few minutes, so a captured one cannot be replayed later.
+  const ageSeconds = Math.abs(Date.now() / 1000 - Number(timestamp));
+  if (!Number.isFinite(ageSeconds) || ageSeconds > 300) return false;
 
   const hmac = createHmac('sha256', secret);
   hmac.update(`${timestamp}.`);

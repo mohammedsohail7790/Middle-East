@@ -90,6 +90,25 @@ export interface NewRun {
   triggerPayload: Record<string, unknown>;
 }
 
+/** Uploaded documents (the text and the photo) are read once and never kept: they are left out of what is saved with a run, so the run log cannot hold or return customers' paperwork. */
+const NOT_KEPT_IN_RUN_LOG = ['text', 'imageDataUrl'] as const;
+export function storablePayload(p: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...p };
+  let dropped = false;
+  for (const k of NOT_KEPT_IN_RUN_LOG) if (k in out) { delete out[k]; dropped = true; }
+  if (dropped) out.documentNotKept = true;
+  return out;
+}
+
+/** Takes a failed run for a retry. Only one caller can win: it flips failed to running in one statement, so a double click or two parallel retries cannot run the steps twice. */
+export async function claimFailedRun(db: Db, tenantId: string, runId: string): Promise<AutomationRun | null> {
+  const r = await db.query(
+    `UPDATE public.tenant_automation_runs SET status = 'running' WHERE tenant_id = $1 AND id = $2 AND status = 'failed' RETURNING *`,
+    [tenantId, runId],
+  );
+  return r.rows[0] ? toRun(r.rows[0]) : null;
+}
+
 /** Starts a run. The same trigger never runs the same automation twice: a repeat returns the existing run with `created: false`. */
 export async function createRun(db: Db, n: NewRun): Promise<{ run: AutomationRun; created: boolean }> {
   const ins = await db.query(
@@ -97,9 +116,10 @@ export async function createRun(db: Db, n: NewRun): Promise<{ run: AutomationRun
      VALUES ($1, $2, $3, $4, $5::jsonb)
      ON CONFLICT (automation_id, trigger_kind, trigger_ref) DO NOTHING
      RETURNING *`,
-    [n.tenantId, n.automationId, n.triggerKind, n.triggerRef, JSON.stringify(n.triggerPayload ?? {})],
+    [n.tenantId, n.automationId, n.triggerKind, n.triggerRef, JSON.stringify(storablePayload(n.triggerPayload ?? {}))],
   );
-  if (ins.rows[0]) return { run: toRun(ins.rows[0]), created: true };
+  // The run that starts gets the full payload in memory (the document steps need the file's text or image); what is saved in the database is the trimmed copy.
+  if (ins.rows[0]) return { run: { ...toRun(ins.rows[0]), triggerPayload: n.triggerPayload ?? {} }, created: true };
   const ex = await db.query(
     `SELECT * FROM public.tenant_automation_runs WHERE automation_id = $1 AND trigger_kind = $2 AND trigger_ref = $3 AND tenant_id = $4`,
     [n.automationId, n.triggerKind, n.triggerRef, n.tenantId],

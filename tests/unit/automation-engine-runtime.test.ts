@@ -33,6 +33,12 @@ function fakeStore() {
       const r = runs.get(rid);
       return r && r.tenantId === tenantId ? r : null;
     },
+    claimFailedRun: async (_db: any, tenantId: string, rid: string) => {
+      const r = runs.get(rid);
+      if (!r || r.tenantId !== tenantId || r.status !== 'failed') return null;
+      r.status = 'running';
+      return r;
+    },
     createApproval: async (_db: any, x: any) => {
       const ex = [...approvals.values()].find((a) => a.runId === x.runId && a.stepIndex === x.stepIndex);
       if (ex) return ex;
@@ -219,6 +225,19 @@ describe('engine runtime', () => {
     expect(after).toHaveBeenCalledTimes(1);
     expect(runOf(s)).toMatchObject({ status: 'succeeded', error: null });
     expect((await s.engine.retry('T', r.id)).ok).toBe(false); // only a failed run can be retried
+  });
+
+  it('two retries at the same moment run the steps once, not twice', async () => {
+    let calls = 0;
+    const flaky = vi.fn(async () => { if (++calls === 1) throw new Error('boom'); return { summary: 'ok' }; });
+    const s = setup(tpl([step('a', 'webhook.post')]), { 'webhook.post': flaky });
+    s.addAutomation();
+    await s.engine.processTrigger('T', 'lead.created', 'l1', {});
+    const r = runOf(s);
+    expect(r.status).toBe('failed');
+    const [x, y] = await Promise.all([s.engine.retry('T', r.id), s.engine.retry('T', r.id)]);
+    expect([x.ok, y.ok].sort()).toEqual([false, true]);
+    expect(flaky).toHaveBeenCalledTimes(2); // the first try plus exactly one retry
   });
 
   it('retrying an external step in ask mode reuses the answer already given for that step', async () => {

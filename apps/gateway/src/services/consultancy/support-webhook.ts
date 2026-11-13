@@ -41,7 +41,11 @@ export async function handleSupportEvent(event: Stripe.Event, inject?: Partial<S
     const plan = planId ? await getPlan(deps.pool, planId).catch(() => null) : null;
     if (!plan) return 'ignored';
     if (obj.payment_status !== 'paid' && obj.payment_status !== 'no_payment_required') return 'ignored';
-    if (plan.status !== 'pending') return 'handled'; // replay, or the plan moved on already
+    if (plan.status !== 'pending') {
+      // Normally a replay. If the plan was cancelled the client has paid for something we closed, so say so loudly for the team to refund or reopen it.
+      if (plan.status === 'cancelled') logger.error(`[Support] Payment received for a cancelled support plan (${plan.id}). Refund it or reopen the plan.`);
+      return 'handled';
+    }
     await setStatus(deps.pool, plan.id, 'active', { subscriptionId: idOf(obj.subscription) ?? undefined, startedOn: true });
     return 'handled';
   }
