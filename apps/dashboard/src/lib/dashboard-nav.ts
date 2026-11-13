@@ -40,6 +40,7 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
     items: [
       { href: "/dashboard/leads", label: "Leads", labelKey: "nav.leads", subtitle: "Pipeline stages and conversion", subtitleKey: "nav.leadsSubtitle" },
       { href: "/dashboard/agent", label: "Voice Agents", labelKey: "nav.voiceAgents", subtitle: "Voice, tone, and routing rules", subtitleKey: "nav.voiceAgentsSubtitle" },
+      { href: "/dashboard/automations", label: "Automations", labelKey: "nav.automations", subtitle: "Ready-made automations, what they did, and what waits for you", subtitleKey: "nav.automationsSubtitle" },
       { href: "/dashboard/calendar", label: "Calendar", labelKey: "nav.calendar", subtitle: "Appointments and availability", subtitleKey: "nav.calendarSubtitle" },
       { href: "/dashboard/analytics", label: "Analytics", labelKey: "nav.analytics", plan: "professional", subtitle: "Trends, funnels, and KPIs", subtitleKey: "nav.analyticsSubtitle" },
       { href: "/dashboard/quality", label: "Quality", labelKey: "nav.quality", plan: "professional", subtitle: "Call scoring, sentiment, and lead quality", subtitleKey: "nav.qualitySubtitle" },

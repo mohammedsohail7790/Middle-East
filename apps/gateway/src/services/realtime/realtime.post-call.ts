@@ -291,6 +291,9 @@ export async function finalizeRuntimeSession(
               });
             }).catch(() => {});
 
+            // Start the business's switched-on "call ended" automations (guarded; payload is name, phone, score and a short summary only; never the transcript).
+            void import('../automation-engine/triggers.js').then((m) => m.emitAutomationTrigger(state.tenantId, 'call.ended', state.callSid ?? undefined, { callerName: leadForEval.name, callerPhone: leadForEval.phone || state.callerPhone || undefined, summary: evaluation.summary, leadQuality: evaluation.leadQuality, outcome: callOutcome })).catch(() => {});
+
             // Derived entirely from the real evaluation plus ai_agent_configs.requiredFields
             // - never invented. See qualification-mapper.ts for the mapping rules.
             const { aiConfigService } = await import('../ai-config/ai-config.service.js');

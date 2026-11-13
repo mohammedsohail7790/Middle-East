@@ -270,6 +270,9 @@ export class LeadsService {
 
       console.log(`[Leads] Lead created: ${lead.id}`);
 
+      // Start the business's switched-on automations for a new lead (guarded: can never break lead creation).
+      void import('../automation-engine/triggers.js').then((m) => m.emitAutomationTrigger(tenantId, 'lead.created', lead.id, { name: lead.name, phone: lead.phoneNumber, email: data?.email, score: lead.score, source, createdAt: new Date().toISOString() })).catch(() => {});
+
       const { publishDashboardPushType } = await import('../dashboard/dashboard-events.js');
       publishDashboardPushType(tenantId, 'lead.created', [], { leadId: lead.id });
 

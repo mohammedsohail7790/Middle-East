@@ -25,6 +25,7 @@ import { DashboardTopbar } from "@/components/dashboard/DashboardTopbar";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { fetchWorkspaceProfile, type WorkspaceProfile } from "@/lib/ensure-tenant";
 import { getLastBootstrap } from "@/lib/dashboard-bootstrap";
+import { usePendingApprovalCount } from "@/components/automations/pending-approvals";
 
 const NAV_ICONS: Record<string, LucideIcon> = {
   "/dashboard": LayoutDashboard,
@@ -47,12 +48,14 @@ function NavLink({
   locked,
   collapsed,
   onNavigate,
+  badge = 0,
 }: {
   item: DashboardNavItem;
   active: boolean;
   locked: boolean;
   collapsed: boolean;
   onNavigate: () => void;
+  badge?: number;
 }) {
   const t = useTranslations();
   const Icon = NAV_ICONS[item.href] ?? LayoutDashboard;
@@ -77,6 +80,11 @@ function NavLink({
         <Icon className="size-4" strokeWidth={ICON_STROKE} />
       </span>
       {!collapsed && <span className="flex-1 truncate">{label}</span>}
+      {!collapsed && badge > 0 && (
+        <span className="min-w-5 rounded-full bg-[var(--accent)] px-1.5 text-center text-[11px] font-semibold leading-5 text-white" aria-label={`${badge}`}>
+          {badge > 99 ? "99+" : badge}
+        </span>
+      )}
       {!collapsed && locked && (
         <Lock className="size-3 shrink-0 opacity-70" strokeWidth={ICON_STROKE} aria-hidden />
       )}
@@ -93,6 +101,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [planTick, setPlanTick] = useState(0);
   const isConsultancyTeam = useConsultancyTeam();
   const [workspace, setWorkspace] = useState<WorkspaceProfile | null>(null);
+  const pendingApprovals = usePendingApprovalCount(pathname);
 
   useEffect(() => {
     let cancelled = false;
@@ -223,6 +232,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                         locked={locked}
                         collapsed={collapsed}
                         onNavigate={closeMobile}
+                        badge={item.href === "/dashboard/automations" ? pendingApprovals : 0}
                       />
                     );
                   })}
