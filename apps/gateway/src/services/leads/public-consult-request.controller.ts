@@ -4,6 +4,7 @@ import { validate } from '../../middleware/validation.js';
 import { logger } from '../logger.js';
 import { renderBrandedEmail, renderCallout, renderDetailList, renderQuote, renderSummaryStrip, stripToPlainText } from '../automation/email-template.js';
 import { Resend } from 'resend';
+import { recordLead } from '../consultancy/lead-store.js';
 import { throwIfRejected } from '../email-delivery.js';
 
 // Public, unauthenticated endpoint — throttle per IP to prevent spam/cost-exhaustion abuse.
@@ -61,6 +62,9 @@ export function createPublicConsultRequestRouter(): Router {
         });
         return;
       }
+
+      // Keep the prospect in the pipeline too, in the background; a failure is logged and never affects the visitor.
+      void recordLead({ source: 'consult_request', company: business, contact_name: name, email, phone, answers: { business, priority, notes }, notes: null });
 
       // The website's Contact page posts here too, marking itself with a "General enquiry" priority.
       const isContactMessage = typeof priority === 'string' && priority.startsWith('General enquiry');

@@ -8,6 +8,7 @@ import { throwIfRejected } from '../email-delivery.js';
 import { approveUrl, firstName } from '../audit/audit-links.js';
 import { isAuditCurrency } from '../audit/audit-pricing.js';
 import { sendClientAuditMail, para } from '../audit/audit-client-mail.js';
+import { recordLead } from '../consultancy/lead-store.js';
 import { assessFit, parseDataLocations, BUDGET_ANSWERS, COMPANY_SIZES, COMPLIANCE_ANSWERS, COUNTRIES, DECIDER_ANSWERS, HOURS_ANSWERS, OFFICE_SIZES, QUOTE_CURRENCY, START_ANSWERS, VERDICT_LABEL, type FitInput } from './fit-check.js';
 
 // Public, unauthenticated endpoint: throttle per IP, like the diagnostic-call form.
@@ -107,6 +108,9 @@ export function createPublicFitCheckRouter(): Router {
         res.status(400).json({ error: 'Invalid answer for where the information lives.' });
         return;
       }
+
+      // Keep the prospect in the pipeline too. In the background: a database problem is logged and never changes what the visitor sees.
+      void recordLead({ source: 'fit_check', company: b.company, contact_name: b.name, email: b.email, phone: b.phone, country: b.country === 'Other' && b.countryName ? b.countryName : b.country, answers: b });
 
       const fit = assessFit(b);
       const country = `${b.country === 'Other' && b.countryName ? b.countryName : b.country}${b.city ? `, ${b.city}` : ''}`;
