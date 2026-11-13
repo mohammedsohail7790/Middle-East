@@ -36,6 +36,23 @@ describe('public routes that need no login', () => {
     expect(passes('POST', '/public/audit/review/pdf')).toBe(false);
     expect(passes('PUT', '/public/audit/review')).toBe(false);
   });
+  it('lets the proposal, project status and form-draft pages through, each only by the method it needs', () => {
+    expect(passes('GET', '/public/proposal?t=abc')).toBe(true);
+    expect(passes('POST', '/public/proposal/accept')).toBe(true);
+    expect(passes('POST', '/public/proposal/decline')).toBe(true);
+    expect(passes('GET', '/public/project?t=abc')).toBe(true);
+    expect(passes('GET', '/public/audit/draft?t=abc')).toBe(true);
+    expect(passes('POST', '/public/audit/draft')).toBe(true);
+    expect(passes('POST', '/public/proposal')).toBe(false);
+    expect(passes('PUT', '/public/proposal/accept')).toBe(false);
+    expect(passes('POST', '/public/project')).toBe(false);
+    expect(passes('GET', '/public/proposal/accept')).toBe(false);
+  });
+  it('keeps the team-side consultancy API behind a login', () => {
+    expect(passes('GET', '/consultancy-admin/me')).toBe(false);
+    expect(passes('GET', '/consultancy-admin/leads')).toBe(false);
+    expect(passes('POST', '/consultancy-admin/proposals')).toBe(false);
+  });
   it('lets the fit check through', () => {
     expect(passes('POST', '/public/fit-check')).toBe(true);
   });
