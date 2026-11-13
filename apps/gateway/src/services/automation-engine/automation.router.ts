@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { asyncHandler } from '../../middleware/index.js';
 import { getTenantId, type CallIqAuthenticatedRequest } from '../auth/tenant-context.js';
 import { listTemplates, getTemplate } from './registry.js';
+// Loading the library registers the ready-made automations, so the library screen lists them before any event has fired.
+import './templates/index.js';
 import { validateConfig } from './config-validation.js';
 import * as store from './store.js';
 import * as engine from './engine.js';
