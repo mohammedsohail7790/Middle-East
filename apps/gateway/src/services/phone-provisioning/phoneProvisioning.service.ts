@@ -200,7 +200,8 @@ export class PhoneProvisioningService {
         voiceMethod: 'POST',
         smsUrl: smsWebhookUrl,
         smsMethod: 'POST',
-        statusCallback: `${baseUrl}/api/v1/voice/stream-status`,
+        // Twilio reports every call on this number here, which is how a missed call starts the "text back callers I missed" automation. (stream-status only writes a log line.)
+        statusCallback: `${baseUrl}/api/v1/voice/call-status`,
         statusCallbackMethod: 'POST',
       });
 
