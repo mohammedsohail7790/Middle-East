@@ -238,7 +238,7 @@ export default function WhatsAppPage() {
                   onError={setFormError}
                   label={t("connectWithFacebook")}
                   failedMessage={t("signupFailed")}
-                  className={cn(BTN, "bg-accent text-accent-foreground")}
+                  className={cn(BTN, "bg-accent text-white")}
                 />
                 <p className="text-xs text-muted-foreground pt-2">{t("orPaste")}</p>
               </div>
@@ -259,7 +259,7 @@ export default function WhatsAppPage() {
               <input className={cn(INPUT, "mt-1")} inputMode="numeric" value={form.wabaId} onChange={(e) => setForm({ ...form, wabaId: e.target.value })} />
             </label>
             {formError && <p className="text-sm text-red-500 flex items-center gap-1.5"><AlertTriangle className="size-4" />{formError}</p>}
-            <button className={cn(BTN, "bg-accent text-accent-foreground")} disabled={busy || !form.phoneNumberId.trim()} onClick={() => void connect()}>
+            <button className={cn(BTN, "bg-accent text-white")} disabled={busy || !form.phoneNumberId.trim()} onClick={() => void connect()}>
               {busy ? t("connecting") : t("connect")}
             </button>
           </div>
@@ -296,7 +296,7 @@ export default function WhatsAppPage() {
                   <input className={INPUT} type="password" autoComplete="off" placeholder={t("payments.keyLabel")} value={stripeKey} onChange={(e) => setStripeKey(e.target.value)} />
                   <p className="text-xs text-muted-foreground">{t("payments.keyHelp")}</p>
                   {stripeError && <p className="text-xs text-red-500">{stripeError}</p>}
-                  <button className={cn(BTN, "bg-accent text-accent-foreground")} disabled={stripeBusy || !stripeKey.trim()} onClick={() => void saveStripeKey()}>
+                  <button className={cn(BTN, "bg-accent text-white")} disabled={stripeBusy || !stripeKey.trim()} onClick={() => void saveStripeKey()}>
                     {stripeBusy ? t("payments.saving") : t("payments.save")}
                   </button>
                 </>
@@ -371,7 +371,7 @@ export default function WhatsAppPage() {
                     {thread.messages.map((m) => (
                       <div key={m.id} className={cn("flex", m.direction === "outbound" ? "justify-end" : "justify-start")}>
                         <div className={cn("max-w-[80%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap",
-                          m.direction === "outbound" ? "bg-accent text-accent-foreground" : "bg-muted",
+                          m.direction === "outbound" ? "bg-accent text-white" : "bg-muted",
                           m.status === "failed" && "ring-1 ring-red-500")}>
                           {m.body}
                           <div className="text-[10px] opacity-70 mt-1">
@@ -392,7 +392,7 @@ export default function WhatsAppPage() {
                         <input className={INPUT} maxLength={120} placeholder={t("payments.descriptionPlaceholder")} aria-label={t("payments.description")} value={pay.description} onChange={(e) => setPay({ ...pay, description: e.target.value })} />
                       </div>
                       {payError && <p className="text-xs text-red-500">{payError}</p>}
-                      <button className={cn(BTN, "bg-accent text-accent-foreground")} disabled={payBusy || !(Number(pay.amount) > 0) || !pay.description.trim() || !thread.conversation.windowOpen} onClick={() => void sendPaymentLink()}>
+                      <button className={cn(BTN, "bg-accent text-white")} disabled={payBusy || !(Number(pay.amount) > 0) || !pay.description.trim() || !thread.conversation.windowOpen} onClick={() => void sendPaymentLink()}>
                         {payBusy ? t("payments.sending") : t("payments.sendLink")}
                       </button>
                     </div>
@@ -403,7 +403,7 @@ export default function WhatsAppPage() {
                     <div className="flex gap-2">
                       <input className={INPUT} value={draft} placeholder={t("typeReply")} disabled={!thread.conversation.windowOpen}
                         onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void send(); }} />
-                      <button className={cn(BTN, "bg-accent text-accent-foreground")} disabled={!draft.trim() || !thread.conversation.windowOpen} onClick={() => void send()}>
+                      <button className={cn(BTN, "bg-accent text-white")} disabled={!draft.trim() || !thread.conversation.windowOpen} onClick={() => void send()}>
                         <Send className="size-4 rtl:-scale-x-100" />{t("send")}
                       </button>
                     </div>
