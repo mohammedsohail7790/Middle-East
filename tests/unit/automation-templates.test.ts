@@ -65,7 +65,7 @@ describe('template library', () => {
   it('triggers and external steps are as designed', () => {
     const shape = (k: string) => ({ trigger: byKey(k).trigger, steps: byKey(k).steps.map((s) => `${s.kind}:${s.external}`) });
     expect(shape('lead-to-crm')).toEqual({ trigger: 'lead.created', steps: ['crm.push_lead:true', 'notify.team:true'] });
-    expect(shape('missed-call-followup')).toEqual({ trigger: 'call.missed', steps: ['message.send:true', 'notify.team:true'] });
+    expect(shape('missed-call-followup')).toEqual({ trigger: 'call.missed', steps: ['notify.team:true', 'email.send:true'] });
     expect(shape('hot-lead-alert')).toEqual({ trigger: 'call.ended', steps: ['data.transform:false', 'notify.team:true', 'email.send:true'] });
     expect(shape('lead-to-spreadsheet')).toEqual({ trigger: 'lead.created', steps: ['webhook.post:true'] });
     expect(shape('document-intake')).toEqual({ trigger: 'document.received', steps: ['document.extract:false', 'webhook.post:true', 'notify.team:true'] });
