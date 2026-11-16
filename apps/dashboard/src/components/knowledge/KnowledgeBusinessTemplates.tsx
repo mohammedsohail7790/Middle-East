@@ -265,8 +265,8 @@ export function KnowledgeBusinessTemplates() {
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
+              <table className="w-full text-sm block sm:table">
+                <thead className="hidden sm:table-header-group">
                   <tr className="text-left text-[10px] uppercase tracking-wide text-foreground-tertiary border-b border-border">
                     <th className="px-4 py-2.5 font-medium w-[100px]">Day</th>
                     <th className="px-2 py-2.5 font-medium">Opens</th>
@@ -274,7 +274,7 @@ export function KnowledgeBusinessTemplates() {
                     <th className="px-4 py-2.5 font-medium text-center w-16">Open</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="block sm:table-row-group">
                   {WEEKDAYS.map((day) => {
                     const row =
                       templates.officeHours.find((h) => h.dayOfWeek === day.dayOfWeek) ??
@@ -284,34 +284,36 @@ export function KnowledgeBusinessTemplates() {
                       <tr
                         key={day.dayOfWeek}
                         className={cn(
-                          "border-b border-border/50 last:border-0",
+                          "border-b border-border/50 last:border-0 grid grid-cols-2 gap-x-3 gap-y-2 px-3 py-3 sm:table-row sm:p-0",
                           !row.isOpen && "bg-muted/30"
                         )}
                       >
-                        <td className="px-4 py-2.5 font-medium text-foreground whitespace-nowrap">
+                        <td className="order-1 block sm:table-cell sm:px-4 sm:py-2.5 font-medium text-foreground whitespace-nowrap">
                           {day.label}
                         </td>
-                        <td className="px-2 py-2">
+                        <td className="order-3 block sm:table-cell sm:px-2 sm:py-2">
+                          <span className="sm:hidden block text-[10px] uppercase tracking-wide text-foreground-tertiary mb-1">Opens</span>
                           <input
                             type="time"
                             value={row.startTime}
                             disabled={!row.isOpen}
                             onChange={(e) => patchDay(day.dayOfWeek, { startTime: e.target.value })}
-                            className="input py-1.5 text-xs w-full min-w-[7rem]"
+                            className="input py-1.5 text-xs w-full min-w-0 sm:min-w-[7rem]"
                             aria-label={`${day.label} opens`}
                           />
                         </td>
-                        <td className="px-2 py-2">
+                        <td className="order-4 block sm:table-cell sm:px-2 sm:py-2">
+                          <span className="sm:hidden block text-[10px] uppercase tracking-wide text-foreground-tertiary mb-1">Closes</span>
                           <input
                             type="time"
                             value={row.endTime}
                             disabled={!row.isOpen}
                             onChange={(e) => patchDay(day.dayOfWeek, { endTime: e.target.value })}
-                            className="input py-1.5 text-xs w-full min-w-[7rem]"
+                            className="input py-1.5 text-xs w-full min-w-0 sm:min-w-[7rem]"
                             aria-label={`${day.label} closes`}
                           />
                         </td>
-                        <td className="px-4 py-2 text-center">
+                        <td className="order-2 block sm:table-cell text-right sm:text-center sm:px-4 sm:py-2">
                           <input
                             type="checkbox"
                             checked={row.isOpen}
