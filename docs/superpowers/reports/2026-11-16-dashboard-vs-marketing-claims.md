@@ -4,18 +4,18 @@ Date: 16 Nov 2026. Report only. No prices or claims were changed.
 
 ## Plan names, prices and limits
 
-| Item | Public site (`src/lib/marketing-content.ts`) | Dashboard | Mismatch |
-|---|---|---|---|
-| Entry plan name | Essential | Sidebar badge says "Starter" (`dashboard-nav.ts` PLAN_LABEL); Billing says "Essential" | Name differs inside the dashboard itself |
-| Essential price | AED 149 / month | Billing fallback list: $39 / month ($390 / year) | Currency and amount |
-| Professional price | AED 549 / month | Billing fallback list: $149 / month ($1,490 / year) | Currency and amount |
-| Essential minutes | 250 min, AED 0.75/min overage | 250 min/mo | Matches (overage not shown) |
-| Professional minutes | 750 min, AED 0.55/min overage | 750 min/mo | Matches (overage not shown) |
-| Languages | Arabic + English | Essential fallback card says "EN + ES" | Wrong language (Spanish) |
-| Phone numbers | Essential: one; Professional: 3 | 1 and 3 | Matches |
-| Stale draft | `design-preview` pages say "$39/month" | n/a | Old reverted draft, not live |
+**Correction (16 Nov 2026, evening).** The first version of this report said the public site prices the receptionist in AED (149 / 549). That was wrong: those figures sit in `src/lib/marketing-content.ts`, which is not what the live pricing page shows. The live pricing copy (`public/marketing-body.html`) says **$39 / $149 / $499 per month**, the same as Billing. So the dashboard and the public page agree on price.
 
-Note: the Billing page builds its plan cards from the gateway when it loads and uses the hard-coded list above only as a fallback. The $149 seen live earlier suggests either the gateway returns USD amounts or the fallback was shown. This needs a look at what the gateway/Stripe actually return before any edit.
+| Item | Live public pricing page | Dashboard | Status |
+|---|---|---|---|
+| Essential / Professional / Enterprise price | $39 / $149 / $499 per month | Billing: $39 / $149 (Enterprise not on sale) | Matches |
+| Minutes | 250 / 750 / 4,000, overage $0.20 / $0.15 / $0.10 | 250 and 750 min/mo | Matches |
+| Entry plan name | Essential | Sidebar badge says "Starter" (`dashboard-nav.ts`); Billing says "Essential" | Mismatch inside the dashboard |
+| Languages | 7 languages | Essential fallback card says "EN + ES" | Mismatch |
+| AED display | The site has a currency switcher (USD base). $39 shows as AED 150 and $149 as AED 550 (`halla_main.js`); the SEO descriptions say "from AED 150 a month" | n/a | Consistent: same plan, shown in AED |
+| Stale content | `marketing-content.ts` holds AED 149 / 549 (a little off the 150 / 550 the switcher uses); design-preview pages say "$39/month" | n/a | Not shown on the live page; harmless, could be tidied |
+
+Enterprise (changed 16 Nov 2026 on Hk's instruction): now "Everything in Professional, plus increased minutes". The 99.9% uptime SLA, dedicated account manager, analytics, 20+ numbers, custom API and data residency claims were removed. UAE hosting is answered in the FAQ ("possible on request").
 
 ## Marketing claims against dashboard
 
@@ -32,8 +32,5 @@ Note: the Billing page builds its plan cards from the gateway when it loads and 
 
 ## Decisions needed from you and Hk
 
-1. Which price list is right for the receptionist: AED 149 / AED 549 (public) or $39 / $149 (Billing fallback)?
-2. Entry plan name: "Essential" or "Starter" (the dashboard uses both)?
-3. Should Overview get an "always answering / emergency routing on" status strip, and a setup progress card? (Data for these needs checking first.)
-
-Nothing is edited until these are answered.
+1. Entry plan name: "Essential" or "Starter" (the dashboard uses both)?
+2. Should Overview get an "always answering / emergency routing on" status strip, and a setup progress card? (Data for these needs checking first.)

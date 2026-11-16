@@ -48,7 +48,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       "Custom AI voice training",
       "3 phone numbers",
     ],
-    missingFeatures: ["Dedicated account manager"],
+    missingFeatures: [],
   },
   {
     id: "enterprise",
@@ -60,11 +60,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     ctaVariant: "outline",
     features: [
       "Everything in Professional",
-      "Dedicated account manager",
-      "99.9% uptime SLA",
-      "Advanced analytics & reporting",
-      "20+ phone numbers",
-      "Custom data residency options",
+      "Increased minutes (4,000 included)",
     ],
     missingFeatures: [],
   },
@@ -97,12 +93,10 @@ export const FEATURE_COMPARISON_ROWS: FeatureComparisonRow[] = [
   { feature: "24/7 AI receptionist", essential: "✓", professional: "✓", enterprise: "✓" },
   { feature: "7 Languages", essential: "✓", professional: "✓", enterprise: "✓" },
   { feature: "Spam blocking", essential: "✓", professional: "✓", enterprise: "✓" },
-  { feature: "CRM integration", essential: "Basic (Zapier)", professional: "Full (Native + Zapier)", enterprise: "Full + custom API" },
+  { feature: "CRM integration", essential: "Basic (Zapier)", professional: "Full (Native + Zapier)", enterprise: "Full (Native + Zapier)" },
   { feature: "Native calendar sync", essential: "—", professional: "✓", enterprise: "✓" },
   { feature: "Custom AI voice", essential: "—", professional: "✓", enterprise: "✓" },
-  { feature: "Phone numbers", essential: "1", professional: "3", enterprise: "20+" },
-  { feature: "Dedicated account manager", essential: "—", professional: "—", enterprise: "✓" },
-  { feature: "Uptime SLA", essential: "—", professional: "—", enterprise: "99.9%" },
+  { feature: "Phone numbers", essential: "1", professional: "3", enterprise: "3" },
   { feature: "Call recording", essential: "Optional, opt-in", professional: "Optional, opt-in", enterprise: "Optional, opt-in" },
 ];
 

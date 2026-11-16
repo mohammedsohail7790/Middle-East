@@ -33,10 +33,7 @@ const PLANS = [
     cta: "outline" as const,
     features: [
       "Everything in Professional",
-      "Dedicated Account Manager",
-      "99.9% Uptime SLA",
-      "Advanced Analytics",
-      "20+ Phone Numbers",
+      "Increased minutes",
     ],
   },
 ];
