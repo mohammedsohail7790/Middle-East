@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, IBM_Plex_Sans_Arabic, Cormorant_Garamond, Plus_Jakarta_Sans, Cairo } from "next/font/google";
+import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google";
+// Self-hosted (no Google Fonts fetch at build time, so CI and deploys cannot fail on a font download).
+import "@fontsource-variable/cormorant-garamond";
+import "@fontsource-variable/plus-jakarta-sans";
+import "@fontsource-variable/cairo";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
@@ -13,22 +17,6 @@ const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-arabic",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-cormorant",
-});
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-jakarta",
-});
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-cairo",
 });
 
 export const metadata: Metadata = {
@@ -69,7 +57,7 @@ export default async function LocaleLayout({
         <script>{themeInitScript}</script>
       </head>
       <body
-        className={`${inter.variable} ${ibmPlexSansArabic.variable} ${cormorant.variable} ${jakarta.variable} ${cairo.variable} ${locale === "ar" ? "font-arabic" : "font-sans"} min-h-screen`}
+        className={`${inter.variable} ${ibmPlexSansArabic.variable} ${locale === "ar" ? "font-arabic" : "font-sans"} min-h-screen`}
         suppressHydrationWarning
       >
         <NextIntlClientProvider>
