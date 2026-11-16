@@ -433,7 +433,7 @@ export default function DashboardHome() {
 
       <VibePanel className="min-w-0 overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card">
       <div className="wb-panel-padded min-w-0 !border-0 !shadow-none !rounded-none">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <div className="flex flex-row items-center justify-between gap-3 mb-4">
           <SectionHeader title={t("recentActivity")} size="sm" />
           <Link href="/dashboard/calls" className="text-xs font-semibold text-primary hover:underline min-h-[44px] sm:min-h-0 flex items-center shrink-0">
             {t("viewAll")}

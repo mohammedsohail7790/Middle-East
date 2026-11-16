@@ -197,7 +197,7 @@ export default function CallsPage() {
                 aria-label={t("searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="input pl-10 w-full"
+                className="input !pl-10 w-full"
               />
             </div>
           )}
