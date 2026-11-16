@@ -60,3 +60,16 @@ describe("marketing palette tokens", () => {
     });
   }
 });
+
+describe("marketing fonts", () => {
+  it(".font-display uses Cormorant Garamond", () => {
+    expect(css).toMatch(/\.font-display\s*{[^}]*--font-cormorant/);
+  });
+  it("Arabic maps .font-display to Cairo", () => {
+    expect(css).toMatch(/\[lang="ar"\]\s+\.font-display\s*{[^}]*--font-cairo/);
+  });
+  it("body sans stack leads with Plus Jakarta Sans", () => {
+    const body = css.slice(css.indexOf("next/font attaches"));
+    expect(body).toMatch(/--font-sans:\s*var\(--font-jakarta/);
+  });
+});

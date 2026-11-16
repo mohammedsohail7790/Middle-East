@@ -85,7 +85,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
-        display: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
         arabic: ["var(--font-arabic)", "var(--font-sans)", "Inter", "system-ui", "sans-serif"],
       },
       maxWidth: {

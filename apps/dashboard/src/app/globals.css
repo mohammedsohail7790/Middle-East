@@ -224,7 +224,20 @@
 
   /* next/font attaches --font-inter to <body>, so re-resolve the stack there. */
   body {
-    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-inter, Inter), "Helvetica Neue", Arial, sans-serif;
+    --font-sans: var(--font-jakarta, "Plus Jakarta Sans"), var(--font-inter, Inter), -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --font-display: var(--font-cormorant, "Cormorant Garamond"), var(--font-cairo, Cairo), Georgia, serif;
+  }
+  html[lang="ar"] body {
+    --font-sans: var(--font-cairo, Cairo), var(--font-arabic), var(--font-jakarta, "Plus Jakarta Sans"), sans-serif;
+  }
+  .font-display {
+    font-family: var(--font-cormorant, "Cormorant Garamond"), var(--font-cairo, Cairo), Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  [lang="ar"] .font-display {
+    font-family: var(--font-cairo, Cairo), var(--font-arabic), sans-serif;
+    letter-spacing: 0;
   }
 
   /* Apple: flat, quiet canvases — no ambient gradients behind content. */
