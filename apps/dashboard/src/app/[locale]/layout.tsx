@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { Providers } from "@/components/providers";
 import "../globals.css";
 import "@/styles/apple-dashboard.css";
+import "@/styles/consultancy-brand.css";
 
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" });
 const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({

@@ -125,3 +125,8 @@ export function navLockedTitle(item: DashboardNavItem, locked: boolean, label?: 
 export function allNavHrefs(): string[] {
   return DASHBOARD_NAV_FLAT.map((i) => i.href);
 }
+
+/** True for the consultancy area, with or without a locale prefix. */
+export function isConsultancyPath(pathname: string): boolean {
+  return /^(\/[a-z]{2})?\/dashboard\/consultancy(\/|$)/.test(pathname);
+}

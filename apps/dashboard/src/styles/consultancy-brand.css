@@ -1,0 +1,70 @@
+
+/* Consultancy keeps the original blue look; the receptionist dashboard uses the marketing palette. */
+[data-brand="consultancy"] {
+  --gold: #0066CC;
+  --gold-dark: #0055AA;
+  --gold-text: #0066CC;
+  --gold-light: #2997FF;
+  --gold-glow: rgba(0, 102, 204, 0.28);
+  --gold-muted: rgba(0, 102, 204, 0.10);
+  --gold-border: rgba(0, 102, 204, 0.30);
+  --accent: var(--gold);
+  --accent-light: #EBF4FD;
+  --accent-mid: var(--gold-light);
+  --accent-foreground: var(--cyan-dark);
+  --primary-foreground: var(--white);
+  --background: var(--white);
+  --background-elevated: var(--gray-100);
+  --background-hover: var(--gray-200);
+  --foreground: var(--gray-800);
+  --foreground-secondary: var(--gray-500);
+  --foreground-tertiary: var(--gray-500);
+  --card: var(--white);
+  --card-foreground: var(--gray-800);
+  --muted-foreground: var(--gray-500);
+  --secondary: var(--gray-100);
+  --muted: var(--gray-100);
+  --border: var(--gray-200);
+  --gradient-brand: linear-gradient(135deg, #2997FF 0%, #0066CC 100%);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--white);
+  --color-paper: var(--white);
+  --sidebar: rgba(245, 245, 247, 0.82);
+  --gray-100: #f5f5f7;
+  --gray-200: #e8e8ed;
+  --gray-300: #d2d2d7;
+  --gray-50: #fbfbfd;
+  --gray-500: #6e6e73;
+  --gray-600: #424245;
+  --gray-800: #1d1d1f;
+  --navy: #000000;
+  --navy-elevated: #1c1c1e;
+  --navy-light: #2c2c2e;
+}
+.dark [data-brand="consultancy"] {
+  --gold: #2997FF;
+  --gold-dark: #5EB2FF;
+  --gold-text: #5EB2FF;
+  --gold-light: #5EB2FF;
+  --gold-glow: rgba(41, 151, 255, 0.3);
+  --gold-muted: rgba(41, 151, 255, 0.16);
+  --gold-border: rgba(41, 151, 255, 0.4);
+  --accent-light: rgba(41, 151, 255, 0.16);
+  --accent-foreground: #5EB2FF;
+  --background: var(--navy);
+  --background-elevated: var(--navy-elevated);
+  --background-hover: var(--navy-light);
+  --foreground: #f5f5f7;
+  --foreground-secondary: #98989d;
+  --foreground-tertiary: #86868b;
+  --card: var(--navy-elevated);
+  --card-foreground: #f5f5f7;
+  --muted-foreground: #98989d;
+  --secondary: var(--navy-light);
+  --muted: var(--navy-light);
+  --border: rgba(255, 255, 255, 0.12);
+  --color-accent: var(--cyan);
+  --color-accent-ink: var(--white);
+  --color-paper: var(--background);
+  --sidebar: rgba(28, 28, 30, 0.82);
+}
