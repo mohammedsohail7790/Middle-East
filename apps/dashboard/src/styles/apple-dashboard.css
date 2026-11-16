@@ -976,3 +976,61 @@ html:has(.auth-shell), body:has(.auth-shell), body:has(.auth-marketing-shell) {
 .onboarding-page { background: var(--background); background-image: none; }
 .onboarding-header { background: color-mix(in srgb, var(--background) 78%, transparent); -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px); border-bottom: 1px solid var(--hairline); }
 .onboarding-card { background: var(--surface-card); border: 0; border-radius: 28px; box-shadow: none; }
+
+/* ───────────────── Marketing theme (16 Nov 2026) ─────────────────
+ * Page titles and big numbers use the display serif; body, tables and
+ * inputs stay in the sans for legibility. Primary actions are gold with
+ * ink text like the marketing site. Consultancy is reset below. */
+.dashboard-title,
+.dashboard-stat-value,
+.wb-kpi-value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.dashboard-stat-value,
+.wb-kpi-value { white-space: nowrap; }
+.dashboard-title { font-size: clamp(2rem, 1.4rem + 1.8vw, 2.9rem); line-height: 1.05; }
+.dashboard-stat-value,
+.wb-kpi-value { font-size: clamp(1.75rem, 1.4rem + 1vw, 2.6rem); line-height: 1.05; }
+[lang="ar"] .dashboard-title,
+[lang="ar"] .dashboard-stat-value,
+[lang="ar"] .wb-kpi-value {
+  font-family: var(--font-cairo, Cairo), var(--font-arabic), sans-serif;
+  letter-spacing: 0;
+}
+.btn-primary,
+.btn-blue {
+  background: var(--gold);
+  color: #121417;
+  font-weight: 600;
+  border: 1px solid var(--gold);
+}
+.btn-primary:hover:not(:disabled),
+.btn-blue:hover:not(:disabled) {
+  background: var(--gold-text);
+  border-color: var(--gold-text);
+  color: #fff;
+}
+.dark .btn-primary:hover:not(:disabled),
+.dark .btn-blue:hover:not(:disabled) {
+  background: var(--gold-light);
+  border-color: var(--gold-light);
+  color: #121417;
+}
+[data-dashboard-brand="consultancy"] :is(.dashboard-title, .dashboard-stat-value, .wb-kpi-value) {
+  font-family: var(--font-sans);
+  font-size: revert;
+  letter-spacing: -0.03em;
+  line-height: revert;
+}
+[data-dashboard-brand="consultancy"] :is(.btn-primary, .btn-blue) {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+[data-dashboard-brand="consultancy"] :is(.btn-primary, .btn-blue):hover:not(:disabled) {
+  background: var(--accent-dark);
+  color: #fff;
+}

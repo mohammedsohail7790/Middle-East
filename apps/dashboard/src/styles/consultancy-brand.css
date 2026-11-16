@@ -1,6 +1,6 @@
 
 /* Consultancy keeps the original blue look; the receptionist dashboard uses the marketing palette. */
-[data-brand="consultancy"] {
+[data-dashboard-brand="consultancy"] {
   --gold: #0066CC;
   --gold-dark: #0055AA;
   --gold-text: #0066CC;
@@ -41,7 +41,7 @@
   --navy-elevated: #1c1c1e;
   --navy-light: #2c2c2e;
 }
-.dark [data-brand="consultancy"] {
+.dark [data-dashboard-brand="consultancy"] {
   --gold: #2997FF;
   --gold-dark: #5EB2FF;
   --gold-text: #5EB2FF;
