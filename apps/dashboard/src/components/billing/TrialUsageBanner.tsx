@@ -40,7 +40,7 @@ export function TrialUsageBanner({
         "mt-4 mb-4 w-full max-w-full rounded-2xl border p-4 lg:p-5",
         urgent
           ? "border-amber-300/60 bg-gradient-to-r from-amber-50 to-orange-50"
-          : "border-accent/20 bg-gradient-to-r from-slate-50 to-indigo-50/40"
+          : "border-accent/20 bg-gradient-to-r from-card to-[var(--accent-light)]"
       )}
     >
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

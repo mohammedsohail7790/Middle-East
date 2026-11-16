@@ -31,12 +31,12 @@ export function HallaAiTile({ size = 32, className }: { size?: number; className
   return (
     <span
       aria-hidden="true"
-      className={cn("inline-flex shrink-0 items-center justify-center rounded-[28%] bg-[#1d1d1f] text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]", className)}
+      className={cn("inline-flex shrink-0 items-center justify-center rounded-[28%] bg-[#121417] text-white dark:bg-[#FAF9F6] dark:text-[#121417]", className)}
       style={{ width: size, height: size }}
     >
       <svg width={glyph} height={glyph} viewBox="0 0 16 16" fill="none">
         <path d="M3.5 2.5v11M12.5 2.5v11" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
-        <path d="M3.5 8h9" stroke="#2997FF" strokeWidth="2.2" strokeLinecap="round" />
+        <path d="M3.5 8h9" stroke="#C5A059" strokeWidth="2.2" strokeLinecap="round" />
       </svg>
     </span>
   );
