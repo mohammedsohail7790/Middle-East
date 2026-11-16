@@ -122,7 +122,7 @@ export function OnboardingPersonalityVoice({
                 className={cn(
                   "mt-2 inline-flex items-center gap-1.5 text-xs font-medium rounded-lg px-2.5 py-1.5 transition-colors",
                   isPlaying
-                    ? "bg-accent text-white"
+                    ? "bg-accent text-[var(--on-accent)]"
                     : "bg-background-hover text-foreground-secondary hover:text-accent"
                 )}
                 aria-label={`Play ${t.label} voice sample`}

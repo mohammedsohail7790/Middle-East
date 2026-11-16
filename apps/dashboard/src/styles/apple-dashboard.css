@@ -6,7 +6,7 @@
  * touching each page: same class names, new look. Mirrors meetklaros.com:
  *   - white canvas, #f5f5f7 grouped surfaces with no outline, 24-28px radii
  *   - SF Pro type with tight tracking, quiet 13px labels (no ALL-CAPS tags)
- *   - pill buttons, #0066CC action blue, hairline separators
+ *   - pill buttons, #C5A059 action blue, hairline separators
  *   - translucent blurred chrome (sidebar, top bar), flat content
  * Dark mode is driven entirely by the tokens in globals.css.
  */
@@ -178,7 +178,7 @@
 }
 .dashboard-topbar-search.is-focused {
   background: var(--surface-inset);
-  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.22), 0 0 0 1px var(--accent);
+  box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.22), 0 0 0 1px var(--accent);
 }
 .dashboard-topbar-search-kbd {
   border-radius: 6px;
@@ -620,7 +620,7 @@
 }
 .input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.18);
+  box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.18);
 }
 textarea.input {
   height: auto;
@@ -928,7 +928,7 @@ textarea.input {
 }
 .dashboard-assistant-bubble.is-user {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border-radius: 20px;
 }
 .dashboard-assistant-bubble.is-assistant {
@@ -962,7 +962,7 @@ html:has(.auth-shell), body:has(.auth-shell), body:has(.auth-marketing-shell) {
 .auth-divider::before, .auth-divider::after { background: var(--hairline); }
 .auth-btn { min-height: 44px; border-radius: 999px; font-size: 15px; font-weight: 500; letter-spacing: -0.006em; box-shadow: none !important; transition: background-color 0.2s var(--ease-apple), transform 0.2s var(--ease-apple); }
 .auth-btn:active:not(:disabled) { transform: scale(0.98); }
-.auth-btn-primary { background: var(--accent) !important; background-image: none !important; color: #fff !important; border: 0 !important; }
+.auth-btn-primary { background: var(--accent) !important; background-image: none !important; color: var(--on-accent) !important; border: 0 !important; }
 .auth-btn-primary:hover:not(:disabled) { background: var(--accent-dark) !important; }
 .auth-btn-social, .auth-btn-outline { background: var(--surface-inset) !important; color: var(--foreground) !important; border: 1px solid var(--input) !important; }
 .auth-btn-social:hover:not(:disabled), .auth-btn-outline:hover:not(:disabled) { background: var(--surface-hover) !important; }
@@ -999,6 +999,7 @@ html:has(.auth-shell), body:has(.auth-shell), body:has(.auth-marketing-shell) {
 [lang="ar"] .wb-kpi-value {
   font-family: var(--font-cairo, Cairo), var(--font-arabic), sans-serif;
   letter-spacing: 0;
+  line-height: 1.3;
 }
 .btn-primary,
 .btn-blue {
@@ -1019,11 +1020,23 @@ html:has(.auth-shell), body:has(.auth-shell), body:has(.auth-marketing-shell) {
   border-color: var(--gold-light);
   color: #121417;
 }
-[data-dashboard-brand="consultancy"] :is(.dashboard-title, .dashboard-stat-value, .wb-kpi-value) {
+[data-dashboard-brand="consultancy"] .dashboard-title {
   font-family: var(--font-sans);
-  font-size: revert;
+  font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem);
   letter-spacing: -0.03em;
-  line-height: revert;
+  line-height: 1.08;
+}
+[data-dashboard-brand="consultancy"] :is(.dashboard-stat-value, .wb-kpi-value) {
+  font-family: var(--font-sans);
+  font-size: clamp(1.75rem, 1.3rem + 1vw, 2.25rem);
+  letter-spacing: -0.03em;
+  line-height: normal;
+}
+[data-dashboard-brand="consultancy"] {
+  font-family: var(--font-sans);
+}
+[lang="ar"] [data-dashboard-brand="consultancy"] {
+  font-family: var(--font-arabic), var(--font-sans);
 }
 [data-dashboard-brand="consultancy"] :is(.btn-primary, .btn-blue) {
   background: var(--accent);

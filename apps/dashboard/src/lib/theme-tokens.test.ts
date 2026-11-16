@@ -73,3 +73,50 @@ describe("marketing fonts", () => {
     expect(body).toMatch(/--font-sans:\s*var\(--font-jakarta/);
   });
 });
+
+describe("review fixes", () => {
+  for (const [mode, vs] of [["light", light], ["dark", dark]] as const) {
+    it(`${mode}: focus ring is at least 3:1 on background and card`, () => {
+      expect(contrast(resolve(vs, "--ring"), resolve(vs, "--background"))).toBeGreaterThanOrEqual(3);
+      expect(contrast(resolve(vs, "--ring"), resolve(vs, "--card"))).toBeGreaterThanOrEqual(3);
+    });
+    it(`${mode}: text on the accent fill (--on-accent) is at least 4.5:1`, () => {
+      expect(contrast(resolve(vs, "--on-accent"), resolve(vs, "--accent"))).toBeGreaterThanOrEqual(4.5);
+    });
+    it(`${mode}: primary foreground on primary is at least 4.5:1`, () => {
+      expect(contrast(resolve(vs, "--primary-foreground"), resolve(vs, "--primary"))).toBeGreaterThanOrEqual(4.5);
+    });
+  }
+
+  const brand = readFileSync(join(__dirname, "../styles/consultancy-brand.css"), "utf8");
+  function brandVars(selector: string): Record<string, string> {
+    const start = brand.indexOf(`${selector} {`);
+    if (start < 0) throw new Error(`no ${selector}`);
+    return vars(brand.slice(start, brand.indexOf("\n}", start)));
+  }
+  const brandLight = brandVars('[data-dashboard-brand="consultancy"]');
+  const brandDark = brandVars('.dark [data-dashboard-brand="consultancy"]');
+  const rootAliases = Object.entries(vars(block(":root"))).filter(([, v]) => v.includes("var(")).map(([k]) => k);
+  const darkAliases = Object.entries(vars(block(".dark"))).filter(([, v]) => v.includes("var(")).map(([k]) => k);
+
+  it("consultancy block redeclares every alias that resolves through var() in :root", () => {
+    const skip = new Set(["--font-display"]);
+    expect(rootAliases.filter((k) => !skip.has(k) && !(k in brandLight))).toEqual([]);
+  });
+  it("consultancy dark block redeclares every alias that resolves through var() in .dark", () => {
+    expect(darkAliases.filter((k) => !(k in brandDark))).toEqual([]);
+  });
+  it("consultancy keeps the blue ring and primary", () => {
+    expect(resolve({ ...light, ...brandLight }, "--primary").toUpperCase()).toBe("#0066CC");
+    expect(resolve({ ...light, ...brandLight }, "--ring").toUpperCase()).toBe("#0066CC");
+  });
+
+  const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
+  it("no hard-coded action blue is left in the shared dashboard css", () => {
+    const apple = strip(readFileSync(join(__dirname, "../styles/apple-dashboard.css"), "utf8"));
+    for (const src of [strip(css), apple]) {
+      expect(src).not.toMatch(/rgba\(0,\s*102,\s*204/);
+      expect(src).not.toMatch(/#0066CC/i);
+    }
+  });
+});

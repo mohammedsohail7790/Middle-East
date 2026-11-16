@@ -140,7 +140,7 @@ export function AuthNavCta({
       href={href}
       className={
         variant === "primary"
-          ? "inline-flex items-center justify-center rounded-full bg-accent px-[18px] py-[9px] text-sm font-medium text-white no-underline whitespace-nowrap transition-colors hover:bg-accent-dark"
+          ? "inline-flex items-center justify-center rounded-full bg-accent px-[18px] py-[9px] text-sm font-medium text-[var(--on-accent)] no-underline whitespace-nowrap transition-colors hover:bg-accent-dark"
           : "inline-flex items-center justify-center rounded-full bg-[var(--surface-card)] px-[18px] py-[9px] text-sm font-medium text-foreground no-underline whitespace-nowrap transition-colors hover:bg-[var(--surface-active)]"
       }
     >
