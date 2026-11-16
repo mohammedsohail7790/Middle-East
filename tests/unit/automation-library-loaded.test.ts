@@ -16,7 +16,10 @@ describe('the automation library through the real API', () => {
       const res = await fetch(`http://127.0.0.1:${(server.address() as AddressInfo).port}/automations`);
       const body = (await res.json()) as { data: { templates: Array<{ key: string; trigger: string; automation: unknown; config: unknown[]; steps: unknown[] }> } };
       expect(res.status).toBe(200);
-      expect(body.data.templates.map((t) => t.key).sort()).toEqual(['document-intake', 'hot-lead-alert', 'lead-to-crm', 'lead-to-spreadsheet', 'missed-call-followup']);
+      expect(body.data.templates.map((t) => t.key).sort()).toEqual([
+        'appointment-confirmation', 'appointment-to-spreadsheet', 'call-log-to-spreadsheet', 'call-summary-email', 'document-intake', 'hot-lead-alert',
+        'lead-to-crm', 'lead-to-spreadsheet', 'lead-welcome-email', 'missed-call-followup', 'new-booking-alert',
+      ]);
       for (const t of body.data.templates) {
         expect(t.automation).toBeNull();
         expect(t.steps.length).toBeGreaterThan(0);

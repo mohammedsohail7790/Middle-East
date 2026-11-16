@@ -4,7 +4,10 @@ import { getTemplate } from '../../apps/gateway/src/services/automation-engine/r
 import { validateConfig } from '../../apps/gateway/src/services/automation-engine/config-validation.js';
 import { TRIGGER_KINDS } from '../../apps/gateway/src/services/automation-engine/types.js';
 
-const KEYS = ['lead-to-crm', 'missed-call-followup', 'hot-lead-alert', 'lead-to-spreadsheet', 'document-intake'];
+const KEYS = [
+  'lead-to-crm', 'missed-call-followup', 'hot-lead-alert', 'lead-to-spreadsheet', 'document-intake',
+  'appointment-confirmation', 'new-booking-alert', 'lead-welcome-email', 'call-summary-email', 'appointment-to-spreadsheet', 'call-log-to-spreadsheet',
+];
 const byKey = (k: string) => ALL_TEMPLATES.find((t) => t.key === k)!;
 
 function collectStrings(v: unknown, out: string[] = []): string[] {
@@ -15,7 +18,7 @@ function collectStrings(v: unknown, out: string[] = []): string[] {
 }
 
 describe('template library', () => {
-  it('has exactly the five templates and registers them', () => {
+  it('has exactly the eleven templates and registers them', () => {
     expect(ALL_TEMPLATES.map((t) => t.key)).toEqual(KEYS);
     for (const k of KEYS) expect(getTemplate(k)).toBeDefined();
   });
@@ -69,6 +72,19 @@ describe('template library', () => {
     expect(shape('hot-lead-alert')).toEqual({ trigger: 'call.ended', steps: ['data.transform:false', 'notify.team:true', 'email.send:true'] });
     expect(shape('lead-to-spreadsheet')).toEqual({ trigger: 'lead.created', steps: ['webhook.post:true'] });
     expect(shape('document-intake')).toEqual({ trigger: 'document.received', steps: ['document.extract:false', 'webhook.post:true', 'notify.team:true'] });
+    expect(shape('appointment-confirmation')).toEqual({ trigger: 'appointment.created', steps: ['email.send:true'] });
+    expect(shape('new-booking-alert')).toEqual({ trigger: 'appointment.created', steps: ['notify.team:true', 'email.send:true'] });
+    expect(shape('lead-welcome-email')).toEqual({ trigger: 'lead.created', steps: ['email.send:true'] });
+    expect(shape('call-summary-email')).toEqual({ trigger: 'call.ended', steps: ['email.send:true'] });
+    expect(shape('appointment-to-spreadsheet')).toEqual({ trigger: 'appointment.created', steps: ['webhook.post:true'] });
+    expect(shape('call-log-to-spreadsheet')).toEqual({ trigger: 'call.ended', steps: ['webhook.post:true'] });
+  });
+
+  it('customer emails go to the customer and name the business', () => {
+    for (const k of ['appointment-confirmation', 'lead-welcome-email']) {
+      expect((byKey(k).steps[0].params as any).to).toBe('customer');
+      expect(byKey(k).config.find((c) => c.key === 'businessName')?.required).toBe(true);
+    }
   });
 
   it('hot-lead-alert skips its alerts below the minimum and defaults to 70', () => {
@@ -79,7 +95,7 @@ describe('template library', () => {
   });
 
   it('the spreadsheet and intake webhooks are required https addresses', () => {
-    for (const k of ['lead-to-spreadsheet', 'document-intake']) {
+    for (const k of ['lead-to-spreadsheet', 'document-intake', 'appointment-to-spreadsheet', 'call-log-to-spreadsheet']) {
       const f = byKey(k).config.find((c) => c.key === 'webhookUrl')!;
       expect(f.type).toBe('url');
       expect(f.required).toBe(true);
