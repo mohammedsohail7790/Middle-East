@@ -217,7 +217,7 @@ export function TeamAccountPanel() {
         <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="email"
-            className="input flex-1 min-w-0"
+            className="input w-full sm:flex-1 min-w-0"
             placeholder="New email address"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
