@@ -83,7 +83,7 @@ const FALLBACK_PLANS: CheckoutPlan[] = [
     monthlyPrice: 39,
     annualPrice: 390,
     annualEstimated: true,
-    features: ["250 min/mo", "1 phone number", "EN + ES", "Appointment booking", "Lead capture", "Email support"],
+    features: ["250 min/mo", "1 phone number", "7 languages", "Appointment booking", "Lead capture", "Email support"],
   },
   {
     id: "professional",
