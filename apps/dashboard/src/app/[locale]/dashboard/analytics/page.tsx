@@ -189,8 +189,8 @@ function AnalyticsPageContent() {
   };
 
   const dateControls = (
-    <div className="flex flex-wrap items-stretch sm:items-center gap-2 w-full min-w-0">
-      <div className="flex flex-wrap gap-1.5">
+    <div className="grid grid-cols-1 gap-2 w-full min-w-0 sm:flex sm:flex-wrap sm:items-center">
+      <div className="flex gap-1.5">
         {[
           { label: "7d", days: 7 },
           { label: "30d", days: 30 },
@@ -200,42 +200,44 @@ function AnalyticsPageContent() {
             key={p.label}
             type="button"
             onClick={() => applyPreset(p.days)}
-            className="btn-ghost text-xs px-3 py-2 min-h-[40px] sm:min-h-0"
+            className="btn-ghost text-xs px-3 py-2 min-h-[40px] sm:min-h-0 flex-1 sm:flex-none justify-center"
           >
             {p.label}
           </button>
         ))}
       </div>
-      <div className="dashboard-panel flex flex-wrap items-center gap-2 px-3 py-2 min-w-0 flex-1 sm:flex-initial">
-        <Calendar className="w-4 h-4 text-gray-400" />
+      <div className="dashboard-panel flex items-center gap-2 px-3 py-2 min-w-0 w-full sm:w-auto">
+        <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
         <input
           type="date"
           aria-label={t("startDate")}
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
-          className="bg-transparent text-sm text-foreground outline-none min-w-0 flex-1 sm:flex-initial max-w-full"
+          className="bg-transparent text-[13px] sm:text-sm text-foreground outline-none min-w-0 flex-1 sm:flex-initial max-w-full"
         />
-        <span className="text-gray-400">—</span>
+        <span className="text-gray-400 shrink-0">—</span>
         <input
           type="date"
           aria-label={t("endDate")}
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
-          className="bg-transparent text-sm text-foreground outline-none min-w-0 flex-1 sm:flex-initial max-w-full"
+          className="bg-transparent text-[13px] sm:text-sm text-foreground outline-none min-w-0 flex-1 sm:flex-initial max-w-full"
         />
       </div>
-      <button type="button" onClick={exportCSV} className="btn-ghost shrink-0 justify-center" title={t("downloadCsv")}>
-        <Download className="w-4 h-4" /> CSV
-      </button>
-      <button
-        type="button"
-        onClick={exportPDF}
-        disabled={exportingPdf}
-        className="btn-blue btn-sm shrink-0 justify-center"
-        title={t("downloadPdf")}
-      >
-        <Download className="w-4 h-4" /> {exportingPdf ? t("exporting") : "PDF"}
-      </button>
+      <div className="flex gap-2">
+        <button type="button" onClick={exportCSV} className="btn-ghost flex-1 sm:flex-none shrink-0 justify-center" title={t("downloadCsv")}>
+          <Download className="w-4 h-4" /> CSV
+        </button>
+        <button
+          type="button"
+          onClick={exportPDF}
+          disabled={exportingPdf}
+          className="btn-blue btn-sm flex-1 sm:flex-none shrink-0 justify-center"
+          title={t("downloadPdf")}
+        >
+          <Download className="w-4 h-4" /> {exportingPdf ? t("exporting") : "PDF"}
+        </button>
+      </div>
     </div>
   );
 
