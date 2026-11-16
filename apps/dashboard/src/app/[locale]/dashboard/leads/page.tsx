@@ -273,7 +273,7 @@ export default function LeadsPage() {
             value={leadSearch}
             onChange={(e) => setLeadSearch(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="input w-full pl-10"
+            className="input w-full !pl-10"
             aria-label="Search leads"
           />
         </div>

@@ -88,7 +88,7 @@ export function StatCard({
             )}
           </div>
           {(hint || trend?.label) && (
-            <p className="text-xs mt-1.5 truncate text-muted-foreground">
+            <p className="text-xs mt-1.5 break-words sm:truncate text-muted-foreground">
               {trend?.label ?? hint}
             </p>
           )}
