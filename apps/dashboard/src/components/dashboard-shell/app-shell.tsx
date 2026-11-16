@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { isNavItemLocked } from "@/lib/store";
 import {
   DASHBOARD_NAV_GROUPS,
+  isConsultancyPath,
   CONSULTANCY_NAV_GROUP,
   navLockedTitle,
   type DashboardNavItem,
@@ -151,7 +152,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const closeMobile = () => setMobileOpen(false);
 
   return (
-    <div className="dashboard-app h-[100dvh] max-h-[100dvh] flex w-full min-w-0 overflow-hidden">
+    <div data-dashboard-brand={isConsultancyPath(pathname ?? "") ? "consultancy" : undefined} className="dashboard-app h-[100dvh] max-h-[100dvh] flex w-full min-w-0 overflow-hidden">
       <a href="#main-content" className="dashboard-skip-link">
         {tShell("skipToContent")}
       </a>
