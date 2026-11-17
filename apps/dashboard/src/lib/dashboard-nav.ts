@@ -22,7 +22,7 @@ export interface DashboardNavGroup {
 }
 
 const PLAN_LABEL: Record<NavPlan, string> = {
-  essential: "Starter",
+  essential: "Essential",
   professional: "Professional",
 };
 

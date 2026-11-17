@@ -28,7 +28,7 @@ const FEATURE_MIN_PLAN: Record<FeatureKey, NavPlan | "trial"> = {
 };
 
 const PLAN_LABEL: Record<string, string> = {
-  essential: "Starter",
+  essential: "Essential",
   professional: "Professional",
   enterprise: "Enterprise",
 };
