@@ -11,6 +11,9 @@
  */
 
 :root {
+  --font-cormorant: "Cormorant Garamond Variable";
+  --font-jakarta: "Plus Jakarta Sans Variable";
+  --font-cairo: "Cairo Variable";
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-inter, Inter), "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
   --ease-apple: cubic-bezier(0.28, 0.11, 0.32, 1);
