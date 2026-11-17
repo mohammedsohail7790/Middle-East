@@ -772,13 +772,16 @@ export default function OnboardingPage() {
                   <Hash className="w-10 h-10 text-accent mx-auto mb-3" />
                   <h2 className="text-xl font-bold">Get your AI phone line</h2>
                   <p className="text-sm text-foreground-secondary mt-1">
-                    Pick a US area code and claim a line. Calls to that number reach your AI receptionist automatically — included on your free trial (up to 3 lines).
+                    Claim a US line by area code. Calls to that number reach your AI receptionist automatically — included on your free trial (up to 3 lines).
                   </p>
                   <p className="text-sm text-foreground-secondary mt-2">
                     <strong>Already have a business number?</strong> Claim a line here, then forward your number to it and keep using the number your customers know.{" "}
                     <a href="https://www.hallaai.com/forwarding" target="_blank" rel="noopener noreferrer" className="text-accent font-semibold underline">
                       Step-by-step forwarding guide
                     </a>
+                  </p>
+                  <p className="text-sm text-foreground-secondary mt-2">
+                    <strong>Want a local UAE number instead?</strong> Choose Skip for now and email hello@hallaai.com. We can set one up for you.
                   </p>
                 </div>
 
