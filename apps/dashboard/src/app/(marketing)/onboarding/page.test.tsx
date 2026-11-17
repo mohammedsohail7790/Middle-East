@@ -137,6 +137,18 @@ describe("sign-up wizard", () => {
     expect(screen.getByText(/We could not save your greeting, voice and instructions and your language and transfer number/)).toBeTruthy();
   });
 
+  it("the phone line step says these are US lines and points UAE clients to a UAE number on request", async () => {
+    await throughToAgentStep({ transfer: "+971501234567" });
+    next();
+    await screen.findByText("Name your AI receptionist");
+    fireEvent.click(screen.getByRole("button", { name: /Launch AI Agent/ }));
+    await screen.findByText("Get your AI phone line");
+    expect(screen.getByText(/Claim a US line by area code/)).toBeTruthy();
+    expect(screen.getByText(/Want a local UAE number instead\?/)).toBeTruthy();
+    expect(screen.getByText(/hello@hallaai\.com/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Skip for now/ })).toBeTruthy();
+  });
+
   it("saves the pasted questions and answers to the knowledge base on the last step", async () => {
     await throughToAgentStep({ transfer: "+971501234567" });
     next();
