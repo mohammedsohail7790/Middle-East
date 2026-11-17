@@ -120,3 +120,20 @@ describe("review fixes", () => {
     }
   });
 });
+
+describe("fonts are self-hosted (CI must not depend on Google Fonts)", () => {
+  const layout = readFileSync(join(__dirname, "../app/[locale]/layout.tsx"), "utf8");
+  it("layout does not load Cormorant, Plus Jakarta or Cairo from next/font/google", () => {
+    expect(layout).not.toMatch(/Cormorant_Garamond|Plus_Jakarta_Sans|\bCairo\b/);
+  });
+  it("layout imports the self-hosted font packages", () => {
+    for (const pkg of ["plus-jakarta-sans", "cairo", "cormorant-garamond"]) {
+      expect(layout).toContain(`@fontsource-variable/${pkg}`);
+    }
+  });
+  it("globals defines the font variables from the self-hosted families", () => {
+    expect(css).toMatch(/--font-cormorant:\s*"Cormorant Garamond Variable"/);
+    expect(css).toMatch(/--font-jakarta:\s*"Plus Jakarta Sans Variable"/);
+    expect(css).toMatch(/--font-cairo:\s*"Cairo Variable"/);
+  });
+});
