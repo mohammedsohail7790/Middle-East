@@ -40,7 +40,7 @@ export async function sendPaymentLinkEmail(p: LinkPayload, lang: 'en' | 'ar' = '
     bodyHtml:
       para(`Hi ${escapeHtml(p.name || 'there')},`) +
       para(`Your Opportunity Audit for ${escapeHtml(p.company)} is ready. To receive it, please pay the audit fee (${escapeHtml(fee)}) using the secure link below within ${PAYMENT_WINDOW_DAYS} days.`) +
-      para('We will send you the full audit by email as soon as your payment arrives. The audit fee is separate from any build, and it is not refundable once the audit has been delivered.'),
+      para('We will send you the full audit by email as soon as your payment arrives. If you confirm your project within 30 days of receiving the audit, the audit fee is credited toward your implementation. The fee is not refundable once the audit has been delivered.'),
     ctaLabel: 'Pay the audit fee',
     ctaUrl: link,
   });

@@ -4,7 +4,7 @@
  *
  * Hk's direction: there is no hard limit of 50 people. A company with 30 warehouse staff may have a small office, and what matters is the ERP, the departments and the
  * processes. So company size is only a soft signal, office staff count more than total headcount, and a person decides. The first engagement is a paid audit of
- * 5,000 AED (one week, not credited against the build), so a budget below that is the main "not yet" signal. Every threshold is a named constant here.
+ * 5,000 AED (one week, credited toward the implementation if the client confirms within 30 days), so a budget below that is the main "not yet" signal. Every threshold is a named constant here.
  */
 
 export const COMPANY_SIZES = ['1-5', '6-15', '16-50', '51-150', '150+'] as const;

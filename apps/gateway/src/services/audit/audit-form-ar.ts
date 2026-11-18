@@ -25,8 +25,8 @@ export const AUDIT_AR: Record<string, string> = {
     'جارٍ التحقق من الرابط…',
   'Pay securely →':
     'ادفع بأمان ←',
-  'Card payment is handled by Stripe. The audit fee is separate from any build. Once we deliver your audit, the fee cannot be refunded.':
-    'تتم معالجة الدفع بالبطاقة عبر Stripe. رسوم التدقيق منفصلة عن أي مشروع بناء. بعد تسليم التدقيق لا يمكن استرداد الرسوم.',
+  'Card payment is handled by Stripe. If you confirm your project within 30 days of receiving the audit, the audit fee is credited toward the implementation. Once we deliver your audit, the fee cannot be refunded.':
+    'تتم معالجة الدفع بالبطاقة عبر Stripe. إذا أكدتم المشروع خلال 30 يوماً من استلام التدقيق، تُخصم رسوم التدقيق من تكلفة التنفيذ. بعد تسليم التدقيق لا يمكن استرداد الرسوم.',
   'Required. Everything else is optional.':
     'مطلوب. كل ما عدا ذلك اختياري.',
   'What you get: a prioritised roadmap with payoff estimates and a fixed build price for every opportunity, valid for 30 days.':
