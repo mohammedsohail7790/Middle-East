@@ -138,4 +138,10 @@ describe('audit report: time frame', () => {
     expect(mergeEdits(old, {}).timeline).toBeUndefined();
     expect(mergeEdits(old, { weeksMin: '3', weeksMax: '5' }).timeline).toMatchObject({ weeksMin: 3, weeksMax: 5 });
   });
+
+  it('strips markdown asterisks the AI may add to labels', () => {
+    const r = make({ ...goodRaw, findings: ['**Siloed data**: requests are typed three times.'], considerations: ['**API availability**: confirm the API.'] }).report;
+    expect(r.findings[0]).toBe('Siloed data: requests are typed three times.');
+    expect(r.considerations[0]).toBe('API availability: confirm the API.');
+  });
 });

@@ -132,7 +132,8 @@ const TODAY_BG = '#F1EEE8';
 const BUILD_BG = '#FBF3DD';
 
 /** A finding written as "Label: sentence" gets the label in bold, as in "Siloed Data: ...". */
-const splitLabel = (s: string): { label: string; rest: string } | null => {
+const splitLabel = (raw: string): { label: string; rest: string } | null => {
+  const s = raw.replace(/\*\*|__/g, ''); // reports drafted before the prompt change may still carry markdown asterisks
   const m = /^([^:.؟?!]{2,40}):\s+(.+)$/s.exec(s);
   return m ? { label: m[1], rest: m[2] } : null;
 };
@@ -213,7 +214,7 @@ export async function renderReportPdf(report: AuditReport, env: NodeJS.ProcessEn
         doc.font(bold).fontSize(10.5).fillColor(INK).text(vis(`${parts.label}:`), LEFT, doc.y, opts({ continued: true, lineGap: 3 }));
         doc.font(regular).text(vis(` ${parts.rest}`), opts({ lineGap: 3 }));
       } else {
-        doc.font(regular).fontSize(10.5).fillColor(INK).text(vis(`•  ${f}`), LEFT, doc.y, opts({ lineGap: 3 }));
+        doc.font(regular).fontSize(10.5).fillColor(INK).text(vis(`•  ${f.replace(/\*\*|__/g, '')}`), LEFT, doc.y, opts({ lineGap: 3 }));
       }
       doc.moveDown(0.3);
     }

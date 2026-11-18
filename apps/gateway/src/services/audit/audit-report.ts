@@ -59,7 +59,7 @@ const MONEY_OR_HOURS = /(?:AED|SAR|USD|QAR|KWD|BHD|OMR|dirhams?|\$|€|£)\s?\d|
 /** Clean one piece of AI text. A sentence that quotes a price or hours is dropped whole, so no broken sentence is left behind. */
 const clean = (v: unknown, max: number): string => {
   if (typeof v !== 'string') return '';
-  const sentences = v.replace(/\s+/g, ' ').trim().split(/(?<=[.!?؟])\s+/);
+  const sentences = v.replace(/\*\*|__|`/g, '').replace(/\s+/g, ' ').trim().split(/(?<=[.!?؟])\s+/);
   return sentences.filter((s) => !MONEY_OR_HOURS.test(s)).join(' ').trim().slice(0, max);
 };
 
@@ -137,7 +137,7 @@ export interface ReportEdits {
   weeksMax?: unknown;
 }
 
-const plain = (v: unknown, max: number): string => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, max) : '');
+const plain = (v: unknown, max: number): string => (typeof v === 'string' ? v.replace(/\*\*|__|`/g, '').replace(/\s+/g, ' ').trim().slice(0, max) : '');
 const plainList = (v: unknown, maxItems: number, maxLen: number): string[] => (Array.isArray(v) ? v.map((x) => plain(x, maxLen)).filter(Boolean).slice(0, maxItems) : []);
 const money = (v: unknown): number | null => {
   const n = typeof v === 'number' ? v : typeof v === 'string' && v.trim() !== '' ? Number(v.replace(/[,\s]/g, '')) : NaN;

@@ -53,7 +53,7 @@ Also fill "assessment" with labelled facts read from the answers:
 
 Return one JSON object with exactly these keys: assessment, summary, findings, opportunities, phaseDeliverables, considerations, nextSteps.
 summary is 3 to 5 sentences: the client's situation today, the cost of it, and the phased automation approach, mentioning that a person keeps approval of critical steps where the answers say so.
-findings is 3 to 6 strings about how things work today. Start each with a short bold-style label of one to three words, a colon, then one sentence, for example "Siloed data: requests are typed into three separate systems." Cover the way work flows, where revenue or time leaks, data quality problems, technical constraints and manual approval bottlenecks, but only those the answers support.
+findings is 3 to 6 strings about how things work today. Start each with a short label of one to three words, a colon, then one sentence. Write plain text only: never use markdown, asterisks or other formatting characters, for example "Siloed data: requests are typed into three separate systems." Cover the way work flows, where revenue or time leaks, data quality problems, technical constraints and manual approval bottlenecks, but only those the answers support.
 considerations is 3 to 5 strings of key assumptions and risks to confirm, each as "Label: sentence" (for example API availability, data location and compliance, approval hierarchy). Only include those the answers make relevant.
 nextSteps is 2 to 4 short strings.
 opportunities is a list of {title, problem, solution, payoff}. phaseDeliverables is a list of three lists of strings.`;
