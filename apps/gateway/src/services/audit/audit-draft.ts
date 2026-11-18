@@ -37,6 +37,7 @@ You are writing the draft of a paid Opportunity Audit for one client, using ONLY
 Rules:
 - Write every piece of text in ${lang === 'ar' ? 'clear, professional Modern Standard Arabic suitable for Gulf business readers. Start every text field, every list item and every opportunity title with an Arabic word (for example "شركة Acme", never "Acme" first), because the PDF cannot lay out a line that starts with a Latin word' : 'clear, plain, professional English'}. Keep company and tool names as written.
 - Use only facts found in the answers. If something important is missing or unclear, do not guess: add a short line to "considerations" saying what must be confirmed.
+- This audit is worth AED 5,000 to the client, so it must read as expert work: name the client's real tools and steps, show where time or money leaks today, and make each opportunity concrete.
 - NEVER write any price, fee, cost, budget figure or number of hours or days of work anywhere in the text. Prices are added later by our system.
 - Be specific to this client's own process and tools. No generic filler, no hype, no promises of exact savings. Describe the expected payoff in words (time saved, fewer errors, faster response).
 - Opportunities: 3 to 5, most valuable first. Each has a short title, the problem today, the proposed automation, and the payoff.
@@ -51,7 +52,10 @@ Also fill "assessment" with labelled facts read from the answers:
 - budgetMaxAed: the top of the budget range they gave, as a plain number in AED, or null if none is given. "under AED 10k" means 10000.
 
 Return one JSON object with exactly these keys: assessment, summary, findings, opportunities, phaseDeliverables, considerations, nextSteps.
-summary is 3 to 5 sentences. findings is 3 to 6 short strings about how things work today. nextSteps is 2 to 4 short strings.
+summary is 3 to 5 sentences: the client's situation today, the cost of it, and the phased automation approach, mentioning that a person keeps approval of critical steps where the answers say so.
+findings is 3 to 6 strings about how things work today. Start each with a short bold-style label of one to three words, a colon, then one sentence, for example "Siloed data: requests are typed into three separate systems." Cover the way work flows, where revenue or time leaks, data quality problems, technical constraints and manual approval bottlenecks, but only those the answers support.
+considerations is 3 to 5 strings of key assumptions and risks to confirm, each as "Label: sentence" (for example API availability, data location and compliance, approval hierarchy). Only include those the answers make relevant.
+nextSteps is 2 to 4 short strings.
 opportunities is a list of {title, problem, solution, payoff}. phaseDeliverables is a list of three lists of strings.`;
 
 export function formatAnswers(answers: Record<string, string>): string {

@@ -26,7 +26,11 @@ describe('audit report PDF', () => {
     expect(t).toContain('Sam Lee');
     expect(t).toContain(`AED ${report.investment.feeAed.toLocaleString('en-US')}`);
     expect(t).toContain('Phase 1: Architecture & API Discovery');
-    expect(t).toContain('smaller Phase 1 of up to AED 20,000');
+    expect(t).toContain('Phase 1 (Discovery & Architecture) engagement for AED 20,000');
+    expect(t).toContain('Executive Summary');
+    expect(t).toContain('Key Assumptions & Risks');
+    expect(t).toContain('www.hallaai.com');
+    expect(t).toContain('audit fee is credited toward your implementation');
     expect(t).toContain('Powered by Clean Room LLC (dba Vertex Connect)');
   });
 
@@ -65,22 +69,21 @@ describe('audit report PDF', () => {
   it('spreads a long report over several pages with page numbers', async () => {
     const long = make({ ...raw, opportunities: Array.from({ length: 5 }, (_, i) => ({ title: `Opportunity ${i}`, problem: 'p '.repeat(120), solution: 's '.repeat(120), payoff: 'x '.repeat(60) })) });
     const t = await text(await renderReportPdf(long));
-    expect(t).toMatch(/Page 1 of [2-9]/);
+    expect(t).toMatch(/Page 2 of [3-9]/);
   });
 
   it('does not add blank pages for the footer', async () => {
     const t = await text(await renderReportPdf(make(raw)));
-    expect(t).toMatch(/Page 1 of [12]\b/);
-    expect(t).not.toMatch(/Page [3-9] of/);
+    expect(t).toMatch(/Page 2 of [23]\b/);
+    expect(t).not.toMatch(/Page [4-9] of/);
   });
 
   it('shows the estimated time frame with a line per phase, and never the hours', async () => {
     const report = make(raw);
     const tl = report.timeline!;
     const txt = await text(await renderReportPdf(report));
-    expect(txt).toContain('Estimated time frame');
-    expect(txt).toContain(`About ${weeksRange(tl.weeksMin, tl.weeksMax, 'en')} from the start of the build.`);
-    expect(txt).toContain(`Phase 1: Architecture & API Discovery, about ${weeksText(tl.phaseWeeks[0], 'en')}`);
+    expect(txt).toContain(`Estimated timeline: ${weeksRange(tl.weeksMin, tl.weeksMax, 'en')}`);
+    expect(txt).toContain(`Phase 1: Architecture & API Discovery (${weeksText(tl.phaseWeeks[0], 'en')})`);
     expect(txt).toContain('The clock starts once we have access to your systems');
     expect(txt).not.toMatch(/\d\s?-?\s?\d*\s?(hours?|hrs?)\b/i);
   });
@@ -88,7 +91,7 @@ describe('audit report PDF', () => {
   it('leaves the time frame out of an older report that has none', async () => {
     const old = make(raw);
     delete (old as any).timeline;
-    expect(await text(await renderReportPdf(old))).not.toContain('Estimated time frame');
+    expect(await text(await renderReportPdf(old))).not.toContain('Estimated timeline');
   });
 
   it('renders the Arabic time frame', async () => {

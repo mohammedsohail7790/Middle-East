@@ -1,5 +1,5 @@
 /**
- * The price of the Opportunity Audit in each currency. The audit is 5,000 AED, one week, not credited against the build.
+ * The price of the Opportunity Audit in each currency. The audit is 5,000 AED, one week, credited toward the implementation if the client confirms within 30 days of receiving the audit.
  * Hk set the other countries' prices (SAR 5,100, QAR 5,000, OMR 525, KWD 425, BHD 515); AUDIT_PRICES_JSON can still change any of them.
  * Set AUDIT_PRICES_JSON to override or add prices, for example {"AED":5000,"SAR":5100,"OMR":520}. Amounts are in whole currency units (decimals allowed).
  */
