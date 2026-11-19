@@ -232,7 +232,17 @@ describe("sign-up wizard", () => {
     await toAutomationsStep();
     fireEvent.change(screen.getByLabelText(/Where should the emails go/), { target: { value: "not-an-email" } });
     next();
-    expect(await screen.findByText(/Enter a valid email address for the emails/)).toBeTruthy();
+    // One message only: the one under the field, not a second banner as well.
+    expect(await screen.findAllByText(/Enter a valid email address/)).toHaveLength(1);
+    expect(screen.queryByText(/or choose Skip for now/)).toBeNull();
+    expect(auto.save).not.toHaveBeenCalled();
+  });
+
+  it("asks for an address when the field is empty", async () => {
+    await toAutomationsStep();
+    fireEvent.change(screen.getByLabelText(/Where should the emails go/), { target: { value: "" } });
+    next();
+    expect(await screen.findByText(/Enter an email address for the emails, or choose Skip for now/)).toBeTruthy();
     expect(auto.save).not.toHaveBeenCalled();
   });
 
