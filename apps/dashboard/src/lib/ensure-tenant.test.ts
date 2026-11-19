@@ -79,3 +79,23 @@ describe("resolveOnboardingEntry with a remembered workspace", () => {
     expect(await resolveOnboardingEntry()).toMatchObject({ tenantId: "old-tenant", redirectToDashboard: true });
   });
 });
+
+describe("resolveOnboardingEntry resume steps after the tools step", () => {
+  const rememberedTenant = () => h.getUser.mockResolvedValue({ data: { user: { id: "u1", user_metadata: { tenant_id: "old-tenant" } } } });
+  const withProgress = (progress: Record<string, unknown>) =>
+    h.get.mockImplementation(async (path: string) => (path === "/onboarding/progress" ? progress : { id: "old-tenant" }));
+
+  it("opens the automations step for a client who connected or skipped their tools", async () => {
+    rememberedTenant();
+    withProgress({ skippedSteps: ["crm"] });
+    expect(await resolveOnboardingEntry()).toMatchObject({ resumeStep: 7 });
+    withProgress({ calendarConnected: true });
+    expect(await resolveOnboardingEntry()).toMatchObject({ resumeStep: 7 });
+  });
+
+  it("goes to the final screen once the automations step was answered", async () => {
+    rememberedTenant();
+    withProgress({ skippedSteps: ["crm", "automations"] });
+    expect(await resolveOnboardingEntry()).toMatchObject({ resumeStep: 8 });
+  });
+});

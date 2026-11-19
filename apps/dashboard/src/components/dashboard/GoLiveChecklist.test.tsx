@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const h = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn() }));
+const auto = vi.hoisted(() => ({ library: vi.fn() }));
+vi.mock("@/components/automations/client", () => ({ automationsApi: { library: auto.library } }));
 vi.mock("@/lib/api", () => ({ api: { get: h.get, post: h.post }, asArray: (d: unknown) => (Array.isArray(d) ? d : []) }));
 vi.mock("@/i18n/navigation", () => ({ Link: ({ href, children, className, ...rest }: any) => <a href={href} className={className} {...rest}>{children}</a> }));
 vi.mock("next-intl", () => ({
@@ -24,6 +26,8 @@ function serve(s: State = {}) {
 beforeEach(() => {
   h.get.mockReset();
   h.post.mockReset();
+  auto.library.mockReset();
+  auto.library.mockResolvedValue([]);
   window.localStorage.clear();
 });
 
@@ -32,11 +36,22 @@ describe("go-live checklist card", () => {
     serve();
     render(<GoLiveChecklist />);
     expect(await screen.findByText("goLiveTitle")).toBeTruthy();
-    expect(screen.getByText("goLiveProgress:0/5")).toBeTruthy();
+    expect(screen.getByText("goLiveProgress:0/6")).toBeTruthy();
     const hrefs = screen.getAllByRole("link").map((a) => a.getAttribute("href"));
     expect(hrefs).toEqual(expect.arrayContaining(["/dashboard/phone-numbers", "/dashboard/knowledge", "/dashboard/integrations"]));
     // No line yet, so there is nothing to call from.
     expect(screen.queryByLabelText("goLiveNumber")).toBeNull();
+  });
+
+  it("adds a line for switching on an automation, ticked when one is on, and leaves it out if the read fails", async () => {
+    serve();
+    auto.library.mockResolvedValue([{ key: "a", automation: { enabled: true } }]);
+    const first = render(<GoLiveChecklist />);
+    expect(await screen.findByText("goLiveProgress:1/6")).toBeTruthy();
+    first.unmount();
+    auto.library.mockRejectedValue(new Error("403"));
+    render(<GoLiveChecklist />);
+    expect(await screen.findByText("goLiveProgress:0/5")).toBeTruthy();
   });
 
   it("hides itself once the phone line, questions and test call are done", async () => {

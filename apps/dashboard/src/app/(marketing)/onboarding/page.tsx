@@ -20,6 +20,9 @@ import { cn } from "@/lib/utils";
 import { OnboardingPersonalityVoice } from "@/components/onboarding/OnboardingPersonalityVoice";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { OnboardingConnectTools } from "@/components/onboarding/OnboardingConnectTools";
+import { OnboardingFirstAutomations } from "@/components/onboarding/OnboardingFirstAutomations";
+import { automationsApi } from "@/components/automations/client";
+import { DEFAULT_FIRST_AUTOMATIONS, FIRST_AUTOMATIONS, isValidOwnerEmail, saveFirstAutomations, type FirstAutomationKey } from "@/lib/first-automations";
 import { OnboardingVoiceGreeting } from "@/components/onboarding/OnboardingVoiceGreeting";
 import { AGENT_LANGUAGES, isArabicLanguage, type AgentLanguageId } from "@/lib/agent-languages";
 import {
@@ -67,7 +70,7 @@ function toggleIndustry(list: string[], id: string): string[] {
   return list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
 }
 
-const TOTAL_WIZARD_STEPS = 7;
+const TOTAL_WIZARD_STEPS = 8;
 
 interface OnboardingProgressData {
   step?: string;
@@ -95,6 +98,9 @@ export default function OnboardingPage() {
   const [testCallLoading, setTestCallLoading] = useState(false);
   const [toolsConnected, setToolsConnected] = useState(false);
   const [testCallNumber, setTestCallNumber] = useState("");
+  const [firstAutomations, setFirstAutomations] = useState<FirstAutomationKey[]>(DEFAULT_FIRST_AUTOMATIONS);
+  const [ownerEmail, setOwnerEmail] = useState("");
+  const [automationsNote, setAutomationsNote] = useState<string | null>(null);
   const [testCallNote, setTestCallNote] = useState<string | null>(null);
 
   const [company, setCompany] = useState("");
@@ -446,6 +452,32 @@ export default function OnboardingPage() {
     }
   }
 
+  async function handleAutomationsContinue(skip: boolean) {
+    setAutomationsNote(null);
+    if (!skip && firstAutomations.length > 0) {
+      if (!isValidOwnerEmail(ownerEmail)) {
+        setAutomationsNote("Enter a valid email address for the emails, or choose Skip for now.");
+        return;
+      }
+      setLoading(true);
+      const { failed } = await saveFirstAutomations(automationsApi.save, firstAutomations, ownerEmail);
+      setLoading(false);
+      if (failed.length > 0) {
+        const names = FIRST_AUTOMATIONS.filter((a) => failed.includes(a.key)).map((a) => a.name);
+        setAutomationsNote(`We could not switch on: ${names.join(" and ")}. You can add them later on the Automations page.`);
+        // Do not trap the client: what saved is on, the rest is noted above, and the next press moves on.
+        setFirstAutomations([]);
+        return;
+      }
+    }
+    try {
+      await api.post("/onboarding/skip-step", { step: "automations" });
+    } catch {
+      /* non-fatal */
+    }
+    setStep(8);
+  }
+
   async function handleToolsContinue() {
     if (toolsConnected) {
       try {
@@ -456,6 +488,15 @@ export default function OnboardingPage() {
     }
     setStep(7);
   }
+
+  useEffect(() => {
+    if (step !== 7 || ownerEmail) return;
+    void supabase.auth.getUser().then(({ data }) => {
+      const e = data?.user?.email;
+      if (e) setOwnerEmail((prev) => prev || e);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   async function goToDashboard() {
     setLoading(true);
@@ -957,7 +998,19 @@ export default function OnboardingPage() {
             )}
 
             {step === 7 && (
-              <motion.div key="s7" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6 space-y-5">
+              <motion.div key="s7" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <OnboardingFirstAutomations
+                  selected={firstAutomations}
+                  email={ownerEmail}
+                  failedNote={automationsNote}
+                  onSelectedChange={setFirstAutomations}
+                  onEmailChange={setOwnerEmail}
+                />
+              </motion.div>
+            )}
+
+            {step === 8 && (
+              <motion.div key="s8" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6 space-y-5">
                 <div className="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center mx-auto">
                   <Check className="w-8 h-8 text-white" />
                 </div>
@@ -1109,6 +1162,22 @@ export default function OnboardingPage() {
                 )}
                 <button type="button" onClick={() => void handleToolsContinue()} className="btn-primary !px-6">
                   Continue <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 7 && (
+            <div className="mt-8 flex flex-wrap justify-between gap-2">
+              <button type="button" onClick={() => setStep(6)} className="btn-ghost !px-5">
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => void handleAutomationsContinue(true)} disabled={loading} className="btn-ghost !px-5">
+                  Skip for now
+                </button>
+                <button type="button" onClick={() => void handleAutomationsContinue(false)} disabled={loading} className="btn-primary !px-6">
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Continue <ArrowRight className="w-4 h-4" /></>}
                 </button>
               </div>
             </div>

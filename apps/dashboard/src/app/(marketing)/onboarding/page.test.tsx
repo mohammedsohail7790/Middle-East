@@ -40,6 +40,8 @@ vi.mock("@/lib/ensure-tenant", () => ({
   ensureTenantSession: vi.fn().mockResolvedValue("tid"),
 }));
 vi.mock("@/lib/store", () => ({ setTenantId: vi.fn(), setPlan: vi.fn(), hasAccess: () => false, getPlan: () => "trial" }));
+const auto = vi.hoisted(() => ({ save: vi.fn() }));
+vi.mock("@/components/automations/client", () => ({ automationsApi: { save: auto.save } }));
 vi.mock("@/lib/integration-oauth", () => ({ startIntegrationOAuth: vi.fn().mockResolvedValue(undefined) }));
 vi.mock("@/lib/auth-navigate", () => ({ navigateAfterSignIn: vi.fn(), localizedDashboardPath: (p: string) => p }));
 vi.mock("@/components/onboarding/OnboardingShell", () => ({ OnboardingShell: ({ children }: any) => <div>{children}</div> }));
@@ -55,6 +57,8 @@ const INDUSTRIES = [
 
 beforeEach(() => {
   Object.values(h).forEach((f) => f.mockReset());
+  auto.save.mockReset();
+  auto.save.mockResolvedValue({});
   h.get.mockImplementation(async (path: string) => {
     if (path.startsWith("/tenants/industries")) return INDUSTRIES;
     if (path.startsWith("/tenants/onboarding-status")) throw new Error("none");
@@ -194,7 +198,65 @@ describe("sign-up wizard", () => {
     expect(await screen.findByText("HubSpot")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
     await waitFor(() => expect(h.post).toHaveBeenCalledWith("/onboarding/skip-step", { step: "crm" }));
+    await screen.findByText("Switch on your first automations");
+    fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
     await screen.findByText(/You're all set/);
+    expect(auto.save).not.toHaveBeenCalled();
+  });
+
+  async function toAutomationsStep() {
+    await throughToAgentStep({ transfer: "" });
+    next();
+    await screen.findByText("Name your AI receptionist");
+    fireEvent.click(screen.getByRole("button", { name: /Launch AI Agent/ }));
+    await screen.findByText("Get your AI phone line");
+    fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
+    await screen.findByText("Almost there");
+    next();
+    await screen.findByText("Connect your tools");
+    fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
+    await screen.findByText("Switch on your first automations");
+  }
+
+  it("switches on the two email automations, in ask-first mode, with the address the client gives", async () => {
+    await toAutomationsStep();
+    fireEvent.change(screen.getByLabelText(/Where should the emails go/), { target: { value: "owner@glow.example" } });
+    next();
+    await screen.findByText(/You're all set/);
+    expect(auto.save).toHaveBeenCalledTimes(2);
+    expect(auto.save).toHaveBeenCalledWith("call-summary-email", { enabled: true, approvalMode: "ask", config: { ownerEmail: "owner@glow.example" } });
+    expect(auto.save).toHaveBeenCalledWith("missed-call-followup", { enabled: true, approvalMode: "ask", config: { ownerEmail: "owner@glow.example" } });
+  });
+
+  it("asks for a valid email before switching anything on", async () => {
+    await toAutomationsStep();
+    fireEvent.change(screen.getByLabelText(/Where should the emails go/), { target: { value: "not-an-email" } });
+    next();
+    expect(await screen.findByText(/Enter a valid email address for the emails/)).toBeTruthy();
+    expect(auto.save).not.toHaveBeenCalled();
+  });
+
+  it("does not trap the client when one automation fails to save", async () => {
+    auto.save.mockImplementation(async (key: string) => {
+      if (key === "missed-call-followup") throw new Error("403");
+      return {};
+    });
+    await toAutomationsStep();
+    fireEvent.change(screen.getByLabelText(/Where should the emails go/), { target: { value: "owner@glow.example" } });
+    next();
+    expect(await screen.findByText(/We could not switch on: Email me about missed calls/)).toBeTruthy();
+    next();
+    await screen.findByText(/You're all set/);
+  });
+
+  it("only saves the ones left ticked", async () => {
+    await toAutomationsStep();
+    fireEvent.click(screen.getByLabelText(/Email me about missed calls/));
+    fireEvent.change(screen.getByLabelText(/Where should the emails go/), { target: { value: "owner@glow.example" } });
+    next();
+    await screen.findByText(/You're all set/);
+    expect(auto.save).toHaveBeenCalledTimes(1);
+    expect(auto.save).toHaveBeenCalledWith("call-summary-email", expect.anything());
   });
 });
 
@@ -216,6 +278,8 @@ describe("test call on the last screen", () => {
     await screen.findByText("Almost there");
     next();
     await screen.findByText("Connect your tools");
+    fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
+    await screen.findByText("Switch on your first automations");
     fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
     await screen.findByText(/You're all set/);
   }

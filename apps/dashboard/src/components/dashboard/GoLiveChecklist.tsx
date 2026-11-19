@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { CheckCircle2, Circle, Loader2, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { api, asArray } from "@/lib/api";
+import { automationsApi } from "@/components/automations/client";
 import { normalizeTransferNumber } from "@/lib/onboarding-setup";
 import { buildGoLiveChecklist, goLiveProgress, isGoLiveComplete, type GoLiveItem } from "@/lib/go-live-checklist";
 
@@ -35,13 +36,15 @@ export function GoLiveChecklist() {
     if (wasDismissed()) return;
     let cancelled = false;
     (async () => {
-      const [progress, line, catalog, knowledge] = await Promise.allSettled([
+      const [progress, line, catalog, knowledge, automations] = await Promise.allSettled([
         api.get<{ testCallCompleted?: boolean }>("/onboarding/progress"),
         api.get<{ configured?: boolean }>("/onboarding/twilio-status"),
         api.get<{ connections?: Record<string, { status?: string }> }>("/integrations/catalog"),
         api.get<unknown>("/knowledge"),
+        automationsApi.library(),
       ]);
       if (cancelled) return;
+      // Required reads: if one fails the card stays hidden. The automations read is only an extra line, so its failure just leaves that line out.
       if ([progress, line, catalog, knowledge].some((r) => r.status === "rejected")) return;
       const get = <T,>(r: PromiseSettledResult<T>) => (r as PromiseFulfilledResult<T>).value;
       const list = buildGoLiveChecklist({
@@ -49,6 +52,7 @@ export function GoLiveChecklist() {
         knowledgeCount: asArray(get(knowledge)).length,
         testCallDone: get(progress)?.testCallCompleted === true,
         connections: get(catalog)?.connections ?? {},
+        automationsOn: automations.status === "fulfilled" ? get(automations).some((tpl) => tpl.automation?.enabled === true) : null,
       });
       setItems(list);
       setHidden(isGoLiveComplete(list));
