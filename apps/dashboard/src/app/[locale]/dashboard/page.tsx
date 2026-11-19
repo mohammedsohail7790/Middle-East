@@ -24,6 +24,7 @@ import { timeAgo, formatDuration, formatChartDay, clampPercent } from "@/lib/uti
 import { useTranslations, useLocale } from "next-intl";
 import { StatCard } from "@/components/ui-kit/StatCard";
 import { MinutesStrip } from "@/components/dashboard/MinutesStrip";
+import { GoLiveChecklist } from "@/components/dashboard/GoLiveChecklist";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
@@ -296,6 +297,7 @@ export default function DashboardHome() {
       onRetry={error ? () => void loadDashboardData(true) : undefined}
       maxWidth="xl"
     >
+      <GoLiveChecklist />
       <div className="dashboard-stat-grid">
         <Link href="/dashboard/calls" className="block min-w-0">
           <StatCard
