@@ -1,7 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { pickOnboardingTools } from "./OnboardingConnectTools";
+import { vi } from "vitest";
+import { allowsDuringSetup, pickOnboardingTools } from "./OnboardingConnectTools";
 
 const ids = (list: { id: string }[]) => list.map((i) => i.id);
+
+const plan = vi.hoisted(() => ({ current: "trial", level: 0 }));
+vi.mock("@/lib/store", () => ({
+  getPlan: () => plan.current,
+  hasAccess: (required?: string) => !required || plan.level >= (required === "professional" ? 2 : 1),
+}));
+
+describe("allowsDuringSetup", () => {
+  it("lets a new trial workspace use Professional tools", () => {
+    plan.current = "trial";
+    plan.level = 0;
+    expect(allowsDuringSetup("professional")).toBe(true);
+  });
+
+  it("still holds back a paid starter plan from Professional tools", () => {
+    plan.current = "starter";
+    plan.level = 1;
+    expect(allowsDuringSetup("professional")).toBe(false);
+    expect(allowsDuringSetup("starter")).toBe(true);
+  });
+});
 
 describe("pickOnboardingTools", () => {
   it("offers a calendar only when its sign-in is configured on the gateway", () => {
