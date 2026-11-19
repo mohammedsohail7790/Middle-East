@@ -94,6 +94,8 @@ export default function OnboardingPage() {
   const [claimingFirst, setClaimingFirst] = useState(false);
   const [testCallLoading, setTestCallLoading] = useState(false);
   const [toolsConnected, setToolsConnected] = useState(false);
+  const [testCallNumber, setTestCallNumber] = useState("");
+  const [testCallNote, setTestCallNote] = useState<string | null>(null);
 
   const [company, setCompany] = useState("");
   const [services, setServices] = useState("");
@@ -479,13 +481,20 @@ export default function OnboardingPage() {
   async function handleTestCall() {
     setTestCallLoading(true);
     setError(null);
+    setTestCallNote(null);
     try {
-      const res = await api.post<{ success?: boolean; message?: string }>("/onboarding/test-call", {});
+      const number = normalizeTransferNumber(testCallNumber || transferNumber);
+      if (!number) {
+        setError("Enter your mobile number with its country code, for example +971 50 123 4567.");
+        return;
+      }
+      const res = await api.post<{ success?: boolean; message?: string }>("/onboarding/test-call", { phoneNumber: number });
       if (res?.success === false) {
         setError(res.message || "Test call failed");
         return;
       }
       if (res?.success) {
+        setTestCallNote(`Calling ${number} now. Answer it to hear your line working.`);
         try {
           await api.post("/onboarding/progress", { testCallCompleted: true });
         } catch {
@@ -963,19 +972,34 @@ export default function OnboardingPage() {
                   )}
                 </p>
                 {provisionedLine && (
-                  <div className="flex flex-col sm:flex-row gap-2 justify-center items-center">
-                    <button
-                      type="button"
-                      disabled={testCallLoading}
-                      onClick={() => void handleTestCall()}
-                      className="btn-ghost inline-flex items-center gap-2"
-                    >
-                      {testCallLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
-                      Ring test number
-                    </button>
-                    <span className="text-[11px] text-foreground-secondary max-w-xs">
-                      Uses <code className="text-[10px]">TEST_CALL_NUMBER</code> on the gateway (optional).
-                    </span>
+                  <div className="text-left max-w-sm mx-auto space-y-2">
+                    <label htmlFor="onboarding-test-number" className="text-sm text-foreground-secondary block">
+                      Test your line: we will call your mobile
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        id="onboarding-test-number"
+                        type="tel"
+                        inputMode="tel"
+                        value={testCallNumber || transferNumber}
+                        onChange={(e) => setTestCallNumber(e.target.value)}
+                        placeholder="+971 50 123 4567"
+                        className="input flex-1"
+                      />
+                      <button
+                        type="button"
+                        disabled={testCallLoading || !normalizeTransferNumber(testCallNumber || transferNumber)}
+                        onClick={() => void handleTestCall()}
+                        className="btn-ghost inline-flex items-center gap-2 shrink-0 disabled:opacity-50"
+                      >
+                        {testCallLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Phone className="w-4 h-4" />}
+                        Call me
+                      </button>
+                    </div>
+                    <p className="text-xs text-foreground-secondary">
+                      Include the country code. You will hear a short recorded message. Up to 3 test calls an hour.
+                    </p>
+                    {testCallNote && <p className="text-xs text-emerald-700">{testCallNote}</p>}
                   </div>
                 )}
                 <button type="button" onClick={() => void goToDashboard()} className="btn-primary !py-3 !px-8">

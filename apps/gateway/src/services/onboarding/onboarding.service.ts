@@ -3,8 +3,10 @@ import { voiceDb } from '../voice/tenant-scope.js';
 import { phoneProvisioningService } from '../phone-provisioning/phoneProvisioning.service.js';
 import { getGatewayPublicHttpsBase } from '../env.js';
 
-const lastTestCallAt = new Map<string, number>();
-const TEST_CALL_COOLDOWN_MS = 60_000;
+import { checkTestCallAllowed, normalizeTestCallNumber } from './test-call-guard.js';
+
+/** Times of each tenant's recent test calls (this instance only; resets on restart). */
+const testCallHistory = new Map<string, number[]>();
 
 interface OnboardingProgress {
     tenantId: string;
@@ -189,16 +191,19 @@ export class OnboardingService {
 
     async runTestCall(tenantId: string, phoneNumber?: string): Promise<{ success: boolean; message: string }> {
         try {
-            const lastCall = lastTestCallAt.get(tenantId);
-            if (lastCall && Date.now() - lastCall < TEST_CALL_COOLDOWN_MS) {
-                const waitSeconds = Math.ceil((TEST_CALL_COOLDOWN_MS - (Date.now() - lastCall)) / 1000);
-                return { success: false, message: `Please wait ${waitSeconds} seconds between test calls` };
+            const gate = checkTestCallAllowed(testCallHistory.get(tenantId) ?? [], Date.now());
+            if (!gate.allowed) {
+                return { success: false, message: gate.message ?? 'Please wait before another test call.' };
             }
 
-            const toNumber = phoneNumber || process.env.TEST_CALL_NUMBER || undefined;
+            const typed = phoneNumber?.trim();
+            const toNumber = typed ? normalizeTestCallNumber(typed) : process.env.TEST_CALL_NUMBER || undefined;
+            if (typed && !toNumber) {
+                return { success: false, message: 'Enter your mobile number with its country code, for example +971 50 123 4567.' };
+            }
 
             if (!toNumber) {
-                return { success: false, message: 'No destination phone number provided. Enter a number or set TEST_CALL_NUMBER.' };
+                return { success: false, message: 'No destination phone number provided. Enter your mobile number.' };
             }
 
             const listed = await phoneProvisioningService.listNumbers(tenantId);
@@ -250,7 +255,7 @@ export class OnboardingService {
 
             const data = await response.json();
             if (data.sid) {
-                lastTestCallAt.set(tenantId, Date.now());
+                testCallHistory.set(tenantId, [...(testCallHistory.get(tenantId) ?? []), Date.now()].slice(-10));
                 logger.info('ONBOARDING_TEST_CALL_INITIATED', {
                     tenantId,
                     callSid: data.sid,
