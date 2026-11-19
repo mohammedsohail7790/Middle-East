@@ -39,7 +39,8 @@ vi.mock("@/lib/ensure-tenant", () => ({
   resolveOnboardingEntry: vi.fn().mockResolvedValue({ tenantId: null, redirectToDashboard: false }),
   ensureTenantSession: vi.fn().mockResolvedValue("tid"),
 }));
-vi.mock("@/lib/store", () => ({ setTenantId: vi.fn(), setPlan: vi.fn() }));
+vi.mock("@/lib/store", () => ({ setTenantId: vi.fn(), setPlan: vi.fn(), hasAccess: () => false }));
+vi.mock("@/lib/integration-oauth", () => ({ startIntegrationOAuth: vi.fn().mockResolvedValue(undefined) }));
 vi.mock("@/lib/auth-navigate", () => ({ navigateAfterSignIn: vi.fn(), localizedDashboardPath: (p: string) => p }));
 vi.mock("@/components/onboarding/OnboardingShell", () => ({ OnboardingShell: ({ children }: any) => <div>{children}</div> }));
 vi.mock("@/components/onboarding/OnboardingPersonalityVoice", () => ({ OnboardingPersonalityVoice: () => <div>personality</div> }));
@@ -58,6 +59,8 @@ beforeEach(() => {
     if (path.startsWith("/tenants/industries")) return INDUSTRIES;
     if (path.startsWith("/tenants/onboarding-status")) throw new Error("none");
     if (path.startsWith("/onboarding/twilio-status")) return { configured: true };
+    if (path === "/integrations/oauth-capabilities") return [{ provider: "google-calendar", configured: true }];
+    if (path === "/integrations/catalog") return { connections: {} };
     return {};
   });
   h.post.mockImplementation(async (path: string) => (path === "/tenants" ? { id: "tid" } : {}));
@@ -171,8 +174,26 @@ describe("sign-up wizard", () => {
     fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
     await screen.findByText("Almost there");
     next();
-    await screen.findByText(/Setup complete|You're all set|ready/i).catch(() => undefined);
+    await screen.findByText("Connect your tools");
     expect(h.post.mock.calls.some((c) => c[0] === "/knowledge")).toBe(false);
+  });
+
+  it("offers the calendar after the questions, and lets the client skip it", async () => {
+    await throughToAgentStep({ transfer: "" });
+    next();
+    await screen.findByText("Name your AI receptionist");
+    fireEvent.click(screen.getByRole("button", { name: /Launch AI Agent/ }));
+    await screen.findByText("Get your AI phone line");
+    fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
+    await screen.findByText("Almost there");
+    next();
+    await screen.findByText("Connect your tools");
+    expect(await screen.findByText("Google Calendar")).toBeTruthy();
+    // Paid CRMs are hidden while the plan does not allow them.
+    expect(screen.queryByText("HubSpot")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
+    await waitFor(() => expect(h.post).toHaveBeenCalledWith("/onboarding/skip-step", { step: "crm" }));
+    await screen.findByText(/You're all set/);
   });
 });
 

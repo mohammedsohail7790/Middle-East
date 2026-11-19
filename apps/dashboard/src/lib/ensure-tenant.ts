@@ -184,7 +184,8 @@ export async function resolveOnboardingEntry(
     const skippedIntegrations =
       progress?.skippedSteps?.includes("crm") || progress?.skippedSteps?.includes("integrations");
     if (progress?.crmConnected || progress?.calendarConnected || skippedIntegrations) {
-      return { tenantId, resumeStep: 6, redirectToDashboard: false };
+      // Past the "Connect your tools" step (6): on to the final screen.
+      return { tenantId, resumeStep: 7, redirectToDashboard: false };
     }
     if (progress?.twilioProvisioned) {
       return { tenantId, resumeStep: 5, redirectToDashboard: false };
