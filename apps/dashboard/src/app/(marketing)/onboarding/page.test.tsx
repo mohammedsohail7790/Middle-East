@@ -39,7 +39,7 @@ vi.mock("@/lib/ensure-tenant", () => ({
   resolveOnboardingEntry: vi.fn().mockResolvedValue({ tenantId: null, redirectToDashboard: false }),
   ensureTenantSession: vi.fn().mockResolvedValue("tid"),
 }));
-vi.mock("@/lib/store", () => ({ setTenantId: vi.fn(), setPlan: vi.fn(), hasAccess: () => false }));
+vi.mock("@/lib/store", () => ({ setTenantId: vi.fn(), setPlan: vi.fn(), hasAccess: () => false, getPlan: () => "trial" }));
 vi.mock("@/lib/integration-oauth", () => ({ startIntegrationOAuth: vi.fn().mockResolvedValue(undefined) }));
 vi.mock("@/lib/auth-navigate", () => ({ navigateAfterSignIn: vi.fn(), localizedDashboardPath: (p: string) => p }));
 vi.mock("@/components/onboarding/OnboardingShell", () => ({ OnboardingShell: ({ children }: any) => <div>{children}</div> }));
@@ -59,7 +59,7 @@ beforeEach(() => {
     if (path.startsWith("/tenants/industries")) return INDUSTRIES;
     if (path.startsWith("/tenants/onboarding-status")) throw new Error("none");
     if (path.startsWith("/onboarding/twilio-status")) return { configured: true };
-    if (path === "/integrations/oauth-capabilities") return [{ provider: "google-calendar", configured: true }];
+    if (path === "/integrations/oauth-capabilities") return [{ provider: "google-calendar", configured: true }, { provider: "hubspot", configured: true }];
     if (path === "/integrations/catalog") return { connections: {} };
     return {};
   });
@@ -189,8 +189,8 @@ describe("sign-up wizard", () => {
     next();
     await screen.findByText("Connect your tools");
     expect(await screen.findByText("Google Calendar")).toBeTruthy();
-    // Paid CRMs are hidden while the plan does not allow them.
-    expect(screen.queryByText("HubSpot")).toBeNull();
+    // A new workspace is on the trial, which includes Professional features, so the paid tools show straight away.
+    expect(await screen.findByText("HubSpot")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
     await waitFor(() => expect(h.post).toHaveBeenCalledWith("/onboarding/skip-step", { step: "crm" }));
     await screen.findByText(/You're all set/);

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
-import { hasAccess } from "@/lib/store";
+import { getPlan, hasAccess } from "@/lib/store";
 import { IntegrationIcon } from "@/components/integrations/IntegrationIcon";
 import {
   getIntegrationsByCategory,
@@ -16,11 +16,19 @@ import { ONBOARDING_RETURN_KEY } from "@/lib/onboarding-return";
 type OAuthCapability = { provider: string; configured: boolean };
 type CatalogResponse = { connections?: Record<string, { status?: string }> };
 
+/**
+ * A new workspace is on the free trial, which includes Professional features (the dashboard says so). The plan check alone ranks "trial"
+ * below Professional, which hid Calendly, Square and HubSpot until the page was reloaded, so a trial counts as allowed here.
+ */
+export function allowsDuringSetup(requiredPlan?: string): boolean {
+  return hasAccess(requiredPlan) || getPlan() === "trial";
+}
+
 /** Calendars and CRMs a new client can link with one sign-in, and that their plan allows. Pure, so it can be tested. */
 export function pickOnboardingTools(
   oauthConfigured: Record<string, boolean>,
   connected: Record<string, boolean>,
-  allows: (plan?: string) => boolean = hasAccess
+  allows: (plan?: string) => boolean = allowsDuringSetup
 ): { calendars: IntegrationDef[]; crms: IntegrationDef[] } {
   const usable = (i: IntegrationDef) =>
     isOneClickConnect(i) &&
