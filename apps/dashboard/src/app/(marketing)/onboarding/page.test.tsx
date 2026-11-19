@@ -61,6 +61,7 @@ beforeEach(() => {
     if (path.startsWith("/onboarding/twilio-status")) return { configured: true };
     if (path === "/integrations/oauth-capabilities") return [{ provider: "google-calendar", configured: true }, { provider: "hubspot", configured: true }];
     if (path === "/integrations/catalog") return { connections: {} };
+    if (path === "/phone-numbers/stats") return { twilioConfigured: true, gatewayReady: true, canAddMore: true, activeCount: 0, maxAllowed: 3 };
     return {};
   });
   h.post.mockImplementation(async (path: string) => (path === "/tenants" ? { id: "tid" } : {}));
@@ -194,6 +195,47 @@ describe("sign-up wizard", () => {
     fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
     await waitFor(() => expect(h.post).toHaveBeenCalledWith("/onboarding/skip-step", { step: "crm" }));
     await screen.findByText(/You're all set/);
+  });
+});
+
+describe("test call on the last screen", () => {
+  async function toFinalScreen() {
+    h.post.mockImplementation(async (path: string) => {
+      if (path === "/tenants") return { id: "tid" };
+      if (path === "/onboarding/provision-phone") return { phoneNumber: "+12125550100" };
+      if (path === "/onboarding/test-call") return { success: true };
+      return {};
+    });
+    await throughToAgentStep({ transfer: "+971501234567" });
+    next();
+    await screen.findByText("Name your AI receptionist");
+    fireEvent.click(screen.getByRole("button", { name: /Launch AI Agent/ }));
+    await screen.findByText("Get your AI phone line");
+    fireEvent.change(screen.getByPlaceholderText(/Area code|212/i), { target: { value: "212" } });
+    fireEvent.click(screen.getByRole("button", { name: /Claim first available/ }));
+    await screen.findByText("Almost there");
+    next();
+    await screen.findByText("Connect your tools");
+    fireEvent.click(screen.getByRole("button", { name: /Skip for now/ }));
+    await screen.findByText(/You're all set/);
+  }
+
+  it("calls the number the client types, in international format", async () => {
+    await toFinalScreen();
+    const field = screen.getByLabelText(/we will call your mobile/i) as HTMLInputElement;
+    // It starts from the on-call number given earlier, and the client can change it.
+    expect(field.value).toBe("+971501234567");
+    fireEvent.change(field, { target: { value: "00971 55 987 6543" } });
+    fireEvent.click(screen.getByRole("button", { name: /Call me/ }));
+    await waitFor(() => expect(h.post).toHaveBeenCalledWith("/onboarding/test-call", { phoneNumber: "+971559876543" }));
+    await screen.findByText(/Calling \+971559876543 now/);
+  });
+
+  it("does not call when the number has no country code", async () => {
+    await toFinalScreen();
+    fireEvent.change(screen.getByLabelText(/we will call your mobile/i), { target: { value: "0559876543" } });
+    expect((screen.getByRole("button", { name: /Call me/ }) as HTMLButtonElement).disabled).toBe(true);
+    expect(h.post.mock.calls.some((c) => c[0] === "/onboarding/test-call")).toBe(false);
   });
 });
 
