@@ -961,6 +961,7 @@ export function createVoiceRouter(): express.Router {
     router.post('/call-status', twilioWebhookGuard, async (req: any, res: any) => {
         const body = req.body || {};
         try {
+            void import('../ops-alerts/team-alert.js').then((m) => m.noteCallStatusForTeam(String(body.CallStatus || ''))).catch(() => {});
             const { handleTwilioCallStatus } = await import('./outbound.service.js');
             await handleTwilioCallStatus({
                 callSid: String(body.CallSid || ''),

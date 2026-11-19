@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { billingService } from './billing.service.js';
 import { logger } from '../logger.js';
+import { noteStripeWebhookFailureForTeam } from '../ops-alerts/team-alert.js';
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2026-08-26.dahlia' })
@@ -31,13 +32,23 @@ export async function handleStripeBillingWebhook(req: Request, res: Response): P
     return;
   }
 
+  let event: Stripe.Event;
   try {
-    const event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+    event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+  } catch (err) {
+    logger.error('Stripe webhook verification failed', { error: String(err) });
+    res.status(400).json({ success: false, error: 'Webhook signature verification failed' });
+    return;
+  }
+
+  try {
     await billingService.handleWebhook(event);
     logger.info('Stripe webhook processed', { type: event.type });
     res.json({ received: true });
   } catch (err) {
-    logger.error('Stripe webhook verification failed', { error: String(err) });
-    res.status(400).json({ success: false, error: 'Webhook signature verification failed' });
+    // The signature was fine, so this is our own failure. Same answer as before (a 400 makes Stripe retry), but the team is told and the log says what really happened.
+    logger.error('Stripe webhook processing failed', { type: event.type, eventId: event.id, error: String(err) });
+    noteStripeWebhookFailureForTeam(event.type, event.id, err);
+    res.status(400).json({ success: false, error: 'Webhook processing failed' });
   }
 }
