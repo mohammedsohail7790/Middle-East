@@ -456,7 +456,8 @@ export default function OnboardingPage() {
     setAutomationsNote(null);
     if (!skip && firstAutomations.length > 0) {
       if (!isValidOwnerEmail(ownerEmail)) {
-        setAutomationsNote("Enter a valid email address for the emails, or choose Skip for now.");
+        // A typed but wrong address already shows its own message under the field; only an empty field needs this one.
+        if (!ownerEmail.trim()) setAutomationsNote("Enter an email address for the emails, or choose Skip for now.");
         return;
       }
       setLoading(true);
