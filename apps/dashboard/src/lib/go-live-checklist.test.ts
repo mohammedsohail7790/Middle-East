@@ -6,10 +6,10 @@ const byId = (items: ReturnType<typeof buildGoLiveChecklist>) => Object.fromEntr
 
 describe("go-live checklist", () => {
   it("starts with nothing done and three required items", () => {
-    const items = buildGoLiveChecklist(none);
-    expect(items.map((i) => i.id)).toEqual(["phone", "faq", "testCall", "calendar", "crm"]);
+    const items = buildGoLiveChecklist({ ...none, automationsOn: false });
+    expect(items.map((i) => i.id)).toEqual(["phone", "faq", "testCall", "calendar", "crm", "automation"]);
     expect(items.filter((i) => i.required).map((i) => i.id)).toEqual(["phone", "faq", "testCall"]);
-    expect(goLiveProgress(items)).toEqual({ done: 0, total: 5 });
+    expect(goLiveProgress(items)).toEqual({ done: 0, total: 6 });
     expect(isGoLiveComplete(items)).toBe(false);
   });
 
@@ -35,6 +35,15 @@ describe("go-live checklist", () => {
     const items = buildGoLiveChecklist({ ...none, phoneLine: true, knowledgeCount: 1, testCallDone: true });
     expect(isGoLiveComplete(items)).toBe(true);
     expect(goLiveProgress(items)).toEqual({ done: 3, total: 5 });
+  });
+
+  it("leaves the automation line out when it could not be read, and ticks it when one is on", () => {
+    expect(buildGoLiveChecklist(none).map((i) => i.id)).not.toContain("automation");
+    expect(buildGoLiveChecklist({ ...none, automationsOn: null }).map((i) => i.id)).not.toContain("automation");
+    const on = byId(buildGoLiveChecklist({ ...none, automationsOn: true }));
+    expect(on.automation.done).toBe(true);
+    expect(on.automation.required).toBe(false);
+    expect(on.automation.href).toBe("/dashboard/automations");
   });
 
   it("is not complete while a required item is missing", () => {

@@ -9,7 +9,7 @@ import { IconBox } from "@/components/ui-kit/IconBox";
 import { BorderBeam } from "@/components/magic-ui/border-beam";
 import { DotPattern } from "@/components/magic-ui/dot-pattern";
 
-const STEP_LABELS = ["Business", "Industry", "Hours", "AI agent", "Phone line", "Questions", "Your tools", "Finish"];
+const STEP_LABELS = ["Business", "Industry", "Hours", "AI agent", "Phone line", "Questions", "Your tools", "Automations", "Finish"];
 
 type OnboardingShellProps = {
   step: number;
@@ -20,7 +20,7 @@ type OnboardingShellProps = {
 
 export function OnboardingShell({
   step,
-  totalSteps = 7,
+  totalSteps = 8,
   children,
   footer,
 }: OnboardingShellProps) {

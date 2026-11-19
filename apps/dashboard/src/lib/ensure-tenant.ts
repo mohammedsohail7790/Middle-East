@@ -181,10 +181,14 @@ export async function resolveOnboardingEntry(
     if (progress?.completed) {
       return { tenantId, resumeStep: null, redirectToDashboard: true };
     }
+    // The automations step (7) was answered: only the final screen is left.
+    if (progress?.skippedSteps?.includes("automations")) {
+      return { tenantId, resumeStep: 8, redirectToDashboard: false };
+    }
     const skippedIntegrations =
       progress?.skippedSteps?.includes("crm") || progress?.skippedSteps?.includes("integrations");
     if (progress?.crmConnected || progress?.calendarConnected || skippedIntegrations) {
-      // Past the "Connect your tools" step (6): on to the final screen.
+      // Past the "Connect your tools" step (6): on to the automations step.
       return { tenantId, resumeStep: 7, redirectToDashboard: false };
     }
     if (progress?.twilioProvisioned) {

@@ -1,6 +1,6 @@
 import { getIntegrationsByCategory } from "@/lib/integration-hub-catalog";
 
-export type GoLiveItemId = "phone" | "faq" | "calendar" | "crm" | "testCall";
+export type GoLiveItemId = "phone" | "faq" | "calendar" | "crm" | "testCall" | "automation";
 
 export type GoLiveItem = {
   id: GoLiveItemId;
@@ -16,6 +16,8 @@ export type GoLiveInput = {
   knowledgeCount: number;
   testCallDone: boolean;
   connections: Record<string, { status?: string } | undefined>;
+  /** Whether any ready-made automation is switched on; null when that could not be read, which leaves the item out. */
+  automationsOn?: boolean | null;
 };
 
 const anyConnected = (category: "calendar" | "crm", connections: GoLiveInput["connections"]) =>
@@ -29,6 +31,9 @@ export function buildGoLiveChecklist(input: GoLiveInput): GoLiveItem[] {
     { id: "testCall", done: input.testCallDone, required: true, href: null },
     { id: "calendar", done: anyConnected("calendar", input.connections), required: false, href: "/dashboard/integrations" },
     { id: "crm", done: anyConnected("crm", input.connections), required: false, href: "/dashboard/integrations" },
+    ...(input.automationsOn === null || input.automationsOn === undefined
+      ? []
+      : [{ id: "automation" as const, done: input.automationsOn, required: false, href: "/dashboard/automations" }]),
   ];
 }
 

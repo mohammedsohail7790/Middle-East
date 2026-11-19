@@ -134,6 +134,7 @@
       "goLiveItem_testCall": "Test your line with a call to your mobile",
       "goLiveItem_calendar": "Connect your calendar",
       "goLiveItem_crm": "Connect your CRM",
+      "goLiveItem_automation": "Switch on an automation",
       "goLiveNumber": "Your mobile number with country code",
       "goLiveCallMe": "Call me",
       "goLiveCalling": "Calling {number} now. Answer it to hear your line working.",
