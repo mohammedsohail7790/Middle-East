@@ -49,6 +49,12 @@ export function registerHealthRoutes(app: Application, cacheManager: CacheManage
         checks.resend = { ok: Boolean(process.env.RESEND_API_KEY) };
 
         const criticalOk = checks.database.ok && checks.redis.ok;
+        if (!criticalOk) {
+            const down: Record<string, string> = {};
+            if (!checks.database.ok) down.database = checks.database.error ?? 'not responding';
+            if (!checks.redis.ok) down.redis = checks.redis.error ?? 'not responding';
+            void import('../services/ops-alerts/team-alert.js').then((m) => m.noteDependencyDownForTeam(down)).catch(() => {});
+        }
         const allConfigOk = checks.stripe.ok && checks.twilio.ok && checks.openai.ok;
         const isReady = criticalOk;
         const statusCode = isReady ? 200 : 503;
