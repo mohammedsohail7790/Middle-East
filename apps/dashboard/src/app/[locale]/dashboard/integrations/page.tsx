@@ -29,6 +29,7 @@ import { subscribePlanUpdates } from "@/lib/store";
 import { canUseFeature } from "@/lib/plan-features";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
+import { consumeOnboardingReturn } from "@/lib/onboarding-return";
 import { IntegrationCard } from "@/components/integrations/IntegrationCard";
 import {
   IntegrationConnectWizard,
@@ -207,6 +208,12 @@ export default function IntegrationsPage() {
     if (!provider || !status) return;
 
     const label = getIntegrationDef(provider)?.name ?? provider.replace(/-/g, " ");
+
+    // The client signed in from the setup wizard: send them back to finish it.
+    if (status === "connected" && consumeOnboardingReturn()) {
+      window.location.replace("/onboarding?step=tools");
+      return;
+    }
 
     if (status === "connected") {
       setSelectedId(provider);

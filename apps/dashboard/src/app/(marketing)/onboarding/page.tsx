@@ -19,6 +19,7 @@ import { navigateAfterSignIn, localizedDashboardPath } from "@/lib/auth-navigate
 import { cn } from "@/lib/utils";
 import { OnboardingPersonalityVoice } from "@/components/onboarding/OnboardingPersonalityVoice";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
+import { OnboardingConnectTools } from "@/components/onboarding/OnboardingConnectTools";
 import { OnboardingVoiceGreeting } from "@/components/onboarding/OnboardingVoiceGreeting";
 import { AGENT_LANGUAGES, isArabicLanguage, type AgentLanguageId } from "@/lib/agent-languages";
 import {
@@ -66,7 +67,7 @@ function toggleIndustry(list: string[], id: string): string[] {
   return list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
 }
 
-const TOTAL_WIZARD_STEPS = 6;
+const TOTAL_WIZARD_STEPS = 7;
 
 interface OnboardingProgressData {
   step?: string;
@@ -92,6 +93,7 @@ export default function OnboardingPage() {
   const [phoneStats, setPhoneStats] = useState<PhoneProvisioningStatus | null>(null);
   const [claimingFirst, setClaimingFirst] = useState(false);
   const [testCallLoading, setTestCallLoading] = useState(false);
+  const [toolsConnected, setToolsConnected] = useState(false);
 
   const [company, setCompany] = useState("");
   const [services, setServices] = useState("");
@@ -180,6 +182,8 @@ export default function OnboardingPage() {
           setCreatedTenantId(entry.tenantId);
           setTenantId(entry.tenantId);
           if (entry.resumeStep != null) setStep(entry.resumeStep);
+          // Back from signing in to a calendar or CRM: land on the tools step to see it connected.
+          if (new URLSearchParams(window.location.search).get("step") === "tools") setStep(6);
         }
       } catch {
         if (!cancelled) {
@@ -431,14 +435,24 @@ export default function OnboardingPage() {
     setLoading(true);
     setError(null);
     try {
-      await saveFaq();
       await api.post("/onboarding/skip-step", { step: "crm" });
-      setStep(6);
     } catch {
-      setStep(6);
+      /* non-fatal: the client can still finish */
     } finally {
       setLoading(false);
+      setStep(7);
     }
+  }
+
+  async function handleToolsContinue() {
+    if (toolsConnected) {
+      try {
+        await api.post("/onboarding/progress", { calendarConnected: true });
+      } catch {
+        /* non-fatal */
+      }
+    }
+    setStep(7);
   }
 
   async function goToDashboard() {
@@ -928,7 +942,13 @@ export default function OnboardingPage() {
             )}
 
             {step === 6 && (
-              <motion.div key="s6" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6 space-y-5">
+              <motion.div key="s6" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                <OnboardingConnectTools onConnectedChange={setToolsConnected} />
+              </motion.div>
+            )}
+
+            {step === 7 && (
+              <motion.div key="s7" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6 space-y-5">
                 <div className="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center mx-auto">
                   <Check className="w-8 h-8 text-white" />
                 </div>
@@ -1041,16 +1061,29 @@ export default function OnboardingPage() {
               <button type="button" onClick={() => setStep(4)} className="btn-ghost !px-5">
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
+              <button type="button" onClick={() => void saveFaq().then(() => setStep(6))} className="btn-primary !px-6">
+                Continue <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {step === 6 && (
+            <div className="mt-8 flex flex-wrap justify-between gap-2">
+              <button type="button" onClick={() => setStep(5)} className="btn-ghost !px-5">
+                <ArrowLeft className="w-4 h-4" /> Back
+              </button>
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => void handleSkipIntegrations()}
-                  disabled={loading}
-                  className="btn-ghost !px-5"
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Skip for now"}
-                </button>
-                <button type="button" onClick={() => void saveFaq().then(() => setStep(6))} className="btn-primary !px-6">
+                {!toolsConnected && (
+                  <button
+                    type="button"
+                    onClick={() => void handleSkipIntegrations()}
+                    disabled={loading}
+                    className="btn-ghost !px-5"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Skip for now"}
+                  </button>
+                )}
+                <button type="button" onClick={() => void handleToolsContinue()} className="btn-primary !px-6">
                   Continue <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
