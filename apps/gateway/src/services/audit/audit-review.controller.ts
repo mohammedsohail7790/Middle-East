@@ -6,7 +6,7 @@ import { verifyLink, type LinkPayload } from './signed-link.js';
 import { mergeEdits, type AuditReport, type ReportEdits } from './audit-report.js';
 import { approve, getAudit, saveEdits, type AuditRow } from './audit-store.js';
 import { sendPaymentLinkEmail } from './audit-payment-mail.js';
-import { handlePaid } from './audit-pipeline.js';
+import { handlePaid, sendTestCopy } from './audit-pipeline.js';
 import { ArabicFontMissingError, renderReportPdf } from './audit-report-pdf.js';
 
 /**
@@ -89,7 +89,10 @@ export function renderReviewPage(row: AuditRow, token: string, notice?: { tone: 
       `<button name="action" value="approve" style="padding:11px 18px;border-radius:8px;border:0;background:#1b1f27;color:#fff;font-weight:600;cursor:pointer">Approve and email the client the payment link</button>`
     : row.status === 'approved'
       ? `<button name="action" value="resend" style="padding:11px 18px;border-radius:8px;border:1px solid #1b1f27;background:#fff;font-weight:600;cursor:pointer">Send the payment link again</button>`
-      : '';
+      : row.status === 'delivery_failed'
+        ? `<button name="action" value="retry" style="padding:11px 18px;border-radius:8px;border:0;background:#1b1f27;color:#fff;font-weight:600;cursor:pointer">Retry sending the PDF to the client</button>`
+        : '';
+  const testButton = `<button name="action" value="testcopy" style="padding:11px 18px;border-radius:8px;border:1px solid #1b1f27;background:#fff;font-weight:600;cursor:pointer">Email me a test copy (not sent to the client)</button>`;
 
   const body =
     `<form method="post" action="review" style="margin:0"><input type="hidden" name="t" value="${h(token)}">` +
@@ -104,7 +107,7 @@ export function renderReviewPage(row: AuditRow, token: string, notice?: { tone: 
       `<div style="display:flex;gap:12px;align-items:center"><div style="flex:1">${input('weeks_min', r.timeline ? String(r.timeline.weeksMin) : '', dis, 'inputmode="numeric" placeholder="From"')}</div><span>to</span><div style="flex:1">${input('weeks_max', r.timeline ? String(r.timeline.weeksMax) : '', dis, 'inputmode="numeric" placeholder="To"')}</div></div>` +
       `<p style="margin:8px 0 0;font-size:12px;color:#5b6472">Worked out from the hours estimate and how many build hours an engineer gets through in a week. The client is told the clock starts once we have access to their systems. Change it if you know better.</p>`) +
     card(label('Things to confirm, one per line') + area('considerations', r.considerations.join('\n'), 3, dis) + label('Next steps, one per line') + area('nextSteps', r.nextSteps.join('\n'), 3, dis)) +
-    `<div style="margin:0 0 16px">${buttons}</div></form>` +
+    `<div style="margin:0 0 16px">${buttons} ${testButton}</div></form>` +
     `<p style="font-size:14px"><a href="review/pdf?t=${encodeURIComponent(token)}" style="color:#1b1f27;font-weight:600">Preview or download the PDF</a> (shows the saved version)</p>`;
   return shell('Audit review', head + banner + body);
 }
@@ -194,6 +197,17 @@ export function createAuditReviewRouter(): Router {
           logger.error('[Audit] Resend failed', undefined, error instanceof Error ? error : new Error(String(error)));
           return void (await show({ tone: 'bad', text: 'The email did not go out. Try again.' }));
         }
+      }
+
+      if (action === 'testcopy') {
+        const out = await sendTestCopy(row);
+        return void (await show(out === 'sent' ? { tone: 'good', text: 'A test copy was emailed to the team. The client has not received anything.' } : out === 'no-report' ? { tone: 'bad', text: 'There is no saved report to send yet.' } : { tone: 'bad', text: 'The test copy could not be sent. Check the logs.' }));
+      }
+
+      if (action === 'retry') {
+        if (row.status !== 'delivery_failed') return void (await show({ tone: 'bad', text: 'Delivery can only be retried when the automatic email failed.' }));
+        const out = await handlePaid(row.id);
+        return void (await show(out === 'delivered' ? { tone: 'good', text: 'The PDF was emailed to the client.' } : { tone: 'bad', text: `Delivery did not complete (${out}). Check your email for details.` }));
       }
 
       if (action !== 'save' && action !== 'approve') return void (await show({ tone: 'bad', text: 'Unknown action.' }));
