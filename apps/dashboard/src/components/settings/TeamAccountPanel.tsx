@@ -209,7 +209,7 @@ export function TeamAccountPanel() {
           icon={Mail}
           iconVariant="muted"
           title="Account email"
-          description='Changing email uses the Supabase "Change email address" template. After you confirm, your workspace team record syncs on the next login.'
+          description="We email you a link to confirm a new address. Once you confirm, your workspace is updated the next time you sign in."
         />
         <p className="text-sm">
           Current: <strong>{accountEmail || "—"}</strong>

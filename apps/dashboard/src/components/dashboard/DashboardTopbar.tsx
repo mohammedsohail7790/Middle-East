@@ -130,8 +130,8 @@ export function DashboardTopbar({ workspace, onOpenMenu, planTick }: Props) {
         <div className="dashboard-header-context-desktop hidden lg:flex items-center gap-2 min-w-0">
           <PageIcon className="size-4 shrink-0 text-muted-foreground" strokeWidth={ICON_STROKE} aria-hidden />
           <nav className="dashboard-topbar-breadcrumb" aria-label="Breadcrumb">
-            <span className="dashboard-topbar-breadcrumb-root">{t("workspace")}</span>
-            <ChevronRight className="size-3 opacity-50 shrink-0" strokeWidth={ICON_STROKE} />
+            <span className="dashboard-topbar-breadcrumb-root hidden xl:inline">{t("workspace")}</span>
+            <ChevronRight className="hidden xl:block size-3 opacity-50 shrink-0" strokeWidth={ICON_STROKE} />
             <span className="dashboard-topbar-breadcrumb-current truncate">{title}</span>
           </nav>
         </div>

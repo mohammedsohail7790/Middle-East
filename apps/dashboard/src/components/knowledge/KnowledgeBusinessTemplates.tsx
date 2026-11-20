@@ -261,7 +261,7 @@ export function KnowledgeBusinessTemplates() {
                 onClick={applyWeekdayHoursToAll}
                 className="text-[11px] text-accent hover:underline whitespace-nowrap"
               >
-                Apply Mon to weekdays
+                Copy Monday hours to Mon–Fri
               </button>
             </div>
             <div className="overflow-x-auto">
@@ -348,7 +348,7 @@ export function KnowledgeBusinessTemplates() {
                 aria-label="Services and pricing, one per line"
               />
               <p className="text-[11px] text-muted-foreground">
-                One service per line. Price is optional — add it as <span className="font-mono">- $89</span> at
+                One service per line. Price is optional — add it as <span className="font-mono">- AED 89</span> at
                 the end of a line if you want the AI to quote it on calls.
               </p>
             </div>
