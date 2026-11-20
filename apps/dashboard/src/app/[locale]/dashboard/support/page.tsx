@@ -9,6 +9,7 @@ import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { SupportQuickLink } from "@/components/support/SupportQuickLink";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { showDashboardToast } from "@/lib/dashboard-toast";
+import { api, humanizeApiError } from "@/lib/api";
 import { SUPPORT_EMAIL, HELP_SETUP_HREF } from "@/lib/integration-support";
 import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
 
@@ -33,24 +34,27 @@ export default function SupportPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [ticket, setTicket] = useState({ subject: "", message: "", email: "" });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [failure, setFailure] = useState("");
 
-  const submitTicket = () => {
+  const submitTicket = async () => {
     if (!ticket.subject.trim() || !ticket.message.trim() || !ticket.email.trim()) {
       showDashboardToast({ type: "error", title: tShell("couldNotLoad"), message: t("missingFields") });
       return;
     }
     const replyEmail = ticket.email;
-    const body = `From: ${replyEmail}\n\n${ticket.message}`;
-    const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(ticket.subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailto, "_blank");
-    setSent(true);
-    setTicket({ subject: "", message: "", email: replyEmail });
-    showDashboardToast({
-      type: "success",
-      title: t("emailOpened"),
-      message: t("emailOpenedDesc"),
-      durationMs: 6000,
-    });
+    setSending(true);
+    setFailure("");
+    try {
+      await api.post("/support/ticket", { email: replyEmail, subject: ticket.subject, message: ticket.message });
+      setSent(true);
+      setTicket({ subject: "", message: "", email: replyEmail });
+    } catch (e) {
+      // The message is kept in the form, and the email link stays available so the client is never stuck.
+      setFailure(humanizeApiError(e));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -118,7 +122,7 @@ export default function SupportPage() {
           title={t("ticketTitle")}
           icon={Mail}
           iconVariant="violet"
-          description="This opens your email client to send a message to our support team."
+          description="Send a message to our support team. We reply within 24 hours."
         >
           <VibePanel beam className="rounded-2xl border border-border/70 bg-card shadow-card">
             <div className="space-y-4 p-5 sm:p-6">
@@ -155,24 +159,33 @@ export default function SupportPage() {
                   className="input resize-none"
                 />
               </div>
+              {failure && (
+                <p role="alert" className="text-sm text-red-600">
+                  {failure} You can also email us at{" "}
+                  <a href={`mailto:${SUPPORT_EMAIL}`} className="font-medium underline underline-offset-2">
+                    {SUPPORT_EMAIL}
+                  </a>
+                  .
+                </p>
+              )}
               <button
                 type="button"
-                onClick={() => submitTicket()}
-                disabled={!ticket.subject.trim() || !ticket.message.trim() || !ticket.email.trim()}
+                onClick={() => void submitTicket()}
+                disabled={sending || !ticket.subject.trim() || !ticket.message.trim() || !ticket.email.trim()}
                 className="btn-primary w-full sm:w-auto"
               >
                 <Send className="size-4" strokeWidth={ICON_STROKE} />
-                Open Email Client
+                {sending ? "Sending…" : "Send message"}
               </button>
             </div>
           </VibePanel>
         </DashboardPageSection>
       ) : (
-        <DashboardPageSection title="Check Your Email" icon={Mail} iconVariant="success">
+        <DashboardPageSection title="Message sent" icon={Mail} iconVariant="success">
           <VibePanel className="rounded-2xl border border-border/70 bg-card shadow-card">
             <div className="py-6 text-center">
               <p className="text-sm text-muted-foreground">
-                Your email client should have opened with the support message. If it didn&apos;t, email us directly at{" "}
+                Thanks, we got your message. We reply within 24 hours, to the email address you gave. You can also reach us at{" "}
                 <a href={`mailto:${SUPPORT_EMAIL}`} className="font-medium text-foreground underline underline-offset-2 hover:text-accent-foreground">
                   {SUPPORT_EMAIL}
                 </a>
@@ -185,7 +198,7 @@ export default function SupportPage() {
                 }}
                 className="btn-ghost mt-4 text-sm"
               >
-                Send another email
+                Send another message
               </button>
             </div>
           </VibePanel>
