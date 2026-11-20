@@ -587,7 +587,7 @@
       "servicesHint": "The AI uses this list when callers ask what you offer.",
       "description": "Business description",
       "descriptionPlaceholder": "Brief overview of your business for the AI receptionist...",
-      "diagnosticFee": "Diagnostic / service call fee (optional)",
+      "diagnosticFee": "Consultation or service fee (optional)",
       "diagnosticFeePlaceholder": "e.g. 89",
       "baseAddress": "Base address (shop / office)",
       "baseAddressPlaceholder": "123 Main St, Springfield, IL",
