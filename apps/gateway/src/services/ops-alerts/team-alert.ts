@@ -49,10 +49,19 @@ export interface TeamAlertDeps {
 const lastSent = new Map<TeamAlertKind, number>();
 const failedCalls: number[] = [];
 
+/** The last alerts actually emailed, newest first, kept in memory only (cleared on restart) for the team usage page. */
+export interface SentTeamAlert { kind: TeamAlertKind; title: string; at: string }
+const sentLog: SentTeamAlert[] = [];
+export const SENT_LOG_LIMIT = 20;
+export function recentTeamAlerts(): SentTeamAlert[] {
+  return sentLog.slice();
+}
+
 /** Test helper: forget what was sent. */
 export function resetTeamAlertState(): void {
   lastSent.clear();
   failedCalls.length = 0;
+  sentLog.length = 0;
 }
 
 async function defaultSend({ to, subject, html }: { to: string[]; subject: string; html: string }): Promise<void> {
@@ -79,6 +88,8 @@ export async function sendTeamAlert(alert: TeamAlert, inject?: Partial<TeamAlert
       bodyHtml: `<p style="margin:0 0 14px;font-size:15px;line-height:1.6;">${escapeHtml(detail)}</p><p style="margin:0;font-size:13px;line-height:1.6;color:#6b675e;">Time: ${escapeHtml(new Date(now).toISOString())}. At most one email of this kind is sent an hour.</p>`,
     });
     await deps.send({ to, subject: `Halla AI alert: ${alert.title}`, html });
+    sentLog.unshift({ kind: alert.kind, title: alert.title, at: new Date(now).toISOString() });
+    if (sentLog.length > SENT_LOG_LIMIT) sentLog.length = SENT_LOG_LIMIT;
     return 'sent';
   } catch (error) {
     logger.warn('[TeamAlert] Could not send a team alert', { kind: alert.kind, error: error instanceof Error ? error.message : String(error) });

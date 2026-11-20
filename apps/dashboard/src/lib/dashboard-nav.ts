@@ -79,6 +79,7 @@ export const CONSULTANCY_NAV_GROUP: DashboardNavGroup = {
     { href: "/dashboard/consultancy/proposals", label: "Proposals", labelKey: "nav.consultancyProposals", subtitle: "Build prices clients accept in writing", subtitleKey: "nav.consultancyProposalsSubtitle" },
     { href: "/dashboard/consultancy/projects", label: "Projects", labelKey: "nav.consultancyProjects", subtitle: "Delivery dates, milestones and handover", subtitleKey: "nav.consultancyProjectsSubtitle" },
     { href: "/dashboard/consultancy/support", label: "Support plans", labelKey: "nav.consultancySupport", subtitle: "Monthly plans and hours worked", subtitleKey: "nav.consultancySupportSubtitle" },
+    { href: "/dashboard/consultancy/usage", label: "Usage and cost", labelKey: "nav.consultancyUsage", subtitle: "Calls and estimated cost per client", subtitleKey: "nav.consultancyUsageSubtitle" },
   ],
 };
 

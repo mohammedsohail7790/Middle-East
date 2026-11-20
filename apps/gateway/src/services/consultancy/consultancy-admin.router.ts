@@ -4,6 +4,7 @@ import { createLeadsRouter } from './consultancy-leads.router.js';
 import { createProposalsRouter } from './consultancy-proposals.router.js';
 import { createProjectsRouter } from './consultancy-projects.router.js';
 import { createSupportRouter } from './consultancy-support.router.js';
+import { createTeamUsageRouter } from '../usage/team-usage.router.js';
 
 /**
  * /api/v1/consultancy-admin: the team's side of the consultancy business. Everything under it needs a signed-in team member (see admin-access.ts).
@@ -19,5 +20,6 @@ export function createConsultancyAdminRouter(): Router {
   router.use('/proposals', createProposalsRouter());
   router.use('/projects', createProjectsRouter());
   router.use('/support', createSupportRouter());
+  router.use('/usage', createTeamUsageRouter());
   return router;
 }
