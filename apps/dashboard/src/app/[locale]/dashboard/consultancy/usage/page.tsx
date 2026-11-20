@@ -13,6 +13,8 @@ interface UsageData {
 }
 
 const usd = (n: number) => `$${n.toFixed(2)}`;
+/** Per-minute rates are small, so show them to three places ($0.014, not $0.01). */
+const rate = (n: number) => `$${n.toFixed(3)}`;
 
 /** Team only (the layout and the gateway both check). Every figure is an estimate from call length, not a bill. */
 export default function Page() {
@@ -77,7 +79,7 @@ export default function Page() {
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            Estimates only: minutes × ({usd(data.rates.phoneUsdPerMinute)} phone + {usd(data.rates.aiUsdPerMinute)} AI) a minute. Not a bill, and it shows no profit.
+            Estimates only: minutes × ({rate(data.rates.phoneUsdPerMinute)} phone + {rate(data.rates.aiUsdPerMinute)} AI) a minute. Not a bill, and it shows no profit.
           </p>
           <section>
             <h2 className="text-base font-semibold">Recent team alerts</h2>
