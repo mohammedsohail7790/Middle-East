@@ -120,12 +120,13 @@ function statusRowsToConnections(rows: LegacyStatusRow[]): Record<string, Integr
 
 async function fetchIntegrationConnections(): Promise<Record<string, IntegrationConnectionInfo>> {
   try {
-    const data = await api.get<CatalogResponse>("/integrations/catalog");
+    // Always ask the server: a cached copy made before the client connected something would show 0 connections right after they come back from the provider.
+    const data = await api.get<CatalogResponse>("/integrations/catalog", { fresh: true });
     return data?.connections ?? {};
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     if (!isCatalogMissingError(message)) throw e;
-    const statuses = await api.get<LegacyStatusRow[]>("/integrations/status");
+    const statuses = await api.get<LegacyStatusRow[]>("/integrations/status", { fresh: true });
     const rows = Array.isArray(statuses) ? statuses : [];
     return statusRowsToConnections(rows);
   }
