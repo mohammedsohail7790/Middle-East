@@ -13,7 +13,7 @@ export function auditRecipients(env: NodeJS.ProcessEnv = process.env): string[] 
     .filter((a) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a));
 }
 
-export async function sendAuditMail(opts: { eyebrow: string; title: string; subject: string; bodyHtml: string; replyTo?: string; ctaLabel?: string; ctaUrl?: string }): Promise<'sent' | 'not-configured'> {
+export async function sendAuditMail(opts: { eyebrow: string; title: string; subject: string; bodyHtml: string; replyTo?: string; ctaLabel?: string; ctaUrl?: string; attachments?: Array<{ filename: string; content: Buffer }> }): Promise<'sent' | 'not-configured'> {
   if (!process.env.RESEND_API_KEY) return 'not-configured';
   const resend = new Resend(process.env.RESEND_API_KEY);
   const html = renderBrandedEmail({ eyebrow: opts.eyebrow, title: opts.title, bodyHtml: opts.bodyHtml, ctaLabel: opts.ctaLabel, ctaUrl: opts.ctaUrl });
@@ -24,6 +24,7 @@ export async function sendAuditMail(opts: { eyebrow: string; title: string; subj
     subject: opts.subject,
     html,
     text: stripToPlainText(html),
+    ...(opts.attachments?.length ? { attachments: opts.attachments } : {}),
   }));
   return 'sent';
 }

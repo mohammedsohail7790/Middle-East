@@ -11,7 +11,7 @@ const store = vi.hoisted(() => ({
 vi.mock('../../../apps/gateway/src/services/audit/audit-store.js', () => store);
 vi.mock('../../../apps/gateway/src/services/db/pool.js', () => ({ pool: { query: vi.fn() } }));
 
-import { deliverAudit, handlePaid, startDraft } from '../../../apps/gateway/src/services/audit/audit-pipeline.js';
+import { deliverAudit, handlePaid, sendTestCopy, startDraft } from '../../../apps/gateway/src/services/audit/audit-pipeline.js';
 import { assembleReport } from '../../../apps/gateway/src/services/audit/audit-report.js';
 
 const raw = {
@@ -151,5 +151,33 @@ describe('handlePaid', () => {
   it('survives a database error', async () => {
     store.markPaid.mockRejectedValue(new Error('db'));
     expect(await handlePaid(p.id, deps)).toBe('no-record');
+  });
+});
+
+describe('sendTestCopy', () => {
+  it('emails the real PDF to the team only and never to the client', async () => {
+    expect(await sendTestCopy(row({ status: 'in_review' }), deps)).toBe('sent');
+    expect(deps.renderPdf).toHaveBeenCalledOnce();
+    expect(deps.clientMail).not.toHaveBeenCalled();
+    const mail = deps.teamMail.mock.calls[0][0];
+    expect(mail.subject).toContain('TEST COPY');
+    expect(mail.attachments[0].filename).toContain('TEST-');
+    expect(mail.attachments[0].content.toString()).toContain('%PDF');
+  });
+  it('changes nothing about the audit', async () => {
+    await sendTestCopy(row(), deps);
+    expect(store.markDelivered).not.toHaveBeenCalled();
+    expect(store.markPaid).not.toHaveBeenCalled();
+  });
+  it('says there is no report when the draft is missing', async () => {
+    expect(await sendTestCopy(row({ report: null }), deps)).toBe('no-report');
+    expect(deps.teamMail).not.toHaveBeenCalled();
+  });
+  it('reports a failure without throwing when the PDF or email breaks', async () => {
+    deps.renderPdf.mockRejectedValue(new Error('boom'));
+    expect(await sendTestCopy(row(), deps)).toBe('failed');
+    deps.renderPdf.mockResolvedValue(Buffer.from('%PDF'));
+    deps.teamMail.mockResolvedValue('not-configured');
+    expect(await sendTestCopy(row(), deps)).toBe('failed');
   });
 });

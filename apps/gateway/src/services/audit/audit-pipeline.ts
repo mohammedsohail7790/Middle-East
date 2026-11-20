@@ -177,6 +177,29 @@ export async function deliverAudit(row: AuditRow, inject?: Partial<Deps>): Promi
   }
 }
 
+/**
+ * A test copy for the team: builds the real PDF from the saved report and emails it, with the attachment, to the team addresses only. Never to the client.
+ * It proves the PDF and the email work without needing a payment, and it changes nothing about the audit.
+ */
+export async function sendTestCopy(row: AuditRow, inject?: Partial<Deps>): Promise<'sent' | 'failed' | 'no-report'> {
+  if (!row.report) return 'no-report';
+  try {
+    const deps: Deps = { ...(await defaultDeps()), ...inject };
+    const pdf = await deps.renderPdf(row.report);
+    const sent = await deps.teamMail({
+      eyebrow: 'Test copy',
+      title: `Test copy of the audit for ${row.company}`,
+      subject: `TEST COPY (not sent to the client) — Audit for ${row.company}`,
+      bodyHtml: renderCallout({ tone: 'warn', label: 'Test only', headline: 'This is the saved version of the audit PDF, sent to the team only. The client has not received it.', points: [`Status: ${row.status}`, 'Check the attachment opens and reads well.'] }) + renderSummaryStrip([{ label: 'Company', value: row.company }, { label: 'Language', value: row.report.lang === 'ar' ? 'Arabic' : 'English' }, { label: 'Reference', value: row.id }]),
+      attachments: [{ filename: `TEST-Opportunity-Audit-${row.id}.pdf`, content: pdf }],
+    });
+    return sent === 'sent' ? 'sent' : 'failed';
+  } catch (error) {
+    logger.error('[Audit] Test copy failed', undefined, error instanceof Error ? error : new Error(String(error)));
+    return 'failed';
+  }
+}
+
 /** Stripe says this audit is paid. Records it and, if the team approved the report, delivers it. If not approved yet, the team is told to approve it and delivery follows at that moment. */
 export async function handlePaid(id: string, inject?: Partial<Deps>): Promise<'delivered' | 'failed' | 'waiting' | 'no-record'> {
   let deps: Deps;
