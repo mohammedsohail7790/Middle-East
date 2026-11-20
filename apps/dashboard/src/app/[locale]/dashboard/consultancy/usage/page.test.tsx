@@ -28,5 +28,6 @@ describe("usage page", () => {
     render(<Page />);
     expect(await screen.findByText(/No alert emails sent/)).toBeTruthy();
     expect(screen.getByText(/Estimates only/)).toBeTruthy();
+    expect(screen.getByText(/\$0\.014 phone \+ \$0\.100 AI/)).toBeTruthy();
   });
 });
