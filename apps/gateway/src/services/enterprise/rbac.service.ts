@@ -21,6 +21,8 @@ const ROLE_RANK: Record<EnterpriseRole, number> = {
 export type Permission =
   | 'ops:read'
   | 'ops:write'
+  /** Everyday work: leads, calls, appointments, knowledge base, messages. Not settings. */
+  | 'work:write'
   | 'governance:read'
   | 'governance:write'
   | 'audit:read'
@@ -33,6 +35,7 @@ const ROLE_PERMISSIONS: Record<EnterpriseRole, Permission[]> = {
   owner: [
     'ops:read',
     'ops:write',
+    'work:write',
     'governance:read',
     'governance:write',
     'audit:read',
@@ -44,6 +47,7 @@ const ROLE_PERMISSIONS: Record<EnterpriseRole, Permission[]> = {
   admin: [
     'ops:read',
     'ops:write',
+    'work:write',
     'governance:read',
     'governance:write',
     'audit:read',
@@ -51,8 +55,8 @@ const ROLE_PERMISSIONS: Record<EnterpriseRole, Permission[]> = {
     'integrations:write',
     'ai_policy:write',
   ],
-  manager: ['ops:read', 'governance:read', 'audit:read', 'billing:read'],
-  operator: ['ops:read', 'governance:read', 'audit:read'],
+  manager: ['ops:read', 'work:write', 'governance:read', 'audit:read', 'billing:read'],
+  operator: ['ops:read', 'work:write', 'governance:read', 'audit:read'],
   analyst: ['ops:read', 'audit:read'],
   readonly: ['ops:read'],
 };
@@ -134,6 +138,8 @@ function mapTeamRoleToEnterpriseRole(role?: string): EnterpriseRole | null {
       return 'owner';
     case 'admin':
       return 'admin';
+    case 'manager':
+      return 'manager';
     case 'agent':
       return 'operator';
     case 'viewer':
