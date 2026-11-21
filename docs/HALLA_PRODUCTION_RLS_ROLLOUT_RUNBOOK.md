@@ -1,7 +1,11 @@
-# Halla production RLS rollout (072 + 073) — PREPARED, NOT EXECUTED
+# Halla production RLS rollout (072 + 073) — APPLIED (verified on production 21 Nov 2026)
+
+> **Status update, 21 Nov 2026.** Production is in the state that migrations 072 and 073 produce, so they were applied. Checked read-only on the production project (`xzhxnxxlbiiidipcgfrv`) with the §3 summary query. Result: `policies` 159, `open_true` 17, `open_non_service` 1, `helpers_present` 3, `definers_anon_exec` 3, `tenant_tables_no_rls` 0, `voice_tenants_public_policy` 0. This equals the "after 072 + 073" column below, except `policies`: 159 instead of 157, because tables added by later migrations brought their own policies. Nothing was changed in the database by this check.
+>
+> Not known: the date 072 and 073 were applied, and whether they were run as these exact files (the check measures the resulting state, not the migration history). The text below is the original plan, kept for the procedure, the checks and the rollback notes. The gateway still connects with a privileged role that bypasses RLS, so every gateway query must carry its own `tenant_id` filter (see `tests/unit/gateway/tenant-filter-guard.test.ts`).
 
 Project: "mohammedsohail7790's Project", ref `xzhxnxxlbiiidipcgfrv` (Free plan, **no provider backups**). Migration 074 (views) is **already applied** to production and is treated as DONE.
-Nothing in this document has been run against production. Every number below was either measured on production (read-only, 2026-10-07/08) or measured on the Halla staging project through the same migrations.
+Nothing in this document had been run against production when it was written (October 2026); see the status update above. Every number below was either measured on production (read-only, 2026-10-07/08) or measured on the Halla staging project through the same migrations.
 
 ## 0. Why, and what is at stake
 Production's RLS is broken in two ways, both measured live on 2026-10-08:
