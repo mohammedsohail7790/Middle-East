@@ -624,7 +624,10 @@
         "hvac": "تكييف",
         "plumbing": "سباكة",
         "electrical": "كهرباء",
-        "general": "عام"
+        "general": "عام",
+        "medical": "طبي",
+        "legal": "قانوني",
+        "real_estate": "عقارات"
       }
     },
     "whatsapp": {

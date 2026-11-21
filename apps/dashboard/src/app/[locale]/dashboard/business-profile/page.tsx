@@ -78,7 +78,7 @@ interface KnowledgeItem {
   created_at: string;
 }
 
-const CATEGORY_IDS = ["all", "hvac", "plumbing", "electrical", "general"] as const;
+const CATEGORY_IDS = ["all", "general", "medical", "legal", "real_estate", "hvac", "plumbing", "electrical"] as const;
 
 const IMPORT_TAB_IDS = ["paste", "url", "file"] as const;
 type ImportMode = (typeof IMPORT_TAB_IDS)[number];
@@ -106,6 +106,9 @@ const CATEGORY_STYLES: Record<string, string> = {
   plumbing: "bg-slate-200/60 text-slate-700",
   electrical: "bg-amber-50 text-amber-800",
   general: "bg-accent/10 text-accent-dark",
+  medical: "bg-emerald-50 text-emerald-800",
+  legal: "bg-indigo-50 text-indigo-800",
+  real_estate: "bg-sky-50 text-sky-800",
 };
 
 function pollKnowledgeRefresh(load: () => Promise<void>, attempts = 10, intervalMs = 3000) {
