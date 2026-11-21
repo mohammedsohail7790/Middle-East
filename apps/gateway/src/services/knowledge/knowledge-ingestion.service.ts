@@ -368,7 +368,8 @@ export class KnowledgeIngestionService {
 
     async reprocessFile(fileId: string, tenantId: string): Promise<boolean> {
         const file = await this.getFileStatus(fileId);
-        if (!file) return false;
+        // Only the owner's own file: without this check any signed-in user who knew a file id could reset another client's file.
+        if (!file || file.tenantId !== tenantId) return false;
 
         await voiceDb.query(
             `DELETE FROM public.knowledge_base WHERE tenant_id = $1 AND source = $2`,
