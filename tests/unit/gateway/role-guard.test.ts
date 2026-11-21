@@ -21,6 +21,11 @@ vi.mock('../../../apps/gateway/src/services/enterprise/rbac.service.js', async (
   };
 });
 
+const denied = vi.hoisted(() => [] as Array<Record<string, any>>);
+vi.mock('../../../apps/gateway/src/services/enterprise/enterprise-audit.service.js', () => ({
+  recordEnterpriseAuditEvent: async (args: Record<string, any>) => { denied.push(args); },
+}));
+
 import {
   roleGuardMiddleware,
   requiredPermissionForWrite,
@@ -51,6 +56,7 @@ beforeEach(() => {
   roleFor.fail = false;
   roleFor.calls = 0;
   resetRoleCacheForTests();
+  denied.length = 0;
   delete process.env.CALLIQ_ENTERPRISE_RBAC;
 });
 
@@ -170,5 +176,31 @@ describe('the permission table', () => {
     expect(hasPermission('operator', 'ops:write')).toBe(false);
     expect(hasPermission('manager', 'ops:write')).toBe(false);
     expect(hasPermission('admin', 'ops:write')).toBe(true);
+  });
+});
+
+describe('refused changes are recorded', () => {
+  it('writes a role_denied audit event with who, their role, and what they tried', async () => {
+    roleFor.value = 'readonly';
+    await run('PUT', '/ai-config');
+    expect(denied).toHaveLength(1);
+    expect(denied[0]).toMatchObject({
+      tenantId: 't1',
+      actorId: 'u1',
+      eventType: 'role_denied',
+      payload: { method: 'PUT', path: '/ai-config', role: 'readonly', needed: 'ops:write' },
+    });
+  });
+
+  it('writes nothing when the change is allowed', async () => {
+    roleFor.value = 'admin';
+    await run('PUT', '/ai-config');
+    expect(denied).toHaveLength(0);
+  });
+
+  it('writes nothing when the role could not be looked up (that is not a role decision)', async () => {
+    roleFor.fail = true;
+    await run('POST', '/leads');
+    expect(denied).toHaveLength(0);
   });
 });

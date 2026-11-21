@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { CallIqAuthenticatedRequest } from '../services/auth/tenant-context.js';
+import { recordEnterpriseAuditEvent } from '../services/enterprise/enterprise-audit.service.js';
 import {
   requirePermission,
   resolveUserRole,
@@ -138,6 +139,14 @@ export async function roleGuardMiddleware(req: Request, res: Response, next: Nex
     return;
   }
   if (!requirePermission(role, needed).ok) {
+    // A refused change is worth knowing about: who tried what, with which role. Never blocks the answer below.
+    void recordEnterpriseAuditEvent({
+      tenantId: tenant.id,
+      actorId: tenant.userId,
+      eventType: 'role_denied',
+      resourceType: 'role_guard',
+      payload: { method: (req.method || '').toUpperCase(), path: relativePath(req), role, needed },
+    });
     res.status(403).json({
       success: false,
       error: `Your role (${role}) cannot make this change. Ask a workspace admin.`,
