@@ -1,0 +1,128 @@
+{
+  "services/api-keys/apiKey.service.ts::tenant_api_keys::`update public.tenant_api_keys set last_used_at = now() where id = $1`": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/automation-engine/store.ts::tenant_automation_approvals::`update public.tenant_automation_approvals set status = 'expired' where status = 'pending'": {
+    "reason": "by design: a sweep across all clients, no single client involved"
+  },
+  "services/calendar/calendar.service.ts::calendar_connections::`update public.calendar_connections set access_token = $1, expires_at = $2, token_expires_": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/calendar/calendar.service.ts::calendar_connections::`update public.calendar_connections set last_sync_at = now(), updated_at = now() where id ": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/calendar/calendly.service.ts::calendar_connections::`update public.calendar_connections set access_token = $1, refresh_token = $2, expires_at ": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/calendar/outlook.calendar.service.ts::calendar_connections::`update public.calendar_connections set access_token = $1, expires_at = $2, updated_at = n": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/calendar/outlook.calendar.service.ts::calendar_connections::`update public.calendar_connections set last_sync_at = now(), updated_at = now() where id ": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/consent/consent-evidence.ts::lead_consent_outbox::`update public.lead_consent_outbox set attempts = attempts + 1, last_outcome = $2 where id": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/consent/consent-evidence.ts::lead_consent_outbox::`update public.lead_consent_outbox set delivered_at = now(), attempts = attempts + 1, last": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/data-retention/retention.service.ts::data_retention_policies::`insert into public.data_retention_policies (${fields.join(', ')}) values (${values.map((_": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/integrations/connection-store.service.ts::integration_sync_jobs::`update public.integration_sync_jobs set status = $2, result = $3::jsonb, error = $4, fini": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/knowledge/knowledge-ingestion.service.ts::knowledge_files::`select * from public.knowledge_files where id = $1`": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/knowledge/knowledge-ingestion.service.ts::knowledge_files::`update public.knowledge_files set status = 'completed', chunk_count = $1, updated_at = no": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/knowledge/knowledge-ingestion.service.ts::knowledge_files::`update public.knowledge_files set status = 'failed', error = $1, updated_at = now() where": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/knowledge/knowledge-ingestion.service.ts::knowledge_files::`update public.knowledge_files set status = $1, updated_at = now() where id = $2`": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/phone-provisioning/phoneProvisioning.service.ts::tenant_phone_numbers::`update public.tenant_phone_numbers set status = 'released' where id = $1`": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/scheduled-reports/reports.service.ts::scheduled_reports::`update public.scheduled_reports set last_error = $1 where id = $2`": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/scheduled-reports/reports.service.ts::scheduled_reports::`update public.scheduled_reports set last_sent_at = now(), last_error = null where id = $1": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/scheduler/campaign-control.ts::scheduled_jobs::`select status, count(*)::int as n, min(run_at) filter (where status = 'pending') as next_": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/scheduler/pg-job-store.ts::scheduled_jobs::`update public.scheduled_jobs set status = 'abandoned', last_error = 'worker stopped mid-s": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/scheduler/pg-job-store.ts::scheduled_jobs::`update public.scheduled_jobs set status = 'cancelled', updated_at = $2, completed_at = $2": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/scheduler/pg-job-store.ts::scheduled_jobs::`update public.scheduled_jobs set status = 'pending', run_at = $2, attempts = greatest(att": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/scheduler/pg-job-store.ts::scheduled_jobs::`update public.scheduled_jobs set status = $2, last_error = $3, locked_until = null, updat": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/scheduler/pg-job-store.ts::scheduled_jobs::`with due as ( select j.id from public.scheduled_jobs j left join public.campaigns c on c.": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/scheduler/ports.ts::campaigns::`update public.campaigns set status = 'running', updated_at = now() where id = $1 and stat": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/voice-cloning/voiceCloning.service.ts::voice_clones::`update public.voice_clones set elevenlabs_voice_id = $1, status = 'processing', samples_u": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/voice-cloning/voiceCloning.service.ts::voice_clones::`update public.voice_clones set samples_uploaded = samples_uploaded + $1, sample_duration_": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/voice-cloning/voiceCloning.service.ts::voice_clones::`update public.voice_clones set status = 'failed', updated_at = now() where id = $1`": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/voice/campaigns.controller.ts::campaigns::`update public.campaigns set description = $2, updated_at = now() where id = $1`": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/voice/campaigns.controller.ts::campaigns::`update public.campaigns set name = $2, updated_at = now() where id = $1`": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/voice/campaigns.controller.ts::campaigns::`update public.campaigns set total_targets = $2, updated_at = now() where id = $1`": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/voice/outbound.service.ts::campaigns::`update public.campaigns set completed_count = $2, success_count = $3, failed_count = $4, ": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/webhooks/webhooks.service.ts::custom_webhooks::`update public.custom_webhooks set last_error = $1, failure_count = failure_count + 1 wher": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/webhooks/webhooks.service.ts::custom_webhooks::`update public.custom_webhooks set last_triggered_at = now(), last_error = null, failure_c": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/webhooks/webhooks.service.ts::webhook_deliveries::`select delivered from public.webhook_deliveries where webhook_id = $1 and event_id = $2`": {
+    "reason": "to review: id-only statement in background or internal code, not yet checked one by one"
+  },
+  "services/whatsapp/whatsapp.store.ts::whatsapp_conversations::`update public.whatsapp_conversations set language = $2 where id = $1`": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/whatsapp/whatsapp.store.ts::whatsapp_conversations::`update public.whatsapp_conversations set last_inbound_at = greatest(coalesce(last_inbound": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/whatsapp/whatsapp.store.ts::whatsapp_conversations::`update public.whatsapp_conversations set last_message_at = now() where id = $1`": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/whatsapp/whatsapp.store.ts::whatsapp_conversations::`update public.whatsapp_conversations set needs_attention = $2 where id = $1`": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/whatsapp/whatsapp.store.ts::whatsapp_conversations::`update public.whatsapp_conversations set opted_out = $2 where id = $1`": {
+    "reason": "checked 21 Nov 2026: the row is loaded with tenant_id earlier in the same function"
+  },
+  "services/whatsapp/whatsapp.store.ts::whatsapp_messages::`update public.whatsapp_messages set status = $2, error = coalesce($3, error) where wa_mes": {
+    "reason": "by design: a delivery receipt matched by WhatsApp's own message id"
+  },
+  "services/whatsapp/whatsapp.store.ts::whatsapp_numbers::`select ${number_cols} from public.whatsapp_numbers where phone_number_id = $1`": {
+    "reason": "by design: finds which client owns an inbound WhatsApp number, so there is no client to filter by yet"
+  }
+}
