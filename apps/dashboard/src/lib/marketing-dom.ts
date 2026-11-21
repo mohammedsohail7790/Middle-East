@@ -1,4 +1,4 @@
-import { pagePath } from "@/lib/marketing-routes";
+import { localizedPath, pagePath, type MarketingLang } from "@/lib/marketing-routes";
 
 /**
  * Scripts inside HTML set with innerHTML never run, so the currency converter and the Ruby calculator in marketing-body.html were silently dead.
@@ -17,7 +17,7 @@ export function runInlineScripts(root: HTMLElement) {
  * Menu and button links are written as script calls (href="javascript:void(0)"), which search engines cannot follow and visitors cannot open in a new tab.
  * Give each one its real web address. A plain click is still handled by the page script, so there is no reload.
  */
-export function linkifyPages(root: HTMLElement) {
+export function linkifyPages(root: HTMLElement, lang: MarketingLang = "en") {
   root.querySelectorAll<HTMLAnchorElement>('a[onclick]').forEach((a) => {
     const call = a.getAttribute("onclick") ?? "";
     const m = /^\s*(go|goSol|switchSection)\('([a-z0-9-]+)'\)/.exec(call);
@@ -28,7 +28,8 @@ export function linkifyPages(root: HTMLElement) {
     else page = ({ consultancy: "consultancy", receptionist: "home", intelligence: "intelligence" } as Record<string, string>)[m[2]] ?? null;
     if (!page) return;
     const path = page === "signup" || page === "login" ? `/${page}` : pagePath(page);
-    if (path) a.setAttribute("href", path);
+    // In Arabic the links stay in Arabic (/ar/...). The sign-in and sign-up pages have no Arabic address.
+    if (path) a.setAttribute("href", page === "signup" || page === "login" ? path : localizedPath(path, lang));
   });
 }
 

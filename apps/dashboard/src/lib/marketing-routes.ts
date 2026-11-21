@@ -50,8 +50,28 @@ export function isMarketingHref(href: string): boolean {
   return false;
 }
 
+export type MarketingLang = "en" | "ar";
+
+/**
+ * Splits a leading /en or /ar language segment off a marketing address. "/ar/solutions" is Arabic, "/solutions" and "/en/solutions" are English.
+ * `explicit` says whether the address named a language, so a plain address can still follow the visitor's saved choice.
+ */
+export function splitLocale(pathname: string): { lang: MarketingLang; path: string; explicit: boolean } {
+  const clean = pathname.replace(/\/+$/, "") || "/";
+  const m = clean.match(/^\/(en|ar)(\/.*)?$/);
+  if (!m) return { lang: "en", path: clean, explicit: false };
+  return { lang: m[1] as MarketingLang, path: m[2] || "/", explicit: true };
+}
+
+/** The address of a page in a language: English is the plain address, Arabic puts /ar in front ("/" becomes "/ar"). */
+export function localizedPath(path: string, lang: MarketingLang): string {
+  const clean = path.replace(/\/+$/, "") || "/";
+  if (lang !== "ar") return clean;
+  return clean === "/" ? "/ar" : `/ar${clean}`;
+}
+
 export function resolveMarketingPage(pathname: string): string {
-  const path = pathname.replace(/\/$/, "") || "/";
+  const path = splitLocale(pathname).path;
   if (MARKETING_PATH_TO_PAGE[path]) return MARKETING_PATH_TO_PAGE[path];
 
   const industryMatch = path.match(/^\/industries\/([a-z0-9-]+)$/i);
@@ -79,9 +99,7 @@ export function pagePath(pageId: string): string | null {
  * A leading /en or /ar language segment is allowed. `pageIds` are the ids of the pages that exist in marketing-body.html.
  */
 export function isKnownMarketingPath(pathname: string, pageIds: ReadonlySet<string>): boolean {
-  let path = pathname.replace(/\/+$/, "") || "/";
-  const locale = path.match(/^\/(en|ar)(\/.*)?$/);
-  if (locale) path = locale[2] || "/";
+  const path = splitLocale(pathname).path;
   if (path === "/") return true;
   if (MARKETING_PATH_TO_PAGE[path]) return true;
   const dynamic = path.match(/^\/(industries|solutions)\/([a-z0-9-]+)$/i);
