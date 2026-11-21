@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { localizedPath, splitLocale } from "@/lib/marketing-routes";
+import { arabicPageText, arabicPagesIndexable, languageAlternates } from "@/lib/marketing-arabic";
 
 /** The hub (page id "consultancy") is the general Halla AI home page, so its search title, description and canonical address say what it is (the receptionist wording belongs to the receptionist pages). */
 const CONSULTANCY_TITLE = "Halla AI | End-to-End AI Systems for Businesses";
@@ -121,4 +123,37 @@ export function pageTitle(pageId: string): string | null {
   const t = marketingMetadata(pageId, "/").title;
   if (t && typeof t === "object" && "absolute" in t && typeof t.absolute === "string") return t.absolute;
   return null;
+}
+
+/** Pages that must stay out of search whatever the language: private links that open from an email. */
+const PRIVATE_IDS = new Set(["audit", "audit-pay", "audit-paid"]);
+
+/**
+ * Metadata for a marketing address including its language. `rawPath` is the address as visited ("/solutions", "/ar/solutions", "/en/solutions");
+ * `pageHtml` is that page's HTML from marketing-body.html, used to read the Arabic headline for Arabic pages.
+ */
+export function localizedMarketingMetadata(pageId: string, rawPath: string, pageHtml = "", indexable = arabicPagesIndexable()): Metadata {
+  const { lang, path } = splitLocale(rawPath);
+  const base = marketingMetadata(pageId, path);
+  if (PRIVATE_IDS.has(pageId)) return base;
+  const canonical = localizedPath(path, lang === "ar" ? "ar" : "en");
+  const languages = indexable ? languageAlternates(path) : undefined;
+  if (lang === "en") {
+    return { ...base, alternates: { ...base.alternates, canonical, ...(languages ? { languages } : {}) } };
+  }
+  const arabic = arabicPageText(pageHtml);
+  // An Arabic address for a page that has no Arabic text (some articles) shows the English page: keep it out of search and point at the English one.
+  if (!arabic.title && pageHtml) {
+    return { ...base, alternates: { ...base.alternates, canonical: localizedPath(path, "en") }, robots: { index: false, follow: true } };
+  }
+  const title = arabic.title ? `${arabic.title} | Halla AI` : undefined;
+  const description = arabic.description ?? undefined;
+  return {
+    ...base,
+    ...(title ? { title: { absolute: title } } : {}),
+    ...(description ? { description } : {}),
+    alternates: { ...base.alternates, canonical, ...(languages ? { languages } : {}) },
+    openGraph: { ...base.openGraph, locale: "ar_AR", url: canonical, ...(title ? { title } : {}), ...(description ? { description } : {}) },
+    robots: indexable ? base.robots : { index: false, follow: true },
+  };
 }

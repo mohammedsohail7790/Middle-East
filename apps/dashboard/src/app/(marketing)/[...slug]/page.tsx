@@ -3,14 +3,17 @@ import { notFound, redirect } from "next/navigation";
 import { readFileSync } from "fs";
 import { join } from "path";
 import MarketingSPA from "@/components/marketing/MarketingSPA";
-import { isKnownMarketingPath, plainAppPath, resolveMarketingPage } from "@/lib/marketing-routes";
-import { marketingMetadata } from "@/lib/marketing-metadata";
+import { isKnownMarketingPath, plainAppPath, resolveMarketingPage, splitLocale } from "@/lib/marketing-routes";
+import { localizedMarketingMetadata } from "@/lib/marketing-metadata";
 import { extractPageHtml } from "@/lib/marketing-ssr";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug?: string[] }> }): Promise<Metadata> {
   const { slug } = await params;
   const path = slug?.length ? `/${slug.join("/")}` : "/";
-  return marketingMetadata(resolveMarketingPage(path), path);
+  const pageId = resolveMarketingPage(path);
+  // An Arabic address takes its title and description from the page's own Arabic text.
+  const pageHtml = splitLocale(path).lang === "ar" ? extractPageHtml(getMarketingBodyHtml(), pageId) : "";
+  return localizedMarketingMetadata(pageId, path, pageHtml);
 }
 
 function getMarketingBodyHtml(): string {
@@ -41,5 +44,6 @@ export default async function MarketingCatchAllPage({
   const pageIds = new Set(Array.from(bodyHtml.matchAll(/<div id="page-([\w-]+)"/g), (m) => m[1]));
   if (!isKnownMarketingPath(path, pageIds)) notFound();
   const pageId = resolveMarketingPage(path);
-  return <MarketingSPA bodyHtml={bodyHtml} initialPage={pageId} ssrHtml={extractPageHtml(bodyHtml, pageId)} />;
+  const { lang, explicit } = splitLocale(path);
+  return <MarketingSPA bodyHtml={bodyHtml} initialPage={pageId} initialLang={explicit ? lang : undefined} ssrHtml={extractPageHtml(bodyHtml, pageId)} />;
 }

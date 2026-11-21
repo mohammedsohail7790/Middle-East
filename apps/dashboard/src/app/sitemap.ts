@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { readFileSync } from "fs";
 import { join } from "path";
-import { sitemapPaths } from "@/lib/marketing-sitemap";
+import { sitemapEntries } from "@/lib/marketing-sitemap";
+import { arabicPagesIndexable } from "@/lib/marketing-arabic";
 
 const SITE = process.env.NEXT_PUBLIC_MARKETING_URL || "https://www.hallaai.com";
 
@@ -14,5 +15,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     /* an empty list is better than a broken file */
   }
   const lastModified = new Date();
-  return sitemapPaths(body).map((path) => ({ url: `${SITE}${path === "/" ? "" : path}`, lastModified, changeFrequency: "monthly", priority: path === "/" ? 1 : 0.7 }));
+  const url = (path: string) => `${SITE}${path === "/" ? "" : path}`;
+  return sitemapEntries(body, arabicPagesIndexable()).map(({ path, languages }) => ({
+    url: url(path),
+    lastModified,
+    changeFrequency: "monthly",
+    priority: path === "/" ? 1 : 0.7,
+    ...(languages ? { alternates: { languages: { en: url(languages.en), ar: url(languages.ar) } } } : {}),
+  }));
 }

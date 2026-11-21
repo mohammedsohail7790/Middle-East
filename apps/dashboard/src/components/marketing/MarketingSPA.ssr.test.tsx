@@ -24,4 +24,12 @@ describe("MarketingSPA on the server", () => {
     expect(after).toContain("<h1");
     expect(visibleWords(after)).toBeGreaterThan(300);
   });
+
+  it("sends an Arabic address right to left, and an English one without a language set", () => {
+    const ar = renderToString(<MarketingSPA bodyHtml={body} initialPage="pricing" initialLang="ar" ssrHtml={extractPageHtml(body, "pricing")} />);
+    expect(ar).toMatch(/<div id="marketing-spa-root"[^>]*lang="ar"/);
+    expect(ar).toMatch(/<div id="marketing-spa-root"[^>]*dir="rtl"/);
+    const en = renderToString(<MarketingSPA bodyHtml={body} initialPage="pricing" ssrHtml={extractPageHtml(body, "pricing")} />);
+    expect(en).not.toMatch(/<div id="marketing-spa-root"[^>]*dir="rtl"/);
+  });
 });
