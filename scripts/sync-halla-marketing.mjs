@@ -3,6 +3,7 @@
  * Running this script WITH the root files present overwrites that file from them and erases any change made
  * directly in marketing-body.html (including the page migrations and fixes made after the root files were last synced).
  * Do not run it with older root files. Agree one source of truth before using it.
+ * It is now guarded: with root files present it overwrites NOTHING unless run with --force (or HALLA_SYNC_OVERWRITE=1).
  */
 /**
  * Publish root Halla marketing files into Marketing site + Next.js dashboard.
@@ -28,6 +29,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { overwriteAllowed, OVERWRITE_WARNING } from "./lib/marketing-sync-guard.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.join(__dirname, "..");
@@ -176,6 +178,12 @@ function syncOnce() {
     process.exit(1);
   }
 
+  // The published files are edited directly now: only overwrite them from the root files when asked to.
+  if (!overwriteAllowed()) {
+    console.warn(OVERWRITE_WARNING);
+    return;
+  }
+
   const css = prepareCss(fs.readFileSync(ROOT_FILES.css, "utf8"));
   const js = prepareJs(fs.readFileSync(ROOT_FILES.js, "utf8"));
   const neuralJs = fs.readFileSync(ROOT_FILES.neuralJs, "utf8");
@@ -202,6 +210,11 @@ function syncOnce() {
 }
 
 const watchMode = process.argv.includes("--watch");
+if (watchMode && !overwriteAllowed()) {
+  console.warn(OVERWRITE_WARNING);
+  console.warn("[sync-halla-marketing] Watch mode would overwrite on every save, so it needs --force too.");
+  process.exit(1);
+}
 if (watchMode) {
   let timer;
   const run = () => {
