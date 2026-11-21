@@ -639,7 +639,10 @@
         "hvac": "HVAC",
         "plumbing": "Plumbing",
         "electrical": "Electrical",
-        "general": "General"
+        "general": "General",
+        "medical": "Medical",
+        "legal": "Legal",
+        "real_estate": "Real estate"
       }
     },
     "whatsapp": {
