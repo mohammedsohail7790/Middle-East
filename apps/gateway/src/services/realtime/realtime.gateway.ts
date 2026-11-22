@@ -37,6 +37,7 @@ import { startVoiceConfigInvalidateListener } from '../voice/voice-config-invali
 import { buildToolsList } from './realtime-tool-schemas.js';
 import { buildFullPrompt } from './realtime-prompt-builder.js';
 import { finalizeRuntimeSession } from './realtime.post-call.js';
+import { getClientIp } from '../../server/client-ip.js';
 
 interface SessionPrefetchBundle {
   instructions: string;
@@ -326,11 +327,7 @@ export class RealtimeGateway {
     this.sessionsBySocket.set(socket, state);
 
     // Track connection in rate limiter
-    const clientIp = (req => {
-      const forwarded = req.headers['x-forwarded-for'];
-      if (typeof forwarded === 'string') return forwarded.split(',')[0].trim();
-      return req.socket.remoteAddress || 'unknown';
-    })(request);
+    const clientIp = getClientIp(request);
     wsRateLimiter.registerConnection(socket, clientIp, tenantId);
 
     // Wire activity tracking
