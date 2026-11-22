@@ -890,6 +890,33 @@
         "rejected": "You said no",
         "pending": "Not started yet"
       }
+    },
+    "auditHistory": {
+      "title": "Audit history",
+      "description": "Every recorded change in your workspace: who did it, what, and when. Export it for a security review.",
+      "back": "Back to Compliance",
+      "from": "From",
+      "to": "To",
+      "event": "Event",
+      "allEvents": "All events",
+      "person": "Person",
+      "personPlaceholder": "Email or user id",
+      "export": "Export CSV",
+      "exporting": "Exporting…",
+      "exportFailed": "Could not export the audit history.",
+      "exported": "Audit history downloaded.",
+      "time": "Time",
+      "record": "Record",
+      "unknownPerson": "System or unknown",
+      "empty": "No events match these filters.",
+      "showing": "Showing {from}–{to} of {total}",
+      "viewAll": "View full history",
+      "loadFailed": "Could not load the audit history.",
+      "noPermission": "Only owners and admins can read the audit history.",
+      "reset": "Clear filters",
+      "apply": "Apply",
+      "previous": "Previous",
+      "next": "Next"
     }
   },
   "gates": {
