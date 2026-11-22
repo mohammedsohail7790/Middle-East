@@ -69,7 +69,7 @@ describe("marketing fonts", () => {
     expect(css).toMatch(/\[lang="ar"\]\s+\.font-display\s*{[^}]*--font-cairo/);
   });
   it("body sans stack leads with Plus Jakarta Sans", () => {
-    const body = css.slice(css.indexOf("next/font attaches"));
+    const body = css.slice(css.indexOf("The fonts are bundled packages"));
     expect(body).toMatch(/--font-sans:\s*var\(--font-jakarta/);
   });
 });
@@ -135,5 +135,31 @@ describe("fonts are self-hosted (CI must not depend on Google Fonts)", () => {
     expect(css).toMatch(/--font-cormorant:\s*"Cormorant Garamond Variable"/);
     expect(css).toMatch(/--font-jakarta:\s*"Plus Jakarta Sans Variable"/);
     expect(css).toMatch(/--font-cairo:\s*"Cairo Variable"/);
+  });
+});
+
+describe("no font is fetched from Google at build time", () => {
+  const { readdirSync, statSync } = require("node:fs") as typeof import("node:fs");
+  const walk = (dir: string): string[] =>
+    readdirSync(dir).flatMap((f) => {
+      const p = join(dir, f);
+      if (statSync(p).isDirectory()) return walk(p);
+      return /\.(tsx?|jsx?)$/.test(p) && !/\.test\.tsx?$/.test(p) ? [p] : [];
+    });
+  const layout = readFileSync(join(__dirname, "../app/[locale]/layout.tsx"), "utf8");
+
+  it("no source file imports next/font/google (it fails the Docker and CI build when Google cannot be reached)", () => {
+    const offenders = walk(join(__dirname, "..")).filter((f) => /next\/font\/google/.test(readFileSync(f, "utf8")));
+    expect(offenders).toEqual([]);
+  });
+
+  it("the layout imports Inter and IBM Plex Sans Arabic from bundled packages", () => {
+    expect(layout).toContain("@fontsource-variable/inter");
+    for (const w of ["400", "500", "600", "700"]) expect(layout).toContain(`@fontsource/ibm-plex-sans-arabic/${w}.css`);
+  });
+
+  it("globals defines --font-inter and --font-arabic from those families", () => {
+    expect(css).toMatch(/--font-inter:\s*"Inter Variable"/);
+    expect(css).toMatch(/--font-arabic:\s*"IBM Plex Sans Arabic"/);
   });
 });
