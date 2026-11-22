@@ -10,6 +10,9 @@ import {
 } from './compliance.service.js';
 import { resolveUserRole, requirePermission } from '../enterprise/rbac.service.js';
 import { voiceDb } from '../voice/tenant-scope.js';
+import { logger } from '../logger.js';
+import { recordEnterpriseAuditEvent } from '../enterprise/enterprise-audit.service.js';
+import { parseAuditFilters, buildAuditQuery, auditRowsToCsv, AUDIT_EXPORT_MAX } from './audit-history-query.js';
 
 export function createComplianceRouter(): express.Router {
   const router = express.Router();
@@ -30,19 +33,82 @@ export function createComplianceRouter(): express.Router {
       const tenantId = getTenantId(req);
       const role = await resolveUserRole(tenantId, r.tenant?.userId);
       if (!requirePermission(role, 'audit:read').ok) {
-        return res.json({ success: true, data: [] });
+        return res.json({ success: true, data: [], total: 0 });
       }
-      const limit = Math.min(100, parseInt(String(req.query.limit || '50'), 10) || 50);
+      const filters = parseAuditFilters(req.query);
+      const q = buildAuditQuery(tenantId, filters);
+      try {
+        const rows = await voiceDb.query(
+          `SELECT id, event_type, actor_id, actor_email, resource_type, resource_id, ip_address, created_at
+           FROM public.enterprise_audit_events
+           WHERE tenant_id = $1${q.and} ORDER BY created_at DESC, id DESC LIMIT $${q.params.length + 1} OFFSET $${q.params.length + 2}`,
+          [...q.params, filters.limit, filters.offset]
+        );
+        const count = await voiceDb.query(
+          `SELECT count(*)::int AS n FROM public.enterprise_audit_events WHERE tenant_id = $1${q.and}`,
+          q.params
+        );
+        res.json({ success: true, data: rows.rows, total: count.rows[0]?.n ?? 0 });
+      } catch (err) {
+        // A failed read is an error, not an empty history: a reviewer must not read "nothing happened".
+        logger.warn('AUDIT_HISTORY_READ_FAILED', { tenantId, error: String(err) });
+        res.status(500).json({ success: false, error: 'Could not load the audit history' });
+      }
+    })
+  );
+
+  router.get(
+    '/audit-event-types',
+    asyncHandler(async (req, res) => {
+      const r = req as CallIqAuthenticatedRequest;
+      const tenantId = getTenantId(req);
+      const role = await resolveUserRole(tenantId, r.tenant?.userId);
+      if (!requirePermission(role, 'audit:read').ok) return res.json({ success: true, data: [] });
       try {
         const result = await voiceDb.query(
-          `SELECT id, event_type, actor_id, resource_type, resource_id, payload, created_at
-           FROM public.enterprise_audit_events
-           WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2`,
-          [tenantId, limit]
+          `SELECT DISTINCT event_type FROM public.enterprise_audit_events WHERE tenant_id = $1 ORDER BY event_type`,
+          [tenantId]
         );
-        res.json({ success: true, data: result.rows });
-      } catch {
-        res.json({ success: true, data: [] });
+        res.json({ success: true, data: result.rows.map((x: { event_type: string }) => x.event_type) });
+      } catch (err) {
+        logger.warn('AUDIT_HISTORY_READ_FAILED', { tenantId, error: String(err) });
+        res.status(500).json({ success: false, error: 'Could not load the audit history' });
+      }
+    })
+  );
+
+  router.get(
+    '/audit-events/export',
+    asyncHandler(async (req, res) => {
+      const r = req as CallIqAuthenticatedRequest;
+      const tenantId = getTenantId(req);
+      const role = await resolveUserRole(tenantId, r.tenant?.userId);
+      if (!requirePermission(role, 'audit:read').ok) {
+        return res.status(403).json({ success: false, error: 'Forbidden' });
+      }
+      const q = buildAuditQuery(tenantId, parseAuditFilters(req.query));
+      try {
+        const rows = await voiceDb.query(
+          `SELECT created_at, event_type, actor_email, actor_id, resource_type, resource_id, ip_address
+           FROM public.enterprise_audit_events
+           WHERE tenant_id = $1${q.and} ORDER BY created_at DESC, id DESC LIMIT $${q.params.length + 1}`,
+          [...q.params, AUDIT_EXPORT_MAX]
+        );
+        // Downloading the log is itself a recorded event.
+        await recordEnterpriseAuditEvent({
+          tenantId,
+          eventType: 'audit.exported',
+          actorId: r.tenant?.userId,
+          resourceType: 'audit_events',
+          payload: { rows: rows.rows.length },
+          ipAddress: req.ip,
+        });
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="audit-log-${new Date().toISOString().slice(0, 10)}.csv"`);
+        res.send(auditRowsToCsv(rows.rows));
+      } catch (err) {
+        logger.warn('AUDIT_HISTORY_READ_FAILED', { tenantId, error: String(err) });
+        res.status(500).json({ success: false, error: 'Could not export the audit history' });
       }
     })
   );
