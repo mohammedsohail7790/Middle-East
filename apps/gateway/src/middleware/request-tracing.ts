@@ -28,7 +28,7 @@ export function requestTracingMiddleware(
 
   runWithCorrelation({ requestId }, () => {
     const spanId = startSpan('http.request', { method: req.method, path: req.originalUrl });
-    patchCorrelation({ requestId });
+    patchCorrelation({ requestId, ip: req.ip });
     const start = Date.now();
     res.on('finish', () => {
       endSpan(spanId, res.statusCode >= 500 ? 'error' : 'ok');
