@@ -60,6 +60,7 @@ import { registerHealthRoutes } from './routes/register-health-routes.js';
 import { registerMetricsRoutes } from './routes/register-metrics-routes.js';
 import { registerDebugRoutes } from './routes/register-debug-routes.js';
 import { attachWebSocketUpgradeHandler } from './server/ws-upgrade-handler.js';
+import { resolveTrustProxyHops } from './server/trust-proxy.js';
 
 validateEnvironment();
 bootstrapOtel();
@@ -114,7 +115,7 @@ if ((process.env.ENABLE_KNOWLEDGE_INGESTION || 'true').toLowerCase() === 'true')
 }
 
 const app = express();
-app.set('trust proxy', 1);
+app.set('trust proxy', resolveTrustProxyHops(process.env.TRUST_PROXY_HOPS));
 app.use(httpsRedirectMiddleware);
 app.use(securityHeadersMiddleware);
 const server = createServer(app as any);

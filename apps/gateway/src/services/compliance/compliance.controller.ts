@@ -182,7 +182,7 @@ export function createComplianceRouter(): express.Router {
         signedByEmail,
         signedByTitle,
         tenantName,
-        ipAddress: String(req.headers['x-forwarded-for'] || req.ip || ''),
+        ipAddress: String(req.ip || ''),
       });
       res.json({ success: true, data });
     })
