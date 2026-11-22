@@ -5,14 +5,7 @@ import type { RealtimeGateway } from '../services/realtime/realtime.gateway.js';
 import { aiConfigWebSocketManager } from '../services/ai-config/ai-config.websocket.js';
 import { isAllowedVoiceWebSocketSource } from '../services/voice/security.js';
 import { wsRateLimiter } from '../services/ws-rate-limiter.js';
-
-function getClientIp(request: IncomingMessage): string {
-    const forwarded = request.headers['x-forwarded-for'];
-    if (typeof forwarded === 'string') {
-        return forwarded.split(',')[0].trim();
-    }
-    return request.socket.remoteAddress || 'unknown';
-}
+import { getClientIp } from './client-ip.js';
 
 function wsRateLimitCheck(request: IncomingMessage, socket: Socket, path: string, tenantId?: string): boolean {
     const ip = getClientIp(request);
@@ -83,9 +76,7 @@ export function attachWebSocketUpgradeHandler(
                 const tenantId = realtimeGateway.extractTenantId(request);
                 if (!wsRateLimitCheck(request, socket as Socket, '/ws/realtime/', tenantId)) return;
                 const origin = request.headers.origin as string | undefined;
-                const ip =
-                    (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim()
-                    || request.socket.remoteAddress;
+                const ip = getClientIp(request);
                 if (!isAllowedVoiceWebSocketSource(origin, ip, request)) {
                     logger.warn('WS_UPGRADE_ORIGIN_BLOCKED', { origin, ip, path: request.url });
                     try {
