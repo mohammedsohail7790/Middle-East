@@ -18,6 +18,7 @@ import {
 } from "@/lib/dashboard-cache";
 import { fetchDashboardBootstrap, readBootstrapSnapshot } from "@/lib/dashboard-bootstrap";
 import { funnelFromMetrics } from "@/lib/gateway-adapters";
+import { translateFunnelName } from "@/lib/funnel-labels";
 import { useDashboardLive } from "@/components/dashboard/DashboardRealtimeProvider";
 import { DASHBOARD_POLL_MS, useDashboardSync } from "@/lib/dashboard-sync";
 import { timeAgo, formatDuration, formatChartDay, clampPercent } from "@/lib/utils";
@@ -87,6 +88,7 @@ function initialHomeState(tenantId: string | null) {
 export default function DashboardHome() {
   const t = useTranslations("pages.home");
   const tCommon = useTranslations("common");
+  const tAnalytics = useTranslations("pages.analytics");
   const locale = useLocale();
   const tenantId = getTenantId();
   const initial = initialHomeState(tenantId);
@@ -256,7 +258,7 @@ export default function DashboardHome() {
     totalCalls: metrics?.totalCalls,
     totalLeads: metrics?.leads,
     conversionRate: metrics?.conversionRate,
-  });
+  }).map((step) => ({ ...step, name: translateFunnelName(step.name, tAnalytics) }));
 
   const greeting = greetingForHour(new Date().getHours(), t);
   const todayLabel = new Date().toLocaleDateString(locale === "ar" ? "ar-AE" : "en-US", {

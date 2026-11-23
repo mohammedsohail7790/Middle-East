@@ -106,6 +106,30 @@
   },
   "pages": {
     "settings": {
+      "teamTitle": "الفريق",
+      "teamDesc": "تُرسل الدعوات بالبريد الإلكتروني. عند قبولها يُربط المدعو بمساحة العمل هذه تلقائياً.",
+      "teamEmptyTitle": "لا يوجد أعضاء في الفريق بعد",
+      "teamEmptyDesc": "ادعُ زملاءك لمشاركة مساحة العمل هذه.",
+      "teamFullName": "الاسم الكامل",
+      "teamInviteEmail": "البريد الإلكتروني للدعوة",
+      "teamRoleAdmin": "مشرف",
+      "teamRoleAgent": "وكيل",
+      "teamRoleViewer": "مشاهد",
+      "teamSendInvite": "إرسال الدعوة",
+      "teamSending": "جارٍ الإرسال…",
+      "teamLoadFailed": "تعذر تحميل الفريق",
+      "teamNeedFields": "البريد الإلكتروني والاسم مطلوبان لإرسال الدعوة.",
+      "teamInviteSent": "تم إرسال الدعوة — سيصلهم بريد الدعوة من Halla AI.",
+      "teamInviteFailed": "تعذر إرسال الدعوة",
+      "accountEmailTitle": "بريد الحساب",
+      "accountEmailDesc": "نرسل إليك رابطاً لتأكيد العنوان الجديد. بعد التأكيد يتحدّث مساحة عملك عند تسجيل الدخول في المرة القادمة.",
+      "accountCurrent": "الحالي:",
+      "accountNewEmail": "عنوان البريد الجديد",
+      "accountChangeEmail": "تغيير البريد",
+      "accountEmailConfirmed": "تم تأكيد عنوان بريدك الجديد.",
+      "accountEmailLinkSent": "أرسلنا رابط تأكيد إلى {email}. يتحدّث بريد تسجيل الدخول بعد التأكيد (قالب «تغيير البريد» من Halla AI).",
+      "accountEmailInvalid": "أدخل عنوان بريد جديداً صالحاً.",
+      "accountEmailFailed": "تعذر بدء تغيير البريد",
       "title": "الفريق والحساب",
       "description": "إدارة أعضاء الفريق والصلاحيات. معلومات الشركة في ملف الأعمال؛ إعدادات المكالمات في الوكلاء الصوتيين.",
       "businessProfileLink": "ملف الأعمال",
@@ -185,6 +209,9 @@
       }
     },
     "analytics": {
+      "funnelQualified": "المؤهّلون",
+      "funnelAppointments": "المواعيد",
+      "funnelConfirmed": "المؤكّدة",
       "totalCalls": "إجمالي المكالمات",
       "totalLeads": "إجمالي العملاء المحتملين",
       "conversionRate": "معدل التحويل",
@@ -276,6 +303,10 @@
       "noAppsDesc": "لا توجد تطبيقات مباشرة مُعدّة بعد. اطلب من المسؤول تفعيل أحد التطبيقات أعلاه."
     },
     "leads": {
+      "pipelineStep": "مسار المبيعات",
+      "noLeadsDesc": "ستظهر هنا العملاء المحتملون الجدد من المكالمات وواتساب والإدخال اليدوي.",
+      "searchAria": "البحث في العملاء المحتملين",
+      "stageAria": "مرحلة المسار",
       "description": "خط الأنابيب من المكالمات وواتساب والإدخال اليدوي",
       "newLead": "عميل محتمل جديد",
       "createLead": "إنشاء عميل محتمل",
@@ -1078,6 +1109,16 @@
     }
   },
   "billing": {
+    "subStatus": {
+      "active": "نشط",
+      "trialing": "فترة تجريبية",
+      "canceled": "ملغى",
+      "cancelled": "ملغى",
+      "past_due": "متأخر السداد",
+      "incomplete": "غير مكتمل",
+      "unpaid": "غير مدفوع",
+      "paused": "متوقف مؤقتاً"
+    },
     "trialUsage": "استخدام الفترة التجريبية",
     "trialDesc": "ميزات احترافية · {days} يوم{daysSuffix} متبقٍ · {minutes} دقيقة متبقية (60 إجمالاً، تراكمي)",
     "trialBannerTitle": "فترة تجريبية مجانية — ميزات احترافية",

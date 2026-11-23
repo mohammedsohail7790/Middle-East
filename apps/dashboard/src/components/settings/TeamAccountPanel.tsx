@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Mail, UserPlus, Users } from "lucide-react";
 import { api, asArray } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
@@ -20,7 +21,11 @@ type TeamMemberRow = {
   status: string;
 };
 
+const ROLE_KEYS = { admin: "teamRoleAdmin", agent: "teamRoleAgent", viewer: "teamRoleViewer" } as const;
+
 export function TeamAccountPanel() {
+  const t = useTranslations("pages.settings");
+  const roleLabel = (role: string) => (role in ROLE_KEYS ? t(ROLE_KEYS[role as keyof typeof ROLE_KEYS]) : role);
   const [members, setMembers] = useState<TeamMemberRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -41,12 +46,12 @@ export function TeamAccountPanel() {
       setError("");
     } catch (e) {
       if (!opts?.silent) {
-        setError(e instanceof Error ? e.message : "Could not load team");
+        setError(e instanceof Error ? e.message : t("teamLoadFailed"));
       }
     } finally {
       if (!opts?.silent) setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadTeam();
@@ -57,13 +62,13 @@ export function TeamAccountPanel() {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (params.get("email") === "confirmed") {
-        setMessage("Your new email address is confirmed.");
+        setMessage(t("accountEmailConfirmed"));
         params.delete("email");
         const url = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
         window.history.replaceState({}, "", url);
       }
     }
-  }, [loadTeam]);
+  }, [loadTeam, t]);
 
   useDashboardSync(["team"], () => {
     void loadTeam({ silent: true });
@@ -71,7 +76,7 @@ export function TeamAccountPanel() {
 
   const sendInvite = async () => {
     if (!inviteEmail.trim() || !inviteName.trim()) {
-      setError("Email and name are required to invite.");
+      setError(t("teamNeedFields"));
       return;
     }
     setInviting(true);
@@ -83,14 +88,14 @@ export function TeamAccountPanel() {
         { email: inviteEmail.trim(), name: inviteName.trim(), role: inviteRole }
       );
       setMessage(
-        res.message || "Invitation sent — they will receive the Halla AI invite email."
+        res.message || t("teamInviteSent")
       );
       setInviteEmail("");
       setInviteName("");
       await loadTeam({ silent: true });
       syncDashboardAction("team");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Invite failed");
+      setError(e instanceof Error ? e.message : t("teamInviteFailed"));
     } finally {
       setInviting(false);
     }
@@ -99,7 +104,7 @@ export function TeamAccountPanel() {
   const requestEmailChange = async () => {
     const next = newEmail.trim();
     if (!next || !next.includes("@")) {
-      setError("Enter a valid new email address.");
+      setError(t("accountEmailInvalid"));
       return;
     }
     setEmailBusy(true);
@@ -112,12 +117,10 @@ export function TeamAccountPanel() {
         { emailRedirectTo: redirectTo }
       );
       if (updateErr) throw updateErr;
-      setMessage(
-        `We sent a confirmation link to ${next}. Your login email updates after you confirm (Halla AI "Change email" template).`
-      );
+      setMessage(t("accountEmailLinkSent", { email: next }));
       setNewEmail("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not start email change");
+      setError(e instanceof Error ? e.message : t("accountEmailFailed"));
     } finally {
       setEmailBusy(false);
     }
@@ -140,8 +143,8 @@ export function TeamAccountPanel() {
         <SectionHeader
           icon={Users}
           iconVariant="violet"
-          title="Team"
-          description="Invites are sent by email. When they accept, they are linked to this workspace automatically."
+          title={t("teamTitle")}
+          description={t("teamDesc")}
         />
 
         {loading ? (
@@ -151,7 +154,7 @@ export function TeamAccountPanel() {
             ))}
           </div>
         ) : members.length === 0 ? (
-          <EmptyState icon={Users} title="No team members yet" description="Invite colleagues to share this workspace." />
+          <EmptyState icon={Users} title={t("teamEmptyTitle")} description={t("teamEmptyDesc")} />
         ) : (
           <ul className="dashboard-panel overflow-hidden divide-y divide-border">
             {members.map((m) => (
@@ -161,7 +164,7 @@ export function TeamAccountPanel() {
                   <p className="text-muted-foreground truncate text-xs">{m.email}</p>
                 </div>
                 <span className="text-xs uppercase tracking-wide text-muted-foreground shrink-0 badge-neutral px-2 py-0.5 rounded-full">
-                  {m.role}
+                  {roleLabel(m.role)}
                 </span>
               </li>
             ))}
@@ -172,14 +175,14 @@ export function TeamAccountPanel() {
           <input
             type="text"
             className="input"
-            placeholder="Full name"
+            placeholder={t("teamFullName")}
             value={inviteName}
             onChange={(e) => setInviteName(e.target.value)}
           />
           <input
             type="email"
             className="input"
-            placeholder="Email to invite"
+            placeholder={t("teamInviteEmail")}
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
           />
@@ -188,9 +191,9 @@ export function TeamAccountPanel() {
             value={inviteRole}
             onChange={(e) => setInviteRole(e.target.value)}
           >
-            <option value="admin">Admin</option>
-            <option value="agent">Agent</option>
-            <option value="viewer">Viewer</option>
+            <option value="admin">{t("teamRoleAdmin")}</option>
+            <option value="agent">{t("teamRoleAgent")}</option>
+            <option value="viewer">{t("teamRoleViewer")}</option>
           </select>
           <button
             type="button"
@@ -199,7 +202,7 @@ export function TeamAccountPanel() {
             onClick={() => void sendInvite()}
           >
             <UserPlus className="w-4 h-4" strokeWidth={ICON_STROKE} />
-            {inviting ? "Sending…" : "Send invite"}
+            {inviting ? t("teamSending") : t("teamSendInvite")}
           </button>
         </div>
       </section>
@@ -208,17 +211,17 @@ export function TeamAccountPanel() {
         <SectionHeader
           icon={Mail}
           iconVariant="muted"
-          title="Account email"
-          description="We email you a link to confirm a new address. Once you confirm, your workspace is updated the next time you sign in."
+          title={t("accountEmailTitle")}
+          description={t("accountEmailDesc")}
         />
         <p className="text-sm">
-          Current: <strong>{accountEmail || "—"}</strong>
+          {t("accountCurrent")} <strong>{accountEmail || "—"}</strong>
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="email"
             className="input w-full sm:flex-1 min-w-0"
-            placeholder="New email address"
+            placeholder={t("accountNewEmail")}
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             autoComplete="email"
@@ -229,7 +232,7 @@ export function TeamAccountPanel() {
             disabled={emailBusy}
             onClick={() => void requestEmailChange()}
           >
-            {emailBusy ? "Sending…" : "Change email"}
+            {emailBusy ? t("teamSending") : t("accountChangeEmail")}
           </button>
         </div>
       </section>
