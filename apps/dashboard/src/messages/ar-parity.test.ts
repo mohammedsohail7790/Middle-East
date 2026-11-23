@@ -36,3 +36,19 @@ describe("Arabic messages match English", () => {
     expect(bad).toEqual([]);
   });
 });
+
+describe("Arabic number-of-things messages avoid a counted noun", () => {
+  // "3 رقماً" is wrong Arabic (the singular form is for 11 and up); phrase it count-last instead.
+  const keys = [
+    "pages.phoneNumbers.planNote",
+    "pages.phoneNumbers.planNoteMore",
+    "pages.phoneNumbers.numbersAvailable",
+  ];
+  for (const k of keys) {
+    it(`${k} does not put a singular noun after the count`, () => {
+      const msg = A[k];
+      expect(msg, k).toBeTruthy();
+      expect(msg).not.toMatch(/رقماً|\}\s*رقم(?=\s|$)/);
+    });
+  }
+});
