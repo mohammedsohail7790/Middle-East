@@ -76,7 +76,15 @@
     "noSession": "لا توجد جلسة نشطة — سجّل الدخول مرة أخرى.",
     "upgradeRequired": "يتطلب ترقية",
     "bootTimeout": "جارٍ تشغيل مساحة العمل. بعد فترة من عدم النشاط قد يستغرق ذلك حتى دقيقة.",
-    "backToSignIn": "العودة إلى تسجيل الدخول"
+    "backToSignIn": "العودة إلى تسجيل الدخول",
+    "mobileNavPrimary": "التنقل الرئيسي",
+    "mobileNavHome": "الرئيسية",
+    "mobileNavCalls": "المكالمات",
+    "mobileNavLeads": "العملاء",
+    "mobileNavAgent": "الوكيل",
+    "mobileNavMore": "المزيد",
+    "searchPlaceholder": "ابحث في المكالمات والعملاء والنصوص…",
+    "searchLabel": "بحث شامل"
   },
   "common": {
     "save": "حفظ",
