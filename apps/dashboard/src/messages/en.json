@@ -106,6 +106,30 @@
   },
   "pages": {
     "settings": {
+      "teamTitle": "Team",
+      "teamDesc": "Invites are sent by email. When they accept, they are linked to this workspace automatically.",
+      "teamEmptyTitle": "No team members yet",
+      "teamEmptyDesc": "Invite colleagues to share this workspace.",
+      "teamFullName": "Full name",
+      "teamInviteEmail": "Email to invite",
+      "teamRoleAdmin": "Admin",
+      "teamRoleAgent": "Agent",
+      "teamRoleViewer": "Viewer",
+      "teamSendInvite": "Send invite",
+      "teamSending": "Sending…",
+      "teamLoadFailed": "Could not load team",
+      "teamNeedFields": "Email and name are required to invite.",
+      "teamInviteSent": "Invitation sent — they will receive the Halla AI invite email.",
+      "teamInviteFailed": "Invite failed",
+      "accountEmailTitle": "Account email",
+      "accountEmailDesc": "We email you a link to confirm a new address. Once you confirm, your workspace is updated the next time you sign in.",
+      "accountCurrent": "Current:",
+      "accountNewEmail": "New email address",
+      "accountChangeEmail": "Change email",
+      "accountEmailConfirmed": "Your new email address is confirmed.",
+      "accountEmailLinkSent": "We sent a confirmation link to {email}. Your login email updates after you confirm (Halla AI \"Change email\" template).",
+      "accountEmailInvalid": "Enter a valid new email address.",
+      "accountEmailFailed": "Could not start email change",
       "title": "Team & Account",
       "description": "Manage teammates and access. Company info lives in Business Profile; call handling lives in Voice Agents.",
       "businessProfileLink": "Business Profile",
@@ -185,6 +209,9 @@
       }
     },
     "analytics": {
+      "funnelQualified": "Qualified",
+      "funnelAppointments": "Appointments",
+      "funnelConfirmed": "Confirmed",
       "totalCalls": "Total Calls",
       "totalLeads": "Total Leads",
       "conversionRate": "Conversion Rate",
@@ -276,6 +303,10 @@
       "noAppsDesc": "Your workspace has no direct apps configured yet. Ask an admin to enable one of the apps above."
     },
     "leads": {
+      "pipelineStep": "Pipeline",
+      "noLeadsDesc": "New leads from calls, WhatsApp, and manual entry will appear in your pipeline.",
+      "searchAria": "Search leads",
+      "stageAria": "Pipeline stage",
       "description": "Pipeline from calls, WhatsApp, and manual entry",
       "newLead": "New Lead",
       "createLead": "Create Lead",
@@ -1077,6 +1108,16 @@
     }
   },
   "billing": {
+    "subStatus": {
+      "active": "Active",
+      "trialing": "Trialing",
+      "canceled": "Canceled",
+      "cancelled": "Canceled",
+      "past_due": "Past due",
+      "incomplete": "Incomplete",
+      "unpaid": "Unpaid",
+      "paused": "Paused"
+    },
     "trialUsage": "Free trial usage",
     "trialDesc": "Professional features · {days} day{daysSuffix} left · {minutes} minutes remaining (60 total, cumulative)",
     "trialBannerTitle": "Free trial — Professional features",
