@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Bot, Mic, Sparkles } from "lucide-react";
 import { AnimatedGradientText } from "@/components/magic-ui/animated-gradient-text";
 import { VibePanel } from "@/components/magic-ui/vibe-panel";
@@ -18,6 +19,7 @@ export function AgentHeroBanner({
   toneLabel,
   liveLabel,
 }: AgentHeroBannerProps) {
+  const t = useTranslations("pages.agent");
   const displayName = agentName.trim() || "Halla";
 
   return (
@@ -27,13 +29,13 @@ export function AgentHeroBanner({
           <IconBox icon={Bot} variant="accent" size="lg" className="shrink-0" />
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              AI receptionist
+              {t("heroLabel")}
             </p>
             <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
               <AnimatedGradientText>{displayName}</AnimatedGradientText>
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Voice and tone your callers hear on every inbound call.
+              {t("heroTagline")}
             </p>
           </div>
         </div>

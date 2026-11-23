@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Bot, Plus, Save, Trash2, Pencil, X } from "lucide-react";
 import { api } from "@/lib/api";
@@ -25,7 +26,16 @@ const EMPTY_FORM = {
   tone: "professional",
 };
 
+const ROLE_KEYS = {
+  receptionist: "aaRoleReceptionist",
+  sales: "aaRoleSales",
+  support: "aaRoleSupport",
+  billing: "aaRoleBilling",
+} as const;
+
 export function AdditionalAgentsPanel() {
+  const t = useTranslations("pages.agent");
+  const roleLabel = (role: string) => (role in ROLE_KEYS ? t(ROLE_KEYS[role as keyof typeof ROLE_KEYS]) : role);
   const [planTick, setPlanTick] = useState(0);
   useEffect(() => subscribePlanUpdates(() => setPlanTick((n) => n + 1)), []);
   void planTick;
@@ -78,7 +88,7 @@ export function AdditionalAgentsPanel() {
       load();
       syncDashboardAction("config");
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to create agent");
+      setError(e instanceof Error ? e.message : t("aaCreateFailed"));
     }
   };
 
@@ -108,7 +118,7 @@ export function AdditionalAgentsPanel() {
       load();
       syncDashboardAction("config");
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to update agent");
+      setError(e instanceof Error ? e.message : t("aaUpdateFailed"));
     }
   };
 
@@ -119,7 +129,7 @@ export function AdditionalAgentsPanel() {
       setAgents((prev) => prev.filter((a) => a.id !== id));
       syncDashboardAction("config");
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Failed to delete");
+      setError(e instanceof Error ? e.message : t("aaDeleteFailed"));
     }
   };
 
@@ -129,7 +139,7 @@ export function AdditionalAgentsPanel() {
     return (
       <div className="card p-8 text-center">
         <p className="text-sm text-foreground-secondary mb-4">
-          Multiple agents per phone number are not available yet.
+          {t("aaLocked")}
         </p>
       </div>
     );
@@ -138,47 +148,49 @@ export function AdditionalAgentsPanel() {
   return (
     <div className="space-y-6">
       <p className="text-sm text-foreground-secondary">
-        Create specialized agents, then assign them on{" "}
-        <Link href="/dashboard/phone-numbers" className="text-accent font-medium hover:underline">
-          Phone Numbers
-        </Link>
-        .
+        {t.rich("aaIntro", {
+          link: (chunks) => (
+            <Link href="/dashboard/phone-numbers" className="text-accent font-medium hover:underline">
+              {chunks}
+            </Link>
+          ),
+        })}
       </p>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
 
       <div className="card p-6">
         <h2 className="text-base font-semibold mb-4 flex items-center gap-2">
-          <Plus className="w-4 h-4" /> New agent
+          <Plus className="w-4 h-4" /> {t("aaNew")}
         </h2>
         <div className="grid gap-3">
           <input
             className="input"
-            placeholder="Name (e.g. Sales — Mike)"
+            placeholder={t("aaNamePlaceholder")}
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
           <select className="input" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
-            <option value="receptionist">Receptionist</option>
-            <option value="sales">Sales</option>
-            <option value="support">Support</option>
-            <option value="billing">Billing</option>
+            <option value="receptionist">{t("aaRoleReceptionist")}</option>
+            <option value="sales">{t("aaRoleSales")}</option>
+            <option value="support">{t("aaRoleSupport")}</option>
+            <option value="billing">{t("aaRoleBilling")}</option>
           </select>
           <textarea
             className="input resize-none"
             rows={4}
-            placeholder="System instructions (required) — how this agent should handle calls..."
+            placeholder={t("aaPromptPlaceholder")}
             value={form.systemPrompt}
             onChange={(e) => setForm({ ...form, systemPrompt: e.target.value })}
           />
           <button type="button" onClick={createAgent} className="btn-primary w-fit" disabled={!canCreate}>
-            <Save className="w-4 h-4" /> Create agent
+            <Save className="w-4 h-4" /> {t("aaCreate")}
           </button>
         </div>
       </div>
 
       {loading ? (
-        <p className="text-sm text-foreground-secondary">Loading...</p>
+        <p className="text-sm text-foreground-secondary">{t("aaLoading")}</p>
       ) : (
         <div className="space-y-3">
           {agents.map((a) => (
@@ -195,10 +207,10 @@ export function AdditionalAgentsPanel() {
                     value={editForm.role}
                     onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
                   >
-                    <option value="receptionist">Receptionist</option>
-                    <option value="sales">Sales</option>
-                    <option value="support">Support</option>
-                    <option value="billing">Billing</option>
+                    <option value="receptionist">{t("aaRoleReceptionist")}</option>
+                    <option value="sales">{t("aaRoleSales")}</option>
+                    <option value="support">{t("aaRoleSupport")}</option>
+                    <option value="billing">{t("aaRoleBilling")}</option>
                   </select>
                   <textarea
                     className="input resize-none"
@@ -213,10 +225,10 @@ export function AdditionalAgentsPanel() {
                       className="btn-primary text-sm"
                       disabled={!editForm.name.trim() || !editForm.systemPrompt.trim()}
                     >
-                      Save
+                      {t("aaSave")}
                     </button>
                     <button type="button" onClick={() => setEditingId(null)} className="btn-ghost text-sm">
-                      <X className="w-4 h-4" /> Cancel
+                      <X className="w-4 h-4" /> {t("aaCancel")}
                     </button>
                   </div>
                 </div>
@@ -226,8 +238,8 @@ export function AdditionalAgentsPanel() {
                     <Bot className="w-5 h-5 text-accent shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold text-foreground">{a.name}</p>
-                      <p className="text-xs text-foreground-secondary capitalize">
-                        {a.role} · voice {a.voiceId}
+                      <p className="text-xs text-foreground-secondary">
+                        {t("aaRoleLine", { role: roleLabel(a.role), voice: a.voiceId })}
                       </p>
                       <p className="text-xs text-foreground-tertiary mt-1 line-clamp-2">{a.systemPrompt}</p>
                     </div>
@@ -237,7 +249,7 @@ export function AdditionalAgentsPanel() {
                       type="button"
                       onClick={() => startEdit(a)}
                       className="text-foreground-tertiary hover:text-accent p-1"
-                      aria-label="Edit agent"
+                      aria-label={t("aaEdit")}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
@@ -245,7 +257,7 @@ export function AdditionalAgentsPanel() {
                       type="button"
                       onClick={() => removeAgent(a.id)}
                       className="text-foreground-tertiary hover:text-red-600 p-1"
-                      aria-label="Delete agent"
+                      aria-label={t("aaDelete")}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -254,7 +266,7 @@ export function AdditionalAgentsPanel() {
               )}
             </div>
           ))}
-          {!agents.length && <p className="text-sm text-foreground-secondary">No additional agents yet.</p>}
+          {!agents.length && <p className="text-sm text-foreground-secondary">{t("aaNone")}</p>}
         </div>
       )}
     </div>
