@@ -19,7 +19,7 @@ import {
   normalizeAIConfig,
   toAIConfigSavePayload,
   normalizeTenantSettings,
-  tenantSettingsToApi,
+  voiceRoutingToApi,
   type DashboardAIConfigShape,
 } from "@/lib/gateway-adapters";
 import { subscribeAIConfigUpdates } from "@/lib/realtime";
@@ -115,7 +115,7 @@ export default function AgentPage() {
     setVoiceRoutingSuccess("");
     try {
       const tenantId = voiceRouting.id || (await resolveTenantId());
-      await api.put(`/tenants/${tenantId}`, tenantSettingsToApi(voiceRouting));
+      await api.put(`/tenants/${tenantId}`, voiceRoutingToApi(voiceRouting));
       voiceRoutingDirtyRef.current = false;
       setVoiceRoutingSuccess(t("voiceRoutingSaved"));
       syncDashboardAction("settings");
@@ -608,72 +608,21 @@ export default function AgentPage() {
           )}
           {voiceRouting && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="vr-language" className="dashboard-field-label flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-foreground-tertiary" />
-                    {t("language")}
-                  </label>
-                  <select
-                    id="vr-language"
-                    value={voiceRouting.language}
-                    onChange={(e) => patchVoiceRouting((s) => ({ ...s, language: e.target.value }))}
-                    className="input"
-                  >
-                    {AGENT_LANGUAGES.map((lang) => (
-                      <option key={lang.id} value={lang.id}>{lang.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="vr-timezone" className="dashboard-field-label flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-foreground-tertiary" />
-                    {t("timezone")}
-                  </label>
-                  <select
-                    id="vr-timezone"
-                    value={voiceRouting.timezone}
-                    onChange={(e) => patchVoiceRouting((s) => ({ ...s, timezone: e.target.value }))}
-                    className="input"
-                  >
-                    {DASHBOARD_TIMEZONES.map((tz) => (
-                      <option key={tz.value} value={tz.value}>{tz.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <span id="vr-tone-label" className="dashboard-field-label">{t("tone")}</span>
-                <div className="flex flex-wrap gap-1.5" role="group" aria-labelledby="vr-tone-label">
-                  {TONE_KEYS.map((tone) => (
-                    <button
-                      key={tone}
-                      type="button"
-                      onClick={() => patchVoiceRouting((s) => ({ ...s, tone }))}
-                      aria-pressed={voiceRouting.tone === tone}
-                      className={cn("seg-pill capitalize", voiceRouting.tone === tone && "is-active")}
-                    >
-                      {t(`tones.${tone}`)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label htmlFor="vr-transfer-number" className="dashboard-field-label flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-foreground-tertiary" />
-                  {t("transferNumber")}
+              <div className="max-w-sm">
+                <label htmlFor="vr-timezone" className="dashboard-field-label flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-foreground-tertiary" />
+                  {t("timezone")}
                 </label>
-                <input
-                  id="vr-transfer-number"
-                  type="tel"
-                  value={voiceRouting.transferNumber}
-                  onChange={(e) => patchVoiceRouting((s) => ({ ...s, transferNumber: e.target.value }))}
-                  placeholder="+1 (555) 000-0000"
+                <select
+                  id="vr-timezone"
+                  value={voiceRouting.timezone}
+                  onChange={(e) => patchVoiceRouting((s) => ({ ...s, timezone: e.target.value }))}
                   className="input"
-                />
-                <p className="dashboard-field-hint">
-                  {t("transferRoutingHint")}
-                </p>
+                >
+                  {DASHBOARD_TIMEZONES.map((tz) => (
+                    <option key={tz.value} value={tz.value}>{tz.label}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex justify-end">
                 <button type="button" onClick={() => void saveVoiceRouting()} disabled={voiceRoutingSaving} className="btn-primary">
