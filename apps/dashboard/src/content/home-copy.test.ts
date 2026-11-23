@@ -31,9 +31,9 @@ describe("home page copy (Hk's review, 17 Nov 2026)", () => {
     expect(html).toContain('<span class="lang-en">Start in minutes. Know the cost upfront.</span><span class="lang-ar">ابدأ خلال دقائق. وتعرف التكلفة مسبقاً.</span>');
   });
 
-  it("each 'At a glance' tile reads category first, then the timeline, then the description (Hk, 22 Nov)", () => {
+  it("each 'At a glance' tile reads category first, then the timeline, then the description (Hk, 22 Nov), Automation and Receptionist first", () => {
     const from = html.indexOf('<div class="hub-stats">');
-    const block = html.slice(from, html.indexOf("</div></div>", html.indexOf("To go live", from)) + 12);
+    const block = html.slice(from, html.indexOf("</div></div>", html.indexOf("Opportunity Audit and roadmap", from)) + 12);
     const text = (h: string) => [...h.matchAll(/<span class="lang-(en|ar)">(.*?)<\/span>/g)].map((m) => m[2]);
     const rows = block;
     const parsed = [...rows.matchAll(/<div class="hub-stat"><em class="hub-stat-cat">(.*?)<\/em><strong>(.*?)<\/strong><span>(.*?)<\/span><\/div>/g)].map((m) => ({
@@ -42,10 +42,10 @@ describe("home page copy (Hk's review, 17 Nov 2026)", () => {
       description: text(m[3]),
     }));
     expect(parsed).toEqual([
-      { category: ["Consultancy", "الاستشارات"], timeline: ["3 min", "3 دقائق"], description: ["Fit check to a direct answer", "فحص الملاءمة لإجابة مباشرة"] },
-      { category: ["Consultancy", "الاستشارات"], timeline: ["1 week", "أسبوع"], description: ["Opportunity Audit and roadmap", "تدقيق الفرص وخارطة الطريق"] },
       { category: ["Automation", "أتمتة الأعمال"], timeline: ["10 days", "10 أيام"], description: ["To build one automation", "لبناء أتمتة واحدة"] },
       { category: ["Receptionist", "موظف الاستقبال"], timeline: ["15 min", "15 دقيقة"], description: ["To go live", "لبدء التشغيل"] },
+      { category: ["Consultancy", "الاستشارات"], timeline: ["3 min", "3 دقائق"], description: ["Fit check to a direct answer", "فحص الملاءمة لإجابة مباشرة"] },
+      { category: ["Consultancy", "الاستشارات"], timeline: ["1 week", "أسبوع"], description: ["Opportunity Audit and roadmap", "تدقيق الفرص وخارطة الطريق"] },
     ]);
     expect(block).not.toContain("Consultancy · ");
     expect(block).not.toContain("Automation · ");
