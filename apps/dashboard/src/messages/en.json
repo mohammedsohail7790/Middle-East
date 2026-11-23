@@ -76,7 +76,15 @@
     "noSession": "No active session — sign in again.",
     "upgradeRequired": "upgrade required",
     "bootTimeout": "Waking up your workspace. After a quiet period this can take up to a minute.",
-    "backToSignIn": "Back to sign in"
+    "backToSignIn": "Back to sign in",
+    "mobileNavPrimary": "Primary",
+    "mobileNavHome": "Home",
+    "mobileNavCalls": "Calls",
+    "mobileNavLeads": "Leads",
+    "mobileNavAgent": "Agent",
+    "mobileNavMore": "More",
+    "searchPlaceholder": "Search calls, leads, transcripts…",
+    "searchLabel": "Global search"
   },
   "common": {
     "save": "Save",
