@@ -15,3 +15,12 @@ describe("audit history page loading", () => {
     expect(src).toMatch(/finally \{\s*setLoading\(false\);\s*setHasLoaded\(true\);/);
   });
 });
+
+describe("audit history page reloads", () => {
+  it("Apply and Clear always reload the list, even when the filters did not change", () => {
+    // Setting the same filters again does not re-run the load by itself, so new events never showed up.
+    expect(src).toMatch(/const apply = \(\) => \{[^}]*setReloadKey\(/);
+    expect(src).toMatch(/const reset = \(\) => \{[^}]*setReloadKey\(/);
+    expect(src).toMatch(/\[load, reloadKey\]/);
+  });
+});

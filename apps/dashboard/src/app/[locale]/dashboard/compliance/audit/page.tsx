@@ -45,6 +45,8 @@ export default function AuditHistoryPage() {
   const [draft, setDraft] = useState<Filters>(NO_FILTERS);
   const [applied, setApplied] = useState<Filters>(NO_FILTERS);
   const [offset, setOffset] = useState(0);
+  // Bumped by Apply and Clear so the list reloads even when the filters are unchanged (new events appear).
+  const [reloadKey, setReloadKey] = useState(0);
   const [rows, setRows] = useState<AuditRow[]>([]);
   const [total, setTotal] = useState(0);
   const [types, setTypes] = useState<string[]>([]);
@@ -76,7 +78,7 @@ export default function AuditHistoryPage() {
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, reloadKey]);
 
   useEffect(() => {
     api
@@ -88,12 +90,14 @@ export default function AuditHistoryPage() {
   const apply = () => {
     setOffset(0);
     setApplied(draft);
+    setReloadKey((k) => k + 1);
   };
 
   const reset = () => {
     setDraft(NO_FILTERS);
     setOffset(0);
     setApplied(NO_FILTERS);
+    setReloadKey((k) => k + 1);
   };
 
   const exportCsv = async () => {
