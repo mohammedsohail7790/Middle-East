@@ -108,7 +108,7 @@ export function GoLiveChecklist() {
           <h2 className="text-sm font-semibold text-foreground">{t("goLiveTitle")}</h2>
           <p className="text-xs text-foreground-secondary">{t("goLiveProgress", { done, total })}</p>
         </div>
-        <button type="button" onClick={dismiss} aria-label={t("goLiveDismiss")} className="text-foreground-secondary hover:text-foreground">
+        <button type="button" onClick={dismiss} className="tap-target text-foreground-secondary hover:text-foreground" aria-label={t("goLiveDismiss")}>
           <X className="size-4" />
         </button>
       </div>
@@ -123,7 +123,7 @@ export function GoLiveChecklist() {
             <span className={i.done ? "text-foreground-secondary line-through" : "text-foreground"}>{t(`goLiveItem_${i.id}`)}</span>
             {!i.required && !i.done && <span className="text-[11px] text-foreground-secondary">{t("goLiveOptional")}</span>}
             {!i.done && i.href && (
-              <Link href={i.href} className="ms-auto text-xs font-medium text-accent hover:underline">
+              <Link href={i.href} className="tap-target ms-auto text-xs font-medium text-accent hover:underline">
                 {t("goLiveOpen")}
               </Link>
             )}

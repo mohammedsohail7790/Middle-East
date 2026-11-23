@@ -259,7 +259,7 @@ export function KnowledgeBusinessTemplates() {
               <button
                 type="button"
                 onClick={applyWeekdayHoursToAll}
-                className="text-[11px] text-accent hover:underline whitespace-nowrap"
+                className="tap-target text-[11px] text-accent hover:underline whitespace-nowrap"
               >
                 Copy Monday hours to Mon–Fri
               </button>
@@ -318,7 +318,7 @@ export function KnowledgeBusinessTemplates() {
                             type="checkbox"
                             checked={row.isOpen}
                             onChange={(e) => patchDay(day.dayOfWeek, { isOpen: e.target.checked })}
-                            className="rounded border-border"
+                            className="rounded border-border max-md:size-6"
                             aria-label={`${day.label} open`}
                           />
                         </td>
