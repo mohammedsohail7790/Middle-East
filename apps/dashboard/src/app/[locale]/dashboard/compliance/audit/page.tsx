@@ -49,6 +49,8 @@ export default function AuditHistoryPage() {
   const [total, setTotal] = useState(0);
   const [types, setTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  // The full-page skeleton is for the very first load only; later searches keep the form mounted.
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [exporting, setExporting] = useState(false);
 
@@ -68,6 +70,7 @@ export default function AuditHistoryPage() {
       setError(t("loadFailed"));
     } finally {
       setLoading(false);
+      setHasLoaded(true);
     }
   }, [applied, offset, t]);
 
@@ -117,7 +120,7 @@ export default function AuditHistoryPage() {
     <DashboardPage
       title={t("title")}
       description={t("description")}
-      loading={loading && rows.length === 0 && !error}
+      loading={loading && !hasLoaded && !error}
       error={error}
       onRetry={() => void load()}
       actions={
