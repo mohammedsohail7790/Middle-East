@@ -60,11 +60,12 @@ export default function AuditHistoryPage() {
     setLoading(true);
     setError(undefined);
     try {
-      const res = await api.getList<AuditRow>("/compliance/audit-events", {
-        ...filterParams(applied),
-        limit: String(PAGE_SIZE),
-        offset: String(offset),
-      });
+      // fresh: the audit log must never come from the 45-second GET cache; a reviewer expects the latest events.
+      const res = await api.getList<AuditRow>(
+        "/compliance/audit-events",
+        { ...filterParams(applied), limit: String(PAGE_SIZE), offset: String(offset) },
+        { fresh: true }
+      );
       setRows(res.items);
       setTotal(res.total);
     } catch {
