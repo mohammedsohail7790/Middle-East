@@ -982,6 +982,10 @@
   "billing": {
     "trialUsage": "استخدام الفترة التجريبية",
     "trialDesc": "ميزات احترافية · {days} يوم{daysSuffix} متبقٍ · {minutes} دقيقة متبقية (60 إجمالاً، تراكمي)",
+    "trialBannerTitle": "فترة تجريبية مجانية — ميزات احترافية",
+    "trialBannerMinutesUsed": "دقيقة مستخدمة",
+    "trialBannerDaysLeft": "{count, plural, zero {لا أيام متبقية} one {متبقٍ يوم واحد} two {متبقٍ يومان} few {متبقٍ # أيام} many {متبقٍ # يومًا} other {متبقٍ # يوم}}",
+    "trialBannerUpgrade": "ترقية الآن",
     "trialWarnings": "تحذيرات عند 40 و50 و55 و58 دقيقة. تنتهي التجربة عند 60 دقيقة أو 14 يوماً — أيهما أولاً.",
     "managePayment": "إدارة طريقة الدفع",
     "stripeNotActive": "الخطط المدفوعة متوفرة قريبًا",

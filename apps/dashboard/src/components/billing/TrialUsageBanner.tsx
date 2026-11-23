@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { AlertTriangle, Clock, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ export function TrialUsageBanner({
   trial: TrialUsageState;
   warnings?: Warning[];
 }) {
+  const t = useTranslations("billing");
   if (!trial.isTrialing && !trial.isLocked) return null;
 
   const pct = Math.min(100, trial.usagePercent);
@@ -52,15 +54,19 @@ export function TrialUsageBanner({
           )}
           <div>
             <p className="text-sm font-semibold text-foreground">
-              Free trial — Professional features
+              {t("trialBannerTitle")}
             </p>
             <p className="text-xs text-foreground-secondary mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
               <span>
-                <strong>{trial.trialMinutesUsed}</strong> / {trial.trialMinutesLimit} minutes used
+                {/* Isolated left to right so the numbers read "0 / 60" in Arabic too, not "60 / 0". */}
+                <span dir="ltr" className="inline-block">
+                  <strong>{trial.trialMinutesUsed}</strong> / {trial.trialMinutesLimit}
+                </span>{" "}
+                {t("trialBannerMinutesUsed")}
               </span>
               <span className="inline-flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {trial.daysRemaining} day{trial.daysRemaining === 1 ? "" : "s"} left
+                {t("trialBannerDaysLeft", { count: trial.daysRemaining })}
               </span>
             </p>
           </div>
@@ -69,7 +75,7 @@ export function TrialUsageBanner({
           href="/dashboard/billing"
           className="btn-primary text-xs py-2 px-4 shrink-0 self-start lg:self-center"
         >
-          Upgrade now
+          {t("trialBannerUpgrade")}
         </Link>
       </div>
 

@@ -997,6 +997,10 @@
   "billing": {
     "trialUsage": "Free trial usage",
     "trialDesc": "Professional features · {days} day{daysSuffix} left · {minutes} minutes remaining (60 total, cumulative)",
+    "trialBannerTitle": "Free trial — Professional features",
+    "trialBannerMinutesUsed": "minutes used",
+    "trialBannerDaysLeft": "{count, plural, one {# day left} other {# days left}}",
+    "trialBannerUpgrade": "Upgrade now",
     "trialWarnings": "Warnings at 40, 50, 55, and 58 minutes. Trial ends when you hit 60 minutes or 14 days — whichever comes first.",
     "managePayment": "Manage payment method",
     "stripeNotActive": "Paid plans coming soon",
