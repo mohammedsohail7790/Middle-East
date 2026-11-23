@@ -1047,3 +1047,15 @@ html:has(.auth-shell), body:has(.auth-shell), body:has(.auth-marketing-shell) {
   background: var(--accent-dark);
   color: #fff;
 }
+
+/* Phone tap targets: widen the touch area of small links and buttons without moving the layout (about 40px). */
+@media (max-width: 767px) {
+  .tap-target {
+    position: relative;
+  }
+  .tap-target::after {
+    content: "";
+    position: absolute;
+    inset: -0.75rem;
+  }
+}

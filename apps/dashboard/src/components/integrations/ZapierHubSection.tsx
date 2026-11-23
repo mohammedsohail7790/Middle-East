@@ -186,7 +186,7 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
             />
             <button
               type="button"
-              className="text-xs text-accent font-medium hover:underline"
+              className="tap-target text-xs text-accent font-medium hover:underline"
               onClick={() => setShowGuide((v) => !v)}
             >
               {showGuide ? "Hide" : "Show"} setup guide

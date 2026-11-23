@@ -213,7 +213,7 @@ function AnalyticsPageContent() {
           aria-label={t("startDate")}
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
-          className="bg-transparent text-[13px] sm:text-sm text-foreground outline-none min-w-0 flex-1 sm:flex-initial max-w-full"
+          className="bg-transparent text-[13px] sm:text-sm text-foreground outline-none min-w-0 flex-1 sm:flex-initial max-w-full max-md:min-h-9"
         />
         <span className="text-gray-400 shrink-0">—</span>
         <input
@@ -221,7 +221,7 @@ function AnalyticsPageContent() {
           aria-label={t("endDate")}
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
-          className="bg-transparent text-[13px] sm:text-sm text-foreground outline-none min-w-0 flex-1 sm:flex-initial max-w-full"
+          className="bg-transparent text-[13px] sm:text-sm text-foreground outline-none min-w-0 flex-1 sm:flex-initial max-w-full max-md:min-h-9"
         />
       </div>
       <div className="flex gap-2">
