@@ -769,7 +769,7 @@ export default function BusinessProfilePage() {
               </div>
             </div>
 
-            <div className="px-4 py-2 border-b border-border flex flex-wrap gap-1.5" role="group" aria-label="Filter by category">
+            <div className="px-4 py-2 border-b border-border flex flex-wrap gap-1.5" role="group" aria-label={t("filterByCategory")}>
               {categories.map((cat) => (
                 <button
                   key={cat.id}

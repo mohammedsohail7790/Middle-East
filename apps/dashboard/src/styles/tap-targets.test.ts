@@ -16,7 +16,7 @@ describe("phone tap targets", () => {
   const users: Array<[string, string]> = [
     ["components/dashboard/GoLiveChecklist.tsx", "goLiveDismiss"],
     ["components/dashboard/GoLiveChecklist.tsx", "goLiveOpen"],
-    ["components/knowledge/KnowledgeBusinessTemplates.tsx", "Copy Monday hours"],
+    ["components/knowledge/KnowledgeBusinessTemplates.tsx", "kbCopyMonday"],
     ["components/integrations/ZapierHubSection.tsx", "setup guide"],
     ["app/[locale]/dashboard/compliance/audit/page.tsx", 't("back")'],
   ];

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Clock,
   Briefcase,
@@ -81,7 +82,10 @@ import { useDashboardSync } from "@/lib/dashboard-sync";
 
 import { DASHBOARD_TIMEZONES, DEFAULT_TIMEZONE } from "@/lib/timezones";
 
+const DAY_KEYS = ["kbDay0", "kbDay1", "kbDay2", "kbDay3", "kbDay4", "kbDay5", "kbDay6"] as const;
+
 export function KnowledgeBusinessTemplates() {
+  const t = useTranslations("pages.businessProfile");
   const [templates, setTemplates] = useState<KnowledgeTemplates>(defaultTemplates());
   const [servicesText, setServicesText] = useState<string>(() =>
     rowsToText(buildRowsFromTemplates(defaultTemplates()))
@@ -100,13 +104,13 @@ export function KnowledgeBusinessTemplates() {
       })
       .catch((e: unknown) => {
         if (!opts?.silent) {
-          setError(e instanceof Error ? e.message : "Could not load templates");
+          setError(e instanceof Error ? e.message : t("kbLoadFailed"));
         }
       })
       .finally(() => {
         if (!opts?.silent) setLoading(false);
       });
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -155,12 +159,12 @@ export function KnowledgeBusinessTemplates() {
       const saved = await saveKnowledgeTemplates(payload);
       setTemplates(saved);
       setServicesText(rowsToText(buildRowsFromTemplates(saved)));
-      setSuccess("Saved — your agent will use these hours, services, and prices on calls.");
+      setSuccess(t("kbSaved"));
       syncDashboardAction("knowledge");
       syncDashboardAction("config");
       setTimeout(() => setSuccess(""), 5000);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Save failed");
+      setError(e instanceof Error ? e.message : t("kbSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -187,14 +191,13 @@ export function KnowledgeBusinessTemplates() {
       <div className="flex flex-col gap-4 p-5 sm:p-6 border-b border-border bg-muted/20 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-accent mb-1">
-            Step 1 · Business info
+            {t("kbStep")}
           </p>
           <h2 id="kb-business-heading" className="text-lg font-semibold text-foreground">
-            Hours, services & pricing
+            {t("kbHeading")}
           </h2>
           <p className="text-sm text-foreground-secondary mt-1 max-w-xl">
-            What callers ask about most. Fill each section — your AI and calendar stay in sync when
-            you save.
+            {t("kbIntro")}
           </p>
         </div>
         <button
@@ -204,7 +207,7 @@ export function KnowledgeBusinessTemplates() {
           className="btn-primary shrink-0 w-full sm:w-auto justify-center"
         >
           <Save className="w-4 h-4" />
-          {saving ? "Saving…" : "Save business info"}
+          {saving ? t("kbSaving") : t("kbSave")}
         </button>
       </div>
 
@@ -233,7 +236,7 @@ export function KnowledgeBusinessTemplates() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 pb-2 border-b border-border/60">
           <label className="flex items-center gap-2 text-sm font-medium text-foreground shrink-0">
             <Globe className="w-4 h-4 text-foreground-tertiary" />
-            Timezone
+            {t("kbTimezone")}
           </label>
           <select
             value={templates.timezone}
@@ -254,24 +257,24 @@ export function KnowledgeBusinessTemplates() {
             <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-muted/30">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-accent" />
-                <h3 className="text-sm font-semibold text-foreground">Office hours</h3>
+                <h3 className="text-sm font-semibold text-foreground">{t("kbOfficeHours")}</h3>
               </div>
               <button
                 type="button"
                 onClick={applyWeekdayHoursToAll}
                 className="tap-target text-[11px] text-accent hover:underline whitespace-nowrap"
               >
-                Copy Monday hours to Mon–Fri
+                {t("kbCopyMonday")}
               </button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm block sm:table">
                 <thead className="hidden sm:table-header-group">
                   <tr className="text-left text-[10px] uppercase tracking-wide text-foreground-tertiary border-b border-border">
-                    <th className="px-4 py-2.5 font-medium w-[100px]">Day</th>
-                    <th className="px-2 py-2.5 font-medium">Opens</th>
-                    <th className="px-2 py-2.5 font-medium">Closes</th>
-                    <th className="px-4 py-2.5 font-medium text-center w-16">Open</th>
+                    <th className="px-4 py-2.5 font-medium w-[100px]">{t("kbDay")}</th>
+                    <th className="px-2 py-2.5 font-medium">{t("kbOpens")}</th>
+                    <th className="px-2 py-2.5 font-medium">{t("kbCloses")}</th>
+                    <th className="px-4 py-2.5 font-medium text-center w-16">{t("kbOpen")}</th>
                   </tr>
                 </thead>
                 <tbody className="block sm:table-row-group">
@@ -289,28 +292,28 @@ export function KnowledgeBusinessTemplates() {
                         )}
                       >
                         <td className="order-1 block sm:table-cell sm:px-4 sm:py-2.5 font-medium text-foreground whitespace-nowrap">
-                          {day.label}
+                          {t(DAY_KEYS[day.dayOfWeek])}
                         </td>
                         <td className="order-3 block sm:table-cell sm:px-2 sm:py-2">
-                          <span className="sm:hidden block text-[10px] uppercase tracking-wide text-foreground-tertiary mb-1">Opens</span>
+                          <span className="sm:hidden block text-[10px] uppercase tracking-wide text-foreground-tertiary mb-1">{t("kbOpens")}</span>
                           <input
                             type="time"
                             value={row.startTime}
                             disabled={!row.isOpen}
                             onChange={(e) => patchDay(day.dayOfWeek, { startTime: e.target.value })}
                             className="input py-1.5 text-xs w-full min-w-0 sm:min-w-[7rem]"
-                            aria-label={`${day.label} opens`}
+                            aria-label={t("kbOpensAria", { day: t(DAY_KEYS[day.dayOfWeek]) })}
                           />
                         </td>
                         <td className="order-4 block sm:table-cell sm:px-2 sm:py-2">
-                          <span className="sm:hidden block text-[10px] uppercase tracking-wide text-foreground-tertiary mb-1">Closes</span>
+                          <span className="sm:hidden block text-[10px] uppercase tracking-wide text-foreground-tertiary mb-1">{t("kbCloses")}</span>
                           <input
                             type="time"
                             value={row.endTime}
                             disabled={!row.isOpen}
                             onChange={(e) => patchDay(day.dayOfWeek, { endTime: e.target.value })}
                             className="input py-1.5 text-xs w-full min-w-0 sm:min-w-[7rem]"
-                            aria-label={`${day.label} closes`}
+                            aria-label={t("kbClosesAria", { day: t(DAY_KEYS[day.dayOfWeek]) })}
                           />
                         </td>
                         <td className="order-2 block sm:table-cell text-right sm:text-center sm:px-4 sm:py-2">
@@ -319,7 +322,7 @@ export function KnowledgeBusinessTemplates() {
                             checked={row.isOpen}
                             onChange={(e) => patchDay(day.dayOfWeek, { isOpen: e.target.checked })}
                             className="rounded border-border max-md:size-6"
-                            aria-label={`${day.label} open`}
+                            aria-label={t("kbOpenAria", { day: t(DAY_KEYS[day.dayOfWeek]) })}
                           />
                         </td>
                       </tr>
@@ -334,22 +337,25 @@ export function KnowledgeBusinessTemplates() {
           <div className="rounded-xl border border-border bg-background flex flex-col">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
               <Briefcase className="w-4 h-4 text-accent" />
-              <h3 className="text-sm font-semibold text-foreground">Services & pricing</h3>
+              <h3 className="text-sm font-semibold text-foreground">{t("kbServicesPricing")}</h3>
             </div>
             <div className="p-4 flex-1 flex flex-col gap-2">
               <textarea
                 value={servicesText}
                 onChange={(e) => setServicesText(e.target.value)}
                 rows={10}
-                placeholder={
-                  "One service per line. Add a price if you want the AI to quote it:\n\nConsultation (30 min) - AED 200\nFollow-up visit - AED 120\nAnnual check-up"
-                }
+                placeholder={t("kbServicesPlaceholder")}
                 className="input text-sm resize-y font-mono leading-relaxed"
-                aria-label="Services and pricing, one per line"
+                aria-label={t("kbServicesAria")}
               />
               <p className="text-[11px] text-muted-foreground">
-                One service per line. Price is optional — add it as <span className="font-mono">- AED 89</span> at
-                the end of a line if you want the AI to quote it on calls.
+                {t.rich("kbServicesHint", {
+                  code: (chunks) => (
+                    <span className="font-mono" dir="ltr">
+                      {chunks}
+                    </span>
+                  ),
+                })}
               </p>
             </div>
           </div>
