@@ -15,6 +15,16 @@ export const AGENT_LANGUAGES = [
 
 export type AgentLanguageId = (typeof AGENT_LANGUAGES)[number]["id"];
 
+/** The language's display name in the current interface language (message key pages.agent.languageNames.<id>), or the raw code if unknown. */
+export function agentLanguageLabel(
+  id: string | undefined | null,
+  t: { has: (key: string) => boolean; (key: string): string }
+): string {
+  const code = String(id ?? "");
+  const key = `languageNames.${code}`;
+  return t.has(key) ? t(key) : code;
+}
+
 /** Match gateway plan language codes, including legacy `ar` ↔ `ar-SA`. */
 export function isAgentLanguageAllowed(
   allowed: string[] | undefined,

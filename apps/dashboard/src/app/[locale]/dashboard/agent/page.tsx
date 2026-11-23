@@ -31,7 +31,7 @@ import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { cn } from "@/lib/utils";
 import { useDashboardSync } from "@/lib/dashboard-sync";
 import { syncDashboardAction } from "@/lib/dashboard-actions";
-import { AGENT_LANGUAGES, isAgentLanguageAllowed } from "@/lib/agent-languages";
+import { AGENT_LANGUAGES, agentLanguageLabel, isAgentLanguageAllowed } from "@/lib/agent-languages";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 import { IconBox, ICON_STROKE } from "@/components/ui-kit/IconBox";
@@ -293,7 +293,7 @@ export default function AgentPage() {
         agentName={config.agentName || t("defaultAgentName")}
         voiceLabel={VOICES.find((v) => v.id === config.voice)?.name ?? config.voice}
         toneLabel={t(`tones.${config.tone}` as "tones.professional")}
-        liveLabel="Live on calls"
+        liveLabel={t("heroLive")}
       />
 
       <section id="receptionist-config" className="scroll-mt-24">
@@ -407,7 +407,7 @@ export default function AgentPage() {
                     style={{ transition: "border-color 160ms ease-out, background-color 160ms ease-out" }}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-foreground-secondary">{lang.name}</span>
+                      <span className="text-sm font-medium text-foreground-secondary">{agentLanguageLabel(lang.id, t)}</span>
                       {!allowed && (
                         <span className="text-[10px] text-amber-700 ml-auto">{t("proPlus")}</span>
                       )}
