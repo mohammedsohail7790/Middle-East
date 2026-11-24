@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { relativeTimeLabel as timeAgo } from "@/lib/relative-time";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
@@ -35,15 +37,6 @@ import {
 } from "@/lib/integration-hub-catalog";
 import { startIntegrationOAuth } from "@/lib/integration-oauth";
 import { navigateToZapierSetup } from "@/lib/zapier-connect";
-
-function timeAgo(iso: string): string {
-  const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
-}
 
 export type IntegrationConnectionInfo = {
   status: string;
@@ -85,6 +78,8 @@ export function IntegrationConnectWizard({
   onClose,
   embedded = false,
 }: Props) {
+  const tw = useTranslations("pages.integrations.hub.wizard");
+  const locale = useLocale();
   const [values, setValues] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [connectingOAuth, setConnectingOAuth] = useState(false);
@@ -124,7 +119,7 @@ export function IntegrationConnectWizard({
     const missing = firstMissingField(integration, fields, values);
     if (missing) {
       const plain = getPlainCredentialCopy(integration, missing);
-      setErrorMessage(`Please enter: ${plain.label.toLowerCase()}.`);
+      setErrorMessage(tw("pleaseEnter", { field: plain.label.toLowerCase() }));
       return;
     }
     setConnectingOAuth(true);
@@ -134,8 +129,8 @@ export function IntegrationConnectWizard({
     } catch (e) {
       showDashboardToast({
         type: "error",
-        title: `Could not connect ${integration.name}`,
-        message: e instanceof Error ? e.message : "Could not start sign-in",
+        title: tw("couldNotConnect", { name: integration.name }),
+        message: e instanceof Error ? e.message : tw("couldNotStartSignIn"),
       });
       setConnectingOAuth(false);
     }
@@ -174,7 +169,7 @@ export function IntegrationConnectWizard({
         setTestResult({ success: true, message: result.message });
       }
     } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : "Connection failed");
+      setErrorMessage(e instanceof Error ? e.message : tw("connectionFailed"));
     } finally {
       setBusy(false);
     }
@@ -184,7 +179,7 @@ export function IntegrationConnectWizard({
     const missing = firstMissingField(integration, fields, values);
     if (missing) {
       const plain = getPlainCredentialCopy(integration, missing);
-      setErrorMessage(`Please enter: ${plain.label.toLowerCase()}.`);
+      setErrorMessage(tw("pleaseEnter", { field: plain.label.toLowerCase() }));
       return;
     }
     setErrorMessage(null);
@@ -201,7 +196,7 @@ export function IntegrationConnectWizard({
       onStatusChange();
       syncDashboardAction("integrations");
     } catch (e) {
-      setTestResult({ success: false, message: e instanceof Error ? e.message : "Test failed" });
+      setTestResult({ success: false, message: e instanceof Error ? e.message : tw("testFailed") });
       setLocalStatus("error");
     } finally {
       setBusy(false);
@@ -250,8 +245,8 @@ export function IntegrationConnectWizard({
     } catch (e) {
       showDashboardToast({
         type: "error",
-        title: `Could not disconnect ${integration.name}`,
-        message: e instanceof Error ? e.message : "Disconnect failed",
+        title: tw("couldNotDisconnect", { name: integration.name }),
+        message: e instanceof Error ? e.message : tw("disconnectFailed"),
       });
     } finally {
       setBusy(false);
@@ -262,10 +257,10 @@ export function IntegrationConnectWizard({
     <div className="text-center py-8 space-y-3">
       <IntegrationWizardRequirements integration={integration} />
       <p className="text-sm text-foreground">
-        {integration.name} requires a {integration.planRequired} plan.
+        {tw("requiresPlan", { name: integration.name, plan: String(integration.planRequired) })}
       </p>
       <a href="/dashboard/billing" className="btn-primary text-sm inline-flex">
-        Upgrade plan
+        {tw("upgradePlan")}
       </a>
     </div>
   );
@@ -289,8 +284,8 @@ export function IntegrationConnectWizard({
       )}
       <p className="text-sm text-muted-foreground">
         {fields.length > 0
-          ? `Enter the required details below, then connect your ${integration.name} account.`
-          : `Sign in with your ${integration.name} account to connect.`}
+          ? tw("enterDetails", { name: integration.name })
+          : tw("signInWithAccount", { name: integration.name })}
       </p>
       {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
       <button
@@ -302,14 +297,13 @@ export function IntegrationConnectWizard({
         {connectingOAuth ? (
           <Loader2 className="size-4 animate-spin" strokeWidth={ICON_STROKE} />
         ) : (
-          "Connect"
+          tw("connect")
         )}
       </button>
       {!oauthConfigured && (
         <div className="rounded-lg border border-amber-200/80 bg-amber-50/60 dark:bg-amber-950/20 px-3 py-2.5 space-y-2">
           <p className="text-xs text-amber-900 dark:text-amber-200">
-            Direct sign-in is not configured on this deployment. Your administrator must add the
-            required server settings, or you can connect through Zapier instead.
+            {tw("notConfigured")}
           </p>
           {integration.category === "crm" || integration.category === "calendar" ? (
             <button
@@ -317,7 +311,7 @@ export function IntegrationConnectWizard({
               className="text-xs font-medium text-accent hover:underline"
               onClick={() => navigateToZapierSetup(integration.id)}
             >
-              Connect via Zapier
+              {tw("connectViaZapier")}
             </button>
           ) : null}
         </div>
@@ -331,7 +325,7 @@ export function IntegrationConnectWizard({
             setErrorMessage(null);
           }}
         >
-          {integration.alternateCredentialLabel ?? "Connect with API credentials instead"}
+          {integration.alternateCredentialLabel ?? tw("connectWithApi")}
         </button>
       ) : null}
     </div>
@@ -352,7 +346,7 @@ export function IntegrationConnectWizard({
             setErrorMessage(null);
           }}
         >
-          ← Back to sign-in connect
+          {tw("backToSignIn")}
         </button>
       ) : null}
 
@@ -368,14 +362,14 @@ export function IntegrationConnectWizard({
           className="btn-primary text-sm inline-flex items-center gap-1.5 w-full justify-center"
         >
           {openLink.kind === "login" ? (
-            <>Sign in to {integration.name}</>
+            <>{tw("signInTo", { name: integration.name })}</>
           ) : (
             <>
-              Open {integration.name} settings <ExternalLink className="size-3.5" />
+              {tw("openSettings", { name: integration.name })} <ExternalLink className="size-3.5" />
             </>
           )}
           <span className="text-[11px] font-normal opacity-90">
-            {openLink.kind === "login" ? "(then copy your API key)" : "(copy from here)"}
+            {openLink.kind === "login" ? tw("thenCopyKey") : tw("copyFromHere")}
           </span>
         </a>
       )}
@@ -417,7 +411,7 @@ export function IntegrationConnectWizard({
       {(integration.screenshots?.length || integration.helpSteps?.length || integration.videoUrl) && (
         <details className="text-xs text-muted-foreground rounded-lg border border-border/60 px-3 py-2">
           <summary className="cursor-pointer flex items-center gap-1 font-medium text-foreground">
-            <HelpCircle className="size-3.5" /> Need help finding your credentials?
+            <HelpCircle className="size-3.5" /> {tw("needHelp")}
           </summary>
           <div className="mt-3 space-y-3">
             <IntegrationSetupMedia
@@ -439,11 +433,13 @@ export function IntegrationConnectWizard({
 
       {integration.id !== "zapier" && (
         <p className="text-xs text-muted-foreground text-center">
-          Want something simpler?{" "}
-          <a href="#zapier-connect" className="text-accent underline underline-offset-2">
-            Use Zapier instead
-          </a>{" "}
-          — one link works with 5,000+ apps, no API keys.
+          {tw.rich("simpler", {
+            link: (chunks) => (
+              <a href="#zapier-connect" className="text-accent underline underline-offset-2">
+                {chunks}
+              </a>
+            ),
+          })}
         </p>
       )}
     </div>
@@ -454,14 +450,14 @@ export function IntegrationConnectWizard({
       {busy ? (
         <>
           <Loader2 className="size-10 text-accent mx-auto animate-spin" strokeWidth={1.5} />
-          <p className="text-base font-semibold">Sending a test to {integration.name}…</p>
-          <p className="text-sm text-muted-foreground">This usually takes a few seconds.</p>
+          <p className="text-base font-semibold">{tw("sendingTest", { name: integration.name })}</p>
+          <p className="text-sm text-muted-foreground">{tw("fewSeconds")}</p>
         </>
       ) : (
         <>
           <CheckCircle2 className="size-10 text-emerald-600 mx-auto" strokeWidth={1.5} />
-          <p className="text-base font-semibold">{integration.name} connected</p>
-          <p className="text-sm text-muted-foreground">Send a test to confirm everything works.</p>
+          <p className="text-base font-semibold">{tw("nameConnected", { name: integration.name })}</p>
+          <p className="text-sm text-muted-foreground">{tw("sendTestToConfirm")}</p>
           <button
             type="button"
             className="btn-primary inline-flex items-center gap-2"
@@ -469,13 +465,13 @@ export function IntegrationConnectWizard({
             onClick={() => void sendTest()}
           >
             <Send className="size-4" />
-            Send test
+            {tw("sendTest")}
           </button>
         </>
       )}
       <div>
         <button type="button" className="text-xs text-muted-foreground underline" onClick={() => void disconnect()}>
-          Disconnect
+          {tw("disconnect")}
         </button>
       </div>
     </div>
@@ -491,23 +487,23 @@ export function IntegrationConnectWizard({
         />
         <div className="space-y-1">
           <p className="text-lg font-semibold text-foreground">
-            {hasError ? `${integration.name} needs attention` : `${integration.name} is connected`}
+            {hasError ? tw("needsAttention", { name: integration.name }) : tw("isConnected", { name: integration.name })}
           </p>
           {connection?.last_test_at && (
             <p className="text-xs text-muted-foreground">
-              Last verified {timeAgo(connection.last_test_at)}
+              {tw("lastVerified", { ago: timeAgo(connection.last_test_at, locale) })}
             </p>
           )}
           {connection?.last_sync_at && (
             <p className="text-xs text-muted-foreground">
-              Last synced {timeAgo(connection.last_sync_at)}
+              {tw("lastSynced", { ago: timeAgo(connection.last_sync_at, locale) })}
             </p>
           )}
         </div>
         {connection?.last_error && (
           <>
             <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 px-3 py-2 text-xs text-amber-800 dark:text-amber-300 text-left">
-              <p className="font-medium mb-0.5">Last error</p>
+              <p className="font-medium mb-0.5">{tw("lastError")}</p>
               <p className="text-amber-700 dark:text-amber-400">{connection.last_error}</p>
             </div>
             <IntegrationWizardRequirements integration={integration} variant="warning" />
@@ -516,11 +512,11 @@ export function IntegrationConnectWizard({
         <div className="flex gap-2 justify-center">
           {hasTestStep(integration) && (
             <button type="button" className="btn-ghost text-sm" onClick={() => setShowTestStep(true)}>
-              Send test
+              {tw("sendTest")}
             </button>
           )}
           <button type="button" className="btn-ghost text-sm text-red-600" disabled={busy} onClick={() => void disconnect()}>
-            Disconnect
+            {tw("disconnect")}
           </button>
         </div>
       </div>
@@ -538,7 +534,7 @@ export function IntegrationConnectWizard({
         )}
         <div>
           <p className="text-lg font-semibold text-foreground">
-            {testPassed ? `${integration.name} connected` : `Couldn't verify ${integration.name}`}
+            {testPassed ? tw("nameConnected", { name: integration.name }) : tw("couldNotVerify", { name: integration.name })}
           </p>
           {testResult && (
             <p className={`text-sm mt-1 ${testPassed ? "text-emerald-700" : "text-amber-800"}`}>
@@ -549,8 +545,7 @@ export function IntegrationConnectWizard({
             <>
               <IntegrationWizardRequirements integration={integration} variant="warning" />
               <p className="text-xs text-muted-foreground mt-2">
-                Call data will not sync until the connection test passes. Use Fix credentials to reconnect with the
-                correct API key or token.
+                {tw("noSyncUntilPass")}
               </p>
             </>
           )}
@@ -562,26 +557,26 @@ export function IntegrationConnectWizard({
             rel="noopener noreferrer"
             className="btn-ghost text-sm inline-flex items-center gap-1"
           >
-            View in {integration.name} <ExternalLink className="size-3.5" />
+            {tw("viewIn", { name: integration.name })} <ExternalLink className="size-3.5" />
           </a>
         )}
         <div className="flex flex-wrap gap-2 justify-center">
           {!testPassed && (
             <>
               <button type="button" className="btn-primary text-sm" disabled={busy} onClick={retryCredentials}>
-                Fix credentials
+                {tw("fixCredentials")}
               </button>
               <button type="button" className="btn-ghost text-sm" disabled={busy} onClick={() => void sendTest()}>
-                Retry test
+                {tw("retryTest")}
               </button>
             </>
           )}
           <button type="button" className="btn-ghost text-sm text-red-600" disabled={busy} onClick={() => void disconnect()}>
-            Disconnect
+            {tw("disconnect")}
           </button>
           {testPassed && (
             <button type="button" className="btn-primary text-sm" onClick={onClose}>
-              Done
+              {tw("done")}
             </button>
           )}
         </div>
@@ -593,9 +588,9 @@ export function IntegrationConnectWizard({
     <div className="text-center py-6 space-y-4">
       <CheckCircle2 className="size-12 text-accent mx-auto" strokeWidth={1.5} />
       <div>
-        <p className="text-lg font-semibold text-foreground">Saved!</p>
+        <p className="text-lg font-semibold text-foreground">{tw("saved")}</p>
         <p className="text-sm text-muted-foreground mt-1">
-          {testResult?.message || `We'll let you know as soon as ${integration.name} sync is ready.`}
+          {testResult?.message || tw("weWillLetYouKnow", { name: integration.name })}
         </p>
       </div>
       <button
@@ -607,7 +602,7 @@ export function IntegrationConnectWizard({
           setTestResult(null);
         }}
       >
-        Update credentials
+        {tw("updateCredentials")}
       </button>
     </div>
   );
@@ -649,15 +644,15 @@ export function IntegrationConnectWizard({
           <div className="flex items-center gap-3 min-w-0">
             <IntegrationIcon id={integration.id} size="md" />
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">Connect {integration.name}</p>
-              <p className="text-xs text-muted-foreground">Setup wizard</p>
+              <p className="text-sm font-semibold text-foreground truncate">{tw("connectName", { name: integration.name })}</p>
+              <p className="text-xs text-muted-foreground">{tw("setupWizard")}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="shrink-0 rounded-lg p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            aria-label="Close"
+            aria-label={tw("close")}
           >
             <X className="size-4" />
           </button>
@@ -670,7 +665,7 @@ export function IntegrationConnectWizard({
             onClick={onClose}
             className="text-xs text-muted-foreground hover:text-foreground"
           >
-            Close setup
+            {tw("closeSetup")}
           </button>
         </div>
       )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
@@ -31,6 +32,7 @@ export function IntegrationSetupMedia({
   helpSteps,
   activeStepIndex,
 }: Props) {
+  const t = useTranslations("pages.integrations.hub.media");
   const [imgIdx, setImgIdx] = useState(activeStepIndex ?? 0);
   const [videoOpen, setVideoOpen] = useState(false);
   const [imgStates, setImgStates] = useState<Record<number, ImgState>>({});
@@ -69,7 +71,7 @@ export function IntegrationSetupMedia({
               <span className="inline-flex items-center justify-center size-7 rounded-full bg-accent/10 shrink-0">
                 <Play className="size-3.5 fill-current text-accent" />
               </span>
-              Watch 30-second setup guide
+              {t("watchGuide")}
             </button>
           ) : isIframeUrl(videoUrl) ? (
             <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: "56.25%" }}>
@@ -78,7 +80,7 @@ export function IntegrationSetupMedia({
                 className="absolute inset-0 w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                title="Setup guide"
+                title={t("setupGuide")}
               />
             </div>
           ) : (
@@ -105,7 +107,7 @@ export function IntegrationSetupMedia({
           <div className="relative rounded-md overflow-hidden bg-muted">
             <Image
               src={screenshots[safeImgIdx]}
-              alt={`Setup step ${safeImgIdx + 1}`}
+              alt={t("setupStep", { n: safeImgIdx + 1 })}
               width={800}
               height={208}
               unoptimized
@@ -156,7 +158,7 @@ export function IntegrationSetupMedia({
                 <button
                   key={i}
                   type="button"
-                  aria-label={`Screenshot ${i + 1}`}
+                  aria-label={t("screenshot", { n: i + 1 })}
                   onClick={() => setImgIdx(i)}
                   className={`size-1.5 rounded-full transition-colors ${i === safeImgIdx ? "bg-accent" : "bg-border hover:bg-muted-foreground/40"}`}
                 />
