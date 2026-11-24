@@ -6,27 +6,10 @@ import { hasAccess } from "@/lib/store";
 import { IntegrationIcon } from "@/components/integrations/IntegrationIcon";
 import { type IntegrationDef } from "@/lib/integration-hub-catalog";
 import { useIntegrationText } from "@/lib/use-integration-text";
+import { relativeTimeLabel as timeAgo } from "@/lib/relative-time";
 import { useLocale, useTranslations } from "next-intl";
 import type { IntegrationConnectionInfo } from "@/components/integrations/IntegrationConnectWizard";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
-
-function timeAgo(iso: string, locale: string): string {
-  const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (locale === "ar") {
-    // Arabic: a proper relative phrase with the same Western digits as the rest of the dashboard.
-    const rtf = new Intl.RelativeTimeFormat("ar-u-nu-latn", { numeric: "auto" });
-    if (m < 1) return rtf.format(0, "minute");
-    if (m < 60) return rtf.format(-m, "minute");
-    const h = Math.floor(m / 60);
-    if (h < 24) return rtf.format(-h, "hour");
-    return rtf.format(-Math.floor(h / 24), "day");
-  }
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
-}
 
 type Props = {
   integration: IntegrationDef;

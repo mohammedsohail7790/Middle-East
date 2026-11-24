@@ -13,20 +13,12 @@ import {
 import { navPageTitle } from "@/lib/dashboard-nav";
 import { FloatingRobot, type RobotMood } from "./FloatingRobot";
 
-const WELCOME =
-  "Hi — I'm Halla AI Assistant. I can see your current dashboard page and workspace data. Ask me anything about setup, calls, leads, or troubleshooting.";
 
 
 function resolvePageTitle(pathname: string): string {
   return navPageTitle(pathname);
 }
 
-const STARTERS = [
-  "What can I do on this page?",
-  "Why aren't my calls showing up?",
-  "How do I fix my AI business hours?",
-  "Where do I add a phone number?",
-];
 
 function messagesForApi(messages: AssistantMessage[]): AssistantMessage[] {
   return messages.filter((m) => m.content.trim().length > 0);
@@ -38,7 +30,7 @@ export function DashboardAssistant() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<AssistantMessage[]>([
-    { role: "assistant", content: WELCOME },
+    { role: "assistant", content: tShell("assistantWelcome") },
   ]);
   const [streaming, setStreaming] = useState(false);
   const [statusText, setStatusText] = useState("");
@@ -62,7 +54,7 @@ export function DashboardAssistant() {
     if (!trimmed || streaming) return;
 
     setError("");
-    setStatusText("Scanning your dashboard…");
+    setStatusText(tShell("assistantScanning"));
     const userMsg: AssistantMessage = { role: "user", content: trimmed };
     const nextMessages = [...messages, userMsg];
     setMessages(nextMessages);
@@ -107,7 +99,7 @@ export function DashboardAssistant() {
         },
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not reach assistant");
+      setError(e instanceof Error ? e.message : tShell("assistantUnreachable"));
       setMessages((prev) => prev.filter((_, i) => i !== assistantIndex));
       setStatusText("");
       setMood("idle");
@@ -116,8 +108,8 @@ export function DashboardAssistant() {
   };
 
   const subtitle = streaming
-    ? statusText || "Streaming answer…"
-    : "Knows every dashboard page · live workspace data";
+    ? statusText || tShell("assistantStreaming")
+    : tShell("assistantSubtitle");
 
   return (
     <div
@@ -185,7 +177,7 @@ export function DashboardAssistant() {
 
           {messages.length <= 1 && !streaming && (
             <div className="dashboard-assistant-starters px-3 pb-2 flex flex-wrap gap-1.5">
-              {STARTERS.map((q) => (
+              {[tShell("assistantStarter1"), tShell("assistantStarter2"), tShell("assistantStarter3"), tShell("assistantStarter4")].map((q) => (
                 <button
                   key={q}
                   type="button"

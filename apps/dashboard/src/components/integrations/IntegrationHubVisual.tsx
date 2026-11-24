@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRef, type Ref } from "react";
 import { Calendar, Users, Zap } from "lucide-react";
 import { AnimatedBeam } from "@/components/magic-ui/animated-beam";
@@ -31,6 +32,7 @@ function HubNode({
 }
 
 export function IntegrationHubVisual() {
+  const t = useTranslations("pages.integrations.hub.hubVisual");
   const containerRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
   const crmRef = useRef<HTMLDivElement>(null);
@@ -64,7 +66,7 @@ export function IntegrationHubVisual() {
             </div>
             <span className="text-xs font-bold uppercase tracking-wider text-accent">Halla AI</span>
           </div>
-          <HubNode nodeRef={calendarRef} icon={Calendar} label="Calendar" />
+          <HubNode nodeRef={calendarRef} icon={Calendar} label={t("calendar")} />
         </div>
       </div>
 

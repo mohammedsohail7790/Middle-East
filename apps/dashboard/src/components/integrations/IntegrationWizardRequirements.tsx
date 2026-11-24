@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Info } from "lucide-react";
 import { getWizardRequirementNotes, type IntegrationDef } from "@/lib/integration-hub-catalog";
 
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export function IntegrationWizardRequirements({ integration, variant = "info" }: Props) {
+  const t = useTranslations("pages.integrations.hub.wizard");
   const notes = getWizardRequirementNotes(integration);
   if (!notes.length) return null;
 
@@ -21,7 +23,7 @@ export function IntegrationWizardRequirements({ integration, variant = "info" }:
     <div className={`rounded-lg border px-3 py-2.5 space-y-1.5 ${styles}`}>
       <p className="text-[11px] font-semibold uppercase tracking-wide flex items-center gap-1.5">
         <Info className="size-3.5 shrink-0" />
-        Before you connect
+        {t("beforeYouConnect")}
       </p>
       <ul className="text-xs leading-relaxed space-y-1 list-disc list-inside marker:text-current/70">
         {notes.map((note) => (

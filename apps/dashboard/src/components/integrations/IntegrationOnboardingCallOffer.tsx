@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar, Phone } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   getIntegrationOnboardingCallUrl,
   isPayingCustomer,
@@ -18,6 +19,7 @@ export function IntegrationOnboardingCallOffer({
   variant = "inline",
   forceShow = false,
 }: Props) {
+  const t = useTranslations("pages.integrations.hub.callOffer");
   if (!forceShow && !isPayingCustomer()) return null;
 
   const href = getIntegrationOnboardingCallUrl(integrationName);
@@ -30,10 +32,9 @@ export function IntegrationOnboardingCallOffer({
             <Phone className="size-4" />
           </span>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground">Need a hand?</p>
+            <p className="text-sm font-semibold text-foreground">{t("needHand")}</p>
             <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-              Book a <strong>free 15-minute setup call</strong> — we&apos;ll connect{" "}
-              {integrationName} for you. Included with your plan.
+              {t.rich("prominentBody", { name: integrationName, strong: (chunks) => <strong>{chunks}</strong> })}
             </p>
           </div>
         </div>
@@ -44,7 +45,7 @@ export function IntegrationOnboardingCallOffer({
           className="btn-primary text-sm w-full inline-flex items-center justify-center gap-2"
         >
           <Calendar className="size-4" />
-          Book free setup call
+          {t("bookFree")}
         </a>
       </div>
     );
@@ -52,16 +53,16 @@ export function IntegrationOnboardingCallOffer({
 
   return (
     <p className="text-xs text-muted-foreground text-center">
-      Still stuck?{" "}
+      {t("stillStuck")}{" "}
       <a
         href={href}
         target={href.startsWith("mailto:") ? undefined : "_blank"}
         rel={href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
         className="text-accent font-medium hover:underline"
       >
-        Book a free setup call
+        {t("bookLink")}
       </a>{" "}
-      — we&apos;ll connect {integrationName} for you.
+      {t("weWillConnect", { name: integrationName })}
     </p>
   );
 }
