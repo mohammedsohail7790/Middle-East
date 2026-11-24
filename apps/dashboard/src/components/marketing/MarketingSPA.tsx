@@ -134,9 +134,9 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ss
     };
     window.addEventListener("popstate", () => {
       pushing = false;
-      // The back button can cross between /x and /ar/x: follow the address's language without rewriting it.
+      // The back and forward buttons can cross between /x and /ar/x: the address decides the language (a plain address is English), and is not rewritten.
       const here = splitLocale(window.location.pathname);
-      if (here.explicit && here.lang !== langRef.current) halla.setLang?.(here.lang, true);
+      if (here.lang !== langRef.current) halla.setLang?.(here.lang, true);
       halla.go?.(resolveMarketingPage(window.location.pathname));
       pushing = true;
     });
