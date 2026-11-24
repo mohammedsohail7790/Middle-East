@@ -683,11 +683,12 @@ async function requestListRaw<T>(
 
 async function requestList<T>(
   path: string,
-  params?: Record<string, string>
+  params?: Record<string, string>,
+  options?: { fresh?: boolean }
 ): Promise<PaginatedList<T>> {
   const qs = params ? `?${new URLSearchParams(params)}` : "";
   const cachePath = `${path}${qs}`;
-  return cachedGet(cachePath, () => requestListRaw<T>(path, params));
+  return cachedGet(cachePath, () => requestListRaw<T>(path, params), options);
 }
 
 function invalidateAfterMutation(path: string) {
@@ -708,7 +709,8 @@ export const api = {
   get: <T>(path: string, options?: { fresh?: boolean }) =>
     cachedGet(path, () => request<T>(path), options),
   getOAuthRedirectUrl: (path: string) => getOAuthRedirectUrl(path),
-  getList: <T>(path: string, params?: Record<string, string>) => requestList<T>(path, params),
+  getList: <T>(path: string, params?: Record<string, string>, options?: { fresh?: boolean }) =>
+    requestList<T>(path, params, options),
   post: <T>(path: string, body: unknown) =>
     request<T>(path, { method: "POST", body: JSON.stringify(body) }).then((data) => {
       invalidateAfterMutation(path);

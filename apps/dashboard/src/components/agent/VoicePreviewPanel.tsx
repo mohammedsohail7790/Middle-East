@@ -1,17 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Mic, Play, Square } from "lucide-react";
 import { api } from "@/lib/api";
 import { normalizeAIConfig, type DashboardAIConfigShape } from "@/lib/gateway-adapters";
 import { subscribeAIConfigUpdates } from "@/lib/realtime";
 import { useDashboardSync } from "@/lib/dashboard-sync";
+import { agentLanguageLabel } from "@/lib/agent-languages";
 
 interface VoicePreviewPanelProps {
   config: DashboardAIConfigShape | null;
 }
 
 export function VoicePreviewPanel({ config: parentConfig }: VoicePreviewPanelProps) {
+  const t = useTranslations("pages.agent");
   const [config, setConfig] = useState<DashboardAIConfigShape | null>(parentConfig);
   const [loading, setLoading] = useState(!parentConfig);
   const [playing, setPlaying] = useState(false);
@@ -28,9 +31,9 @@ export function VoicePreviewPanel({ config: parentConfig }: VoicePreviewPanelPro
       .get<DashboardAIConfigShape>("/ai-config")
       .then((data) => setConfig(normalizeAIConfig(data)))
       .catch((e: unknown) => {
-        setError(e instanceof Error ? e.message : "Could not load agent settings");
+        setError(e instanceof Error ? e.message : t("vpLoadFailed"));
       });
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!parentConfig) {
@@ -71,7 +74,7 @@ export function VoicePreviewPanel({ config: parentConfig }: VoicePreviewPanelPro
       await audio.play();
     } catch (e: unknown) {
       setPlaying(false);
-      setError(e instanceof Error ? e.message : "Voice preview failed");
+      setError(e instanceof Error ? e.message : t("vpPreviewFailed"));
     }
   };
 
@@ -98,10 +101,10 @@ export function VoicePreviewPanel({ config: parentConfig }: VoicePreviewPanelPro
     return (
       <div className="card p-6 max-w-xl space-y-3">
         <p className="text-sm text-foreground-secondary">
-          {error || "Could not load agent settings. Save your configuration above or retry."}
+          {error || t("vpLoadFailedLong")}
         </p>
         <button type="button" className="btn-primary" onClick={() => void reloadConfig()}>
-          Retry
+          {t("vpRetry")}
         </button>
       </div>
     );
@@ -110,30 +113,29 @@ export function VoicePreviewPanel({ config: parentConfig }: VoicePreviewPanelPro
   return (
     <div className="card p-6 space-y-4 max-w-xl">
       <p className="text-sm text-foreground-secondary">
-        Hear a sample in your selected language (OpenAI TTS). Updates automatically when you or a teammate
-        saves agent settings on another tab.
+        {t("vpIntro")}
       </p>
       {error && <p className="text-red-600 text-sm">{error}</p>}
       <div className="rounded-xl border border-border bg-muted p-4 text-sm text-foreground-secondary">
         <p className="font-medium text-foreground mb-1">{config.agentName}</p>
         <p className="line-clamp-4">
           {config.greetingMessage?.trim() ||
-            `Thanks for calling. This is ${config.agentName}. How can I help you today?`}
+            t("vpDefaultGreeting", { name: config.agentName })}
         </p>
         <p className="text-xs text-foreground-tertiary mt-2">
-          Voice: {config.voice} · Language: {config.language}
+          {t("vpVoiceLanguage", { voice: config.voice, language: agentLanguageLabel(config.language, t) })}
         </p>
       </div>
       <div className="flex gap-2">
         <button type="button" onClick={preview} disabled={playing} className="btn-primary">
-          <Play className="w-4 h-4" /> {playing ? "Playing..." : "Play preview"}
+          <Play className="w-4 h-4" /> {playing ? t("vpPlaying") : t("vpPlay")}
         </button>
         <button type="button" onClick={stop} className="btn-ghost">
-          <Square className="w-4 h-4" /> Stop
+          <Square className="w-4 h-4" /> {t("vpStop")}
         </button>
       </div>
       <p className="text-[10px] text-foreground-tertiary flex items-center gap-1">
-        <Mic className="w-3 h-3" /> Live sync via workspace push and AI config WebSocket.
+        <Mic className="w-3 h-3" /> {t("vpLiveSync")}
       </p>
     </div>
   );

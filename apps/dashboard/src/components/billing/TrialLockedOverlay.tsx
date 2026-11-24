@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Lock, Sparkles, Mail } from "lucide-react";
 import { api } from "@/lib/api";
@@ -14,6 +15,8 @@ const PLANS = [
 ];
 
 export function TrialLockedOverlay({ trial }: { trial: TrialUsageState }) {
+  const t = useTranslations("billing");
+  const locale = useLocale();
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState("");
 
@@ -23,7 +26,7 @@ export function TrialLockedOverlay({ trial }: { trial: TrialUsageState }) {
     try {
       const { data: userData } = await supabase.auth.getUser();
       const email = userData.user?.email;
-      if (!email) throw new Error("Sign in required");
+      if (!email) throw new Error(t("trialLockedErrorSignIn"));
 
       const origin = typeof window !== "undefined" ? window.location.origin : "";
       const res = await api.post<{ url: string }>("/billing/checkout-session", {
@@ -33,9 +36,9 @@ export function TrialLockedOverlay({ trial }: { trial: TrialUsageState }) {
         cancelUrl: `${origin}/dashboard/billing?checkout=cancel`,
       });
       if (res?.url) window.location.href = res.url;
-      else throw new Error("Checkout URL missing");
+      else throw new Error(t("trialLockedErrorUrl"));
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Checkout failed");
+      setError(e instanceof Error ? e.message : t("trialLockedErrorFailed"));
     } finally {
       setLoading(null);
     }
@@ -51,29 +54,29 @@ export function TrialLockedOverlay({ trial }: { trial: TrialUsageState }) {
           <div className="w-14 h-14 rounded-2xl bg-white/10 mx-auto flex items-center justify-center mb-4">
             <Lock className="w-7 h-7" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight">Your free trial has ended</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t("trialLockedTitle")}</h2>
           <p className="text-sm text-white/70 mt-2 max-w-sm mx-auto">
-            {trial.blockReason ||
-              "Upgrade to restore your AI receptionist, workflows, and integrations."}
+            {/* The server's reason is English only, so other languages show the translated default. */}
+            {(locale === "en" && trial.blockReason) || t("trialLockedDefaultReason")}
           </p>
         </div>
 
         <div className="px-8 py-6 space-y-4">
           <div className="grid grid-cols-2 gap-3 text-center">
             <div className="rounded-xl bg-muted p-3 border border-border">
-              <p className="text-[10px] uppercase tracking-wide text-foreground-tertiary">Minutes used</p>
-              <p className="text-xl font-bold text-foreground">
+              <p className="text-[10px] uppercase tracking-wide text-foreground-tertiary">{t("trialLockedMinutesUsed")}</p>
+              <p className="text-xl font-bold text-foreground" dir="ltr">
                 {trial.trialMinutesUsed} <span className="text-sm font-normal text-foreground-secondary">/ 60</span>
               </p>
             </div>
             <div className="rounded-xl bg-muted p-3 border border-border">
-              <p className="text-[10px] uppercase tracking-wide text-foreground-tertiary">Trial period</p>
-              <p className="text-xl font-bold text-foreground">14 days</p>
+              <p className="text-[10px] uppercase tracking-wide text-foreground-tertiary">{t("trialLockedPeriod")}</p>
+              <p className="text-xl font-bold text-foreground">{t("trialLockedPeriodValue", { count: 14 })}</p>
             </div>
           </div>
 
           <p className="text-xs text-foreground-secondary text-center">
-            You can still view analytics and manage billing. Choose a plan to go live again.
+            {t("trialLockedStillAvailable")}
           </p>
 
           {error && (
@@ -94,12 +97,12 @@ export function TrialLockedOverlay({ trial }: { trial: TrialUsageState }) {
                   <div>
                     <span className="text-sm font-semibold text-foreground">{p.name}</span>
                     {p.popular && (
-                      <span className="ml-2 text-[10px] font-medium text-accent">Popular</span>
+                      <span className="ml-2 text-[10px] font-medium text-accent">{t("trialLockedPopular")}</span>
                     )}
                   </div>
                 </div>
                 <span className="text-sm font-bold text-foreground">
-                  {loading === p.id ? "…" : `$${p.price}/mo`}
+                  {loading === p.id ? "…" : t("trialLockedPricePerMonth", { price: p.price })}
                 </span>
               </button>
             ))}
@@ -110,13 +113,13 @@ export function TrialLockedOverlay({ trial }: { trial: TrialUsageState }) {
               href="/dashboard/billing"
               className="btn-primary flex-1 justify-center text-sm"
             >
-              View billing
+              {t("trialLockedViewBilling")}
             </Link>
             <a
               href={`mailto:${SUPPORT_EMAIL}`}
               className="btn-ghost flex-1 justify-center text-sm gap-2"
             >
-              <Mail className="w-4 h-4" /> Contact sales
+              <Mail className="w-4 h-4" /> {t("trialLockedContactSales")}
             </a>
           </div>
         </div>

@@ -58,8 +58,9 @@ import { createBillingIntelligenceRouter } from '../services/billing/billing-int
 import { ipAllowlistMiddleware } from '../services/security/ipAllowlist.js';
 import { apiAuthUnlessPublic } from '../middleware/api-auth-unless-public.js';
 import { csrfProtectionMiddleware } from '../middleware/csrf.js';
-import { apiScopeMiddleware } from '../middleware/api-scopes.js';
+import { roleGuardMiddleware } from '../middleware/role-guard.js';
 import { enforceMfaMiddleware } from '../middleware/enforce-mfa.js';
+import { auditChangesMiddleware } from '../middleware/audit-changes.js';
 
 export function createApiRouter(): express.Router {
     const apiRouter = express.Router();
@@ -69,9 +70,14 @@ export function createApiRouter(): express.Router {
     apiRouter.use((req, res, next) => {
         void csrfProtectionMiddleware(req, res, next);
     });
-    apiRouter.use(apiScopeMiddleware);
+    // Roles are enforced on every change request, with the role looked up on the server (replaces the old x-dashboard-role header guard).
+    apiRouter.use((req, res, next) => {
+        void roleGuardMiddleware(req, res, next);
+    });
     // HIPAA §164.312(d) — Enforce MFA when required by tenant org policy
     apiRouter.use(enforceMfaMiddleware);
+    // Every successful change by a signed-in user is written to the audit log (who, what, which record; never the request body).
+    apiRouter.use(auditChangesMiddleware);
 
     apiRouter.use('/voice', createVoiceRouter());
     apiRouter.use('/tenants', createTenantsRouter());

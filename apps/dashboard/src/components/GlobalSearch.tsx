@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { useDebouncedValue } from "@/lib/use-debounced-value";
 import { Search, Phone, Users, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -17,6 +18,7 @@ const CATEGORY_ICONS: Record<string, typeof Phone> = {
 };
 
 export function GlobalSearch() {
+  const t = useTranslations("shell");
   const [q, setQ] = useState("");
   const debouncedQ = useDebouncedValue(q, 350);
   const [hits, setHits] = useState<Hit[]>([]);
@@ -74,9 +76,9 @@ export function GlobalSearch() {
         <input
           ref={inputRef}
           role="combobox"
-          placeholder="Search calls, leads, transcripts…"
+          placeholder={t("searchPlaceholder")}
           className="dashboard-topbar-search-input"
-          aria-label="Global search"
+          aria-label={t("searchLabel")}
           aria-expanded={showDropdown}
           aria-controls="global-search-results"
           value={q}

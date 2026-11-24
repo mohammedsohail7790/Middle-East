@@ -8,6 +8,7 @@ import {
   FileCheck, Mic, MicOff, MessageSquare, Building2, Save, Info,
   ChevronRight, AlertTriangle, CheckCircle2,
 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { api } from "@/lib/api";
 import { SUPPORT_EMAIL } from "@/lib/integration-support";
 import { DashboardPage } from "@/components/ui-kit/DashboardPage";
@@ -209,6 +210,7 @@ function ProfileCard({
 export default function CompliancePage() {
   const t = useTranslations("pages.compliance");
   const tCommon = useTranslations("common");
+  const tAudit = useTranslations("pages.auditHistory");
   const { title, description } = useDashboardPageLabels("/dashboard/compliance");
   const retentionOptions = useMemo(
     () => RETENTION_OPTION_KEYS.map((opt) => ({ ...opt, label: t(opt.key) })),
@@ -772,6 +774,11 @@ export default function CompliancePage() {
         icon={FileText}
         iconVariant="neutral"
         description={t("auditTrailDesc")}
+        actions={
+          <Link href="/dashboard/compliance/audit" className="btn-ghost text-xs">
+            {tAudit("viewAll")}
+          </Link>
+        }
       >
         {auditEvents.length === 0 ? (
           <p className="text-sm text-muted-foreground py-6 text-center">{t("noAuditEvents")}</p>

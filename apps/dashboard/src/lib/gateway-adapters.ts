@@ -406,6 +406,14 @@ export function tenantSettingsToApi(settings: {
   };
 }
 
+/**
+ * The Voice & routing card only edits the timezone. Language, tone and the transfer number live in the agent settings above it,
+ * so this save must not send them: a stale copy would silently overwrite what was just saved there.
+ */
+export function voiceRoutingToApi(settings: { timezone: string }) {
+  return { timezone: settings.timezone };
+}
+
 export function normalizeKnowledgeItem(row: Record<string, unknown>) {
   const text = String(row.text ?? row.content ?? "");
   return {

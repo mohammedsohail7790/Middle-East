@@ -274,7 +274,7 @@ export default function LeadsPage() {
             onChange={(e) => setLeadSearch(e.target.value)}
             placeholder={t("searchPlaceholder")}
             className="input w-full !pl-10"
-            aria-label="Search leads"
+            aria-label={t("searchAria")}
           />
         </div>
       }
@@ -293,7 +293,7 @@ export default function LeadsPage() {
       </div>
 
       <DashboardPageSection
-        step="Pipeline"
+        step={t("pipelineStep")}
         title={t("stagesTitle")}
         description={t("stagesDesc")}
         icon={Users}
@@ -322,12 +322,12 @@ export default function LeadsPage() {
           <EmptyState
             icon={Users}
             title={t("noLeads")}
-            description="New leads from calls, WhatsApp, and manual entry will appear in your pipeline."
+            description={t("noLeadsDesc")}
           />
         ) : (
           <>
           <div className="lg:hidden space-y-3 sm:space-y-4">
-            <div className="dashboard-pipeline-tabs" role="tablist" aria-label="Pipeline stage">
+            <div className="dashboard-pipeline-tabs" role="tablist" aria-label={t("stageAria")}>
               {columns.map((col) => {
                 const count = leads.filter((l) => l.status === col.id).length;
                 const active = mobileColumn === col.id;

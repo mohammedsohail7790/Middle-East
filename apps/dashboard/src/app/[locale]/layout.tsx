@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
-import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google";
-// Self-hosted (no Google Fonts fetch at build time, so CI and deploys cannot fail on a font download).
+// Every font is self-hosted (no Google Fonts fetch at build time, so CI, Docker and deploys cannot fail on a font download).
+import "@fontsource-variable/inter";
+import "@fontsource/ibm-plex-sans-arabic/400.css";
+import "@fontsource/ibm-plex-sans-arabic/500.css";
+import "@fontsource/ibm-plex-sans-arabic/600.css";
+import "@fontsource/ibm-plex-sans-arabic/700.css";
 import "@fontsource-variable/cormorant-garamond";
 import "@fontsource-variable/plus-jakarta-sans";
 import "@fontsource-variable/cairo";
@@ -11,13 +15,6 @@ import { Providers } from "@/components/providers";
 import "../globals.css";
 import "@/styles/apple-dashboard.css";
 import "@/styles/consultancy-brand.css";
-
-const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" });
-const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
-  subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-arabic",
-});
 
 export const metadata: Metadata = {
   title: "Halla AI – Smart • Seamless • Always",
@@ -57,7 +54,7 @@ export default async function LocaleLayout({
         <script>{themeInitScript}</script>
       </head>
       <body
-        className={`${inter.variable} ${ibmPlexSansArabic.variable} ${locale === "ar" ? "font-arabic" : "font-sans"} min-h-screen`}
+        className={`${locale === "ar" ? "font-arabic" : "font-sans"} min-h-screen`}
         suppressHydrationWarning
       >
         <NextIntlClientProvider>

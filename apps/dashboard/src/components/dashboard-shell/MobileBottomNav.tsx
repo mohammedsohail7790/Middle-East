@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { usePathname } from "@/i18n/navigation";
 import { LayoutDashboard, Phone, Users, Bot, Menu } from "lucide-react";
@@ -7,10 +8,10 @@ import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
-  { href: "/dashboard", label: "Home", icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/calls", label: "Calls", icon: Phone },
-  { href: "/dashboard/leads", label: "Leads", icon: Users },
-  { href: "/dashboard/agent", label: "Agent", icon: Bot },
+  { href: "/dashboard", labelKey: "mobileNavHome", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/calls", labelKey: "mobileNavCalls", icon: Phone },
+  { href: "/dashboard/leads", labelKey: "mobileNavLeads", icon: Users },
+  { href: "/dashboard/agent", labelKey: "mobileNavAgent", icon: Bot },
 ] as const;
 
 type Props = {
@@ -20,6 +21,7 @@ type Props = {
 
 export function MobileBottomNav({ onOpenMenu, hidden }: Props) {
   const pathname = usePathname();
+  const t = useTranslations("shell");
 
   return (
     <nav
@@ -29,7 +31,7 @@ export function MobileBottomNav({ onOpenMenu, hidden }: Props) {
       )}
       aria-hidden={hidden || undefined}
       style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
-      aria-label="Primary"
+      aria-label={t("mobileNavPrimary")}
     >
       <div className="grid grid-cols-5 h-[3.75rem] max-w-lg mx-auto">
         {ITEMS.map((item) => {
@@ -55,7 +57,7 @@ export function MobileBottomNav({ onOpenMenu, hidden }: Props) {
               >
                 <Icon className="size-[18px]" strokeWidth={active ? ICON_STROKE + 0.25 : ICON_STROKE} />
               </span>
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           );
         })}
@@ -63,12 +65,12 @@ export function MobileBottomNav({ onOpenMenu, hidden }: Props) {
           type="button"
           onClick={onOpenMenu}
           className="flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold text-muted-foreground min-h-[44px]"
-          aria-label="Open menu"
+          aria-label={t("openMenu")}
         >
           <span className="grid place-items-center size-9 rounded-xl">
             <Menu className="size-[18px]" strokeWidth={ICON_STROKE} />
           </span>
-          More
+          {t("mobileNavMore")}
         </button>
       </div>
     </nav>

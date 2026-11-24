@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { subscriptionStatusLabel } from "@/lib/subscription-status";
 import { useRouter } from "@/i18n/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -418,7 +419,7 @@ function BillingPageContent() {
                   "px-2 py-0.5 text-xs rounded-full",
                   subscription.status === "active" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-700"
                 )}>
-                  {subscription.status}
+                  {subscriptionStatusLabel(subscription.status, t)}
                 </span>
               </div>
               <p className="text-sm text-foreground-secondary mb-4">

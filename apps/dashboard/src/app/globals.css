@@ -11,6 +11,8 @@
  */
 
 :root {
+  --font-inter: "Inter Variable";
+  --font-arabic: "IBM Plex Sans Arabic";
   --font-cormorant: "Cormorant Garamond Variable";
   --font-jakarta: "Plus Jakarta Sans Variable";
   --font-cairo: "Cairo Variable";
@@ -227,7 +229,7 @@
     min-height: 100dvh;
   }
 
-  /* next/font attaches --font-inter to <body>, so re-resolve the stack there. */
+  /* The fonts are bundled packages that define these family names, so the stack is re-resolved on <body>. */
   body {
     --font-sans: var(--font-jakarta, "Plus Jakarta Sans"), var(--font-inter, Inter), -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
     --font-display: var(--font-cormorant, "Cormorant Garamond"), var(--font-cairo, Cairo), Georgia, serif;

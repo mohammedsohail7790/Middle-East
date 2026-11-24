@@ -8,6 +8,8 @@ export interface CorrelationContext {
   callSid?: string;
   wsSessionId?: string;
   sessionId?: string;
+  /** Address the current HTTP request came from, so audit events can say where a change was made. */
+  ip?: string;
 }
 
 const storage = new AsyncLocalStorage<CorrelationContext>();
