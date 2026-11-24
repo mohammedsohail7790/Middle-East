@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useIntegrationText } from "@/lib/use-integration-text";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -44,7 +45,6 @@ import { IntegrationHubVisual } from "@/components/integrations/IntegrationHubVi
 import { VibePanel } from "@/components/magic-ui/vibe-panel";
 import { ZapierHubSection } from "@/components/integrations/ZapierHubSection";
 import {
-  CATEGORY_LABELS,
   OAUTH_INTEGRATIONS,
   getIntegrationDef,
   getIntegrationsByCategory,
@@ -146,6 +146,7 @@ function sortIntegrationsForList(
 
 export default function IntegrationsPage() {
   const t = useTranslations("pages.integrations");
+  const integrationText = useIntegrationText();
   const tNav = useTranslations("nav");
   const [, setPlanTick] = useState(0);
   const initialCatalog = readApiGetCache<CatalogResponse>("/integrations/catalog");
@@ -306,14 +307,14 @@ export default function IntegrationsPage() {
       if ((counts[cat] ?? 0) > 0) {
         tabs.push({
           id: cat,
-          label: CATEGORY_LABELS[cat],
+          label: integrationText.categoryLabel(cat),
           icon: CATEGORY_ICONS[cat],
           count: counts[cat] ?? 0,
         });
       }
     }
     return tabs;
-  }, [displayableIntegrations, t]);
+  }, [displayableIntegrations, t, integrationText]);
 
   const visibleIntegrations = useMemo(() => {
     const q = searchQuery.trim();

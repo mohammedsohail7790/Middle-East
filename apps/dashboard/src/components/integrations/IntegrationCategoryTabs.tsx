@@ -1,6 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { IntegrationCategory } from "@/lib/integration-hub-catalog";
 
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export function IntegrationCategoryTabs({ tabs, active, onChange, className }: Props) {
+  const t = useTranslations("pages.integrations.hub");
   return (
     <div
       className={cn(
@@ -28,7 +30,7 @@ export function IntegrationCategoryTabs({ tabs, active, onChange, className }: P
         className
       )}
       role="tablist"
-      aria-label="Integration categories"
+      aria-label={t("categoriesAria")}
     >
       {tabs.map((tab) => {
         const selected = tab.id === active;

@@ -194,9 +194,9 @@ function AnalyticsPageContent() {
     <div className="grid grid-cols-1 gap-2 w-full min-w-0 sm:flex sm:flex-wrap sm:items-center">
       <div className="flex gap-1.5">
         {[
-          { label: "7d", days: 7 },
-          { label: "30d", days: 30 },
-          { label: "90d", days: 90 },
+          { label: t("range7d"), days: 7 },
+          { label: t("range30d"), days: 30 },
+          { label: t("range90d"), days: 90 },
         ].map((p) => (
           <button
             key={p.label}
@@ -255,7 +255,7 @@ function AnalyticsPageContent() {
         <StatCard label={t("totalCalls")} value={metrics?.totalCalls ?? 0} icon={Phone} iconVariant="accent" index={0} />
         <StatCard label={t("totalLeads")} value={metrics?.totalLeads ?? 0} icon={Users} iconVariant="violet" index={1} />
         <StatCard label={t("conversionRate")} value={`${metrics?.conversionRate ?? 0}%`} icon={TrendingUp} iconVariant="success" index={2} />
-        <StatCard label={t("avgDuration")} value={`${metrics?.avgDuration ?? 0}s`} icon={Clock} iconVariant="neutral" index={3} />
+        <StatCard label={t("avgDuration")} value={t("avgDurationValue", { value: metrics?.avgDuration ?? 0 })} icon={Clock} iconVariant="neutral" index={3} />
       </div>
 
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">

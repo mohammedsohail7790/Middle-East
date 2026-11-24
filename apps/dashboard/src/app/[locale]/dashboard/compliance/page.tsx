@@ -214,6 +214,8 @@ function ProfileCard({
 export default function CompliancePage() {
   const t = useTranslations("pages.compliance");
   const tCommon = useTranslations("common");
+  // The four known profiles have translated names; anything else the server sends is shown as it comes.
+  const profileName = (id: string, fallback: string) => (["healthcare", "legal", "real_estate", "general"].includes(id) ? t(`profiles.${id}.label` as never) : fallback);
   const tAudit = useTranslations("pages.auditHistory");
   const { title, description } = useDashboardPageLabels("/dashboard/compliance");
   const retentionOptions = useMemo(
@@ -648,7 +650,7 @@ export default function CompliancePage() {
                 },
                 {
                   label: t("summaryProfile"),
-                  value: profiles.find((p) => p.id === settings.industryProfile)?.label ?? settings.industryProfile,
+                  value: profileName(settings.industryProfile, profiles.find((p) => p.id === settings.industryProfile)?.label ?? settings.industryProfile),
                   ok: null,
                 },
               ].map(({ label, value, ok }) => (

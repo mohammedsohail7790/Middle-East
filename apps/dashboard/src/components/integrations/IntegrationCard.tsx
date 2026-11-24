@@ -4,12 +4,23 @@ import { ArrowRight, CheckCircle, Clock, Lock, AlertTriangle } from "lucide-reac
 import { cn } from "@/lib/utils";
 import { hasAccess } from "@/lib/store";
 import { IntegrationIcon } from "@/components/integrations/IntegrationIcon";
-import { CATEGORY_LABELS, type IntegrationDef } from "@/lib/integration-hub-catalog";
+import { type IntegrationDef } from "@/lib/integration-hub-catalog";
+import { useIntegrationText } from "@/lib/use-integration-text";
+import { useLocale, useTranslations } from "next-intl";
 import type { IntegrationConnectionInfo } from "@/components/integrations/IntegrationConnectWizard";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 
-function timeAgo(iso: string): string {
+function timeAgo(iso: string, locale: string): string {
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (locale === "ar") {
+    // Arabic: a proper relative phrase with the same Western digits as the rest of the dashboard.
+    const rtf = new Intl.RelativeTimeFormat("ar-u-nu-latn", { numeric: "auto" });
+    if (m < 1) return rtf.format(0, "minute");
+    if (m < 60) return rtf.format(-m, "minute");
+    const h = Math.floor(m / 60);
+    if (h < 24) return rtf.format(-h, "hour");
+    return rtf.format(-Math.floor(h / 24), "day");
+  }
   if (m < 1) return "just now";
   if (m < 60) return `${m}m ago`;
   const h = Math.floor(m / 60);
@@ -62,41 +73,44 @@ export function IntegrationCard({
   onSelect,
   variant = "card",
 }: Props) {
+  const t = useTranslations("pages.integrations.hub.card");
+  const locale = useLocale();
+  const text = useIntegrationText();
   const status = connection?.status ?? "disconnected";
   const connected = status === "connected";
   const comingSoonSaved = status === "coming_soon";
   const hasError = status === "error" || (connected && !!connection?.last_error);
   const locked = !!integration.planRequired && !hasAccess(integration.planRequired) && !connected;
 
-  let actionLabel = "Connect";
-  if (connected) actionLabel = "Manage";
-  else if (comingSoonSaved) actionLabel = "Update";
-  else if (!integration.ready) actionLabel = "Set up";
+  let actionLabel = t("connect");
+  if (connected) actionLabel = t("manage");
+  else if (comingSoonSaved) actionLabel = t("update");
+  else if (!integration.ready) actionLabel = t("setUp");
 
   const statusBadges = (
     <>
       {connected && !hasError && (
         <StatusBadge tone="success">
           <CheckCircle className="w-3 h-3" />
-          Connected
+          {t("connected")}
         </StatusBadge>
       )}
       {connected && hasError && (
         <StatusBadge tone="warning">
           <AlertTriangle className="w-3 h-3" />
-          Needs attention
+          {t("needsAttention")}
         </StatusBadge>
       )}
       {!connected && comingSoonSaved && (
         <StatusBadge tone="warning">
           <Clock className="w-3 h-3" />
-          Saved
+          {t("saved")}
         </StatusBadge>
       )}
       {!connected && status === "error" && (
         <StatusBadge tone="error">
           <AlertTriangle className="w-3 h-3" />
-          Error
+          {t("error")}
         </StatusBadge>
       )}
       {locked && !connected && (
@@ -124,13 +138,13 @@ export function IntegrationCard({
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <p className="text-sm font-semibold text-foreground">{integration.name}</p>
               <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                {CATEGORY_LABELS[integration.category]}
+                {text.categoryLabel(integration.category)}
               </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{integration.tagline}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{text.tagline(integration)}</p>
             {connected && connection?.last_test_at && (
               <p className="text-[10px] text-muted-foreground/80 mt-1">
-                Verified {timeAgo(connection.last_test_at)}
+                {t("verified", { ago: timeAgo(connection.last_test_at, locale) })}
               </p>
             )}
           </div>
@@ -171,7 +185,7 @@ export function IntegrationCard({
             {integration.name}
           </span>
           <span className="block text-[11px] text-muted-foreground mt-1 line-clamp-2 leading-snug">
-            {integration.tagline}
+            {text.tagline(integration)}
           </span>
         </div>
         {locked && !connected && (
@@ -183,7 +197,7 @@ export function IntegrationCard({
 
       {connected && connection?.last_test_at && (
         <span className="text-[10px] text-muted-foreground/70 mt-1">
-          Verified {timeAgo(connection.last_test_at)}
+          {t("verified", { ago: timeAgo(connection.last_test_at, locale) })}
         </span>
       )}
 
