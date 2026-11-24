@@ -84,7 +84,19 @@
     "mobileNavAgent": "Agent",
     "mobileNavMore": "More",
     "searchPlaceholder": "Search calls, leads, transcripts…",
-    "searchLabel": "Global search"
+    "searchLabel": "Global search",
+    "mainNavigation": "Main navigation",
+    "footerTagline": "Halla AI — US-based, built for the Middle East.",
+    "breadcrumb": "Breadcrumb",
+    "notifications": "Notifications",
+    "alerts": "Alerts",
+    "assistantLabel": "Assistant",
+    "assistantTitle": "Halla AI Assistant",
+    "assistantOpen": "Open Halla AI Assistant",
+    "assistantClose": "Close Halla AI Assistant",
+    "assistantCloseShort": "Close assistant",
+    "assistantPlaceholder": "Ask Halla AI Assistant…",
+    "assistantSend": "Send message"
   },
   "common": {
     "save": "Save",
@@ -657,7 +669,26 @@
       "notRequired": "Not required",
       "indefinite": "Indefinite",
       "settingsSaved": "Compliance settings saved",
-      "saveFailed": "Save failed"
+      "saveFailed": "Save failed",
+      "profiles": {
+        "healthcare": {
+          "label": "Healthcare",
+          "description": "Stricter defaults for HIPAA-regulated environments: clinics, dental, chiropractic, veterinary."
+        },
+        "legal": {
+          "label": "Legal",
+          "description": "Stricter defaults for law offices and legal services. Supports attorney-client privilege awareness."
+        },
+        "real_estate": {
+          "label": "Real Estate",
+          "description": "Standard defaults for real estate agencies and property management."
+        },
+        "general": {
+          "label": "General Business",
+          "description": "Standard defaults suitable for most industries."
+        }
+      },
+      "hipaaBaaBody": "HIPAA Business Associate Agreements (BAA) are not currently offered on any plan. Halla AI does support healthcare compliance settings, including AI disclosure, call recording, and caller consent, through the settings above. However, a formal BAA is not available. If your business requires HIPAA compliance, contact <mail>{email}</mail> and we will follow up when this changes."
     },
     "businessProfile": {
       "heroLabel": "Business profile",

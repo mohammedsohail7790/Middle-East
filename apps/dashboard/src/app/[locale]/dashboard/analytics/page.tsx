@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import {
   TrendingUp, Phone, Users, Clock, Download, Calendar, Filter
@@ -57,6 +57,7 @@ export default function AnalyticsPage() {
 
 function AnalyticsPageContent() {
   const t = useTranslations("pages.analytics");
+  const locale = useLocale();
   const { title, description } = useDashboardPageLabels("/dashboard/analytics");
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [callVolume, setCallVolume] = useState<CallVolume[]>([]);
@@ -290,7 +291,7 @@ function AnalyticsPageContent() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={formatChartDay}
+                  tickFormatter={(v) => formatChartDay(v, locale)}
                   tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}

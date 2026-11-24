@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { X, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -33,6 +34,7 @@ function messagesForApi(messages: AssistantMessage[]): AssistantMessage[] {
 
 export function DashboardAssistant() {
   const pathname = usePathname();
+  const tShell = useTranslations("shell");
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<AssistantMessage[]>([
@@ -126,12 +128,12 @@ export function DashboardAssistant() {
         <button
           type="button"
           className="dashboard-assistant-backdrop lg:hidden"
-          aria-label="Close assistant"
+          aria-label={tShell("assistantCloseShort")}
           onClick={() => setOpen(false)}
         />
       )}
       {open && (
-        <div className="dashboard-assistant-panel" role="dialog" aria-label="Halla AI Assistant">
+        <div className="dashboard-assistant-panel" role="dialog" aria-label={tShell("assistantTitle")}>
           <header className="dashboard-assistant-header">
             <div className="flex items-center gap-3 min-w-0">
               <div className="assistant-logo-wrap shrink-0">
@@ -145,7 +147,7 @@ export function DashboardAssistant() {
                 />
               </div>
               <div className="min-w-0">
-                <p className="font-semibold text-sm text-foreground">Halla AI Assistant</p>
+                <p className="font-semibold text-sm text-foreground">{tShell("assistantTitle")}</p>
                 <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
               </div>
             </div>
@@ -153,7 +155,7 @@ export function DashboardAssistant() {
               type="button"
               className="dashboard-icon-btn"
               onClick={() => setOpen(false)}
-              aria-label="Close Halla AI Assistant"
+              aria-label={tShell("assistantClose")}
             >
               <X className="w-4 h-4" />
             </button>
@@ -207,7 +209,7 @@ export function DashboardAssistant() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask Halla AI Assistant…"
+              placeholder={tShell("assistantPlaceholder")}
               className="input flex-1 text-sm"
               disabled={streaming}
               maxLength={2000}
@@ -216,7 +218,7 @@ export function DashboardAssistant() {
               type="submit"
               className="btn-primary shrink-0 !px-3"
               disabled={streaming || !input.trim()}
-              aria-label="Send message"
+              aria-label={tShell("assistantSend")}
             >
               <Send className="w-4 h-4" />
             </button>
@@ -229,14 +231,14 @@ export function DashboardAssistant() {
         className={cn("dashboard-assistant-fab", open && "is-open")}
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        aria-label={open ? "Close Halla AI Assistant" : "Open Halla AI Assistant"}
+        aria-label={open ? tShell("assistantClose") : tShell("assistantOpen")}
       >
         {open ? (
           <X className="w-5 h-5" />
         ) : (
           <FloatingRobot mood={mood} compact className="floating-robot-fab" />
         )}
-        <span className="dashboard-assistant-fab-label">Assistant</span>
+        <span className="dashboard-assistant-fab-label">{tShell("assistantLabel")}</span>
       </button>
     </div>
   );

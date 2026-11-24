@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Bell } from "lucide-react";
 import { api } from "@/lib/api";
 import { SEVERITY_DOT, sortAlerts, toAlertView, type AlertView, type ServerAlert } from "@/lib/server-alerts";
@@ -15,6 +15,7 @@ export function NotificationsCenter() {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const locale = useLocale();
+  const tShell = useTranslations("shell");
 
   // The business's saved alerts (minutes running out, a trial ending, a tool that stopped working). They come from the server, so they are still here after a refresh or on another device.
   const [alerts, setAlerts] = useState<ServerAlert[]>([]);
@@ -101,7 +102,7 @@ export function NotificationsCenter() {
       <button
         type="button"
         className="dashboard-icon-btn relative"
-        aria-label="Notifications"
+        aria-label={tShell("notifications")}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
@@ -117,7 +118,7 @@ export function NotificationsCenter() {
         <div
           className="absolute right-0 top-full mt-2 w-[min(100vw-2rem,22rem)] rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-lg z-50 overflow-hidden"
           role="dialog"
-          aria-label="Notifications"
+          aria-label={tShell("notifications")}
         >
           <div className="flex items-center justify-between px-3 py-2.5 border-b border-[var(--border)]">
             <p className="text-sm font-semibold text-foreground">Notifications</p>
@@ -130,7 +131,7 @@ export function NotificationsCenter() {
           {alertViews.length > 0 && (
             <div className="border-b border-[var(--border)]">
               <p className="px-3 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-foreground-tertiary">Alerts</p>
-              <ul className="max-h-56 overflow-y-auto" aria-label="Alerts">
+              <ul className="max-h-56 overflow-y-auto" aria-label={tShell("alerts")}>
                 {alertViews.map((a) => (
                   <li key={a.id}>
                     <Link

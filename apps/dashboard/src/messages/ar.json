@@ -67,7 +67,7 @@
     "signedIn": "تم تسجيل الدخول",
     "openMenu": "فتح القائمة",
     "closeMenu": "إغلاق القائمة",
-    "collapseSidebar": "طي الشريط الجانبي",
+    "collapseSidebar": "طيّ الشريط الجانبي",
     "expandSidebar": "توسيع الشريط الجانبي",
     "live": "مباشر",
     "synced": "متزامن",
@@ -84,7 +84,19 @@
     "mobileNavAgent": "الوكيل",
     "mobileNavMore": "المزيد",
     "searchPlaceholder": "ابحث في المكالمات والعملاء والنصوص…",
-    "searchLabel": "بحث شامل"
+    "searchLabel": "بحث شامل",
+    "mainNavigation": "التنقل الرئيسي",
+    "footerTagline": "Halla AI — مقرّها الولايات المتحدة، وبُنيت لمنطقة الشرق الأوسط.",
+    "breadcrumb": "مسار التنقل",
+    "notifications": "الإشعارات",
+    "alerts": "التنبيهات",
+    "assistantLabel": "المساعد",
+    "assistantTitle": "مساعد Halla AI",
+    "assistantOpen": "فتح مساعد Halla AI",
+    "assistantClose": "إغلاق مساعد Halla AI",
+    "assistantCloseShort": "إغلاق المساعد",
+    "assistantPlaceholder": "اسأل مساعد Halla AI…",
+    "assistantSend": "إرسال الرسالة"
   },
   "common": {
     "save": "حفظ",
@@ -658,7 +670,26 @@
       "notRequired": "غير مطلوب",
       "indefinite": "بلا حد",
       "settingsSaved": "تم حفظ إعدادات الامتثال",
-      "saveFailed": "فشل الحفظ"
+      "saveFailed": "فشل الحفظ",
+      "profiles": {
+        "healthcare": {
+          "label": "الرعاية الصحية",
+          "description": "إعدادات افتراضية أكثر صرامة للبيئات الخاضعة لقانون HIPAA: العيادات وعيادات الأسنان وتقويم العمود الفقري والطب البيطري."
+        },
+        "legal": {
+          "label": "القانونية",
+          "description": "إعدادات افتراضية أكثر صرامة لمكاتب المحاماة والخدمات القانونية. تراعي سرّية العلاقة بين المحامي والعميل."
+        },
+        "real_estate": {
+          "label": "العقارات",
+          "description": "إعدادات افتراضية قياسية لشركات العقارات وإدارة الممتلكات."
+        },
+        "general": {
+          "label": "أعمال عامة",
+          "description": "إعدادات افتراضية قياسية تناسب معظم القطاعات."
+        }
+      },
+      "hipaaBaaBody": "اتفاقيات شريك العمل (BAA) الخاصة بقانون HIPAA غير متاحة حالياً في أي خطة. تدعم Halla AI إعدادات الامتثال في القطاع الصحي، ومنها الإفصاح عن الذكاء الاصطناعي وتسجيل المكالمات وموافقة المتصل، من خلال الإعدادات أعلاه، لكن لا تتوفر اتفاقية BAA رسمية. إذا كان عملك يتطلب الامتثال لقانون HIPAA، فتواصل معنا على <mail>{email}</mail> وسنوافيك عندما يتغير ذلك."
     },
     "businessProfile": {
       "heroLabel": "ملف الأعمال",
