@@ -10,7 +10,10 @@ const h = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/api", () => ({ api: { get: h.get, post: h.post, put: h.put } }));
-vi.mock("next-intl", () => ({ useLocale: () => h.locale.value }));
+vi.mock("next-intl", () => ({
+  useLocale: () => h.locale.value,
+  useTranslations: () => (key: string) => ({ notifications: "Notifications", alerts: "Alerts" } as Record<string, string>)[key] ?? key,
+}));
 vi.mock("@/i18n/navigation", () => ({ Link: ({ href, children, onClick, className }: any) => <a href={href} onClick={onClick} className={className}>{children}</a> }));
 vi.mock("./DashboardRealtimeProvider", () => ({ useDashboardNotifications: () => h.live }));
 

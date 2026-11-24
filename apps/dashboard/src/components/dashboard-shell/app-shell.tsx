@@ -184,7 +184,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               type="button"
               onClick={() => setCollapsed(false)}
               className="hidden lg:grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-[var(--nav-hover)]"
-              aria-label="Expand sidebar"
+              aria-label={tShell("expandSidebar")}
             >
               <PanelLeft className="size-4" />
             </button>
@@ -194,7 +194,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={closeMobile}
                 className="lg:hidden absolute top-2 right-2 grid size-8 place-items-center rounded-lg bg-[var(--sidebar)] text-muted-foreground shadow-sm hover:bg-[var(--nav-hover)]"
-                aria-label="Close menu"
+                aria-label={tShell("closeMenu")}
               >
                 <X className="size-4" />
               </button>
@@ -202,7 +202,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 type="button"
                 onClick={() => setCollapsed(true)}
                 className="hidden lg:grid absolute top-2 right-2 size-8 place-items-center rounded-lg bg-[var(--sidebar)] text-muted-foreground shadow-sm hover:bg-[var(--nav-hover)]"
-                aria-label="Collapse sidebar"
+                aria-label={tShell("collapseSidebar")}
               >
                 <PanelLeftClose className="size-4" />
               </button>
@@ -211,7 +211,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <div className="dashboard-sidebar-scroll flex-1 min-h-0 overflow-y-auto overscroll-contain scrollbar-thin">
-          <nav className="dashboard-sidebar-nav p-3 space-y-5" aria-label="Main navigation">
+          <nav className="dashboard-sidebar-nav p-3 space-y-5" aria-label={tShell("mainNavigation")}>
             {(isConsultancyTeam ? [...DASHBOARD_NAV_GROUPS, CONSULTANCY_NAV_GROUP] : DASHBOARD_NAV_GROUPS).map((group) => (
               <div key={group.label}>
                 {!collapsed && (
@@ -260,7 +260,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </button>
             {!collapsed && (
               <p className="px-2 pt-2 text-[10px] leading-snug text-muted-foreground/60">
-                Halla AI — US-based, built for the Middle East.
+                {tShell("footerTagline")}
               </p>
             )}
           </div>

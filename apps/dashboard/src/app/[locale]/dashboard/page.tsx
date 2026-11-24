@@ -388,7 +388,7 @@ export default function DashboardHome() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.6} />
-                <XAxis dataKey="day" stroke="currentColor" opacity={0.4} fontSize={12} tickLine={false} axisLine={false} tickFormatter={formatChartDay} />
+                <XAxis dataKey="day" stroke="currentColor" opacity={0.4} fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => formatChartDay(v, locale)} />
                 <YAxis stroke="currentColor" opacity={0.4} fontSize={12} width={32} tickLine={false} axisLine={false} />
                 <Tooltip
                   contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 12, boxShadow: "var(--shadow-md)" }}

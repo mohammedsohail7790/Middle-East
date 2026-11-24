@@ -38,10 +38,11 @@ export function timeAgo(date: string): string {
 }
 
 /** "2026-10-02" or "2026-10-02T00:00:00.000Z" → "Oct 2" (chart axis labels). */
-export function formatChartDay(value: unknown): string {
+export function formatChartDay(value: unknown, locale = "en"): string {
   const d = new Date(String(value));
   if (Number.isNaN(d.getTime())) return String(value ?? "");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  // Arabic month names with the same Western digits the rest of the dashboard uses.
+  return d.toLocaleDateString(locale === "ar" ? "ar-u-nu-latn" : "en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 }
 
 /** Conversion is leads ÷ calls; leads can outnumber calls (manual/web leads), so never show more than 100%. */

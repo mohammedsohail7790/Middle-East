@@ -158,6 +158,10 @@ function ProfileCard({
   applying: boolean;
 }) {
   const t = useTranslations("pages.compliance");
+  // The four known profiles have translated names and descriptions; anything else the server sends is shown as it comes.
+  const known = ["healthcare", "legal", "real_estate", "general"].includes(profile.id);
+  const label = known ? t(`profiles.${profile.id}.label` as never) : profile.label;
+  const description = known ? t(`profiles.${profile.id}.description` as never) : profile.description;
   return (
     <button
       type="button"
@@ -171,7 +175,7 @@ function ProfileCard({
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-foreground">{profile.label}</span>
+            <span className="text-sm font-semibold text-foreground">{label}</span>
             <span
               className={cn(
                 "px-1.5 py-0.5 text-[10px] font-medium rounded-full",
@@ -183,7 +187,7 @@ function ProfileCard({
               {profile.strictness === "strict" ? t("stricterDefaults") : t("standardDefaults")}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{profile.description}</p>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{description}</p>
         </div>
         {selected && <CheckCircle2 className="size-4 shrink-0 text-accent mt-0.5" strokeWidth={ICON_STROKE} />}
       </div>
@@ -759,12 +763,10 @@ export default function CompliancePage() {
       >
         <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 p-4">
           <p className="text-sm text-amber-900 dark:text-amber-200">
-            HIPAA Business Associate Agreements (BAA) are not currently offered on any plan.
-            Halla AI does support healthcare compliance settings — including AI disclosure, call recording,
-            and caller consent — through the settings above. However, a formal BAA is not available.
-            If your business requires HIPAA compliance, contact{" "}
-            <a href={`mailto:${SUPPORT_EMAIL}`} className="underline">{SUPPORT_EMAIL}</a> and
-            we&apos;ll follow up when this changes.
+            {t.rich("hipaaBaaBody", {
+              email: SUPPORT_EMAIL,
+              mail: (chunks) => <a href={`mailto:${SUPPORT_EMAIL}`} className="underline">{chunks}</a>,
+            })}
           </p>
         </div>
       </DashboardPageSection>
