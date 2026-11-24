@@ -17,7 +17,7 @@ describe("phone tap targets", () => {
     ["components/dashboard/GoLiveChecklist.tsx", "goLiveDismiss"],
     ["components/dashboard/GoLiveChecklist.tsx", "goLiveOpen"],
     ["components/knowledge/KnowledgeBusinessTemplates.tsx", "kbCopyMonday"],
-    ["components/integrations/ZapierHubSection.tsx", "setup guide"],
+    ["components/integrations/ZapierHubSection.tsx", "hideGuide"],
     ["app/[locale]/dashboard/compliance/audit/page.tsx", 't("back")'],
   ];
   for (const [file, marker] of users) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   ExternalLink,
   Loader2,
@@ -23,6 +24,7 @@ type Props = {
 };
 
 export function ZapierHubSection({ connected, onConnectedChange }: Props) {
+  const t = useTranslations("pages.integrations.hub.zapier");
   const [webhookUrl, setWebhookUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -49,8 +51,8 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
     if (!url.startsWith("https://hooks.zapier.com/")) {
       showDashboardToast({
         type: "error",
-        title: "Invalid webhook URL",
-        message: "Paste the full Zapier Catch Hook URL (starts with https://hooks.zapier.com/).",
+        title: t("invalidTitle"),
+        message: t("invalidBody"),
       });
       return;
     }
@@ -61,14 +63,14 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
       syncDashboardAction("integrations");
       showDashboardToast({
         type: "success",
-        title: "Zapier connected",
-        message: "Webhook saved. Send a test lead to confirm delivery.",
+        title: t("connectedTitle"),
+        message: t("connectedBody"),
       });
     } catch (e) {
       showDashboardToast({
         type: "error",
-        title: "Could not save webhook",
-        message: e instanceof Error ? e.message : "Save failed",
+        title: t("saveFailedTitle"),
+        message: e instanceof Error ? e.message : t("saveFailed"),
       });
     } finally {
       setSaving(false);
@@ -86,22 +88,22 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
       if (!data.success) {
         showDashboardToast({
           type: "warning",
-          title: "Test needs attention",
-          message: data.message || "Turn your Zap ON in Zapier, then try again.",
+          title: t("testAttentionTitle"),
+          message: data.message || t("testAttentionBody"),
         });
       } else {
         showDashboardToast({
           type: "success",
-          title: "Test lead sent",
-          message: data.message || "Check your destination app for the sample record.",
+          title: t("testSentTitle"),
+          message: data.message || t("testSentBody"),
         });
       }
       syncDashboardAction("integrations");
     } catch (e) {
       showDashboardToast({
         type: "error",
-        title: "Test failed",
-        message: e instanceof Error ? e.message : "Test failed",
+        title: t("testFailedTitle"),
+        message: e instanceof Error ? e.message : t("testFailed"),
       });
     } finally {
       setTesting(false);
@@ -118,8 +120,8 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
     } catch (e) {
       showDashboardToast({
         type: "error",
-        title: "Disconnect failed",
-        message: e instanceof Error ? e.message : "Could not disconnect",
+        title: t("disconnectFailedTitle"),
+        message: e instanceof Error ? e.message : t("disconnectFailed"),
       });
     } finally {
       setSaving(false);
@@ -144,20 +146,20 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
         <div className="flex-1 p-4 sm:p-6 space-y-4 border-b lg:border-b-0 border-border">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-foreground">Webhook configuration</p>
+              <p className="text-sm font-semibold text-foreground">{t("webhookConfig")}</p>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed max-w-md">
-                Create a Zap with Catch Hook in Zapier, turn it on, then paste the webhook URL below.
+                {t("webhookConfigDesc")}
               </p>
             </div>
             {connected ? (
               <span className="inline-flex items-center gap-1.5 shrink-0 text-xs font-medium text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-full px-3 py-1">
                 <CheckCircle2 className="size-3.5" strokeWidth={ICON_STROKE} />
-                Connected
+                {t("connected")}
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 shrink-0 text-xs font-medium text-muted-foreground bg-muted border border-border rounded-full px-3 py-1">
                 <Link2 className="size-3.5" strokeWidth={ICON_STROKE} />
-                Not connected
+                {t("notConnected")}
               </span>
             )}
           </div>
@@ -168,13 +170,13 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
             rel="noopener noreferrer"
             className="btn-ghost text-sm inline-flex items-center gap-2 border border-border w-full sm:w-auto justify-center"
           >
-            Open Zapier to create Catch Hook
+            {t("openZapier")}
             <ExternalLink className="size-3.5" strokeWidth={ICON_STROKE} />
           </a>
 
           <div className="space-y-2">
             <label htmlFor="zapier-webhook-url" className="text-xs font-medium text-foreground">
-              Catch Hook URL
+              {t("catchHookUrl")}
             </label>
             <input
               id="zapier-webhook-url"
@@ -189,17 +191,12 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
               className="tap-target text-xs text-accent font-medium hover:underline"
               onClick={() => setShowGuide((v) => !v)}
             >
-              {showGuide ? "Hide" : "Show"} setup guide
+              {showGuide ? t("hideGuide") : t("showGuide")}
             </button>
             {showGuide && (
               <IntegrationSetupMedia
                 screenshots={ZAPIER_SETUP_SCREENSHOTS}
-                helpSteps={[
-                  "Open your Zap in Zapier",
-                  "Click the Catch Hook trigger step",
-                  "Copy the Custom Webhook URL",
-                  "Paste it above and save",
-                ]}
+                helpSteps={[t("helpStep1"), t("helpStep2"), t("helpStep3"), t("helpStep4")]}
                 activeStepIndex={0}
               />
             )}
@@ -215,7 +212,7 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
               {saving ? (
                 <Loader2 className="size-4 animate-spin" strokeWidth={ICON_STROKE} />
               ) : (
-                "Save webhook"
+                t("saveWebhook")
               )}
             </button>
             <button
@@ -227,7 +224,7 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
               {testing ? (
                 <Loader2 className="size-4 animate-spin" strokeWidth={ICON_STROKE} />
               ) : (
-                "Send test lead"
+                t("sendTest")
               )}
             </button>
             {connected && (
@@ -237,7 +234,7 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
                 disabled={saving}
                 onClick={() => void disconnect()}
               >
-                Disconnect
+                {t("disconnect")}
               </button>
             )}
           </div>
@@ -245,12 +242,12 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
 
         <div className="lg:w-72 xl:w-80 p-4 sm:p-6 bg-muted/15 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Supported via Zapier
+            {t("supportedVia")}
           </p>
           <ul className="text-xs text-muted-foreground space-y-2 leading-relaxed">
             <li>Insightly, Follow Up Boss, Copper (API)</li>
             <li>Buildium, AppFolio, Yardi</li>
-            <li>ServiceTitan, Housecall Pro, and 5,000+ apps</li>
+            <li>{t("supportedMore")}</li>
           </ul>
           <details
             className="rounded-lg border border-border text-xs bg-background/60"
@@ -259,7 +256,7 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
           >
             <summary className="cursor-pointer px-3 py-2.5 font-medium text-foreground flex items-center gap-1.5">
               <ChevronDown className={cn("size-3.5 transition-transform", showHelp && "rotate-180")} />
-              Client handoff
+              {t("clientHandoff")}
             </summary>
             <div className="px-3 pb-3 border-t border-border pt-2">
               <button
@@ -268,7 +265,7 @@ export function ZapierHubSection({ connected, onConnectedChange }: Props) {
                 onClick={copyClientInstructions}
               >
                 <Copy className="size-3" strokeWidth={ICON_STROKE} />
-                {copied ? "Copied" : "Copy setup steps"}
+                {copied ? t("copied") : t("copySteps")}
               </button>
             </div>
           </details>

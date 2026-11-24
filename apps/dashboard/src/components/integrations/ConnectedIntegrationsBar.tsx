@@ -2,7 +2,9 @@
 
 import { CheckCircle2 } from "lucide-react";
 import { IntegrationIcon } from "@/components/integrations/IntegrationIcon";
-import { CATEGORY_LABELS, type IntegrationDef } from "@/lib/integration-hub-catalog";
+import { type IntegrationDef } from "@/lib/integration-hub-catalog";
+import { useIntegrationText } from "@/lib/use-integration-text";
+import { useTranslations } from "next-intl";
 import type { IntegrationConnectionInfo } from "@/components/integrations/IntegrationConnectWizard";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,8 @@ export function ConnectedIntegrationsBar({
   zapierConnected,
   onOpenZapier,
 }: Props) {
+  const t = useTranslations("pages.integrations.hub.bar");
+  const text = useIntegrationText();
   const connected = items.filter((i) => connections[i.id]?.status === "connected");
   const total = connected.length + (zapierConnected ? 1 : 0);
 
@@ -33,7 +37,7 @@ export function ConnectedIntegrationsBar({
       <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-border bg-emerald-50/50 dark:bg-emerald-950/15">
         <div className="flex items-center gap-2 min-w-0">
           <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-          <p className="text-sm font-semibold text-foreground">Active connections</p>
+          <p className="text-sm font-semibold text-foreground">{t("active")}</p>
           <span className="text-xs text-muted-foreground tabular-nums">({total})</span>
         </div>
       </div>
@@ -56,7 +60,7 @@ export function ConnectedIntegrationsBar({
               <IntegrationIcon id={integration.id} size="sm" />
               <span className="text-sm font-medium text-foreground">{integration.name}</span>
               <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                {CATEGORY_LABELS[integration.category]}
+                {text.categoryLabel(integration.category)}
               </span>
             </button>
           );
@@ -69,7 +73,7 @@ export function ConnectedIntegrationsBar({
           >
             <IntegrationIcon id="zapier" size="sm" />
             <span className="text-sm font-medium text-foreground">Zapier</span>
-            <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Automation</span>
+            <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{t("automation")}</span>
           </button>
         )}
       </div>
