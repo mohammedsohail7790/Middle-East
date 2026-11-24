@@ -7,7 +7,7 @@ import { MarketingPremiumLayer } from "@/components/marketing/premium/MarketingP
 import { MarketingConsultancyLayer } from "@/components/marketing/premium/MarketingConsultancyLayer";
 import { Dashboard3DMounts } from "@/components/marketing/premium/Dashboard3DMounts";
 import { MarketingAtmosphere } from "@/components/marketing/effects/MarketingAtmosphere";
-import { pagePath, resolveMarketingPage } from "@/lib/marketing-routes";
+import { localizedPath, pagePath, resolveMarketingPage, splitLocale, type MarketingLang } from "@/lib/marketing-routes";
 import { linkifyPages, runInlineScripts, titleForPage } from "@/lib/marketing-dom";
 import { pageTitle } from "@/lib/marketing-metadata";
 
@@ -16,6 +16,8 @@ interface Props {
   initialPage?: string;
   /** One page's HTML rendered on the server, so crawlers and link previews get real text. The browser replaces it with the full app on mount. */
   ssrHtml?: string;
+  /** Set when the address names a language (/ar/... or /en/...). The address then decides the language; a plain address follows the visitor's saved choice. */
+  initialLang?: MarketingLang;
 }
 
 const NEXT_ROUTES: Record<string, string> = {
@@ -29,7 +31,7 @@ const SCROLL_TRIGGER_URL =
 
 type HallaWindow = Window & {
   go?: (page: string) => void;
-  setLang?: (lang: string) => void;
+  setLang?: (lang: string, keepUrl?: boolean) => void;
   HALLA_EMBEDDED?: boolean;
   THREE?: typeof import("three");
   HallaNeural?: { init: () => void; refreshForPage?: (page: string) => void };
@@ -61,19 +63,21 @@ function loadScript(src: string): Promise<void> {
  * halla_main.js loads first so routing works even if THREE/GSAP fail.
  * Neural + GSAP are decorative and load in parallel afterward.
  */
-export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ssrHtml }: Props) {
+export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ssrHtml, initialLang }: Props) {
   const safeInitialPage = initialPage.replace(/[^a-z0-9-]/gi, "") || "consultancy";
   const bridgeInstalled = useRef(false);
   const decorStarted = useRef(false);
   const spaRootRef = useRef<HTMLDivElement>(null);
   const htmlInjected = useRef(false);
+  /** The language on screen, so links and addresses are built in the same language. */
+  const langRef = useRef<MarketingLang>(initialLang ?? "en");
 
   useEffect(() => {
     const el = spaRootRef.current;
     if (!el || htmlInjected.current) return;
     el.innerHTML = bodyHtml;
     runInlineScripts(el);
-    linkifyPages(el);
+    linkifyPages(el, langRef.current);
     htmlInjected.current = true;
     window.dispatchEvent(new CustomEvent("halla-marketing-mounted"));
   }, [bodyHtml]);
@@ -122,18 +126,23 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ss
       spaGo(page);
       if (!ready) return;
       // Keep the address bar and the tab title in step with the page, so a page can be shared, bookmarked and reached with the back button.
-      const path = pagePath(page);
+      const base = pagePath(page);
+      const path = base ? localizedPath(base, langRef.current) : null;
       if (pushing && path && window.location.pathname !== path) window.history.pushState(null, "", path);
-      const title = pageTitle(page) ?? titleForPage(page);
+      const title = langRef.current === "ar" ? titleForPage(page) ?? pageTitle(page) : pageTitle(page) ?? titleForPage(page);
       if (title) document.title = title;
     };
     window.addEventListener("popstate", () => {
       pushing = false;
+      // The back button can cross between /x and /ar/x: follow the address's language without rewriting it.
+      const here = splitLocale(window.location.pathname);
+      if (here.explicit && here.lang !== langRef.current) halla.setLang?.(here.lang, true);
       halla.go?.(resolveMarketingPage(window.location.pathname));
       pushing = true;
     });
 
-    halla.setLang = function setLang(lang: string) {
+    halla.setLang = function setLang(lang: string, keepUrl?: boolean) {
+      langRef.current = lang === "ar" ? "ar" : "en";
       const root = document.getElementById("marketing-spa-root");
       if (root) {
         root.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
@@ -149,6 +158,14 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ss
         node.textContent = (lang === "ar" ? node.dataset.ar : node.dataset.en) ?? node.textContent;
       });
       (window as unknown as { applyPrimaryCtaText?: () => void }).applyPrimaryCtaText?.();
+      // Links follow the language, and so does the address bar: /solutions <-> /ar/solutions.
+      if (root) linkifyPages(root, langRef.current);
+      if (!keepUrl) {
+        const here = splitLocale(window.location.pathname);
+        const target = localizedPath(here.path, langRef.current);
+        const current = window.location.pathname.replace(/\/+$/, "") || "/";
+        if (target !== current) window.history.replaceState(null, "", `${target}${window.location.search}${window.location.hash}`);
+      }
       try {
         localStorage.setItem("halla_lang", lang);
       } catch {
@@ -162,10 +179,11 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ss
     } catch {
       /* ignore */
     }
-    halla.setLang(saved);
+    // An address that names a language decides; a plain address follows the saved choice (and is rewritten to /ar/... when that is Arabic).
+    halla.setLang(initialLang ?? (saved === "ar" ? "ar" : "en"));
     halla.go(safeInitialPage);
     ready = true; // from here on, every page change is a visitor action
-  }, [safeInitialPage]);
+  }, [safeInitialPage, initialLang]);
 
   const bootDecor = useCallback(() => {
     if (decorStarted.current) return;
@@ -221,7 +239,7 @@ export default function MarketingSPA({ bodyHtml, initialPage = "consultancy", ss
       <MarketingVibeLayer />
       <MarketingPremiumLayer />
       <MarketingConsultancyLayer />
-      <div id="marketing-spa-root" ref={spaRootRef} suppressHydrationWarning dangerouslySetInnerHTML={ssrHtml ? { __html: ssrHtml } : undefined} />
+      <div id="marketing-spa-root" ref={spaRootRef} lang={initialLang === "ar" ? "ar" : undefined} dir={initialLang === "ar" ? "rtl" : undefined} suppressHydrationWarning dangerouslySetInnerHTML={ssrHtml ? { __html: ssrHtml } : undefined} />
       <Dashboard3DMounts />
 
       <Script
