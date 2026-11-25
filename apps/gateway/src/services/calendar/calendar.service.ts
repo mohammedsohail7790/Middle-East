@@ -17,6 +17,23 @@ const pool = voiceDb;
 /** Tenant-scoped rows (calls, leads, appointments) — same DB as voice pipeline */
 const tenantDb = voiceDb;
 
+/** Ask Google to cancel a token. Never throws: a failed revoke must not block disconnecting. */
+export async function revokeGoogleToken(token: string): Promise<boolean> {
+  try {
+    const res = await fetch('https://oauth2.googleapis.com/revoke', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ token }).toString(),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) console.warn(`[Calendar] Google revoke answered ${res.status}`);
+    return res.ok;
+  } catch (error) {
+    console.warn('[Calendar] Google revoke failed:', error instanceof Error ? error.message : error);
+    return false;
+  }
+}
+
 async function syncGoogleTokensToVoiceTenant(
   tenantId: string,
   accessToken: string,
@@ -894,9 +911,30 @@ export class CalendarService {
    */
   async disconnect(tenantId: string): Promise<void> {
     try {
+      // Tell Google to cancel the access first, so a copy of the token anywhere else stops working.
+      // If Google refuses (for example the token was already revoked) we still delete our copy.
+      const stored = await voiceDb.query(
+        `SELECT refresh_token AS token FROM public.calendar_connections
+          WHERE tenant_id = $1 AND provider = 'google'
+         UNION ALL
+         SELECT google_refresh_token AS token FROM public.voice_tenants WHERE id = $1
+         UNION ALL
+         SELECT access_token AS token FROM public.calendar_connections
+          WHERE tenant_id = $1 AND provider = 'google'`,
+        [tenantId]
+      );
+      const tokens = new Set<string>(
+        (stored.rows as Array<{ token: string | null }>)
+          .map((r) => (r.token || '').trim())
+          .filter(Boolean)
+      );
+      for (const token of tokens) {
+        await revokeGoogleToken(token);
+      }
+
       await voiceDb.query(
         `UPDATE public.calendar_connections
-         SET status = 'disconnected', updated_at = NOW()
+         SET status = 'disconnected', access_token = NULL, refresh_token = NULL, updated_at = NOW()
          WHERE tenant_id = $1 AND provider = 'google'`,
         [tenantId]
       );
