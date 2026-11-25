@@ -103,7 +103,7 @@ export class TeamService {
    */
   async addTeamMember(
     tenantId: string,
-    userId: string,
+    userId: string | null,
     email: string,
     name: string,
     role: TeamMember['role']

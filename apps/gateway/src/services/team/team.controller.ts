@@ -4,7 +4,7 @@
  */
 
 import { teamService } from './team.service.js';
-import { inviteTeamMember, linkTeamMemberFromAuth, syncTeamMemberEmail } from './team-invite.service.js';
+import { inviteTeamMember, linkTeamMemberFromAuth, syncTeamMemberEmail, TeamInviteError } from './team-invite.service.js';
 import { verifySupabaseAuthOnly } from '../auth/jwt-tenant-verifier.js';
 import { asyncHandler } from '../../middleware/index.js';
 import { validate } from '../../middleware/validation.js';
@@ -94,7 +94,15 @@ export function createTeamRouter(): Router {
         return res.status(400).json({ success: false, error: 'Invalid role. Use admin, agent, or viewer.' });
       }
 
-      const result = await inviteTeamMember(tenantId, email, name, resolvedRole);
+      let result;
+      try {
+        result = await inviteTeamMember(tenantId, email, name, resolvedRole);
+      } catch (err) {
+        if (err instanceof TeamInviteError) {
+          return res.status(409).json({ success: false, error: err.message });
+        }
+        throw err;
+      }
       logger.info('[Team] Invite sent', { tenantId, email, inviteSent: result.inviteSent });
 
       res.json({
@@ -203,9 +211,8 @@ export function createTeamRouter(): Router {
         return res.status(400).json({ error: 'Missing required fields: email, name, role' });
       }
 
-      const resolvedUserId =
-        (typeof userId === 'string' && userId.trim()) ||
-        `invite:${String(email).toLowerCase().trim()}`;
+      // No user yet means a pending member: leave user_id empty, matched by email when they sign in.
+      const resolvedUserId = (typeof userId === 'string' && userId.trim()) || null;
       const roleMap: Record<string, string> = { manager: 'admin' };
       const resolvedRole = (roleMap[role] || role) as 'owner' | 'admin' | 'agent' | 'viewer';
       if (!['owner', 'admin', 'agent', 'viewer'].includes(resolvedRole)) {
