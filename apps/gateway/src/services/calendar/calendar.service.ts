@@ -108,7 +108,8 @@ export class CalendarService {
     const scopes = [
       'openid',
       'email',
-      'https://www.googleapis.com/auth/calendar',
+      // Only events on the primary calendar are used, so the narrow scope is enough.
+      // Do not add the full 'calendar' scope: it is what makes Google verification harder.
       'https://www.googleapis.com/auth/calendar.events',
     ];
 
