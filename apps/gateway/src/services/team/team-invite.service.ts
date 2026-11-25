@@ -10,6 +10,9 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
+/** A refusal the person can fix (as opposed to a server fault). */
+export class TeamInviteError extends Error {}
+
 /**
  * Send Supabase invite email (uses "Invite user" template) and ensure team_members row exists.
  */
@@ -23,7 +26,7 @@ export async function inviteTeamMember(
   const redirectTo = `${getDashboardBaseUrl()}/auth/callback?next=${encodeURIComponent('/dashboard')}`;
 
   const existing = await voiceDb.query(
-    `SELECT id FROM public.team_members
+    `SELECT id, role FROM public.team_members
      WHERE tenant_id = $1 AND lower(trim(email)) = $2
      LIMIT 1`,
     [tenantId, normalizedEmail]
@@ -31,6 +34,10 @@ export async function inviteTeamMember(
 
   let member: TeamMember;
   if (existing.rows.length > 0) {
+    // Inviting the owner's own address would quietly turn the owner into an agent or viewer.
+    if (existing.rows[0].role === 'owner') {
+      throw new TeamInviteError('That email is the workspace owner, who is already on the team.');
+    }
     const updated = await teamService.updateTeamMember(tenantId, String(existing.rows[0].id), {
       name,
       role,
@@ -38,9 +45,11 @@ export async function inviteTeamMember(
     });
     member = updated;
   } else {
+    // A pending invite has no user yet: user_id stays empty (the column only holds real user IDs)
+    // and the person is matched by email when they accept.
     member = await teamService.addTeamMember(
       tenantId,
-      `invite:${normalizedEmail}`,
+      null,
       normalizedEmail,
       name,
       role
@@ -107,7 +116,7 @@ export async function linkTeamMemberFromAuth(
     const byEmail = await voiceDb.query(
       `SELECT tenant_id FROM public.team_members
        WHERE lower(trim(email)) = $1
-       ORDER BY CASE WHEN user_id::text LIKE 'invite:%' THEN 0 ELSE 1 END, created_at DESC
+       ORDER BY CASE WHEN user_id IS NULL THEN 0 ELSE 1 END, created_at DESC
        LIMIT 1`,
       [emailNorm]
     );
@@ -132,11 +141,9 @@ export async function linkTeamMemberFromAuth(
   if (!tenantId) return null;
 
   if (emailNorm) {
-    // Match either the already-linked row (user_id = $1) or this specific
-    // invitee's placeholder row (user_id = 'invite:<their email>' — set at
-    // invite time in inviteTeamMember). A bare `user_id LIKE 'invite:%'`
-    // would match every pending invite in the tenant, not just this one,
-    // and silently overwrite other invitees' rows with this user's identity.
+    // Match this user's own row: already linked to them (user_id = $1), or a pending invite for
+    // their email that has no user yet. Other invitees' rows have a different email, so they are
+    // never touched.
     await voiceDb.query(
       `UPDATE public.team_members
        SET user_id = $1,
@@ -147,9 +154,8 @@ export async function linkTeamMemberFromAuth(
          AND (
            user_id = $1
            OR lower(trim(email)) = $2
-           OR user_id = $4
          )`,
-      [userId, emailNorm, tenantId, `invite:${emailNorm}`]
+      [userId, emailNorm, tenantId]
     );
   } else {
     await voiceDb.query(
