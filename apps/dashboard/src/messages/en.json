@@ -558,6 +558,107 @@
           "stepFirst": "Step 1 — Open settings and copy",
           "stepLast": "Step {n} — Paste and finish",
           "stepMiddle": "Step {n} — Copy the next item"
+        },
+        "providers": {
+          "zoho": {
+            "step1": "Confirm you can open Zoho CRM (crm.zoho.com or your region) as an admin",
+            "step2": "Select your data center, then Connect — or use refresh token if OAuth is blocked",
+            "step3": "Approve lead permissions (OAuth) or paste Client ID, Secret, and refresh token",
+            "step4": "Send a test lead from Halla AI to confirm sync",
+            "alternateLabel": "Connect with refresh token instead"
+          },
+          "freshsales": {
+            "step1": "Sign in to Freshsales using the button above",
+            "step2": "Click your profile picture → Settings → API Settings",
+            "step3": "Copy the API key shown there",
+            "step4": "Paste below and click Connect"
+          },
+          "pipedrive": {
+            "step1": "Click Connect with Pipedrive",
+            "step2": "Sign in to Pipedrive and approve Halla AI",
+            "step3": "After redirect, send a test lead to confirm sync"
+          },
+          "followupboss": {
+            "step1": "Sign in to Follow Up Boss using the button above",
+            "step2": "Go to Admin → API",
+            "step3": "Click Create API Key and name it Halla AI",
+            "step4": "Copy the key immediately — you only see it once",
+            "step5": "Paste below and click Connect"
+          },
+          "clio": {
+            "step1": "Click Connect with Clio",
+            "step2": "Sign in to Clio and approve Halla AI",
+            "step3": "After redirect, send a test contact to confirm sync"
+          },
+          "mycase": {
+            "step1": "Request API access from your MyCase account representative",
+            "step2": "Authorize your developer app and copy the access token",
+            "step3": "Paste it here and click Connect"
+          },
+          "acuity": {
+            "step1": "Click Connect with Acuity Scheduling",
+            "step2": "Sign in to Acuity and approve Halla AI",
+            "step3": "After redirect, verify your calendar connection"
+          },
+          "setmore": {
+            "step1": "Click 'Sign in to Setmore' to open your account",
+            "step2": "Request API access at setmore.com/developers if you do not have a key yet",
+            "step3": "Paste your API key",
+            "step4": "Click Verify Connection"
+          },
+          "square-appointments": {
+            "step1": "Click Connect with Square Appointments",
+            "step2": "Sign in to Square and approve Halla AI",
+            "step3": "After redirect, verify your calendar connection"
+          },
+          "vagaro": {
+            "step1": "Request API access from Vagaro support",
+            "step2": "Copy your business ID and API key from Vagaro settings",
+            "step3": "Paste both here and click Connect"
+          },
+          "mindbody": {
+            "step1": "Apply for API access in the Mindbody Developer Portal",
+            "step2": "Copy your site ID and API key",
+            "step3": "Paste both here and click Connect"
+          },
+          "housecallpro": {
+            "step1": "Sign in to Housecall Pro using the button above",
+            "step2": "Go to Settings → API Access and generate a key",
+            "step3": "Copy your Company ID and API key",
+            "step4": "Paste both here and click Connect"
+          },
+          "buildium": {
+            "step1": "Click 'Sign in to Buildium' to log in to your account",
+            "step2": "Enable the API under Settings → Application Settings → API Settings",
+            "step3": "Go to Settings → Developer Tools and create an API key",
+            "step4": "Copy the Client ID and Client Secret immediately",
+            "step5": "Paste both values here",
+            "step6": "Click Verify Connection"
+          },
+          "appfolio": {
+            "step1": "Request AppFolio Stack API access from your account manager",
+            "step2": "Copy your company login name, Client ID, and Client Secret",
+            "step3": "Paste all three here and click Connect"
+          },
+          "yardi": {
+            "step1": "Request Yardi API access from your account representative",
+            "step2": "Sign in to Client Central if you need product documentation",
+            "step3": "Copy the API URL, Client ID, and Client Secret they provide",
+            "step4": "Paste all three here and click Connect"
+          },
+          "slack": {
+            "step1": "Click Connect with Slack in Halla AI",
+            "step2": "Sign in to your Slack workspace (use the workspace URL if prompted, e.g. yourteam.slack.com)",
+            "step3": "On the permission screen, click Allow and select a channel for notifications",
+            "step4": "You should return to Halla AI with Slack marked connected"
+          }
+        },
+        "regions": {
+          "com": "United States (.com)",
+          "eu": "Europe (.eu)",
+          "in": "India (.in)",
+          "comAu": "Australia (.com.au)",
+          "jp": "Japan (.jp)"
         }
       }
     },

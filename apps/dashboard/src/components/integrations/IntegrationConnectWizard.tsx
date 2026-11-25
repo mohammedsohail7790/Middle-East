@@ -19,6 +19,7 @@ import { syncDashboardAction } from "@/lib/dashboard-actions";
 import { hasAccess } from "@/lib/store";
 import { ICON_STROKE } from "@/components/ui-kit/IconBox";
 import { IntegrationIcon } from "@/components/integrations/IntegrationIcon";
+import { useIntegrationText } from "@/lib/use-integration-text";
 import { IntegrationCredentialField } from "@/components/integrations/IntegrationCredentialField";
 import { IntegrationSetupMedia } from "@/components/integrations/IntegrationSetupMedia";
 import { IntegrationOnboardingCallOffer } from "@/components/integrations/IntegrationOnboardingCallOffer";
@@ -80,6 +81,7 @@ export function IntegrationConnectWizard({
   embedded = false,
 }: Props) {
   const tw = useTranslations("pages.integrations.hub.wizard");
+  const it = useIntegrationText();
   const tpRaw = useTranslations("pages.integrations.hub.plain");
   const tp: PlainTranslator = (key, values) => tpRaw(key as never, values as never);
   const locale = useLocale();
@@ -275,6 +277,7 @@ export function IntegrationConnectWizard({
         <div className="space-y-3">
           {fields.map((field) => (
             <IntegrationCredentialField
+              optionLabel={(opt) => (field.key === "dataCenter" ? it.regionLabel(opt.value, opt.label) : opt.label)}
               key={field.key}
               field={field}
               value={values[field.key] ?? ""}
@@ -328,7 +331,7 @@ export function IntegrationConnectWizard({
             setErrorMessage(null);
           }}
         >
-          {integration.alternateCredentialLabel ?? tw("connectWithApi")}
+          {it.alternateLabel(integration) ?? tw("connectWithApi")}
         </button>
       ) : null}
     </div>
@@ -380,6 +383,7 @@ export function IntegrationConnectWizard({
       <div className="space-y-3">
         {fields.map((field) => (
           <IntegrationCredentialField
+              optionLabel={(opt) => (field.key === "dataCenter" ? it.regionLabel(opt.value, opt.label) : opt.label)}
             key={field.key}
             field={field}
             value={values[field.key] ?? ""}
@@ -420,12 +424,12 @@ export function IntegrationConnectWizard({
             <IntegrationSetupMedia
               screenshots={integration.screenshots}
               videoUrl={integration.videoUrl}
-              helpSteps={integration.helpSteps}
+              helpSteps={it.helpSteps(integration)}
               activeStepIndex={0}
             />
-            {integration.helpSteps && (
+            {it.helpSteps(integration) && (
               <ol className="list-decimal list-inside space-y-1">
-                {integration.helpSteps.map((s) => (
+                {it.helpSteps(integration)!.map((s) => (
                   <li key={s}>{s}</li>
                 ))}
               </ol>
