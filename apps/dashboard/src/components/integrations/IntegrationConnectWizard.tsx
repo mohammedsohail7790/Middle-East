@@ -27,6 +27,7 @@ import { IntegrationZapierEasyPath } from "@/components/integrations/Integration
 import {
   getGuidedWizardIntro,
   getPlainCredentialCopy,
+  type PlainTranslator,
 } from "@/lib/integration-plain-language";
 import {
   buildConfigureBody,
@@ -79,6 +80,8 @@ export function IntegrationConnectWizard({
   embedded = false,
 }: Props) {
   const tw = useTranslations("pages.integrations.hub.wizard");
+  const tpRaw = useTranslations("pages.integrations.hub.plain");
+  const tp: PlainTranslator = (key, values) => tpRaw(key as never, values as never);
   const locale = useLocale();
   const [values, setValues] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -118,7 +121,7 @@ export function IntegrationConnectWizard({
     if (!integration.oauthAuthPath) return;
     const missing = firstMissingField(integration, fields, values);
     if (missing) {
-      const plain = getPlainCredentialCopy(integration, missing);
+      const plain = getPlainCredentialCopy(integration, missing, tp);
       setErrorMessage(tw("pleaseEnter", { field: plain.label.toLowerCase() }));
       return;
     }
@@ -178,7 +181,7 @@ export function IntegrationConnectWizard({
   const connectWithCredentials = () => {
     const missing = firstMissingField(integration, fields, values);
     if (missing) {
-      const plain = getPlainCredentialCopy(integration, missing);
+      const plain = getPlainCredentialCopy(integration, missing, tp);
       setErrorMessage(tw("pleaseEnter", { field: plain.label.toLowerCase() }));
       return;
     }
@@ -277,7 +280,7 @@ export function IntegrationConnectWizard({
               value={values[field.key] ?? ""}
               onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
               showHelp
-              plain={getPlainCredentialCopy(integration, field)}
+              plain={getPlainCredentialCopy(integration, field, tp)}
             />
           ))}
         </div>
@@ -351,7 +354,7 @@ export function IntegrationConnectWizard({
       ) : null}
 
       <p className="text-sm text-muted-foreground leading-relaxed rounded-lg bg-muted/30 border border-border px-3 py-2.5">
-        {getGuidedWizardIntro(integration)}
+        {getGuidedWizardIntro(integration, tp)}
       </p>
 
       {openLink && (
@@ -382,7 +385,7 @@ export function IntegrationConnectWizard({
             value={values[field.key] ?? ""}
             onChange={(v) => setValues((prev) => ({ ...prev, [field.key]: v }))}
             showHelp
-            plain={getPlainCredentialCopy(integration, field)}
+            plain={getPlainCredentialCopy(integration, field, tp)}
           />
         ))}
       </div>
