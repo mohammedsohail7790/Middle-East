@@ -17,9 +17,11 @@ type Props = {
   onChange: (value: string) => void;
   showHelp: boolean;
   plain?: PlainOverrides;
+  /** Text for a choice in a select list (defaults to the catalog's English label). */
+  optionLabel?: (option: { value: string; label: string }) => string;
 };
 
-export function IntegrationCredentialField({ field, value, onChange, showHelp, plain }: Props) {
+export function IntegrationCredentialField({ field, value, onChange, showHelp, plain, optionLabel }: Props) {
   const [copied, setCopied] = useState(false);
 
   const copyExample = () => {
@@ -57,7 +59,7 @@ export function IntegrationCredentialField({ field, value, onChange, showHelp, p
           </option>
           {field.options?.map((opt) => (
             <option key={opt.value} value={opt.value}>
-              {opt.label}
+              {optionLabel ? optionLabel(opt) : opt.label}
             </option>
           ))}
         </select>

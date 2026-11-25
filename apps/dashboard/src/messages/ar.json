@@ -558,6 +558,107 @@
           "stepFirst": "الخطوة 1 — افتح الإعدادات وانسخ",
           "stepLast": "الخطوة {n} — الصق وأنهِ",
           "stepMiddle": "الخطوة {n} — انسخ العنصر التالي"
+        },
+        "providers": {
+          "zoho": {
+            "step1": "تأكد من أنك تستطيع فتح Zoho CRM (crm.zoho.com أو منطقتك) كمسؤول",
+            "step2": "اختر منطقة بياناتك ثم اضغط «ربط»، أو استخدم رمز التحديث إذا كان تسجيل الدخول محجوباً",
+            "step3": "وافق على أذونات العملاء المحتملين (OAuth)، أو الصق Client ID وSecret ورمز التحديث",
+            "step4": "أرسل عميلاً محتملاً تجريبياً من Halla AI للتأكد من المزامنة",
+            "alternateLabel": "الربط برمز التحديث بدلاً من ذلك"
+          },
+          "freshsales": {
+            "step1": "سجّل الدخول إلى Freshsales بالزر أعلاه",
+            "step2": "اضغط صورة ملفك الشخصي ← Settings ← API Settings",
+            "step3": "انسخ مفتاح API الظاهر هناك",
+            "step4": "الصقه أدناه ثم اضغط «ربط»"
+          },
+          "pipedrive": {
+            "step1": "اضغط زر «ربط» الخاص بـ Pipedrive",
+            "step2": "سجّل الدخول إلى Pipedrive ووافق على Halla AI",
+            "step3": "بعد العودة، أرسل عميلاً محتملاً تجريبياً للتأكد من المزامنة"
+          },
+          "followupboss": {
+            "step1": "سجّل الدخول إلى Follow Up Boss بالزر أعلاه",
+            "step2": "اذهب إلى Admin ← API",
+            "step3": "اضغط Create API Key وسمِّه Halla AI",
+            "step4": "انسخ المفتاح فوراً، فلن يظهر لك إلا مرة واحدة",
+            "step5": "الصقه أدناه ثم اضغط «ربط»"
+          },
+          "clio": {
+            "step1": "اضغط زر «ربط» الخاص بـ Clio",
+            "step2": "سجّل الدخول إلى Clio ووافق على Halla AI",
+            "step3": "بعد العودة، أرسل جهة اتصال تجريبية للتأكد من المزامنة"
+          },
+          "mycase": {
+            "step1": "اطلب الوصول إلى API من ممثل حسابك في MyCase",
+            "step2": "فوّض تطبيق المطوّر الخاص بك وانسخ رمز الوصول",
+            "step3": "الصقه هنا ثم اضغط «ربط»"
+          },
+          "acuity": {
+            "step1": "اضغط زر «ربط» الخاص بـ Acuity Scheduling",
+            "step2": "سجّل الدخول إلى Acuity ووافق على Halla AI",
+            "step3": "بعد العودة، تحقق من اتصال تقويمك"
+          },
+          "setmore": {
+            "step1": "اضغط «تسجيل الدخول إلى Setmore» لفتح حسابك",
+            "step2": "اطلب الوصول إلى API من setmore.com/developers إن لم يكن لديك مفتاح بعد",
+            "step3": "الصق مفتاح API الخاص بك",
+            "step4": "اضغط «التحقق من الاتصال»"
+          },
+          "square-appointments": {
+            "step1": "اضغط زر «ربط» الخاص بـ Square Appointments",
+            "step2": "سجّل الدخول إلى Square ووافق على Halla AI",
+            "step3": "بعد العودة، تحقق من اتصال تقويمك"
+          },
+          "vagaro": {
+            "step1": "اطلب الوصول إلى API من دعم Vagaro",
+            "step2": "انسخ رقم نشاطك التجاري ومفتاح API من إعدادات Vagaro",
+            "step3": "الصق الاثنين هنا ثم اضغط «ربط»"
+          },
+          "mindbody": {
+            "step1": "قدّم طلب الوصول إلى API في بوابة المطورين في Mindbody",
+            "step2": "انسخ رقم موقعك (site ID) ومفتاح API",
+            "step3": "الصق الاثنين هنا ثم اضغط «ربط»"
+          },
+          "housecallpro": {
+            "step1": "سجّل الدخول إلى Housecall Pro بالزر أعلاه",
+            "step2": "اذهب إلى Settings ← API Access وأنشئ مفتاحاً",
+            "step3": "انسخ رقم شركتك (Company ID) ومفتاح API",
+            "step4": "الصق الاثنين هنا ثم اضغط «ربط»"
+          },
+          "buildium": {
+            "step1": "اضغط «تسجيل الدخول إلى Buildium» لدخول حسابك",
+            "step2": "فعّل API من Settings ← Application Settings ← API Settings",
+            "step3": "اذهب إلى Settings ← Developer Tools وأنشئ مفتاح API",
+            "step4": "انسخ Client ID وClient Secret فوراً",
+            "step5": "الصق القيمتين هنا",
+            "step6": "اضغط «التحقق من الاتصال»"
+          },
+          "appfolio": {
+            "step1": "اطلب الوصول إلى AppFolio Stack API من مدير حسابك",
+            "step2": "انسخ اسم دخول شركتك وClient ID وClient Secret",
+            "step3": "الصق الثلاثة هنا ثم اضغط «ربط»"
+          },
+          "yardi": {
+            "step1": "اطلب الوصول إلى Yardi API من ممثل حسابك",
+            "step2": "سجّل الدخول إلى Client Central إذا احتجت إلى وثائق المنتج",
+            "step3": "انسخ رابط API وClient ID وClient Secret التي يعطونك إياها",
+            "step4": "الصق الثلاثة هنا ثم اضغط «ربط»"
+          },
+          "slack": {
+            "step1": "اضغط «الربط مع Slack» في Halla AI",
+            "step2": "سجّل الدخول إلى مساحة عمل Slack (استخدم رابط المساحة إن طُلب منك، مثل yourteam.slack.com)",
+            "step3": "في شاشة الأذونات اضغط Allow واختر قناة للإشعارات",
+            "step4": "ستعود إلى Halla AI ويظهر Slack مرتبطاً"
+          }
+        },
+        "regions": {
+          "com": "الولايات المتحدة (.com)",
+          "eu": "أوروبا (.eu)",
+          "in": "الهند (.in)",
+          "comAu": "أستراليا (.com.au)",
+          "jp": "اليابان (.jp)"
         }
       }
     },
