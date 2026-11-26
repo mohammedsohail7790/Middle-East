@@ -10,6 +10,7 @@ import { voiceDb } from '../voice/tenant-scope.js';
 import { getTenantTimezone } from '../appointments/tenant-timezone.js';
 import { getBusinessHoursColumnSet, rowIsOpen } from '../business-hours/business-hours-schema.js';
 import { mapGoogleCalendarConnectionRow } from './calendar-connection-map.js';
+import { decryptGoogleTokenOrEmpty, encryptGoogleToken } from './google-token-crypto.js';
 
 /** Legacy calendar_events / business_hours queries — same DB as voice pipeline */
 const pool = voiceDb;
@@ -39,13 +40,14 @@ async function syncGoogleTokensToVoiceTenant(
   accessToken: string,
   refreshToken: string | null
 ): Promise<void> {
+  // Tokens are stored encrypted. A null refresh token keeps the one already saved.
   await voiceDb.query(
     `UPDATE public.voice_tenants
      SET google_access_token = $2,
          google_refresh_token = COALESCE($3, google_refresh_token),
          updated_at = NOW()
      WHERE id = $1`,
-    [tenantId, accessToken, refreshToken]
+    [tenantId, encryptGoogleToken(accessToken), encryptGoogleToken(refreshToken)]
   );
 }
 
@@ -226,12 +228,13 @@ export class CalendarService {
           [
             tenantId,
             email,
-            tokens.access_token,
-            tokens.refresh_token ?? null,
+            encryptGoogleToken(tokens.access_token),
+            encryptGoogleToken(tokens.refresh_token),
             expiresAt,
           ]
         );
-        row = result.rows[0];
+        // Map the row so the caller gets the usual connection shape (tokens decrypted), not the raw encrypted columns.
+        row = mapGoogleCalendarConnectionRow(result.rows[0] as Record<string, unknown>);
       } catch (dbErr) {
         console.warn('[Calendar] calendar_connections row skipped:', dbErr);
         row = {
@@ -310,7 +313,7 @@ export class CalendarService {
              token_expires_at = $2,
              updated_at = NOW()
          WHERE id = $3`,
-        [newAccessToken, expiresAt, connection.id]
+        [encryptGoogleToken(newAccessToken), expiresAt, connection.id]
       );
 
       await syncGoogleTokensToVoiceTenant(connection.tenantId, newAccessToken, null);
@@ -923,9 +926,11 @@ export class CalendarService {
           WHERE tenant_id = $1 AND provider = 'google'`,
         [tenantId]
       );
+      // Stored tokens are encrypted (old rows are plain text), so decrypt before asking Google to revoke them.
+      // A token that cannot be decrypted is skipped; our copies are still deleted below.
       const tokens = new Set<string>(
         (stored.rows as Array<{ token: string | null }>)
-          .map((r) => (r.token || '').trim())
+          .map((r) => decryptGoogleTokenOrEmpty(r.token).trim())
           .filter(Boolean)
       );
       for (const token of tokens) {
