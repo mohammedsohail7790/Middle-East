@@ -67,7 +67,7 @@ Integrations use **BullMQ** for async job processing:
 | Token refresh | Automatic refresh on expiry |
 
 **Env vars:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`  
-**Storage:** `voice_tenants.google_access_token`, `google_refresh_token`, `google_calendar_id`
+**Storage:** `voice_tenants.google_access_token`, `google_refresh_token`, `google_calendar_id`, and `calendar_connections.access_token` / `refresh_token`. Both tokens are stored **encrypted** (AES-256-GCM with `INTEGRATION_CREDENTIALS_KEY`, value starts with `enc:v1:`). A value without that marker is an older plain-text token and is still read. Encrypt old rows once with `apps/gateway/scripts/encrypt-google-tokens.ts` (dry run first).
 
 ## Outlook Calendar
 
