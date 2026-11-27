@@ -26,6 +26,7 @@ import { EmptyState } from "@/components/ui-kit/EmptyState";
 import { SectionHeader } from "@/components/ui-kit/SectionHeader";
 import { useConfirm } from "@/components/ui-kit/ConfirmDialog";
 import { useDashboardPageLabels } from "@/lib/use-dashboard-page-labels";
+import { TestAppointmentTool } from "@/components/calendar/TestAppointmentTool";
 
 interface CalendarEvent {
   id: string;
@@ -217,6 +218,13 @@ export default function CalendarPage() {
           {isLocalDashboard() && <p className="text-xs mt-2 opacity-90">{t("errorHint")}</p>}
         </div>
       )}
+
+      <TestAppointmentTool
+        onAdded={() => {
+          void loadEvents();
+          syncDashboardAction("calendar");
+        }}
+      />
 
       {!loading && events.length === 0 && !error && (
         <div className="dashboard-alert border-amber-200 bg-amber-50 dark:bg-amber-950/20 mb-6">

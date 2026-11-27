@@ -5,6 +5,10 @@ import { appointmentService } from './appointment.service.js';
 import { logger } from '../logger.js';
 import express from 'express';
 import { clientErrorMessage } from '../../security/safe-error.js';
+import { isTenantOwner } from '../enterprise/rbac.service.js';
+import { calendarService } from '../calendar/calendar.service.js';
+import { getTenantTimezone } from './tenant-timezone.js';
+import { createTestAppointment } from './test-appointment.js';
 
 function getTenant(req: Request): string {
     const tenantId = (req as any).resolvedTenantId || req.header('x-tenant-id');
@@ -16,6 +20,50 @@ export function createAppointmentsRouter(): express.Router {
     const router = express.Router();
     router.use(requireVoiceApiAccess);
     router.use(voiceRateLimit);
+
+    /** Only the workspace owner, signed in with their own login (not an API key or a service call). */
+    async function ownerMayUseTestTool(req: any, tenantId: string): Promise<boolean> {
+        const tenant = req.tenant as { source?: string; userId?: string } | undefined;
+        if (!tenant || (tenant.source !== 'user_jwt' && tenant.source !== 'legacy_jwt') || !tenant.userId) return false;
+        return isTenantOwner(tenantId, tenant.userId);
+    }
+
+    // GET /api/appointments/test-access — does this person get the "Add test appointment" button? (registered before /:id)
+    router.get('/test-access', async (req: any, res: any) => {
+        try {
+            const tenantId = getTenant(req);
+            const allowed = await ownerMayUseTestTool(req, tenantId);
+            res.json({
+                success: true,
+                data: { allowed, googleConnected: allowed ? await calendarService.hasActiveConnection(tenantId) : false },
+            });
+        } catch (error) {
+            logger.error('Failed to check test appointment access', { error: String(error) });
+            res.json({ success: true, data: { allowed: false, googleConnected: false } });
+        }
+    });
+
+    // POST /api/appointments/test — owner only: book one clearly labelled test appointment (goes to the connected Google Calendar)
+    router.post('/test', async (req: any, res: any) => {
+        try {
+            const tenantId = getTenant(req);
+            if (!(await ownerMayUseTestTool(req, tenantId))) {
+                return res.status(403).json({ success: false, error: 'Only the workspace owner can add a test appointment.' });
+            }
+            const out = await createTestAppointment(tenantId, {
+                timeZone: await getTenantTimezone(tenantId),
+                create: (input) => appointmentService.createAppointment(input),
+                hasGoogle: () => calendarService.hasActiveConnection(tenantId),
+            });
+            if (out.success === false) {
+                return res.status(409).json({ success: false, error: out.message });
+            }
+            res.json({ success: true, data: { id: out.id, scheduled_time: out.scheduledTime, googleConnected: out.googleConnected } });
+        } catch (error) {
+            logger.error('Failed to create test appointment', { error: String(error) });
+            res.status(400).json({ success: false, error: clientErrorMessage(error, 'Request failed') });
+        }
+    });
 
     // GET /api/appointments — list appointments for the current tenant
     router.get('/', async (req: any, res: any) => {
