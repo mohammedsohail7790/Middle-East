@@ -617,9 +617,10 @@ export class AppointmentService {
 
         try {
             if (appointment.calendar_provider === 'google' && appointment.calendar_event_id) {
+                // updateEvent takes OUR appointment id and looks up Google's event id itself.
                 await googleCalendarService.updateEvent(
                     tenantId,
-                    appointment.calendar_event_id,
+                    appointment.id as string,
                     parsed,
                     plusMinutes(parsed, 60)
                 );

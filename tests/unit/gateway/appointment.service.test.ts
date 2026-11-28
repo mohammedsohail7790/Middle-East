@@ -9,6 +9,7 @@ vi.mock('../../../apps/gateway/src/services/calendar/google.calendar.service.js'
     hasConnection: vi.fn(),
     createEvent: vi.fn(),
     getAvailability: vi.fn(),
+    updateEvent: vi.fn(),
   },
 }));
 
@@ -76,5 +77,40 @@ describe('AppointmentService.createAppointment', () => {
       expect.stringContaining('insert into public.appointments'),
       expect.any(Array)
     );
+  });
+});
+
+describe('AppointmentService.rescheduleAppointment (Google)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (googleCalendarService.hasConnection as any).mockResolvedValue(false);
+    (googleCalendarService.updateEvent as any).mockResolvedValue(undefined);
+    (voiceDb.query as any).mockImplementation(async (sql: string) => {
+      if (/from public\.appointments\s+where id = \$1 and tenant_id = \$2 and status = 'booked'/i.test(sql)) {
+        return {
+          rows: [
+            {
+              id: 'apt-uuid-1',
+              name: 'Jane',
+              phone: '',
+              service: 'Test',
+              calendar_event_id: 'googleEventIdNotAUuid',
+              calendar_provider: 'google',
+              external_calendar_event_id: null,
+            },
+          ],
+        };
+      }
+      return { rows: [] };
+    });
+  });
+
+  it('gives Google the appointment id (not Google\'s own event id), which updateEvent looks up itself', async () => {
+    const future = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const result = await appointmentService.rescheduleAppointment('tenant-1', future, { appointmentId: 'apt-uuid-1' });
+
+    expect(result.success).toBe(true);
+    expect(googleCalendarService.updateEvent).toHaveBeenCalledTimes(1);
+    expect((googleCalendarService.updateEvent as any).mock.calls[0][1]).toBe('apt-uuid-1');
   });
 });
