@@ -19,10 +19,12 @@ import {
   WEEKDAYS,
   type KnowledgeTemplates,
 } from "@/lib/knowledge-templates";
+import { parseServiceText, rowsToText, type ServiceRow } from "@/lib/service-lines";
+import { cn } from "@/lib/utils";
+import { syncDashboardAction } from "@/lib/dashboard-actions";
+import { useDashboardSync } from "@/lib/dashboard-sync";
 
-/** One combined row — name is required, price is optional. Derived into the
- *  separate services[]/pricing[] arrays the API expects on save. */
-type ServiceRow = { name: string; price: string };
+import { DASHBOARD_TIMEZONES, DEFAULT_TIMEZONE } from "@/lib/timezones";
 
 function buildRowsFromTemplates(templates: KnowledgeTemplates): ServiceRow[] {
   const priceByName = new Map<string, string>();
@@ -50,37 +52,6 @@ function buildRowsFromTemplates(templates: KnowledgeTemplates): ServiceRow[] {
   }
   return rows;
 }
-
-/** One service per line: "Consultation - AED 200" or just "Consultation" (no price). */
-function rowsToText(rows: ServiceRow[]): string {
-  return rows
-    .filter((r) => r.name.trim())
-    .map((r) => (r.price.trim() ? `${r.name} - $${r.price.trim()}` : r.name))
-    .join("\n");
-}
-
-function parseServiceText(text: string): ServiceRow[] {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const match = line.match(/^(.*\S)\s*[-–,]\s*\$?\s*(\d+(?:\.\d{1,2})?)\s*$/);
-      if (match) {
-        return { name: match[1].trim(), price: match[2] };
-      }
-      const trailingPrice = line.match(/^(.*\S)\s+\$\s*(\d+(?:\.\d{1,2})?)\s*$/);
-      if (trailingPrice) {
-        return { name: trailingPrice[1].trim(), price: trailingPrice[2] };
-      }
-      return { name: line, price: "" };
-    });
-}
-import { cn } from "@/lib/utils";
-import { syncDashboardAction } from "@/lib/dashboard-actions";
-import { useDashboardSync } from "@/lib/dashboard-sync";
-
-import { DASHBOARD_TIMEZONES, DEFAULT_TIMEZONE } from "@/lib/timezones";
 
 const DAY_KEYS = ["kbDay0", "kbDay1", "kbDay2", "kbDay3", "kbDay4", "kbDay5", "kbDay6"] as const;
 
