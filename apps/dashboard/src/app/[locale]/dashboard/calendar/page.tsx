@@ -64,6 +64,7 @@ function eventOnLocalDay(event: CalendarEvent, year: number, month: number, day:
   return d.getFullYear() === year && d.getMonth() === month && d.getDate() === day;
 }
 
+// Always fresh: the 45s GET cache would otherwise hide a booking (test, reschedule, cancel) made moments ago.
 async function fetchCalendarEvents(year: number, month: number): Promise<CalendarEvent[]> {
   const { from, to } = monthBounds(year, month);
   const qs = new URLSearchParams({
@@ -73,7 +74,7 @@ async function fetchCalendarEvents(year: number, month: number): Promise<Calenda
   });
 
   try {
-    const data = await api.get<CalendarEvent[]>(`/calendar/events?${qs.toString()}`);
+    const data = await api.get<CalendarEvent[]>(`/calendar/events?${qs.toString()}`, { fresh: true });
     return asArray(data).map(
       (row) => normalizeCalendarEvent(row as Record<string, unknown>) as CalendarEvent
     );
@@ -81,7 +82,7 @@ async function fetchCalendarEvents(year: number, month: number): Promise<Calenda
     // Falling back to /appointments hides real backend regressions on the
     // primary endpoint from the user — surface it so it doesn't go unnoticed.
     console.error("[calendar] /calendar/events failed, falling back to /appointments", err);
-    const fallback = await api.get<Record<string, unknown>[]>("/appointments?limit=200");
+    const fallback = await api.get<Record<string, unknown>[]>("/appointments?limit=200", { fresh: true });
     const { from: f, to: t } = monthBounds(year, month);
     return asArray(fallback)
       .map((row) => normalizeCalendarEvent(row as Record<string, unknown>) as CalendarEvent)
