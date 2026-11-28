@@ -22,6 +22,32 @@ describe("GET cache", () => {
     await cachedGet("/x", fetcher, { fresh: true });
     expect(fetcher).toHaveBeenCalledTimes(2);
   });
+
+  it("a fresh request never joins a request that started earlier, which may carry an older answer", async () => {
+    let release!: (v: { status: string }) => void;
+    const slowOld = vi.fn(() => new Promise<{ status: string }>((resolve) => (release = resolve)));
+    const fast = vi.fn(async () => ({ status: "disconnected" }));
+
+    const before = cachedGet("/x", slowOld); // started before the change, still waiting
+    const after = await cachedGet("/x", fast, { fresh: true }); // asked after the change
+
+    expect(fast).toHaveBeenCalledTimes(1);
+    expect(after).toEqual({ status: "disconnected" });
+    release({ status: "connected" });
+    await before;
+  });
+
+  it("an older request finishing last does not hide the newer answer from the cache", async () => {
+    let release!: (v: { status: string }) => void;
+    const slowOld = () => new Promise<{ status: string }>((resolve) => (release = resolve));
+    const before = cachedGet("/x", slowOld);
+    await cachedGet("/x", async () => ({ status: "disconnected" }), { fresh: true });
+    release({ status: "connected" });
+    await before;
+    const again = vi.fn(async () => ({ status: "never" }));
+    expect(await cachedGet("/x", again)).toEqual({ status: "disconnected" });
+    expect(again).not.toHaveBeenCalled();
+  });
 });
 
 describe("audit history is never served from the cache", () => {
