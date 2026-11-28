@@ -52,6 +52,8 @@ function writeSessionSticky(path: string, data: unknown): void {
 
 const store = new Map<string, CacheEntry>();
 const inflight = new Map<string, Promise<unknown>>();
+let requestCounter = 0;
+const latestWritten = new Map<string, number>();
 
 function keyFor(path: string, method = "GET"): string {
   return `${getTenantId() || "anon"}|${method}|${path}`;
@@ -90,6 +92,7 @@ export function invalidateApiGetCache(pathPrefix?: string): void {
 export function clearApiGetCache(): void {
   store.clear();
   inflight.clear();
+  latestWritten.clear();
 }
 
 function isFresh(entry: CacheEntry): boolean {
@@ -114,16 +117,25 @@ export async function cachedGet<T>(
     }
   }
 
-  if (inflight.has(key)) {
+  // A normal request may share one already on its way. A fresh one never does: that request started earlier and can
+  // still carry the answer from before the change the caller is now refreshing (for example a Disconnect).
+  if (!options?.fresh && inflight.has(key)) {
     return inflight.get(key) as Promise<T>;
   }
 
+  const startedAt = ++requestCounter;
   const request = fetcher()
     .then((data) => {
-      writeApiGetCache(path, data);
+      // Do not let an older request that finishes last overwrite the newer answer.
+      if (startedAt >= (latestWritten.get(key) ?? 0)) {
+        latestWritten.set(key, startedAt);
+        writeApiGetCache(path, data);
+      }
       return data;
     })
-    .finally(() => inflight.delete(key));
+    .finally(() => {
+      if (inflight.get(key) === request) inflight.delete(key);
+    });
 
   inflight.set(key, request);
   return request;
